@@ -8,6 +8,8 @@ import ServiceArea from "@/components/ServiceArea";
 import Values from "@/components/Values";
 import BeforeAfter from "@/components/BeforeAfter";
 import Reviews from "@/components/Reviews";
+import Faq from "@/components/Faq";
+import BlogPreview from "@/components/BlogPreview";
 
 export default function Home() {
   return (
@@ -25,6 +27,9 @@ export default function Home() {
       <BeforeAfter />
       <CtaBand heading={false} />
       <Reviews />
+      <Faq />
+      <CtaBand />
+      <BlogPreview />
     </main>
   );
 }
