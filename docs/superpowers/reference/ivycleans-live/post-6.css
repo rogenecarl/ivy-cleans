@@ -1,0 +1,67 @@
+.elementor-kit-6{--e-global-color-primary:#6EC1E4;--e-global-color-secondary:#54595F;--e-global-color-text:#7A7A7A;--e-global-color-accent:#61CE70;--e-global-typography-primary-font-family:"Roboto";--e-global-typography-primary-font-weight:600;--e-global-typography-secondary-font-family:"Roboto Slab";--e-global-typography-secondary-font-weight:400;--e-global-typography-text-font-family:"Roboto";--e-global-typography-text-font-weight:400;--e-global-typography-accent-font-family:"Roboto";--e-global-typography-accent-font-weight:500;color:#374151;font-family:"Poppins", Sans-serif;font-weight:400;line-height:1.5em;}.elementor-kit-6 e-page-transition{background-color:#FFBC7D;}.elementor-kit-6 p{margin-block-end:2rem;}.elementor-kit-6 a{font-family:"Poppins", Sans-serif;font-weight:400;line-height:1.2em;}.elementor-kit-6 h1{font-family:"Poppins", Sans-serif;font-size:26px;font-weight:700;line-height:1.2em;}.elementor-kit-6 h2{font-family:"Poppins", Sans-serif;font-size:22px;font-weight:700;line-height:1.2em;}.elementor-kit-6 h3{font-family:"Poppins", Sans-serif;font-size:20px;font-weight:600;line-height:1.2em;}.elementor-kit-6 h4{font-family:"Poppins", Sans-serif;font-size:18px;font-weight:700;line-height:1.2em;}.elementor-kit-6 h5{font-family:"Poppins", Sans-serif;font-weight:400;line-height:1.2em;}.elementor-kit-6 h6{font-family:"Poppins", Sans-serif;font-weight:400;line-height:1.2em;}.elementor-kit-6 button,.elementor-kit-6 input[type="button"],.elementor-kit-6 input[type="submit"],.elementor-kit-6 .elementor-button{font-family:"Poppins", Sans-serif;font-weight:700;text-transform:uppercase;line-height:1.2em;border-style:solid;border-width:1px 1px 1px 1px;border-radius:5px 5px 5px 5px;padding:1.1rem 2.4rem 1.1rem 2.4rem;}.elementor-kit-6 button:hover,.elementor-kit-6 button:focus,.elementor-kit-6 input[type="button"]:hover,.elementor-kit-6 input[type="button"]:focus,.elementor-kit-6 input[type="submit"]:hover,.elementor-kit-6 input[type="submit"]:focus,.elementor-kit-6 .elementor-button:hover,.elementor-kit-6 .elementor-button:focus{border-style:solid;border-width:1px 1px 1px 1px;}.elementor-section.elementor-section-boxed > .elementor-container{max-width:119rem;}.e-con{--container-max-width:119rem;}.elementor-widget:not(:last-child){margin-block-end:2rem;}.elementor-element{--widgets-spacing:2rem 2rem;--widgets-spacing-row:2rem;--widgets-spacing-column:2rem;}{}h1.entry-title{display:var(--page-title-display);}.site-header .site-branding{flex-direction:column;align-items:stretch;}.site-header{padding-inline-end:0px;padding-inline-start:0px;}.site-footer .site-branding{flex-direction:column;align-items:stretch;}@media(max-width:1024px){.elementor-section.elementor-section-boxed > .elementor-container{max-width:1024px;}.e-con{--container-max-width:1024px;}}@media(max-width:767px){.elementor-section.elementor-section-boxed > .elementor-container{max-width:767px;}.e-con{--container-max-width:767px;}}/* Start custom CSS */html {
+	font-size: 62.5%; /* 10px browser default */
+}
+body {		
+	margin: 0;
+	padding: 0;	
+    font-variant-ligatures: none;
+    -webkit-font-variant-ligatures: none;
+    /* Smoothing */
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+	text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+	background-color: #fff;
+	color: #fff;
+}
+img, iframe {
+	border:none;
+	max-width:100%;
+}
+p {
+     line-height: 1.5;
+}
+
+/* # will apply this css starting 1023px and below
+   # Please insert all media queries below, avoid creating new breakpoints and inserting anywhere.
+---------------------------------------------------------------------------------------------------- */
+
+@media only screen and (max-width: 1024px) {
+	br {
+		display: none;	
+	}
+}
+
+@media only screen and (max-width:960px) {
+
+}
+
+@media only screen and (max-width: 768px) {
+
+}
+
+@media only screen and (max-width: 568px) {
+	
+}
+
+@media only screen and (max-width: 480px) {
+	
+}
+
+@media only screen and (max-width: 375px) {
+	
+}
+
+
+
+/* # Font Sizing
+   # Please insert all media queries below, avoid creating new breakpoints and inserting anywhere.
+---------------------------------------------------------------------------------------------------- */
+/* # Font Sizing # Please insert all media queries below, avoid creating new breakpoints and inserting anywhere. ---------------------------------------------------------------------------------------------------- */
+@media only screen and (max-width:1600px) { html { font-size: 56.3%;  } }
+@media only screen and (max-width:1440px) { html { font-size: 52%;    } }
+@media only screen and (max-width:1280px) { html { font-size: 50%;    } }
+@media only screen and (max-width:1024px) { html { font-size: 62.5%;    } }
+/*@media only screen and (max-width:960px)  { html { font-size: 62.5%;    } }
+@media only screen and (max-width:768px)  { html { font-size: 62.5%; } }*//* End custom CSS */
