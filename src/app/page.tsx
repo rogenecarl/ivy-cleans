@@ -16,6 +16,7 @@ export default function Home() {
       <ServiceTypes />
       <CtaBand />
       <Packages />
+      <CtaBand heading={false} />
       <ServiceArea />
       <Values />
       <CtaBand />
