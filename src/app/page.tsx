@@ -3,6 +3,7 @@ import FeaturedIn from "@/components/FeaturedIn";
 import Intro from "@/components/Intro";
 import ServiceTypes from "@/components/ServiceTypes";
 import CtaBand from "@/components/CtaBand";
+import Packages from "@/components/Packages";
 
 export default function Home() {
   return (
@@ -12,6 +13,8 @@ export default function Home() {
       <Intro />
       <ServiceTypes />
       <CtaBand />
+      <Packages />
+      <CtaBand heading={false} />
     </main>
   );
 }
