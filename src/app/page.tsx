@@ -4,6 +4,8 @@ import Intro from "@/components/Intro";
 import ServiceTypes from "@/components/ServiceTypes";
 import CtaBand from "@/components/CtaBand";
 import Packages from "@/components/Packages";
+import ServiceArea from "@/components/ServiceArea";
+import Values from "@/components/Values";
 
 export default function Home() {
   return (
@@ -14,7 +16,9 @@ export default function Home() {
       <ServiceTypes />
       <CtaBand />
       <Packages />
-      <CtaBand heading={false} />
+      <ServiceArea />
+      <Values />
+      <CtaBand />
     </main>
   );
 }
