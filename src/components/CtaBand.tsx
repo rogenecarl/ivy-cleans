@@ -14,7 +14,7 @@ export default function CtaBand({ heading = true }: { heading?: boolean }) {
           </h2>
         )}
         <CtaButton size="lg" />
-        <p className="mt-6 text-[1.8rem]">Prefer to call? We&apos;re available now.</p>
+        <p className="mt-6 text-[1.8rem]">Prefer to call? We&rsquo;re available now.</p>
         <h3 className="mt-2 text-[2.6rem] font-bold md:text-[3rem] lg:text-[3.6rem]">
           <a href={site.phoneHref}>{site.phone}</a>
         </h3>
