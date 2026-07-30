@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-raleway);
+  --font-sans: var(--font-poppins);
 }
 
 @theme {
@@ -10,11 +10,61 @@
   --color-herogreen: #37745f;
   --color-peach: #fef3f0;
   --color-star: #f8af0d;
+  --color-link: #cc3366;
+  --color-icongrey: #69727d;
+}
+
+/*
+ * The live site drives every rem-based size from a viewport-stepped root
+ * font-size (Elementor kit custom CSS). Reproducing the ladder is what makes
+ * the rem values copied out of post-2035.css render at the real pixel sizes.
+ */
+html {
+  font-size: 62.5%;
+}
+@media only screen and (max-width: 1600px) {
+  html {
+    font-size: 56.3%;
+  }
+}
+@media only screen and (max-width: 1440px) {
+  html {
+    font-size: 52%;
+  }
+}
+@media only screen and (max-width: 1280px) {
+  html {
+    font-size: 50%;
+  }
+}
+@media only screen and (max-width: 1024px) {
+  html {
+    font-size: 62.5%;
+  }
 }
 
 body {
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5em;
   color: #000;
   background: #fff;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+p {
+  line-height: 1.5;
+}
+
+/*
+ * Elementor boxed container: 1098px outer with the widget-wrap's 10px padding.
+ * The live site keeps that same 10px gutter all the way down to mobile — at a
+ * 390px viewport its headings measure x=10 / width=370.
+ */
+.ec {
+  margin-inline: auto;
+  max-width: 1098px;
+  padding: 10px;
 }

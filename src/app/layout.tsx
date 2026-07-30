@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Poppins } from "next/font/google";
 import TopBar from "@/components/TopBar";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "./globals.css";
 
-const raleway = Raleway({ subsets: ["latin"], variable: "--font-raleway" });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
   title: "House Cleaning Service in Minneapolis Minnesota - Ivy Cleans",
@@ -19,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-US" className={raleway.variable}>
+    <html lang="en-US" className={poppins.variable}>
       <body>
         <TopBar />
         <Header />

@@ -20,12 +20,10 @@ export default function Home() {
       <ServiceTypes />
       <CtaBand />
       <Packages />
-      <CtaBand heading={false} />
       <ServiceArea />
       <Values />
       <CtaBand />
       <BeforeAfter />
-      <CtaBand heading={false} />
       <Reviews />
       <Faq />
       <CtaBand />
