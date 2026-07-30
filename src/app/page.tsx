@@ -6,6 +6,8 @@ import CtaBand from "@/components/CtaBand";
 import Packages from "@/components/Packages";
 import ServiceArea from "@/components/ServiceArea";
 import Values from "@/components/Values";
+import BeforeAfter from "@/components/BeforeAfter";
+import Reviews from "@/components/Reviews";
 
 export default function Home() {
   return (
@@ -20,6 +22,9 @@ export default function Home() {
       <ServiceArea />
       <Values />
       <CtaBand />
+      <BeforeAfter />
+      <CtaBand heading={false} />
+      <Reviews />
     </main>
   );
 }
