@@ -11,7 +11,7 @@ export default function TopBar() {
         </Link>
         <div className="flex items-center gap-8">
           <div>
-            <h3 className="text-[1.6rem] font-bold">Prefer to call? We're available now.</h3>
+            <h3 className="text-[1.6rem] font-bold">Prefer to call? We&rsquo;re available now.</h3>
             <p><a href={site.phoneHref} className="text-rust font-semibold">{site.phone}</a></p>
           </div>
           <div className="hidden md:block">
