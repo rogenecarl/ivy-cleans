@@ -31,7 +31,7 @@ export default function Faq({
             </p>
           )}
           {questionsHeading && (
-            <h3 className="mb-[2rem] text-[2rem] leading-[1.2em] font-bold md:text-[2.6rem] lg:text-[3rem]">
+            <h3 className="mb-[2rem] text-center text-[2rem] leading-[1.2em] font-bold md:text-[2.6rem] lg:text-[3rem]">
               {questionsHeading}
             </h3>
           )}
