@@ -27,13 +27,22 @@ export default function InnerFooter() {
           <h3 className={headingClass}>Services</h3>
           <div className={dividerClass} />
           <ul>
-            {innerSite.servicesLinks.map((l) => (
-              <li key={l.label} className="pb-[0.75rem]">
-                <Link href={l.href} className={linkListClass}>
+            {innerSite.servicesLinks.map((l) =>
+              l.label === "Book Now" ? (
+                <li
+                  key={l.label}
+                  className="block pb-[0.75rem] text-[1.6rem] leading-[1.2em] font-medium"
+                >
                   {l.label}
-                </Link>
-              </li>
-            ))}
+                </li>
+              ) : (
+                <li key={l.label} className="pb-[0.75rem]">
+                  <Link href={l.href} className={linkListClass}>
+                    {l.label}
+                  </Link>
+                </li>
+              )
+            )}
           </ul>
         </div>
         <div className="w-full px-[10px] md:w-[25%]">
