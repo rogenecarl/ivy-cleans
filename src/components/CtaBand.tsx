@@ -30,8 +30,7 @@ export function CtaCompact({ light = false }: { light?: boolean }) {
   );
 }
 
-export default function CtaBand({ heading = true }: { heading?: boolean }) {
-  if (!heading) return <CtaCompact />;
+export default function CtaBand() {
   return (
     <section
       className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[5rem]"
