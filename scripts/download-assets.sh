@@ -9,6 +9,11 @@ IMAGES=(
   2023/05/Logo.png
   2023/06/dusting.jpg 2023/06/vacuuming.jpg 2023/06/bathroom-cleaning.jpg
   2023/06/window.jpg 2023/06/upholstery.jpg
+  2023/06/service-icon1.png 2023/06/service-icon2.png 2023/06/service-icon3.png
+  2023/06/service-icon4.png 2023/06/service-icon5.png
+  2023/07/Untitled-design.png 2023/07/Untitled-design-1-2.png 2023/07/Untitled-design-2.png
+  2023/07/rn_image_picker_lib_temp_d129a169-21-1.jpg
+  2023/07/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg
   2023/11/before.jpg 2023/11/after.jpg
   2023/11/cleaning-bg2.jpg 2023/11/faq-bg.jpg
   2023/12/Logo.png 2023/12/Group-5.png 2023/12/logo-mbl1.png 2023/12/logo-mbl2.png
