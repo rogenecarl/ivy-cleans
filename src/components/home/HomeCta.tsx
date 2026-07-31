@@ -1,17 +1,15 @@
 import { innerSite } from "@/data/site";
 
-/* live layout wraps the FAQ accordion (Task 5) with these two headings — the
-   "Do you have any Questions?" subheading precedes it and the "Trust Us..."
-   CTA follows it; this component renders both together per the round-2
-   page-composition contract, which places a single HomeCta after the FAQ
-   placeholder. */
+/* live layout: the "Do you have any Questions?" H3 sits inside the FAQ
+   section (between the "Frequently Asked Questions" H2 and the accordion) —
+   per home-content-dump.txt lines 128–130 — so it's passed into <Faq
+   questionsHeading="..." /> instead of living here (see /home's page.tsx).
+   This component renders only the "Trust Us..." CTA that follows the FAQ
+   accordion on the live page (dump lines 150–151). */
 export default function HomeCta() {
   return (
     <section className="bg-white py-[2rem] md:py-[3rem] lg:py-[6rem]">
       <div className="ec text-center">
-        <h3 className="mb-[2rem] text-[2rem] leading-[1.2em] font-bold md:text-[2.6rem] lg:text-[3rem]">
-          Do you have any Questions?
-        </h3>
         <h3 className="mb-[2rem] text-[2rem] leading-[1.2em] font-bold md:text-[2.6rem] lg:text-[3rem]">
           Trust Us For Your House Cleaning Needs & Give Us A Call!
         </h3>

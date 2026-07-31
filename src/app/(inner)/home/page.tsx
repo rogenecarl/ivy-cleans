@@ -9,6 +9,7 @@ import Principles from "@/components/home/Principles";
 import Locations from "@/components/home/Locations";
 import WorkCarousel from "@/components/home/WorkCarousel";
 import HomeCta from "@/components/home/HomeCta";
+import Faq from "@/components/Faq";
 
 export const metadata: Metadata = { title: homeMeta.title };
 
@@ -23,7 +24,7 @@ export default function HomePage() {
       <Principles />
       <Locations />
       <WorkCarousel />
-      {/* FAQ section — Task 5 wires the Faq component in here */}
+      <Faq subtitle={false} questionsHeading="Do you have any Questions?" />
       <HomeCta />
     </>
   );
