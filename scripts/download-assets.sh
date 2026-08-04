@@ -40,6 +40,10 @@ IMAGES=(
   2023/06/deep-img2.jpg 2023/06/out-icon1.png 2023/06/out-icon2.png
   2023/06/out-icon3.png 2023/06/out-img1.jpg 2023/06/out-img2.jpg
   2023/06/out-img3.jpg
+  # round 3 section backgrounds (post-245.css / post-241.css)
+  2023/06/deep-bg1.jpg 2023/06/deep-bg2.jpg 2023/06/deep-bg3.jpg
+  2023/06/deep-bg5.jpg 2023/06/out-bg1.jpg 2023/06/out-bg2.jpg
+  2023/06/out-bg3.jpg
 )
 for path in "${IMAGES[@]}"; do
   name="$(basename "$path")"
