@@ -63,6 +63,11 @@ for icon in facebook x youtube instagram pinterest tiktok; do
   echo "ok $icon.svg"
 done
 
+# round 4: /blog author gravatar ("aj") — same hash on every authored card in blog.html,
+# not under the ivycleans uploads BASE, so pulled from gravatar directly
+[ -f public/images/avatar-aj.jpg ] || curl -sfL --retry 3 "https://secure.gravatar.com/avatar/12fec07b0a62280c45b4c4c309629c75d268e8013644b7c027fca9ca69c5596f?s=128&d=mm&r=g" -o public/images/avatar-aj.jpg
+echo "ok avatar-aj.jpg"
+
 # real favicon (replaces the create-next-app default)
 curl -sf --retry 3 --max-time 120 "$BASE/2023/05/cropped-favicon-32x32.png" -o src/app/icon.png
 rm -f src/app/favicon.ico

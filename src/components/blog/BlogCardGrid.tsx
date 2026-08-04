@@ -53,9 +53,13 @@ function Card({ card }: { card: BlogCard }) {
             </div>
           )}
           {card.author && (
-            <div className="bg-herogreen absolute -bottom-[1.8rem] left-[2rem] flex h-[3.6rem] w-[3.6rem] items-center justify-center rounded-full border-[0.3rem] border-white text-[1.2rem] leading-[1.2em] font-semibold text-white uppercase">
-              {card.author}
-            </div>
+            <Image
+              src="/images/avatar-aj.jpg"
+              alt={card.author}
+              width={128}
+              height={128}
+              className="absolute -bottom-[1.8rem] left-[2rem] h-[3.6rem] w-[3.6rem] rounded-full border-[0.3rem] border-white object-cover"
+            />
           )}
         </div>
       )}
