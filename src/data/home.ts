@@ -1,4 +1,8 @@
-export const homeMeta = { title: "Cleaning Service in Minneapolis, MN | Ivy Cleans" };
+export const homeMeta = {
+  title: "Cleaning Service in Minneapolis, MN | Ivy Cleans",
+  description:
+    "Ivy Cleans is a great choice for all of your home cleaning needs. We offer a 100% satisfaction on all of our cleans. Check us out today!",
+};
 
 export const nearMe: string[] = [
   "At Ivy Cleans, our passion is providing high-quality house cleaning services in Minneapolis. We are a team of professional adults, dedicated to excellence, who act as much more than just maids. We understand the importance of trust and reliability – factors that are highlighted in our positive customer reviews. We are the perfect choice for anyone looking for a reliable, professional, and trustworthy house cleaning service in Minneapolis.",

@@ -42,14 +42,16 @@ export default function InnerHeader() {
     // header measures 83px @1440 / 89px @390, logo top edge at y=22 / y=24.
     <header className="sticky top-0 z-50 bg-[#C5ECEC] py-[1.4rem]">
       <div className="ec flex items-center">
-        <Link href="/home" className="shrink-0">
+        {/* live wraps the logo in a link to the site root, not /home */}
+        <Link href="/" className="shrink-0">
           <Image
             src="/images/Logo.png"
             alt="Ivy Cleans"
             width={309}
             height={149}
             className="h-auto w-[8.4rem]"
-            priority
+            fetchPriority="high"
+            loading="eager"
           />
         </Link>
         {/* desktop + tablet nav */}

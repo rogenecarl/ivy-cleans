@@ -4,7 +4,10 @@ import PlansHeader from "@/components/cleaning-services/PlansHeader";
 import PackagesBar from "@/components/cleaning-services/PackagesBar";
 import RoomChecklist from "@/components/cleaning-services/RoomChecklist";
 
-export const metadata: Metadata = { title: csMeta.title };
+export const metadata: Metadata = {
+  title: csMeta.title,
+  description: csMeta.description,
+};
 
 export default function CleaningServicesPage() {
   return (

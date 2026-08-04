@@ -1,4 +1,8 @@
-export const csMeta = { title: "Cleaning Services - Ivy Cleans" };
+export const csMeta = {
+  title: "Cleaning Services - Ivy Cleans",
+  description:
+    "CLEANING PLANS Choose a cleaning package Most Popular Packages Basic Book Now Deep Book Now Moving Book Now Living Rooms / Bedrooms / Hallways Basic Deep",
+};
 
 export const tiers = ["Basic", "Deep", "Moving"] as const;
 

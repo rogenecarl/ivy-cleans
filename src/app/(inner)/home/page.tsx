@@ -11,7 +11,10 @@ import WorkCarousel from "@/components/home/WorkCarousel";
 import HomeFaqStatic from "@/components/home/HomeFaqStatic";
 import HomeCta from "@/components/home/HomeCta";
 
-export const metadata: Metadata = { title: homeMeta.title };
+export const metadata: Metadata = {
+  title: homeMeta.title,
+  description: homeMeta.description,
+};
 
 export default function HomePage() {
   return (

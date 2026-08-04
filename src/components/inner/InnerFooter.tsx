@@ -37,7 +37,8 @@ export default function InnerFooter() {
             </li>
             <li className={`${itemClass} justify-center md:justify-start`}>
               <EnvelopeIcon className={iconClass} />
-              <a href={`mailto:${innerSite.email}`}>{innerSite.email}</a>
+              {/* live renders the email as plain text — no mailto anchor */}
+              <span>{innerSite.email}</span>
             </li>
             <li className={`${itemClass} justify-center md:justify-start`}>
               <MapMarkerIcon className={iconClass} />
