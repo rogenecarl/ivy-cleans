@@ -58,9 +58,23 @@ for path in "${IMAGES[@]}"; do
   echo "ok $name"
 done
 
-for icon in facebook x youtube instagram pinterest tiktok; do
+for icon in facebook x youtube instagram pinterest tiktok linkedin; do
   [ -f "public/icons/$icon.svg" ] || curl -sfL --retry 3 "https://unpkg.com/simple-icons@13/icons/$icon.svg" -o "public/icons/$icon.svg"
   echo "ok $icon.svg"
+done
+
+# round 4 fix: the post body's 4 inline wp-block-image figures (blog-post.html)
+# are pasted external stock photos, not ivycleans uploads — pulled directly
+# from their live hotlink URLs, not the BASE prefix.
+declare -A INLINE_IMAGES=(
+  [blog-inline-1.jpg]="https://images.unsplash.com/photo-1580256081112-e49377338b7f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2787&q=80"
+  [blog-inline-2.jpg]="https://plus.unsplash.com/premium_photo-1661690569941-e87b71d91dda?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80"
+  [blog-inline-3.jpg]="https://images.unsplash.com/photo-1603712725038-e9334ae8f39f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2942&q=80"
+  [blog-inline-4.webp]="https://st.depositphotos.com/1570716/2295/i/600/depositphotos_22950232-stock-photo-cleaning-service-in-the-office.jpg"
+)
+for name in "${!INLINE_IMAGES[@]}"; do
+  [ -f "public/images/$name" ] || curl -sfL --retry 3 --max-time 120 "${INLINE_IMAGES[$name]}" -o "public/images/$name"
+  echo "ok $name"
 done
 
 # round 4: /blog author gravatar ("aj") — same hash on every authored card in blog.html,

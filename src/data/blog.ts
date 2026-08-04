@@ -124,19 +124,35 @@ export const postMeta: { title: string; description: string } = {
     "Maintaining a clean and tidy home is essential for our well-being, and every once in a while, we need to go beyond the regular cleaning routine to ensure that",
 };
 
-export type ArticleBlock = { type: "h2" | "h3" | "p"; text: string };
+export type ArticleBlock =
+  | { type: "h2" | "h3" | "p"; text: string }
+  | {
+      type: "img";
+      src: string;
+      width: number;
+      height: number;
+      alt: string;
+      // wp-block-image alignment class from blog-post.html (alignleft /
+      // aligncenter / alignright)
+      align: "left" | "center" | "right";
+    };
 
 export const postArticle: {
   h1: string;
   heroImage: { src: string; width: number; height: number; alt: string };
-  meta: { author?: string; date?: string; category?: string };
+  // "time"/"commentCount" are the remaining two elementor-post-info list
+  // items shown on the live post (blog-post.html elementor-element-1329edf);
+  // author/date are the other two.
+  meta: { author?: string; date?: string; category?: string; time?: string; commentCount?: string };
   blocks: ArticleBlock[];
 } = {
   h1: "Do I Need to Be Home During a Deep Cleaning Service",
   heroImage: { src: "/images/image-12.webp", width: 600, height: 400, alt: "deep cleaning" },
-  meta: { author: "aj", date: "March 21, 2024" },
+  meta: { author: "aj", date: "March 21, 2024", time: "7:21 pm", commentCount: "No Comments" },
   blocks: [
     { type: "p", text: "Maintaining a clean and tidy home is essential for our well-being, and every once in a while, we need to go beyond the regular cleaning routine to ensure that our living space is truly spotless. Deep cleaning, a thorough and comprehensive cleaning of your entire home, is a task that many homeowners undertake to maintain a healthy and pleasant living environment. However, a common question that arises when scheduling a deep cleaning service is whether you need to be home during the process. In this blog, we’ll explore the factors to consider when deciding whether or not to be present during a deep cleaning service." },
+    // blog-post.html line 372: <figure class="wp-block-image alignleft size-large is-resized"> — style width:307px;height:461px
+    { type: "img", src: "/images/blog-inline-1.jpg", width: 307, height: 461, alt: "", align: "left" },
     { type: "h2", text: "The Nature of Deep Cleaning" },
     { type: "p", text: "Deep cleaning is a more intensive and detailed cleaning process compared to regular maintenance cleaning. It involves cleaning areas that are often overlooked during routine cleaning, such as baseboards, light fixtures, behind appliances, and inside cabinets. Deep cleaning also includes tasks like scrubbing, sanitizing, and dusting all surfaces. Because of the thoroughness and time-intensive nature of deep cleaning, it’s important to consider whether or not you should be present during the service." },
     { type: "h2", text: "Pros of Being Home During Deep Cleaning" },
@@ -150,6 +166,8 @@ export const postArticle: {
     { type: "p", text: "Moreover, you can share any concerns you might have about fragile or valuable items in your home. This direct communication helps the cleaning crew take extra care when handling delicate items or ensure that specific areas, like a collection of antique porcelain, are treated with utmost caution." },
     { type: "h3", text: "Security and Peace of Mind" },
     { type: "p", text: "Having the peace of mind that comes with being home during a deep cleaning service cannot be overstated. You can keep an eye on your belongings and ensure that your home is safe and secure while the cleaning crew is at work. Knowing that someone you’ve trusted is supervising your property provides a layer of security. You won’t need to worry about accidental damage or missing items since you can oversee the process. This peace of mind is especially valuable if you have pets or young children at home, as you can ensure their safety and comfort during the cleaning." },
+    // blog-post.html line 428: <figure class="wp-block-image aligncenter size-large"> — no explicit width/height in the source; dims are the downloaded file's actual pixels (WP core caps "large" at 1024px on the long side, matching this photo's 1024x683 render)
+    { type: "img", src: "/images/blog-inline-2.jpg", width: 1024, height: 683, alt: "", align: "center" },
     { type: "h3", text: "Real-Time Feedback" },
     { type: "p", text: "Being present during the deep cleaning service allows for real-time communication with the cleaning professionals. If you have any questions, concerns, or special requests, you can address them immediately. This direct interaction can lead to better outcomes and ensure that your expectations are met. For example, if you notice a spot that needs extra attention, you can point it out and ensure it gets the necessary treatment." },
     { type: "p", text: "Real-time feedback promotes a collaborative and efficient cleaning process, helping you achieve the desired results. Additionally, if you have any specific instructions or unique preferences, you can clarify them on the spot, reducing the likelihood of misunderstandings and ensuring a more customized cleaning experience." },
@@ -164,6 +182,8 @@ export const postArticle: {
     { type: "p", text: "Being present during a deep cleaning service offers you the advantages of providing access and guidance, sharing your personal cleaning preferences, enjoying security and peace of mind, and facilitating real-time feedback. These benefits enhance the overall quality of the cleaning process, making it a more personalized and efficient experience that aligns closely with your expectations and requirements." },
     { type: "h2", text: "Cons of Being Home During Deep Cleaning" },
     { type: "p", text: "While being present during a deep cleaning service offers benefits, it also comes with certain challenges. Understanding the cons of being home during the cleaning process is essential for making an informed decision that aligns with your needs and preferences." },
+    // blog-post.html line 488: <figure class="wp-block-image aligncenter size-large"> — same no-explicit-dims situation as blog-inline-2; downloaded file's actual 1024x683-equivalent aspect
+    { type: "img", src: "/images/blog-inline-3.jpg", width: 1024, height: 683, alt: "", align: "center" },
     { type: "h3", text: "Disruption" },
     { type: "p", text: "Deep cleaning is a comprehensive and time-consuming process that can significantly disrupt your daily routine. While cleaning professionals are diligently working in various parts of your home, you might find it challenging to carry on with your usual activities. This disruption can be especially inconvenient if you have other commitments or responsibilities, such as work, childcare, or appointments. It may require you to be present in different areas of your home to coordinate and make way for the cleaning crew, potentially making it difficult to focus on your regular tasks." },
     { type: "h3", text: "Safety and Efficiency" },
@@ -180,6 +200,8 @@ export const postArticle: {
     { type: "p", text: "The decision of whether or not to be home during a deep cleaning service should take into account the potential cons, including disruption to your daily routine, risks to safety and efficiency, potential distractions for the cleaning crew, and personal comfort and privacy. Weighing these factors against the advantages of being present will help you determine the best approach for your specific circumstances and preferences." },
     { type: "h2", text: "Conclusion" },
     { type: "p", text: "Deciding whether to be home during a deep cleaning service ultimately depends on your preferences, priorities, and circumstances. While being present offers advantages like personal guidance, real-time feedback, and peace of mind, it also comes with potential inconveniences, such as disruption, distraction, and discomfort. Ultimately, the choice is yours, and you should consider what will work best for you and your specific needs." },
+    // blog-post.html line 556: <figure class="wp-block-image alignright size-large is-resized"> — style width:408px;height:305px
+    { type: "img", src: "/images/blog-inline-4.webp", width: 408, height: 305, alt: "", align: "right" },
     { type: "p", text: "If you decide not to be present during the deep cleaning service, make sure to communicate your expectations and preferences to the cleaning company in advance. Providing a detailed checklist and any specific instructions can help ensure that the cleaning professionals meet your standards. On the other hand, if you choose to stay home during the deep cleaning, be prepared to cooperate with the cleaning crew and make their job as efficient and effective as possible." },
     { type: "p", text: "In any case, the goal of a deep cleaning service is to transform your home into a cleaner, healthier, and more enjoyable living space. Whether you choose to be present or not, the end result should be a refreshed and revitalized home that you can take pride in." },
     { type: "p", text: "Schedule your deep cleaning service with Ivy Cleans today and experience the difference in cleanliness and comfort. Contact us now to book your deep cleaning appointment and enjoy a spotless living space." },

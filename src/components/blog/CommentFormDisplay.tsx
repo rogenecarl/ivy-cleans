@@ -2,10 +2,13 @@
  * Display-only reproduction of blog-post.html's #respond comment form
  * (WordPress's default comment-form markup, not covered by post-952.css —
  * that stylesheet only carries the post-template layout). Field set/labels
- * verbatim: "Leave a Reply" heading, comment-notes line, Comment textarea,
- * Name/Email/Website inputs, the "Save my name..." consent checkbox, and
- * the "Post Comment" submit. No `action`, no submit handler — this is a
- * static clone with no backend to post to.
+ * verbatim: "Leave a Reply" heading, comment-notes line (email-notes span
+ * wired to the email input's aria-describedby, matching the live markup),
+ * Comment textarea, Name/Email/Website inputs, the "Save my name..."
+ * consent checkbox, and the "Post Comment" submit — including the live
+ * `required` attributes on Comment/Name/Email (Website is optional on the
+ * live form too). No `action`, no submit handler — this is a static clone
+ * with no backend to post to.
  */
 export default function CommentFormDisplay() {
   return (
@@ -17,8 +20,10 @@ export default function CommentFormDisplay() {
           </h2>
           <form className="flex flex-col gap-[1.5rem]">
             <p className="text-[1.4rem] leading-[1.5em] font-light text-[#54595f]">
-              Your email address will not be published. Required fields are marked{" "}
-              <span className="text-[#cc3366]">*</span>
+              <span id="email-notes">Your email address will not be published.</span>{" "}
+              <span>
+                Required fields are marked <span className="text-[#cc3366]">*</span>
+              </span>
             </p>
             <p className="flex flex-col gap-[0.6rem]">
               <label htmlFor="comment" className="text-[1.4rem] font-medium text-black">
@@ -30,6 +35,7 @@ export default function CommentFormDisplay() {
                 cols={45}
                 rows={8}
                 maxLength={65525}
+                required
                 className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
               />
             </p>
@@ -44,6 +50,7 @@ export default function CommentFormDisplay() {
                 size={30}
                 maxLength={245}
                 autoComplete="name"
+                required
                 className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
               />
             </p>
@@ -58,6 +65,8 @@ export default function CommentFormDisplay() {
                 size={30}
                 maxLength={100}
                 autoComplete="email"
+                aria-describedby="email-notes"
+                required
                 className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
               />
             </p>
