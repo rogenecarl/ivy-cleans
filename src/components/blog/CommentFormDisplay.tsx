@@ -9,25 +9,46 @@
  * `required` attributes on Comment/Name/Email (Website is optional on the
  * live form too). No `action`, no submit handler — this is a static clone
  * with no backend to post to.
+ *
+ * The form sits at the foot of the same Elementor column as the article, so
+ * it repeats PostArticle's 119rem container and 60px column padding (0 at
+ * <=767) and carries the column's 50px bottom margin. Everything else is
+ * theme/browser default and was measured off the live page with a Playwright
+ * computed-style probe at 1440x900 and 390x844 (round-4 fidelity pass):
+ * the whole form inherits the 1rem root size (labels, inputs, notes and the
+ * submit are all 1rem, not a scaled-up size), #reply-title matches the post
+ * body's h2 (22px/700 #374151), fields are 1px #666 / 3px radius with
+ * 0.5rem 1rem padding, and the submit is an outline button — transparent
+ * fill, 1px #cc3366 border, 5px radius, 1rem/700 uppercase #cc3366 text with
+ * 1.1rem 2.4rem padding. Sibling paragraphs are spaced 2rem apart.
  */
+const FIELD_CLASS =
+  "w-full rounded-[3px] border border-[#666] px-[1rem] py-[0.5rem] text-[1rem] leading-[1.5] text-black";
+
 export default function CommentFormDisplay() {
+  /*
+   * mt is 2rem (Elementor's widget gap) plus the heading's own 0.5rem top
+   * margin, folded into one value so the two don't collapse across the
+   * section boundary — live has 20.8px between the divider and #reply-title
+   * at 1440.
+   */
   return (
-    <section className="mt-0 mb-[2rem] bg-white md:mb-[3.5rem] lg:mb-[5rem]">
-      <div className="ec">
-        <div className="mx-auto max-w-[978px] p-0 lg:px-[6rem]">
-          <h2 className="mb-[2rem] text-[2.4rem] leading-[1.3em] font-semibold text-black">
+    <section className="mt-[2.5rem] mb-[50px] bg-white">
+      <div className="mx-auto max-w-[119rem]">
+        <div className="p-0 md:px-[60px] md:pb-[60px]">
+          <h2 className="mt-0 mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]">
             Leave a Reply
           </h2>
-          <form className="flex flex-col gap-[1.5rem]">
-            <p className="text-[1.4rem] leading-[1.5em] font-light text-[#54595f]">
+          <form className="flex flex-col gap-[2rem]">
+            <p className="text-[1rem] text-[#374151]">
               <span id="email-notes">Your email address will not be published.</span>{" "}
               <span>
-                Required fields are marked <span className="text-[#cc3366]">*</span>
+                Required fields are marked <span>*</span>
               </span>
             </p>
-            <p className="flex flex-col gap-[0.6rem]">
-              <label htmlFor="comment" className="text-[1.4rem] font-medium text-black">
-                Comment <span className="text-[#cc3366]">*</span>
+            <p className="flex flex-col items-start gap-0">
+              <label htmlFor="comment" className="text-[1rem] text-[#374151]">
+                Comment <span>*</span>
               </label>
               <textarea
                 id="comment"
@@ -36,12 +57,12 @@ export default function CommentFormDisplay() {
                 rows={8}
                 maxLength={65525}
                 required
-                className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
+                className={FIELD_CLASS}
               />
             </p>
-            <p className="flex flex-col gap-[0.6rem]">
-              <label htmlFor="author" className="text-[1.4rem] font-medium text-black">
-                Name <span className="text-[#cc3366]">*</span>
+            <p className="flex flex-col items-start gap-0">
+              <label htmlFor="author" className="text-[1rem] text-[#374151]">
+                Name <span>*</span>
               </label>
               <input
                 id="author"
@@ -51,12 +72,12 @@ export default function CommentFormDisplay() {
                 maxLength={245}
                 autoComplete="name"
                 required
-                className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
+                className={FIELD_CLASS}
               />
             </p>
-            <p className="flex flex-col gap-[0.6rem]">
-              <label htmlFor="email" className="text-[1.4rem] font-medium text-black">
-                Email <span className="text-[#cc3366]">*</span>
+            <p className="flex flex-col items-start gap-0">
+              <label htmlFor="email" className="text-[1rem] text-[#374151]">
+                Email <span>*</span>
               </label>
               <input
                 id="email"
@@ -67,11 +88,11 @@ export default function CommentFormDisplay() {
                 autoComplete="email"
                 aria-describedby="email-notes"
                 required
-                className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
+                className={FIELD_CLASS}
               />
             </p>
-            <p className="flex flex-col gap-[0.6rem]">
-              <label htmlFor="url" className="text-[1.4rem] font-medium text-black">
+            <p className="flex flex-col items-start gap-0">
+              <label htmlFor="url" className="text-[1rem] text-[#374151]">
                 Website
               </label>
               <input
@@ -81,18 +102,21 @@ export default function CommentFormDisplay() {
                 size={30}
                 maxLength={200}
                 autoComplete="url"
-                className="rounded-[4px] border border-[#afafaf] p-[1rem] text-[1.4rem] leading-[1.5em]"
+                className={FIELD_CLASS}
               />
             </p>
-            <p className="flex items-center gap-[0.8rem]">
+            <p className="flex items-center gap-[2px]">
               <input
                 id="wp-comment-cookies-consent"
                 name="wp-comment-cookies-consent"
                 type="checkbox"
                 value="yes"
-                className="h-[1.6rem] w-[1.6rem]"
+                className="h-[13px] w-[13px]"
               />
-              <label htmlFor="wp-comment-cookies-consent" className="text-[1.4rem] leading-[1.4em] text-black">
+              <label
+                htmlFor="wp-comment-cookies-consent"
+                className="text-[1rem] text-[#374151]"
+              >
                 Save my name, email, and website in this browser for the next time I comment.
               </label>
             </p>
@@ -102,7 +126,7 @@ export default function CommentFormDisplay() {
                 type="submit"
                 id="submit"
                 value="Post Comment"
-                className="bg-herogreen cursor-pointer rounded-[4px] px-[2.4rem] py-[1.2rem] text-[1.4rem] font-medium text-white"
+                className="cursor-pointer rounded-[5px] border border-[#cc3366] bg-transparent px-[2.4rem] py-[1.1rem] text-[1rem] font-bold text-[#cc3366] uppercase"
               />
             </p>
           </form>

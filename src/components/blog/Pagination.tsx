@@ -14,13 +14,24 @@ export default function Pagination() {
   return (
     <nav
       aria-label="Pagination"
-      className="mt-[3rem] text-center text-[1.8rem] leading-[1.2em] font-normal lg:mt-[5rem]"
+      className="mt-[3rem] text-center text-[1.8rem] leading-[1.2em] font-normal md:mt-[5rem]"
     >
-      <span aria-current="page" className="text-herogreen mx-[0.5rem] font-semibold">
+      {/*
+        post-32.css gives `.page-numbers` inner-only gutters —
+        `:not(:first-child){margin-left:calc(1rem/2)}` +
+        `:not(:last-child){margin-right:calc(1rem/2)}` — so the row has no
+        outer margin; `first:ml-0 last:mr-0` reproduces that. The current
+        page is plain #374151/400 on live, not a highlighted colour.
+      */}
+      <span aria-current="page" className="mx-[0.5rem] text-[#374151] first:ml-0 last:mr-0">
         <span className="sr-only">Page</span>1
       </span>
       {otherPages.map((n) => (
-        <a key={n} href={`/blog/${n}/`} className="mx-[0.5rem] hover:underline">
+        <a
+          key={n}
+          href={`/blog/${n}/`}
+          className="text-link mx-[0.5rem] first:ml-0 last:mr-0 hover:underline"
+        >
           <span className="sr-only">Page</span>
           {n}
         </a>
