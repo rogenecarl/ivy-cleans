@@ -34,6 +34,12 @@ IMAGES=(
   2023/12/ChIJT35locmWcKMRgykID0Xc2Vo_b6f41b6f1e06107b29211a5aeb0c6878.jpg
   2023/12/ChIJT35locmWcKMRgykID0Xc2Vo_db464bae7301c38f8607cd4ff2652a30.jpg
   2023/12/ChIJT35locmWcKMRgykID0Xc2Vo_1d694dba7949954b92bc22ef5a96f457.jpg
+  # round 3: deep-cleaning + move-out pages
+  2023/06/deep-bg4.jpg 2023/06/deep-icon1.png 2023/06/deep-icon2.png
+  2023/06/deep-icon3.png 2023/06/deep-icon4.png 2023/06/deep-img1.jpg
+  2023/06/deep-img2.jpg 2023/06/out-icon1.png 2023/06/out-icon2.png
+  2023/06/out-icon3.png 2023/06/out-img1.jpg 2023/06/out-img2.jpg
+  2023/06/out-img3.jpg
 )
 for path in "${IMAGES[@]}"; do
   name="$(basename "$path")"
