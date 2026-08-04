@@ -41,7 +41,7 @@ export function CaretDownIcon({ className }: IconProps) {
   );
 }
 
-/* rounded grey tile with a green glyph, as used in the live top bar */
+/* checklist checkmark used on deep-cleaning and move-out pages */
 export function CheckItemIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 512 512" fill="currentColor" aria-hidden className={className}>
@@ -50,6 +50,7 @@ export function CheckItemIcon({ className }: IconProps) {
   );
 }
 
+/* rounded grey tile with a green glyph, as used in the live top bar */
 export function TileIcon({ kind }: { kind: "phone" | "email" }) {
   return (
     <span className="flex h-[5rem] w-[5rem] shrink-0 items-center justify-center rounded-[1rem] bg-[#f2f2f2]">
