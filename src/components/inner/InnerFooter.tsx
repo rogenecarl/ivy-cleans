@@ -33,7 +33,7 @@ export default function InnerFooter() {
           <ul className="space-y-[1.3rem]">
             <li className={`${itemClass} justify-center md:justify-start`}>
               <PhoneIcon className={iconClass} />
-              <a href={innerSite.footerPhoneHref}>{innerSite.footerPhone}</a>
+              <span>{innerSite.footerPhone}</span>
             </li>
             <li className={`${itemClass} justify-center md:justify-start`}>
               <EnvelopeIcon className={iconClass} />

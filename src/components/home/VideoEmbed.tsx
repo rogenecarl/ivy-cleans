@@ -20,6 +20,8 @@ export default function VideoEmbed() {
             title="Ivy Cleans"
             className="h-full w-full"
             loading="lazy"
+            // Standard YouTube iframe embed `allow` list — not reference-derived (the
+            // live widget's src/allow attrs are never present in static HTML; see above).
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
           />

@@ -35,12 +35,12 @@ export const innerSite = {
   /*
    * The inner footer's icon-list phone (d439f43 on both home.html and
    * cleaning-services.html) is a *different* number from the hero/CTA "Call
-   * Us Now!" buttons above — 612-424-0391, plain text with no tel: href on
-   * the live page. We keep the anchor for usability but give it the same
-   * tel: format already used for the front-page number (site.phoneHref).
+   * Us Now!" buttons above — 612-424-0391, rendered as plain text with no
+   * tel: href on the live page (unlike the hero/CTA buttons, which are real
+   * <a href="tel:..."> links). InnerFooter renders this in a <span>, so no
+   * href field is kept here.
    */
   footerPhone: "612-424-0391",
-  footerPhoneHref: "tel:6124240391",
   email: "support@ivycleans.com",
   address: "5821 Cedar Lake Road, West Unit 208, Minneapolis, MN 55416",
   bookUrl: "/book",
