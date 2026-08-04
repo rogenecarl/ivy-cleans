@@ -7,10 +7,10 @@ export default function InnerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="tpl-inner">
       <InnerHeader />
       {children}
       <InnerFooter />
-    </>
+    </div>
   );
 }

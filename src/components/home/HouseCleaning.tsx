@@ -1,14 +1,22 @@
 import Link from "next/link";
 import { houseCleaning } from "@/data/home";
 
+/*
+ * Section 71b51dd4 (post-8.css): cleaning-bg2.jpg `top center / cover` with
+ * padding 6rem 0 6rem (desktop), 3rem 0 1rem (<=1024), 2rem 0 0 (<=767).
+ * Heading 2ddd8298 and body 11f8346 are both #FFFFFF over the artwork.
+ */
 export default function HouseCleaning() {
   return (
-    <section className="bg-[#fafafa] py-[2rem] md:py-[3rem] lg:py-[6rem]">
+    <section
+      className="bg-cover bg-top bg-no-repeat pt-[2rem] pb-0 text-white md:pt-[3rem] md:pb-[1rem] lg:py-[6rem]"
+      style={{ backgroundImage: "url(/images/cleaning-bg2.jpg)" }}
+    >
       <div className="ec">
         <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
           House Cleaning Services Minneapolis
         </h2>
-        <div className="text-[1.6rem] leading-[1.5em] font-light md:text-[1.8rem] lg:text-[1.9rem]">
+        <div className="text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
           {houseCleaning.map((p) => (
             <p key={p.slice(0, 40)} className="mb-[2rem]">
               {p}
@@ -16,14 +24,14 @@ export default function HouseCleaning() {
           ))}
           <p className="mb-[2rem]">
             In addition to our main services, We also offer{" "}
-            <Link href="/deep-cleaning-minneapolis" className="text-rust underline">
+            <Link href="/deep-cleaning-minneapolis" className="font-normal underline">
               Deep Cleaning in Minneapolis
             </Link>{" "}
             and{" "}
-            <Link href="/minneapolis-move-out-cleaning-services" className="text-rust underline">
+            <Link href="/minneapolis-move-out-cleaning-services" className="font-normal underline">
               Move-out cleaning Minneapolis
             </Link>
-            , if you’re interested.
+            , if you&rsquo;re interested.
           </p>
         </div>
       </div>

@@ -36,48 +36,73 @@ function XIcon() {
   );
 }
 
-export default function RoomChecklist({ room }: { room: Room }) {
+/* post-30.css custom CSS: `.package2` (the room header rows) and `.package3`
+   (the item rows) carry left/right 1px rgb(134,198,176) borders, `.package3`
+   also a 1px #e5e7eb rule underneath, and the single `.last-package` row
+   closes the table with a green bottom border, 4px radius and a shadow.
+   Columns stay 40/20/20/20 down to 390px — the table never stacks. */
+const SIDE_BORDER = "border-r border-l border-[rgb(134,198,176)]";
+
+export default function RoomChecklist({ room, last = false }: { room: Room; last?: boolean }) {
   return (
-    <section className="px-[1rem]">
-      <div className="ec">
-        {/* header row */}
-        <div className="flex flex-wrap">
-          <div className="bg-herogreen w-full p-[1.2rem_1.6rem] lg:w-[40%]">
+    <section className={`px-[1rem] ${last ? "pb-[3rem]" : ""}`}>
+      <div className="mx-auto max-w-[119rem]">
+        {/* header row (.package2) */}
+        <div className={`bg-herogreen flex ${SIDE_BORDER}`}>
+          <div className="w-[40%] p-[1.2rem_1.6rem]">
             <h2 className="text-[1.6rem] leading-[1.2em] font-semibold text-white">{room.name}</h2>
           </div>
           {tiers.map((tier) => (
-            <div key={tier} className="bg-herogreen w-1/3 p-[1.2rem_1.6rem] text-center lg:w-[20%]">
+            <div key={tier} className="w-[20%] p-[1.2rem_1.6rem] text-center">
               <h3 className="text-[1.4rem] leading-[1.2em] font-medium text-white">{tier}</h3>
             </div>
           ))}
         </div>
 
-        {/* item rows */}
-        {room.items.map((item) => (
-          <div key={item.label} className="flex flex-wrap">
-            <div className="w-full p-[1.2rem_1.6rem] lg:w-[40%]">
-              <p className="text-herogreen text-[1.6rem] leading-[1.5em] font-normal">{item.label}</p>
-            </div>
+        {/* item rows (.package3, the final one also .last-package) */}
+        {room.items.map((item, i) => {
+          const isLastRow = last && i === room.items.length - 1;
+          return (
             <div
-              className="flex w-1/3 items-center justify-center bg-white p-[1.2rem_1.6rem] lg:w-[20%]"
-              aria-label={item.basic ? "Included" : "Not included"}
+              key={item.label}
+              className={`flex ${SIDE_BORDER} ${
+                isLastRow
+                  ? "rounded-b-[4px] border-b border-b-[rgb(134,198,176)] shadow-[0_4px_6px_-1px_rgba(0,0,0,.1),0_2px_4px_-2px_rgba(0,0,0,.1)]"
+                  : "border-b border-b-[#e5e7eb]"
+              }`}
             >
-              {item.basic ? <CheckIcon /> : <XIcon />}
+              <div className="w-[40%] p-[1.2rem_1.6rem]">
+                {/* globals.css' unlayered `p { line-height: 1.5 }` outranks
+                    Tailwind's leading-* utilities, so the live 1.2em (label
+                    measures h=58 for 3 lines @390) has to be set inline. */}
+                <p
+                  className="text-herogreen text-[1.6rem] font-normal"
+                  style={{ lineHeight: "1.2em" }}
+                >
+                  {item.label}
+                </p>
+              </div>
+              <div
+                className="flex w-[20%] items-center justify-center bg-white p-[1.2rem_1.6rem]"
+                aria-label={item.basic ? "Included" : "Not included"}
+              >
+                {item.basic ? <CheckIcon /> : <XIcon />}
+              </div>
+              <div
+                className="flex w-[20%] items-center justify-center bg-[#ECF9F9] p-[1.2rem_1.6rem]"
+                aria-label={item.deep ? "Included" : "Not included"}
+              >
+                {item.deep ? <CheckIcon /> : <XIcon />}
+              </div>
+              <div
+                className="flex w-[20%] items-center justify-center bg-white p-[1.2rem_1.6rem]"
+                aria-label={item.moving ? "Included" : "Not included"}
+              >
+                {item.moving ? <CheckIcon /> : <XIcon />}
+              </div>
             </div>
-            <div
-              className="flex w-1/3 items-center justify-center bg-[#ECF9F9] p-[1.2rem_1.6rem] lg:w-[20%]"
-              aria-label={item.deep ? "Included" : "Not included"}
-            >
-              {item.deep ? <CheckIcon /> : <XIcon />}
-            </div>
-            <div
-              className="flex w-1/3 items-center justify-center bg-white p-[1.2rem_1.6rem] lg:w-[20%]"
-              aria-label={item.moving ? "Included" : "Not included"}
-            >
-              {item.moving ? <CheckIcon /> : <XIcon />}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

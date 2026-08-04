@@ -11,8 +11,8 @@ export default function CleaningServicesPage() {
     <>
       <PlansHeader />
       <PackagesBar />
-      {rooms.map((r) => (
-        <RoomChecklist key={r.name} room={r} />
+      {rooms.map((r, i) => (
+        <RoomChecklist key={r.name} room={r} last={i === rooms.length - 1} />
       ))}
     </>
   );

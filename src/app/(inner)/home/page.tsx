@@ -3,7 +3,6 @@ import { homeMeta } from "@/data/home";
 import HomeHero from "@/components/home/HomeHero";
 import HomeServices from "@/components/home/HomeServices";
 import NearMe from "@/components/home/NearMe";
-import Features from "@/components/home/Features";
 import HouseCleaning from "@/components/home/HouseCleaning";
 import Principles from "@/components/home/Principles";
 import Locations from "@/components/home/Locations";
@@ -18,8 +17,8 @@ export default function HomePage() {
     <>
       <HomeHero />
       <HomeServices />
+      {/* Features renders inside NearMe — section 102673a0 wraps both (see NearMe.tsx) */}
       <NearMe />
-      <Features />
       <HouseCleaning />
       <Principles />
       <Locations />

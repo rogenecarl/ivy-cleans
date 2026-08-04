@@ -16,6 +16,8 @@ IMAGES=(
   2023/07/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg
   2023/11/before.jpg 2023/11/after.jpg
   2023/11/cleaning-bg2.jpg 2023/11/faq-bg.jpg
+  2023/06/cleaning-bg-desktop.jpg 2023/06/cleaning-bg-mbl.jpg
+  2023/06/cleaning-bg3.jpg 2023/06/move-out-bg.jpg
   2023/12/Logo.png 2023/12/Group-5.png 2023/12/logo-mbl1.png 2023/12/logo-mbl2.png
   2023/12/guarantee-icon-1.png
   2023/12/icon1.png 2023/12/icon2.png 2023/12/icon3.png 2023/12/icon4.png 2023/12/icon5.png

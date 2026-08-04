@@ -68,3 +68,24 @@ p {
   max-width: 1098px;
   padding: 10px;
 }
+
+/*
+ * /home and /cleaning-services render through Elementor's *section* template,
+ * whose boxed container is the kit's own `--container-max-width: 119rem`
+ * (post-6.css "Font Sizing" block). Because that width is in rem it tracks the
+ * root font-size ladder above — 990px at the 1440 step, where the front page's
+ * flexbox containers stay at 1098px. Scoped so `/` is untouched.
+ */
+.tpl-inner .ec {
+  max-width: 119rem;
+}
+
+/* /home hero (219b11a0): desktop art, mobile art swapped in below 768px. */
+.home-hero {
+  background-image: url("/images/cleaning-bg-mbl.jpg");
+}
+@media (min-width: 768px) {
+  .home-hero {
+    background-image: url("/images/cleaning-bg-desktop.jpg");
+  }
+}
