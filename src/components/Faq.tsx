@@ -1,17 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { faqs, type Faq as FaqItem } from "@/data/faqs";
+import { faqs } from "@/data/faqs";
 
-export default function Faq({
-  items = faqs,
-  subtitle = true,
-  questionsHeading,
-}: {
-  items?: FaqItem[];
-  subtitle?: boolean;
-  questionsHeading?: string;
-}) {
+/*
+ * Front-page-only accordion (the front page is the sole remaining caller —
+ * /home now renders HomeFaqStatic instead — so the old items/subtitle/
+ * questionsHeading props that only /home ever varied are gone).
+ */
+export default function Faq() {
   /* live: every accordion item renders with aria-expanded="false" — nothing is open on load */
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   return (
@@ -25,18 +22,11 @@ export default function Faq({
           <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
             Frequently Asked Questions
           </h2>
-          {subtitle && (
-            <p className="mb-[2rem] text-center text-[1.7rem] leading-[1.5em] lg:text-[2.2rem]">
-              If you need further assistance, please do not hesitate to contact us.
-            </p>
-          )}
-          {questionsHeading && (
-            <h3 className="mb-[2rem] text-center text-[2rem] leading-[1.2em] font-bold md:text-[2.6rem] lg:text-[3rem]">
-              {questionsHeading}
-            </h3>
-          )}
+          <p className="mb-[2rem] text-center text-[1.7rem] leading-[1.5em] lg:text-[2.2rem]">
+            If you need further assistance, please do not hesitate to contact us.
+          </p>
           <div>
-            {items.map((f, i) => (
+            {faqs.map((f, i) => (
               <div key={f.q} className="mb-[2rem] overflow-hidden rounded-[1.2rem]">
                 <button
                   onClick={() => setOpenIdx(openIdx === i ? null : i)}
