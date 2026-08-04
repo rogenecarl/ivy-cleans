@@ -14,10 +14,13 @@ import { contactHeader } from "@/data/contact";
  *     inside the second section's left column (#2e9a1fb) — h2 #918eedb
  *     ("We would love to hear from you!", 2.4rem/600 desktop -> 2.2rem
  *     <=1024, no further 767 override, color #37745F) and paragraph
- *     #0940d0f (1.6rem, color #37745F, widget-container margin 0 0 -2rem 0
- *     which fully cancels the 2rem widget gap before the form — net 0 gap
- *     to the field-group wrapper). No widget-container override on #918eedb
- *     itself, so the default 2rem gap stands between the eyebrow and it.
+ *     #0940d0f (1.6rem, color #37745F). Its widget-container margin
+ *     0 0 -2rem 0 cancels the *inner* <p>'s own 2rem bottom margin, not the
+ *     widget gap: the live DOM probe measures the rendered copy block ending
+ *     at y=385.9 and the form starting at y=402.6 at 1440 — a 2rem (16.64px)
+ *     gap — so this clone spends that gap as `mb-[2rem]` on the paragraph
+ *     itself. No widget-container override on #918eedb itself, so the
+ *     default 2rem gap stands between it and the paragraph.
  * Both variants live in this one component (per the task brief's data
  * shape) and are placed by the page where post-34.css puts them.
  */
@@ -46,7 +49,7 @@ export default function ContactHeader({
       <h2 className="text-herogreen mb-[2rem] text-[2.2rem] leading-[1.2em] font-semibold lg:text-[2.4rem]">
         {contactHeader.h2b}
       </h2>
-      <p className="mb-0 text-[1.6rem] leading-[1.5em] text-[#37745F]">
+      <p className="text-herogreen mb-[2rem] text-[1.6rem] leading-[1.5em]">
         {contactHeader.intro}
       </p>
     </>

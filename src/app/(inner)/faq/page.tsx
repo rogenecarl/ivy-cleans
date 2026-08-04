@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Source_Serif_4 } from "next/font/google";
 import { faqPageMeta, faqPageHeader } from "@/data/faq-page";
 import FaqAccordion from "@/components/faq-page/FaqAccordion";
 
@@ -7,6 +8,20 @@ export const metadata: Metadata = {
   title: faqPageMeta.title,
   description: faqPageMeta.description,
 };
+
+/*
+ * The accordion *answers* are the one place on the site that is not Poppins:
+ * post-36.css sets `.elementor-tab-content{font-family:"Source Serif Pro",
+ * Sans-serif}` and a live DOM probe confirms it actually renders (computed
+ * font-family on the open answer is `"Source Serif Pro", sans-serif`, and the
+ * live screenshot shows serifs). Google retired Source Serif Pro in favour of
+ * its successor Source Serif 4 — that is the only member of the family
+ * next/font/google still exposes, so it is what the clone self-hosts.
+ * Declared here, page-scoped (next/font scopes a face to the component that
+ * loads it), and handed to the accordion as a className: the shared root
+ * layout keeps owning Poppins and no other page pays for this face.
+ */
+const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
 /*
  * faq.html's two top-level sections after the shared header:
@@ -20,10 +35,15 @@ export const metadata: Metadata = {
  *     0/0/9.6rem/0 -> 0/1rem/4rem/1rem -> 0/1rem/3rem/1rem): a single
  *     white, rounded (4px), #86C6B0-bordered column (#aafb91a, padding
  *     2.8rem 4.8rem 4.8rem 4.8rem -> 2rem 3rem 3rem 3rem -> 1rem 2rem
- *     2rem 2rem) holding the accordion (#664764d) then a small
- *     "Contact Us" button (#6e78442, href /contact, bg/border #397963,
- *     hover swaps to white bg + #397963 text, widget-container margin
- *     2rem 0 0 0 above it).
+ *     2rem 2rem) holding the accordion (#664764d) then a small,
+ *     center-aligned "Contact Us" button (#6e78442, href /contact, bg/border
+ *     #397963, hover swaps to white bg + #397963 text). Its gap to the
+ *     accordion is 4rem, not 2rem: the accordion widget's own 2rem bottom
+ *     margin plus this widget-container's 2rem top margin. Live probe at
+ *     1440: accordion ends y=562.5, button starts y=595.7 (33.2px = 4rem at
+ *     root 8.32px); at 390 the same pair measures 665.9 -> 705.9 (40px =
+ *     4rem at root 10px). The button is centered (x=652.5, w=134.9 in a
+ *     1440 viewport -> centered on 720).
  */
 export default function FaqPage() {
   return (
@@ -38,16 +58,18 @@ export default function FaqPage() {
           </h2>
         </div>
       </section>
-      <section className="bg-[linear-gradient(180deg,#EEF7F4_20%,#FFFFFF_20%)] pb-[3rem] md:pb-[4rem] lg:pb-[9.6rem]">
-        <div className="ec">
+      <section className="bg-[linear-gradient(180deg,#EEF7F4_20%,#FFFFFF_20%)] px-[1rem] pb-[3rem] md:pb-[4rem] lg:px-0 lg:pb-[9.6rem]">
+        <div className="mx-auto max-w-[119rem]">
           <div className="rounded-[4px] border border-[#86C6B0] bg-white pt-[1rem] pr-[2rem] pb-[2rem] pl-[2rem] md:pt-[2rem] md:pr-[3rem] md:pb-[3rem] md:pl-[3rem] lg:pt-[2.8rem] lg:pr-[4.8rem] lg:pb-[4.8rem] lg:pl-[4.8rem]">
-            <FaqAccordion />
-            <Link
-              href="/contact"
-              className="mt-[2rem] inline-block rounded-[5px] border border-[#397963] bg-[#397963] px-[2.4rem] py-[1.1rem] text-[1.6rem] leading-[1.2em] font-bold text-white uppercase transition-colors hover:bg-white hover:text-[#397963]"
-            >
-              Contact Us
-            </Link>
+            <FaqAccordion answerClassName={sourceSerif.className} />
+            <div className="mt-[4rem] text-center">
+              <Link
+                href="/contact"
+                className="inline-block rounded-[5px] border border-[#397963] bg-[#397963] px-[2.4rem] py-[1.1rem] text-[1.6rem] leading-[1.2em] font-bold text-white uppercase transition-colors hover:bg-white hover:text-[#397963]"
+              >
+                Contact Us
+              </Link>
+            </div>
           </div>
         </div>
       </section>
