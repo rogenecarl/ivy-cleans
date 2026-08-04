@@ -1,0 +1,105 @@
+[A href=#content]
+[A href=https://ivycleans.com]
+[IMG Logo.png alt='' w=309 h=149]
+[A href=https://ivycleans.com/home/]
+<li> Contact - Ivy CleansSkip to contentHome
+[A href=https://ivycleans.com/cleaning-services/]
+[A href=https://ivycleans.com/deep-cleaning-minneapolis/]
+<li> Cleaning ServicesDeep Cleaning Minneapolis
+[A href=https://ivycleans.com/minneapolis-move-out-cleaning-services/]
+<li> Minneapolis Move Out Cleaning Services
+[A href=https://ivycleans.com/blog/]
+<li> Blog
+[A href=https://ivycleans.com/contact/]
+<li> Contact
+[A href=https://ivycleans.com/faq/]
+<li> FAQ
+[A href=https://ivycleans.com/home/]
+<li> Home
+[A href=https://ivycleans.com/cleaning-services/]
+[A href=https://ivycleans.com/deep-cleaning-minneapolis/]
+<li> Cleaning ServicesDeep Cleaning Minneapolis
+[A href=https://ivycleans.com/minneapolis-move-out-cleaning-services/]
+<li> Minneapolis Move Out Cleaning Services
+[A href=https://ivycleans.com/blog/]
+<li> Blog
+[A href=https://ivycleans.com/contact/]
+<li> Contact
+[A href=https://ivycleans.com/faq/]
+<li> FAQ
+<h3> GET IN TOUCH WITH OUR TEAM
+<h2> Contact Us
+<h2> We would love to hear from you!
+<p> Give us a call, we try to answer all enquiries within 24 hours on business days.
+[INPUT name=post_id type=hidden placeholder= required=False]
+[INPUT name=form_id type=hidden placeholder= required=False]
+[INPUT name=referer_title type=hidden placeholder= required=False]
+[INPUT name=queried_id type=hidden placeholder= required=False]
+<label> Name
+[INPUT name=form_fields[name] type=text placeholder=Your Name required=False]
+<label> Email
+[INPUT name=form_fields[email] type=email placeholder=Email required=True]
+<label> Phone Number
+[INPUT name=form_fields[field_66433ea] type=text placeholder=(777) 777-7777 required=False]
+<label> Are You Looking For Help With A Cleaning Project?
+[SELECT name=form_fields[message] type= placeholder= required=True]
+<option> -
+<option> Yes
+<option> No
+<label> How Can We Help?
+[TEXTAREA name=form_fields[field_45db7dd] type= placeholder=Give us some more details on how we can help. required=False]
+<button> Send
+[IFRAME src=https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near title=ivy cleans]
+<h2> Location
+<p> 5821 Cedar Lake Road Suite 208 Minneapolis, MN 55416
+<h2> Hours
+<p> Mon-Fri: 8:00 AM – 5:00 PMSat: 8:00 AM – 5:00 PMSun: 8:00 AM – 5:00 PM
+<h2> Location
+<p> 612-424-0391Support@ivycleans.com
+[IMG Logo.png alt='' w=309 h=149]
+<h4> Services
+<li> Book Now
+[A href=/cleaning-services]
+<li> Cleaning Services
+<h4> Company
+[A href=/privacy-policy]
+<li> Privacy Policy
+[A href=/contact]
+<li> Contact Us
+[A href=/faq]
+<li> FAQ
+<h4> © 2026 IvyCleans. All rights reserved.
+[IMG Logo.png alt='' w=309 h=149]
+<li> 612-424-0391
+<li> support@ivycleans.com
+<li> 5821 Cedar Lake Road, West Unit 208, Minneapolis, MN 55416
+<h4> Links
+[A href=https://ivycleans.com/home/]
+<li> Home
+[A href=https://ivycleans.com/blog/]
+<li> Blog
+[A href=https://ivycleans.com/contact/]
+<li> Contact
+[A href=https://ivycleans.com/faq/]
+<li> FAQ
+[A href=https://ivycleans.com/privacy-policy/]
+<li> Privacy Policy
+[A href=https://ivycleans.com/home/]
+<li> Home
+[A href=https://ivycleans.com/blog/]
+<li> Blog
+[A href=https://ivycleans.com/contact/]
+<li> Contact
+[A href=https://ivycleans.com/faq/]
+<li> FAQ
+[A href=https://ivycleans.com/privacy-policy/]
+<li> Privacy Policy
+<h4> Get In Touch
+[A href=https://www.facebook.com/ivy.cleans1/]
+[A href=https://twitter.com/Ivycleans]
+[A href=https://www.youtube.com/channel/UCZIsiCt4aoUbrzbPmpVwQGA]
+[A href=https://www.instagram.com/ivy.cleans1/]
+[A href=https://www.pinterest.com/ivycleans/]
+[A href=https://www.tiktok.com/@ivy.cleans1]
+<h4> FacebookTwitterYoutubeInstagramPinterestTiktok© 2026 IvyCleans. All rights reserved.
+<h4> Ivy Cleans
