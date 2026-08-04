@@ -44,6 +44,11 @@ IMAGES=(
   2023/06/deep-bg1.jpg 2023/06/deep-bg2.jpg 2023/06/deep-bg3.jpg
   2023/06/deep-bg5.jpg 2023/06/out-bg1.jpg 2023/06/out-bg2.jpg
   2023/06/out-bg3.jpg
+  # round 4: /blog listing thumbnails (resized variants the live cards serve)
+  2024/03/image-21-300x200.webp
+  2024/01/how-to-clean-smoke-detectors-1-300x171.jpg
+  2024/01/what-to-do-in-st-louis-park-mn-300x171.jpg
+  2024/03/image-2-300x200.png
 )
 for path in "${IMAGES[@]}"; do
   name="$(basename "$path")"
