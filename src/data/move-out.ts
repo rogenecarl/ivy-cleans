@@ -21,20 +21,30 @@ export const moveHero: { h1: string; paragraphs: string[] } = {
   ],
 };
 
-export const whyMoveOut: { h2: string; image: string; paragraphs: string[] } = {
+export const whyMoveOut: {
+  h2: string;
+  row1: { image: string; paragraphs: string[] };
+  row2: { paragraphs: string[]; image: string };
+} = {
   h2: "Move out cleaning Minneapolis",
-  image: "/images/out-img1.jpg",
-  paragraphs: [
-    "Move-out cleaning is an essential task that you should undertake before leaving a rental property in Minneapolis. It’s a responsibility that ensures that the property is left in good condition for the next tenant or the landlord.",
-    "Move-out cleaning is also an excellent opportunity to inspect the property for any damages or repairs that need to be done. By identifying these issues early, you can address them before leaving the property and avoid any disputes or legal action in the future.",
-    "Moreover, move-out cleaning gives you the chance to show that you’re a responsible tenant who takes care of the property. Leaving the property in excellent condition reflects positively on you as a tenant and can help you secure good references and recommendations for future rentals.",
-    "In conclusion, move-out cleaning is an essential task that you should undertake before leaving a rental property in Minneapolis. It’s your responsibility to ensure that the property is left in good condition for the next tenant or the landlord. Hiring a professional cleaning service like IVYCleans can make the task easier and more efficient, ensuring that the property is left spotless and ready for the next occupants.",
-  ],
+  row1: {
+    image: "/images/out-img1.jpg",
+    paragraphs: [
+      "Move-out cleaning is an essential task that you should undertake before leaving a rental property in Minneapolis. It’s a responsibility that ensures that the property is left in good condition for the next tenant or the landlord.",
+      "Move-out cleaning is also an excellent opportunity to inspect the property for any damages or repairs that need to be done. By identifying these issues early, you can address them before leaving the property and avoid any disputes or legal action in the future.",
+    ],
+  },
+  row2: {
+    paragraphs: [
+      "Moreover, move-out cleaning gives you the chance to show that you’re a responsible tenant who takes care of the property. Leaving the property in excellent condition reflects positively on you as a tenant and can help you secure good references and recommendations for future rentals.",
+      "In conclusion, move-out cleaning is an essential task that you should undertake before leaving a rental property in Minneapolis. It’s your responsibility to ensure that the property is left in good condition for the next tenant or the landlord. Hiring a professional cleaning service like IVYCleans can make the task easier and more efficient, ensuring that the property is left spotless and ready for the next occupants.",
+    ],
+    image: "/images/out-img2.jpg",
+  },
 };
 
-export const included: { h2: string; image: string; items: string[] } = {
+export const included: { h2: string; items: string[] } = {
   h2: "What services are included in a move-out cleaning?",
-  image: "/images/out-img2.jpg",
   items: [
     "Dusting and wiping all surfaces, including countertops, cabinets, and appliances",
     "Cleaning the floors, including vacuuming and mopping",
@@ -59,7 +69,12 @@ export type MoveOutQuality = {
   alt: string;
 };
 
-export const whyIvy: { h2: string; intro: string; qualities: MoveOutQuality[] } = {
+export const whyIvy: {
+  h2: string;
+  intro: string;
+  qualities: MoveOutQuality[];
+  image: string;
+} = {
   h2: "Move out cleaning service in Minneapolis",
   intro:
     "IVYCleans is an excellent choice for move-out cleaning services in Minneapolis because we provide exceptional attention to detail, and expertise, have a long-standing time in the industry, have effective communication, and have consistent quality.",
@@ -105,11 +120,11 @@ export const whyIvy: { h2: string; intro: string; qualities: MoveOutQuality[] } 
       alt: "In this image we explain what are the things you would like to ask your cleaning service provider",
     },
   ],
+  image: "/images/out-img3.jpg",
 };
 
-export const cost: { h2: string; image: string; paragraphs: string[] } = {
+export const cost: { h2: string; paragraphs: string[] } = {
   h2: "How much does a move-out cleaning cost?",
-  image: "/images/out-img3.jpg",
   paragraphs: [
     "The cost of move-out cleaning services can vary depending on several factors. The size of the property, the level of cleaning required, and the location are some of the key factors that can influence the price.",
     "Smaller properties typically cost less to clean than larger ones, as there is less surface area to cover. However, the level of cleaning required can also play a role. If the property is particularly dirty or has not been cleaned regularly, it may require more time and effort to clean, which can increase the cost.",
