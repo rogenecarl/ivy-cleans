@@ -8,10 +8,12 @@ import { innerSite } from "@/data/site";
 
    Section 6774f01c: cleaning-bg3.jpg `top center / cover`, padding 6rem 0 6rem
    at >=1280, 3rem 0 3rem at 768–1024 and 2rem 0 2rem at <=767. Heading
-   77760a30 is 4.5/4/2.8rem at the kit's h3 weight of 600, with the standard
-   2rem widget bottom margin. The button 5572535 is 1.9rem at every width with
-   17px/30px padding (17px/20px and left-aligned at <=767) and its container
-   adds a 3rem top margin only at >=1280. */
+   77760a30 is 4.5/4/2.8rem, wrapped in a live `<b>` that computes to
+   font-weight 900 (the kit's own h3 weight is 600; box geometry is identical
+   either way), with the standard 2rem widget bottom margin. The button
+   5572535 is 1.9rem at every width with 17px/30px padding (17px/20px and
+   left-aligned at <=767) and its container adds a 3rem top margin only at
+   >=1280. */
 export default function HomeCta() {
   return (
     <section
@@ -19,7 +21,7 @@ export default function HomeCta() {
       style={{ backgroundImage: "url(/images/cleaning-bg3.jpg)" }}
     >
       <div className="ec flex flex-col text-center">
-        <h3 className="mb-[2rem] text-[2.8rem] leading-[1.2em] font-semibold md:text-[4rem] lg:text-[4.5rem]">
+        <h3 className="mb-[2rem] text-[2.8rem] leading-[1.2em] font-black md:text-[4rem] lg:text-[4.5rem]">
           Trust Us For Your House Cleaning Needs &amp; Give Us A Call!
         </h3>
         <div className="text-left md:text-center lg:mt-[3rem]">
