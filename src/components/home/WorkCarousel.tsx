@@ -6,18 +6,25 @@ import { workImages } from "@/data/home";
 import { ChevronRightIcon } from "@/components/Icons";
 
 /*
- * Section 3eef65e is an Elementor image-carousel, not a single-image viewer.
- * Live @1440 the track measures 1185px centred (slides at x=128/523/918, each
- * 395x296) and @390 it is the container's own 370px with one slide — i.e.
- * three slides per view on desktop, one on mobile, 4:3 art either way. The
- * section measures 395px tall at both widths: 32/42px above the slides and
- * 67/75px of pagination space below.
+ * Two live sections: 5d80ea1 holds only the heading (zero padding, the usual
+ * 1rem heading-container margin at >=768), then 6153513 holds the carousel.
+ * post-8.css pins that one down exactly:
+ *   .elementor-element-6153513 > .elementor-container{max-width:1205px;
+ *                                                     min-height:395px}
+ * Both are flat px, so the section is 395px tall at every one of the seven
+ * probed widths and the container is 1205px wide from 1280 up, then simply the
+ * viewport (1024 / 768 / 390). The column is vertically centred inside the
+ * 395px (live: 22.62px of slack above the slides at 1440, 45 at 1024, 31.75 at
+ * 390 — always half the leftover).
  *
  * Widget 741355c data-settings: slides_to_show 3, slides_to_scroll 3,
  * infinite yes, autoplay yes @5000ms, pause_on_hover yes, pause_on_interaction
- * yes, navigation "both" (arrows + dots), speed 500. No *_tablet / *_mobile
- * keys, so Elementor's image-carousel responsive defaults apply: 2-up on
- * tablet, 1-up on mobile.
+ * yes, navigation "both" (arrows + dots), speed 500, arrows position inside.
+ * Elementor feeds swiper `breakpoints[767] = tablet` and
+ * `breakpoints[1024] = desktop` over a mobile base, which is exactly what the
+ * live probe shows: 1-up below 767, 2-up at 768 (slides 374 of 748), 3-up from
+ * 1024 up (334.66 of 1004 at 1024, 395 of 1185 at >=1280). Note 1024 is
+ * already 3-up — the carousel's desktop threshold is *not* the site's 1025.
  */
 const TOTAL = workImages.length; // 5
 const MAX_PER_VIEW = 3;
@@ -47,8 +54,8 @@ const RENDERED = TOTAL + MAX_PER_VIEW - 1; // 7
 
 /* the slide widths below are plain CSS, but the page size (and therefore the
    dot count and the wrap point) has to be known in JS, so read the same two
-   breakpoints from matchMedia */
-const QUERIES = ["(min-width: 1024px)", "(min-width: 768px)"];
+   swiper breakpoints from matchMedia */
+const QUERIES = ["(min-width: 1024px)", "(min-width: 767px)"];
 
 function subscribePerView(onChange: () => void) {
   const lists = QUERIES.map((q) => window.matchMedia(q));
@@ -111,68 +118,89 @@ export default function WorkCarousel() {
   }, [autoplay, hovered, page, pageCount]);
 
   return (
-    <section className="bg-white">
-      <div className="ec">
-        <h2 className="text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
-          Our Cleaning Work In Action
-        </h2>
-      </div>
-      <div
-        className="relative mx-auto max-w-[390px] px-[10px] pt-[42px] pb-[75px] md:max-w-[790px] lg:max-w-[1185px] lg:px-0 lg:pt-[32px] lg:pb-[67px]"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Image Carousel"
-      >
-        <div className="overflow-hidden">
-          <div
-            className={`flex w-full ${instant ? "" : "transition-transform duration-500 ease-out"}`}
-            style={{ transform: `translateX(-${page * 100}%)` }}
-          >
-            {Array.from({ length: RENDERED }, (_, i) => (
-              <div key={i} className="w-full shrink-0 md:w-1/2 lg:w-1/3">
-                <Image
-                  src={workImages[i % TOTAL]}
-                  alt=""
-                  width={800}
-                  height={600}
-                  className="aspect-[395/296] w-full object-cover"
-                />
+    <>
+      <section className="bg-white">
+        <div className="ec flex flex-col">
+          <h2 className="text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
+            Our Cleaning Work In Action
+          </h2>
+        </div>
+      </section>
+      <section className="bg-white">
+        <div className="mx-auto flex min-h-[395px] w-full max-w-[1205px] items-center">
+          {/* the column's own widget-wrap gutter */}
+          <div className="w-full p-[10px]">
+            <div
+              /* .elementor-image-carousel-wrapper: 30px of pagination space */
+              className="relative pb-[30px]"
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="Image Carousel"
+            >
+              <div className="relative">
+                {/* live's slide images are inline, so the track carries ~0.4rem
+                    of line-box descender under them (299.73 vs 296.25 @1440) */}
+                <div className="overflow-hidden pb-[0.4rem]">
+                  <div
+                    className={`flex w-full ${
+                      instant ? "" : "transition-transform duration-500 ease-out"
+                    }`}
+                    style={{ transform: `translateX(-${page * 100}%)` }}
+                  >
+                    {Array.from({ length: RENDERED }, (_, i) => (
+                      <div
+                        key={i}
+                        className="w-full shrink-0 min-[767px]:w-1/2 min-[1024px]:w-1/3"
+                      >
+                        <Image
+                          src={workImages[i % TOTAL]}
+                          alt=""
+                          width={800}
+                          height={600}
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* elementor-arrows-position-inside: 25px glyphs inset 10px and
+                    centred on the slides, not on the pagination band */}
+                <button
+                  onClick={() => goTo(page - 1, true)}
+                  aria-label="Previous image"
+                  className="absolute top-1/2 left-[10px] flex h-[25px] w-[25px] -translate-y-1/2 items-center justify-center text-[#3f444b]"
+                >
+                  <ChevronRightIcon className="h-[25px] w-[25px] rotate-180" />
+                </button>
+                <button
+                  onClick={() => goTo(page + 1, true)}
+                  aria-label="Next image"
+                  className="absolute top-1/2 right-[10px] flex h-[25px] w-[25px] -translate-y-1/2 items-center justify-center text-[#3f444b]"
+                >
+                  <ChevronRightIcon className="h-[25px] w-[25px]" />
+                </button>
               </div>
-            ))}
+              {/* navigation "both" => swiper's dots: 6px bullets 6px apart in a
+                  one-line box sitting 5px off the bottom of the 30px band */}
+              <div className="absolute inset-x-0 bottom-[5px] flex h-[1.5rem] items-center justify-center gap-[12px]">
+                {Array.from({ length: pageCount }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i, true)}
+                    aria-label={`Go to slide group ${i + 1}`}
+                    aria-current={i === page}
+                    className={`h-[6px] w-[6px] rounded-full bg-black transition-opacity ${
+                      i === page ? "opacity-100" : "opacity-20"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-        <button
-          onClick={() => goTo(page - 1, true)}
-          aria-label="Previous image"
-          className="absolute top-1/2 left-[-1.5rem] flex h-[3.4rem] w-[3.4rem] -translate-y-1/2 items-center justify-center text-[#3f444b]"
-        >
-          <ChevronRightIcon className="h-[1.8rem] w-[1.8rem] rotate-180" />
-        </button>
-        <button
-          onClick={() => goTo(page + 1, true)}
-          aria-label="Next image"
-          className="absolute top-1/2 right-[-1.5rem] flex h-[3.4rem] w-[3.4rem] -translate-y-1/2 items-center justify-center text-[#3f444b]"
-        >
-          <ChevronRightIcon className="h-[1.8rem] w-[1.8rem]" />
-        </button>
-        {/* navigation "both" => swiper's dots, sitting in the pagination space
-            below the slides (elementor-pagination-position-outside) */}
-        <div className="absolute inset-x-0 bottom-[30px] flex justify-center gap-[8px] lg:bottom-[26px]">
-          {Array.from({ length: pageCount }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i, true)}
-              aria-label={`Go to slide group ${i + 1}`}
-              aria-current={i === page}
-              className={`h-[6px] w-[6px] rounded-full bg-black transition-opacity ${
-                i === page ? "opacity-100" : "opacity-20"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

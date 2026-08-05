@@ -24,19 +24,24 @@ function LocationRow({ list, trailingComma }: { list: Area[]; trailingComma: boo
 }
 
 /*
- * The "Locations" heading (97293de) sits in its own zero-padding section, and
- * the text sections that follow (621b7186, 41821cb) carry none either — the
- * only vertical rhythm comes from the heading's 1rem widget margin and the
- * paragraphs' 2rem bottom margins. Between the heading section (3699c47) and
- * the paragraph section (621b7186), the live page inserts the Google Maps
- * embed (section 6455f48) — see MapEmbed.tsx — so it renders here rather
- * than at the very end of the page.
+ * Four live sections, all with zero section padding:
+ *   3699c47  the "Locations" heading — post-8.css gives it
+ *            `margin-top:15px;margin-bottom:15px`, flat px at every width, and
+ *            the heading widget adds a 1rem container margin at >=768.
+ *   6455f48  the Google Maps embed (MapEmbed.tsx) — it really does sit between
+ *            the heading and the location lists on the live page.
+ *   621b7186 the two location-list paragraphs (widget 4e4f0435).
+ *   2dabc70  the ZIP and landmark paragraphs (widget 41821cb, capped at
+ *            112rem from 768 up; its container adds a 3rem bottom margin at
+ *            >=1280 that swallows the last paragraph's 2rem).
+ * Keeping them as four sections is what puts the 10+10px widget gutters
+ * between the blocks — a single section would run 20px short at each seam.
  */
 export default function Locations() {
   return (
     <>
-      <section className="bg-white">
-        <div className="ec">
+      <section className="my-[15px] bg-white">
+        <div className="ec flex flex-col">
           <h2 className="text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
             Locations
           </h2>
@@ -44,12 +49,19 @@ export default function Locations() {
       </section>
       <MapEmbed />
       <section className="bg-white">
-        <div className="ec">
-          <LocationRow list={areas.slice(0, 12)} trailingComma />
-          <LocationRow list={areas.slice(12, 24)} trailingComma={false} />
-          {/* live: the closing two paragraphs sit in a 112rem-wide widget */}
-          <p className={`mb-[2rem] max-w-[112rem] ${bodyClass}`}>{zipParagraph}</p>
-          <p className={`max-w-[112rem] ${bodyClass}`}>{landmarksParagraph}</p>
+        <div className="ec flex flex-col">
+          <div>
+            <LocationRow list={areas.slice(0, 12)} trailingComma />
+            <LocationRow list={areas.slice(12, 24)} trailingComma={false} />
+          </div>
+        </div>
+      </section>
+      <section className="bg-white">
+        <div className="ec flex flex-col">
+          <div className="max-w-[112rem]">
+            <p className={`mb-[2rem] ${bodyClass}`}>{zipParagraph}</p>
+            <p className={`mb-[2rem] lg:mb-[3rem] ${bodyClass}`}>{landmarksParagraph}</p>
+          </div>
         </div>
       </section>
     </>

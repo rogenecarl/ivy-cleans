@@ -34,6 +34,13 @@ export default function HomePage() {
       {/* live renders the FAQ as static text on /home, not the accordion — see HomeFaqStatic.tsx */}
       <HomeFaqStatic />
       <HomeCta />
+      {/* live section b975f84 closes the page with a text widget holding the
+          LocalBusiness JSON-LD. The widget itself measures 0px tall, but the
+          section still contributes its widget-wrap gutter — a flat 20px at all
+          seven probed widths — so the spacer is reproduced here. */}
+      <section className="bg-white">
+        <div className="ec" />
+      </section>
     </>
   );
 }

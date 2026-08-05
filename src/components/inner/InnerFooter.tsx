@@ -41,7 +41,15 @@ const iconClass =
 export default function InnerFooter() {
   return (
     <footer className="text-herogreen bg-[#FDECE7] pt-[1rem] pb-[1rem] md:pt-[3rem] lg:pt-[4rem]">
-      <div className="ec flex flex-wrap">
+      {/* live's box model puts the 10px gutter on each column's widget-wrap and
+          leaves `.elementor-container` unpadded, so the thirds divide the full
+          container width. `.ec` folds both together, which double-counts the
+          gutter once the row splits into columns — drop its horizontal padding
+          from 768 up, where the columns supply their own (probe @1440: column 2
+          x=565.0 w=310.02 live, 568.3/303.3 before, 564.98/310.03 after).
+          `.ec` is an unlayered rule in globals.css, so it beats a plain
+          `md:px-0` utility — the trailing `!` is required. */}
+      <div className="ec flex flex-wrap md:px-0!">
         {/* logo + contact */}
         <div className="w-full text-center md:w-1/3 md:px-[10px] md:text-start">
           {/* live image widget: 13rem wide, 2rem of widget margin plus a further
