@@ -7,8 +7,8 @@ export default function Intro() {
       {/* live: its own #F7F7F7 band, 7rem vertical padding */}
       <section className="bg-[#f7f7f7] py-[1rem] md:py-[2rem] lg:py-[7rem]">
         {/* post-2035.css `.sec03 > .elementor-container{max-width:97rem!important}` —
-            807px at the 1440 step of the font-size ladder (live probe: 807) */}
-        <div className="ec mx-auto max-w-[min(1098px,97rem)]! text-center">
+            a pure rem cap, so it rides the ladder: 970 @1920, 807 @1440 (probe) */}
+        <div className="ec mx-auto max-w-[97rem]! text-center">
           {/* e32c6fb: widget-container margin-bottom 1rem base, 0 at <=767 — leads
               straight into the video widget below it in the same column */}
           <h2 className="mb-0 text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
@@ -23,10 +23,10 @@ export default function Intro() {
         </div>
       </section>
       {/* live: white band, 6rem vertical padding, shared with the service cards */}
-      <section className="bg-white pt-[1rem] md:pt-[2rem] lg:pt-[6rem]">
+      <section className="bg-white pt-[1rem] md:pt-[3rem] lg:pt-[6rem]">
         {/* the live column's 10px widget-wrap padding is emitted once for the whole
             band; this half owns only the top half, ServiceTypes owns the bottom */}
-        <div className="mx-auto max-w-[1098px] px-[10px] pt-[10px] pb-[1rem] md:pb-[2rem] lg:pb-[5rem]">
+        <div className="mx-auto max-w-[132rem] px-[10px] pt-[10px] pb-[1rem] md:pb-[2rem] lg:pb-[5rem]">
           {/* b8a2ade: widget-container margin-bottom -1rem below 768px, so the kit's
               2rem widget spacing collapses to 1rem there */}
           <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">

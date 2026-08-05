@@ -31,7 +31,12 @@ export default function Footer() {
               alt="Ivy Cleans"
               width={165}
               height={84}
-              className="mx-auto h-auto w-[100px] md:mx-0 md:w-[133px]"
+              /* live footer logo: max-width 16rem, 10rem at <=1024 — probe 160
+                 @1920 / 133.11 @1440 / 128 @1280 / 100 @1024/768/390, i.e. a rem
+                 cap on the ladder, not the fixed 133px this used to be. Written as
+                 a width (not a max-width) so the lazy image still reserves its box
+                 before it loads — the 165px source is always wider than the cap. */
+              className="mx-auto h-auto w-[10rem] md:mx-0 lg:w-[16rem]"
             />
           </div>
           <div className="w-full p-[10px] md:w-[23.462%]">

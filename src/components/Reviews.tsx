@@ -53,7 +53,7 @@ export default function Reviews() {
   const visible = [0, 1, 2].map((o) => reviews[(start + o) % reviews.length]);
 
   return (
-    <section className="bg-[#fafafa] py-[1rem] md:py-[2rem] lg:py-[5rem]">
+    <section className="bg-[#fafafa] py-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]">
       <div className="ec">
         <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
           What Our Satisfied Clients Are Saying
@@ -64,10 +64,12 @@ export default function Reviews() {
           which computes to a fixed 12.48px and shrinks every line box inside.
           `.grw-row` is a flex row (column below 768px) with 16px bottom padding.
         */}
-        <div className="flex flex-col pb-[16px] text-[16px] leading-[25px] lg:flex-row lg:items-center">
+        {/* the widget lays its header + review cards out in a row from 768 up
+            (live probe: avatars at x=30/424/768 @768 and 30/384/704/1024 @1024) */}
+        <div className="flex flex-col pb-[16px] text-[16px] leading-[25px] md:flex-row md:items-center">
           {/* .grw-header — 25% of the widget width; .grw-header-inner: margin 4,
               padding 16, gap 12, column gap 8 */}
-          <div className="shrink-0 lg:w-1/4">
+          <div className="shrink-0 md:w-1/4">
             {/* live .grw-header-inner keeps its full 269.5px width despite the 4px
                 margin (it overflows the header), so only the vertical margin counts */}
             <div className="my-[4px] ml-[4px] flex w-full gap-[12px] p-[16px]">

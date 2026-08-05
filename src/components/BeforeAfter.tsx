@@ -4,7 +4,7 @@ import { CtaCompact } from "./CtaBand";
 export default function BeforeAfter() {
   return (
     <section
-      className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[9rem]"
+      className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[9rem]"
       style={{ backgroundImage: "url(/images/cleaning-bg2.jpg)" }}
     >
       <div className="ec">
@@ -13,14 +13,22 @@ export default function BeforeAfter() {
           Our Cleaning Work In Action
         </h2>
         {/* padding, not margin: the h2's own 2rem bottom margin would swallow it.
-            Live probe gap from the caption bar to the button: 41.5px @1440, 11px @390 */}
-        <div className="flex flex-wrap md:mt-0 md:mb-[4rem] md:pt-[1rem]">
+            The trailing gap to the CTA is device-specific — the single 4rem this
+            used to carry left the whole page below the photos 2rem low at
+            1280/1440/1920 (probe drift 17.56/16.78/19.94px = 2rem at each ladder
+            step) and 2rem high at 768/1024 (+15.6px). */}
+        {/* the photo row is its own inner section, and post-2035.css caps *that*
+            container at a fixed 1130px: `.elementor-element-8dcc8eb >
+            .elementor-container{max-width:1130px}`. Without it the photos stretched
+            to the full 132rem container at 1920 (630 wide against live's 545 =
+            1130/2 - 2x10px of column padding). */}
+        <div className="mx-auto flex max-w-[1130px] flex-wrap md:mt-0 md:mb-[2rem] md:pt-[1rem] lg:mb-[6rem]">
           {[
             { src: "/images/before.jpg", label: "before" },
             { src: "/images/after.jpg", label: "after" },
           ].map((item) => (
             /* live: elementor's inner columns add their own 10px widget-wrap padding */
-            <figure key={item.label} className="w-full px-[10px] py-[10px] lg:w-1/2">
+            <figure key={item.label} className="w-full px-[10px] py-[10px] md:w-1/2">
               <Image src={item.src} alt="" width={555} height={417} className="mb-[2rem] h-auto w-full" />
               {/*
                 live: the caption widget-container is #000 with 1.5rem padding and margin-top:-2rem,

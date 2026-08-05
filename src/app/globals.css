@@ -5,6 +5,27 @@
 }
 
 @theme {
+  /*
+   * Elementor's device breakpoints, which every reference stylesheet is written
+   * against: mobile is `max-width:767px`, tablet `max-width:1024px`, so desktop
+   * starts at *1025*. Tailwind's stock `lg` (min-width:1024px) applied our
+   * desktop styles one pixel early — at a 1024px viewport the live site is still
+   * on tablet (probe: live h1 40px/full-width vs ours 72px/49% column).
+   * `xl` and `2xl` map to the page CSS's `max-width:1280px` and
+   * `max-width:1440px` steps the same way.
+   *
+   * The whole scale is re-declared (after `--breakpoint-*: initial`) because
+   * tailwind emits breakpoint media queries in *registration* order: overriding
+   * only lg/xl/2xl left the stock `min-width:768px` block emitted last, so `md:`
+   * utilities beat `lg:` ones at 1280+ (probe: our h1 came out 33.28px instead of
+   * 59.904px at 1440). Declaring them all here keeps the cascade ascending.
+   */
+  --breakpoint-*: initial;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1025px;
+  --breakpoint-xl: 1281px;
+  --breakpoint-2xl: 1441px;
+
   --color-rust: #bf360c;
   --color-brand: #40907a;
   --color-herogreen: #37745f;
@@ -59,13 +80,19 @@ p {
 }
 
 /*
- * Elementor boxed container: 1098px outer with the widget-wrap's 10px padding.
- * The live site keeps that same 10px gutter all the way down to mobile — at a
- * 390px viewport its headings measure x=10 / width=370.
+ * Elementor boxed container. post-2035.css custom CSS:
+ *   body .elementor-section.elementor-section-boxed > .elementor-container
+ *     { max-width: 132rem; }
+ * It is a *rem* cap, so it rides the root font-size ladder above and the outer
+ * width changes with the viewport step — live probe: 1320 @1920, 1189.05 @1600,
+ * 1098.23 @1440/1366, 1056 @1280/1152, 100% at <=1024. (A fixed 1098px only
+ * matched the 1440 step.) The 10px padding is the widget-wrap's own gutter,
+ * which the live site keeps all the way down to mobile — at a 390px viewport
+ * its headings measure x=10 / width=370.
  */
 .ec {
   margin-inline: auto;
-  max-width: 1098px;
+  max-width: 132rem;
   padding: 10px;
 }
 

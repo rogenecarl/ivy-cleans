@@ -6,7 +6,7 @@ export default function BlogPreview() {
     <section className="bg-white py-[1rem] md:py-[2rem] lg:py-[5rem]">
       <div className="ec">
         {/* 8588c5c: widget-container margin-bottom -1.5rem below 768px */}
-        <h3 className="mb-[0.5rem] text-center text-[1.8rem] leading-[1.2em] md:mb-[2rem] lg:text-[2.2rem]">
+        <h3 className="mb-[0.5rem] text-center text-[1.8rem] leading-[1.2em] md:mb-[2rem] md:text-[2.2rem]">
           NEWS AND CLEANING TIPS
         </h3>
         {/* e68f311: widget-container margin-bottom 2rem, -1rem below 768px, on top of
@@ -14,7 +14,9 @@ export default function BlogPreview() {
         <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[4rem] md:text-[4rem] lg:text-[4.5rem]">
           Latest From The Ivy Cleans Blog
         </h2>
-        <div className="grid gap-[3rem] lg:grid-cols-3 lg:gap-x-[6rem]">
+        {/* live posts grid: 3 columns on desktop, 2 at <=1024 (probe @1024: card
+            images 476.72 wide, two per row), 1 at <=767 */}
+        <div className="grid gap-[3rem] md:grid-cols-2 lg:grid-cols-3 lg:gap-x-[6rem]">
           {/* live: .elementor-post{border-radius:5px;box-shadow:0 0 14px 0 rgba(0,0,0,.1)} */}
           {posts.map((p) => (
             <article
@@ -27,7 +29,8 @@ export default function BlogPreview() {
                 <Image src={p.image} alt={p.alt} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover" />
               </a>
               <div className="p-[2rem]">
-                <h3 className="mb-[1.5rem] text-[1.8rem] leading-[1.2em] font-medium lg:text-[2.4rem]">
+                {/* 597443d .elementor-post__title: 2.4rem, 2rem at <=1024, 1.8rem at <=767 */}
+                <h3 className="mb-[1.5rem] text-[1.8rem] leading-[1.2em] font-medium md:text-[2rem] lg:text-[2.4rem]">
                   <a href={p.href}>{p.title}</a>
                 </h3>
                 <a href={p.href} className="text-link inline-block text-[1.6rem] leading-[1.2em] font-medium">

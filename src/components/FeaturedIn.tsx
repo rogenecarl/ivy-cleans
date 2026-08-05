@@ -11,7 +11,8 @@ const raleway = Raleway({ subsets: ["latin"], weight: ["700"], display: "swap" }
 
 export default function FeaturedIn() {
   return (
-    <section className="bg-brand py-[1rem] md:py-[3rem]">
+    /* a49eb67: 3rem, 1rem at <=1024 (no separate <=767 rule) */
+    <section className="bg-brand py-[1rem] lg:py-[3rem]">
       {/* full-bleed on the live site — the logo strip spans the viewport */}
       <div className="p-[10px] text-center">
         {/* 744760e widget-container margin-bottom: 1rem on top of the kit's 2rem
@@ -26,7 +27,7 @@ export default function FeaturedIn() {
           alt=""
           width={1824}
           height={51}
-          className="mb-[2rem] hidden h-auto w-full md:block"
+          className="mx-auto mb-[2rem] hidden h-auto w-auto max-w-full md:block"
         />
         <div className="space-y-[2rem] md:hidden">
           <Image src="/images/logo-mbl1.png" alt="" width={800} height={51} className="h-auto w-full" />

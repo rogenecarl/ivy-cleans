@@ -3,11 +3,13 @@ import Image from "next/image";
 export default function Values() {
   return (
     <section
-      className="bg-cover bg-top pt-[1rem] md:py-[2rem] lg:py-[5rem]"
+      className="bg-cover bg-top pt-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]"
       style={{ backgroundImage: "url(/images/Rectangle-12.jpg)" }}
     >
-      {/* live: this section's column is 1065px wide (1045px of content), not the full 1098px boxed width */}
-      <div className="ec mx-auto max-w-[1065px]! text-center">
+      {/* post-2035.css `.sec08 > .elementor-container{max-width:128rem!important}` —
+          a rem cap riding the ladder: 1280 @1920, 1064.96 @1440 (the 1065px this
+          used to hard-code) */}
+      <div className="ec mx-auto max-w-[128rem]! text-center">
         {/* 7e03a53: widget-container margin-bottom -1rem below 768px */}
         <h2 className="mb-[1rem] text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           Our Values &amp; Guarantee
@@ -17,7 +19,7 @@ export default function Values() {
           alt=""
           width={299}
           height={298}
-          className="mx-auto mb-[2rem] h-auto w-[185px] lg:w-[299px]"
+          className="mx-auto mb-[2rem] h-auto w-[185px] md:w-[299px]"
         />
         <div className="text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
           <p className="mb-[2rem]">

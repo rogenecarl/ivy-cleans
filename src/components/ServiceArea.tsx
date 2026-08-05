@@ -5,12 +5,12 @@ import { MapMarkerIcon } from "./Icons";
 export default function ServiceArea() {
   return (
     <section
-      className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[5rem]"
+      className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]"
       style={{ backgroundImage: "url(/images/pexels-la-miko-36167641.jpg)" }}
     >
       <div className="ec">
         {/* 39580fa: widget-container margin-bottom -1.5rem below 768px */}
-        <h3 className="mb-[0.5rem] text-center text-[1.8rem] leading-[1.2em] md:mb-[2rem] lg:text-[2.2rem]">
+        <h3 className="mb-[0.5rem] text-center text-[1.8rem] leading-[1.2em] md:mb-[2rem] md:text-[2.2rem]">
           House Cleaning Services Near Me in Minneapolis, MN
         </h3>
         {/* e140447: widget-container margin-bottom -1rem below 768px */}

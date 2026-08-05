@@ -17,15 +17,17 @@ const dropdown = site.nav.filter(
 );
 
 const linkClass =
-  "flex items-center gap-[0.5rem] py-[1rem] text-[1.8rem] leading-[1.2em] font-bold uppercase text-white hover:opacity-80";
+  "flex items-center py-[1rem] text-[1.8rem] leading-[1.2em] font-bold uppercase text-white hover:opacity-80";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   return (
     <header className="bg-brand sticky top-0 z-50">
       <div className="ec">
-        {/* desktop nav */}
-        <nav className="hidden lg:block">
+        {/* desktop + tablet nav: the live nav-menu widget only collapses to the
+            toggle at <=767 (probe @1024 and @768: the horizontal items are visible
+            at x=10/116/371/619, 18px) — it used to collapse at <=1024 here */}
+        <nav className="hidden md:block">
           <ul className="flex items-center gap-[2.5rem]">
             {topLevel.map((item, i) => (
               <li key={item.href} className="flex items-center gap-[2.5rem]">
@@ -34,7 +36,13 @@ export default function Header() {
                   <div className="group relative">
                     <Link href={item.href} className={linkClass}>
                       {item.label}
-                      <CaretDownIcon className="h-[1.4rem] w-[1.4rem]" />
+                      {/* live sub-arrow: a <span> with padding-left:10px (a fixed
+                          px value) wrapping a ~0.6em glyph — probe: span w=19 at
+                          14.976px @1440, w=21 at 18px @1920, and the item measures
+                          175/203 wide against our 171.8/201 before this */}
+                      <span className="pl-[10px]">
+                        <CaretDownIcon className="h-[0.6em] w-[0.6em]" />
+                      </span>
                     </Link>
                     <div className="absolute top-full left-0 z-50 hidden min-w-[26rem] bg-white shadow-lg group-hover:block">
                       {dropdown.map((d) => (
@@ -58,7 +66,7 @@ export default function Header() {
           </ul>
         </nav>
         {/* mobile toggle — centred white tile, as on the live site */}
-        <div className="flex justify-center lg:hidden">
+        <div className="flex justify-center md:hidden">
           <button
             aria-label="Toggle menu"
             aria-expanded={open}
@@ -72,7 +80,7 @@ export default function Header() {
         </div>
       </div>
       {open && (
-        <nav className="bg-white lg:hidden">
+        <nav className="bg-white md:hidden">
           {site.nav.map((item) => (
             <Link
               key={item.href}
