@@ -63,12 +63,14 @@ export default function BookingForm({ size }: { size: "md" | "sm" }) {
    *   bg #6474f3, color #ffffff; hover only restates color:#ffffff (a no-op
    *   against its own white text) — no background swap, so no hover classes
    *   here for the sm variant. No border-color is set in that CSS block, so
-   *   border is kept the same #6474f3 as the background.
+   *   it falls back to CSS's initial `currentcolor`, which resolves to this
+   *   rule's own `color:#ffffff` — i.e. a faint white ring, not the fill
+   *   color (fix round 1: was incorrectly matching #6474f3 to the fill).
    */
   const buttonAccent =
     size === "md"
       ? "border-rust bg-rust text-white hover:bg-white hover:text-rust"
-      : "border-[#6474f3] bg-[#6474f3] text-white";
+      : "border-white bg-[#6474f3] text-white";
 
   if (submitted) {
     return <ComingSoonPanel />;
