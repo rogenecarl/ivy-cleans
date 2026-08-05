@@ -17,6 +17,7 @@ IMAGES=(
   2023/11/before.jpg 2023/11/after.jpg
   2023/11/cleaning-bg2.jpg 2023/11/faq-bg.jpg
   2023/06/cleaning-bg-desktop.jpg 2023/06/cleaning-bg-mbl.jpg
+  2023/06/cleaning-bg2.jpg
   2023/06/cleaning-bg3.jpg 2023/06/move-out-bg.jpg
   2023/12/Logo.png 2023/12/Group-5.png 2023/12/logo-mbl1.png 2023/12/logo-mbl2.png
   2023/12/guarantee-icon-1.png
@@ -54,6 +55,8 @@ for path in "${IMAGES[@]}"; do
   name="$(basename "$path")"
   # 2023/12/Logo.png collides with 2023/05/Logo.png — keep the footer one distinct
   if [ "$path" = "2023/12/Logo.png" ]; then name="Logo-footer.png"; fi
+  # live site has two distinct cleaning-bg2.jpg images (2023/06 and 2023/11) — keep them separate
+  if [ "$path" = "2023/06/cleaning-bg2.jpg" ]; then name="cleaning-bg2-2023-06.jpg"; fi
   [ -f "public/images/$name" ] || curl -sf --retry 3 --max-time 120 "$BASE/$path" -o "public/images/$name"
   echo "ok $name"
 done
