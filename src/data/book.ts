@@ -37,6 +37,45 @@ export const bookHeader = {
   h2: "Book Now",
 };
 
+/*
+ * /book only — the lead-in block the live page renders between the "Book Now"
+ * H2 and the form. Verbatim from book.html:
+ *   :319  <p class="elementor-heading-title ...">A Couple of Questions For
+ *         Your FREE Quote! </p>              (widget #6d970af1)
+ *   :323  <p>You&#8217;re just 3 steps away from a clean house!</p>
+ *         <p><strong>Prefer To Call? Sure! </strong></p>
+ *         <p><strong>We&#8217;re Available Monday-Friday 7 am-7 pm</strong></p>
+ *         <p><a href="tel:6124240391"><strong>(612) 424-0391</strong></a></p>
+ *                                            (widget #30422d1e)
+ * Cross-checked against book-content-dump.txt:32-37, whose (trimmed) lines are
+ * byte-identical. Elementor's trailing markup spaces ("Quote! ", "Sure! ") are
+ * dropped for the same reason bookSubmitLabel drops "Claim "'s — they are
+ * whitespace inside the tag, not part of the label, and HTML collapses them.
+ * /book-now has NO equivalent block: book-now.html:365 goes straight from
+ * section #925b984 to the form widget #a295442 (verified by grepping the whole
+ * `data-elementor-id="2336"` subtree — one section, one column, one widget).
+ */
+export const bookLeadIn = {
+  heading: "A Couple of Questions For Your FREE Quote!",
+  intro: "You’re just 3 steps away from a clean house!",
+  callPrompt: "Prefer To Call? Sure!",
+  hours: "We’re Available Monday-Friday 7 am-7 pm",
+  phone: "(612) 424-0391",
+  phoneHref: "tel:6124240391",
+};
+
+/*
+ * /book only — button widget #5dafbb39 (book.html:325-333). Its widget classes
+ * are `elementor-align-center elementor-hidden-desktop elementor-hidden-tablet`
+ * and the button is `elementor-button-link elementor-size-sm` with a
+ * `fas fa-phone` icon. See BookSection for why "hidden desktop + tablet" is
+ * NOT the same as "mobile only" on this kit.
+ */
+export const bookCallNow = {
+  label: "Call Now",
+  href: "tel:6124240391",
+};
+
 export type BookField =
   | {
       kind: "select";

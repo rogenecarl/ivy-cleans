@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# per-round fidelity-probe scratch dirs (live/local DOM dumps + screenshots).
+# Not just housekeeping: Tailwind v4 auto-scans every non-ignored file in the
+# project, and these dumps record each element's full `class` attribute — so an
+# un-ignored fidelity-*/ directory feeds our own class strings back into the
+# content scan and bakes dead utilities into the shared CSS chunk.
+/fidelity-*/
