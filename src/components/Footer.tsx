@@ -75,7 +75,7 @@ export default function Footer() {
             <h3 className={headingClass}>Get In Touch</h3>
             <div className={dividerClass} />
             {/* live social icons render at a fixed 25px on a 95px column pitch */}
-            <div className="mx-auto grid w-fit grid-cols-3 gap-x-[70px] gap-y-[27px] md:mx-0 md:gap-y-[2rem]">
+            <div className="mx-auto grid w-fit grid-cols-3 gap-x-[50px] lg:gap-x-[70px] gap-y-[27px] md:mx-0 md:gap-y-[2rem]">
               {site.socials.map((s) => (
                 <a
                   key={s.label}

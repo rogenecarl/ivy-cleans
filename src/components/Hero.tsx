@@ -32,9 +32,9 @@ export default function Hero() {
             Cleaning Services Minneapolis
           </h1>
           <div className="text-[1.6rem] leading-[1.5em] font-light lg:text-[1.9rem]">
-            {heroParagraphs.map((p) => (
+            {heroParagraphs.map((p, i) => (
               <p key={p.slice(0, 40)} className="mb-[2rem] last:font-bold">
-                {boldIvyCleans(p)}
+                {i === 0 ? boldIvyCleans(p) : p}
               </p>
             ))}
           </div>
