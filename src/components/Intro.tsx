@@ -1,4 +1,5 @@
 import { serviceIntro } from "@/data/services";
+import IntroVideo from "./IntroVideo";
 
 export default function Intro() {
   return (
@@ -8,9 +9,17 @@ export default function Intro() {
         {/* post-2035.css `.sec03 > .elementor-container{max-width:97rem!important}` —
             807px at the 1440 step of the font-size ladder (live probe: 807) */}
         <div className="ec mx-auto max-w-[min(1098px,97rem)]! text-center">
-          <h2 className="text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
+          {/* e32c6fb: widget-container margin-bottom 1rem base, 0 at <=767 — leads
+              straight into the video widget below it in the same column */}
+          <h2 className="mb-0 text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
             Your Happiness is our Priority
           </h2>
+          {/* video widget keeps the kit's own 2rem trailing margin even as the
+              column's last child (live probe: content-stack sums to container
+              height only with this margin included, both @1440 and @390) */}
+          <div className="mb-[2rem]">
+            <IntroVideo />
+          </div>
         </div>
       </section>
       {/* live: white band, 6rem vertical padding, shared with the service cards */}

@@ -3,6 +3,17 @@ import { heroParagraphs } from "@/data/services";
 import CtaButton from "./CtaButton";
 import { PhoneIcon } from "./Icons";
 
+// live markup: `<p>As a local and insured business, <strong>Ivy Cleans</strong> is
+// thrilled to be...` — only the mid-sentence "Ivy Cleans" in the first paragraph is
+// individually wrapped; the string bytes in src/data/services.ts stay untouched, this
+// wraps the exact substring at render time (same pattern round 2 used for Values).
+function boldIvyCleans(text: string) {
+  const parts = text.split("Ivy Cleans");
+  return parts.flatMap((part, i) =>
+    i === 0 ? [part] : [<strong key={i}>Ivy Cleans</strong>, part],
+  );
+}
+
 export default function Hero() {
   return (
     <section
@@ -23,7 +34,7 @@ export default function Hero() {
           <div className="text-[1.6rem] leading-[1.5em] font-light lg:text-[1.9rem]">
             {heroParagraphs.map((p) => (
               <p key={p.slice(0, 40)} className="mb-[2rem] last:font-bold">
-                {p}
+                {boldIvyCleans(p)}
               </p>
             ))}
           </div>
