@@ -1,0 +1,98 @@
+[A href=#content]
+[A href=https://ivycleans.com]
+[IMG Logo.png w=309 h=149]
+[A href=tel:6124240391]
+<h3> Book Now - Ivy CleansSkip to content Prefer to call? We’re available now.
+<p> 612-424-0391
+[A href=tel:6124240391]
+<h3> Email
+<p> Support@ivycleans.com
+[A href=/book-now]
+[A href=https://ivycleans.com/home/]
+<li> SET AN APPOINTMENT 👈Home
+[A href=https://ivycleans.com/cleaning-services/]
+[A href=https://ivycleans.com/deep-cleaning-minneapolis/]
+<li> Cleaning ServicesDeep Cleaning Minneapolis
+[A href=https://ivycleans.com/minneapolis-move-out-cleaning-services/]
+<li> Minneapolis Move Out Cleaning Services
+[A href=https://ivycleans.com/blog/]
+<li> Blog
+[A href=https://ivycleans.com/contact/]
+<li> Contact
+[A href=https://ivycleans.com/faq/]
+<li> FAQ
+[A href=https://ivycleans.com/home/]
+<li> Home
+[A href=https://ivycleans.com/cleaning-services/]
+[A href=https://ivycleans.com/deep-cleaning-minneapolis/]
+<li> Cleaning ServicesDeep Cleaning Minneapolis
+[A href=https://ivycleans.com/minneapolis-move-out-cleaning-services/]
+<li> Minneapolis Move Out Cleaning Services
+[A href=https://ivycleans.com/blog/]
+<li> Blog
+[A href=https://ivycleans.com/contact/]
+<li> Contact
+[A href=https://ivycleans.com/faq/]
+<li> FAQ
+[INPUT name=post_id type=hidden ph= req=False]
+[INPUT name=form_id type=hidden ph= req=False]
+[INPUT name=referer_title type=hidden ph= req=False]
+[INPUT name=queried_id type=hidden ph= req=False]
+<label> What Type of Service Are Your Looking For?
+[SELECT name=form_fields[email] type= ph= req=True]
+<option> Standard Cleaning (Basic Cleaning Package)
+<option> Recurring Cleaning ( Standard + Additional Discounts)
+<option> Deep Cleaning ( Most Popular Option)
+<option> Move-In/Move-Out Cleaning (Most Comprehensive, Total Clean)
+<label> How Would Your Describe Your Home Right Now?
+[SELECT name=form_fields[field_22aa910] type= ph= req=True]
+<option> Slightly Dirty (Nothing crazy)
+<option> Pretty Dirty (It's been awhile since we cleaned, it's pretty dirty)
+<option> Very Dirty (It's a nightmare, please save me)
+<label> How Many Bedrooms?
+[INPUT name=form_fields[field_c4cfac1] type=number ph=ex. 3 req=True]
+<label> How Many Bathrooms?
+[INPUT name=form_fields[field_caacb3a] type=number ph=ex. 2 req=True]
+<label> How Soon Are You Looking To Have This Cleaned?
+[SELECT name=form_fields[message] type= ph= req=True]
+<option> ASAP (It's an emergency)
+<option> Sometime this week
+<option> Sometime next week
+<option> No Rush
+<option> Not Sure (Just price shopping right now)
+<label> What's the Address of the Property?
+[INPUT name=form_fields[field_1872bc3] type=text ph=Message req=True]
+<label> Full Name
+[INPUT name=form_fields[name] type=text ph=Full Name req=True]
+<label> Email Address
+[INPUT name=form_fields[field_ca2243e] type=email ph=example@gmail.com req=True]
+<label> Phone Number
+[INPUT name=form_fields[field_deeaf01] type=tel ph=777-777-7777 req=True]
+<label> How Would You Prefer To Be Contacted?
+[SELECT name=form_fields[field_1abcd81] type= ph= req=True]
+<option> Call Me
+<option> Text Me
+<option> Email Me
+<option> It's all the same to me
+<button> Claim
+[IMG Logo.png w=165 h=84]
+<h3> Contact
+<li> 612-424-0391
+<li> support@ivycleans.com
+<li> 5821 Cedar Lake Road,West Unit 208, Minneapolis, N 55416
+<h3> Quick Links
+[A href=/]
+<li> Home
+[A href=/blog]
+<li> Blog
+[A href=/contact]
+<li> Contact
+[A href=/faq]
+<li> FAQ
+<h3> Get In Touch
+[A href=https://www.facebook.com/ivy.cleans1/]
+[A href=https://twitter.com/Ivycleans]
+[A href=https://www.youtube.com/channel/UCZIsiCt4aoUbrzbPmpVwQGA]
+[A href=https://www.instagram.com/ivy.cleans1/]
+[A href=https://www.pinterest.com/ivycleans/]
+[A href=https://www.tiktok.com/@ivy.cleans1]
