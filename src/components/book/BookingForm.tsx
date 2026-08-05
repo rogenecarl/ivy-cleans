@@ -53,6 +53,23 @@ export default function BookingForm({ size }: { size: "md" | "sm" }) {
   const inputClass = `${fieldBase} px-[1rem] py-[0.5rem] leading-[1.4em]`;
   const selectClass = `${fieldBase} py-[5px] pr-[20px] pl-[14px]`;
 
+  /*
+   * Submit button color, per-page (deferred from Task 1's "size only covers
+   * control sizing" note — resolved here since `size` already correlates
+   * 1:1 with page: md only appears on /book-now, sm only on /book).
+   * post-2336.css .elementor-element-a295442 .elementor-button[type=submit]:
+   *   bg/border #BF360C (--color-rust), hover bg #FFFFFF / text #BF360C.
+   * post-189.css .elementor-element-3ef7408c .elementor-button[type=submit]:
+   *   bg #6474f3, color #ffffff; hover only restates color:#ffffff (a no-op
+   *   against its own white text) — no background swap, so no hover classes
+   *   here for the sm variant. No border-color is set in that CSS block, so
+   *   border is kept the same #6474f3 as the background.
+   */
+  const buttonAccent =
+    size === "md"
+      ? "border-rust bg-rust text-white hover:bg-white hover:text-rust"
+      : "border-[#6474f3] bg-[#6474f3] text-white";
+
   if (submitted) {
     return <ComingSoonPanel />;
   }
@@ -110,7 +127,7 @@ export default function BookingForm({ size }: { size: "md" | "sm" }) {
       <div className="flex w-full justify-end">
         <button
           type="submit"
-          className="border-rust bg-rust hover:text-rust min-h-[40px] rounded-[4px] border px-[2.4rem] py-[1.1rem] text-[1.8rem] leading-[1.2em] font-bold text-white uppercase transition-colors hover:bg-white"
+          className={`${buttonAccent} min-h-[40px] rounded-[4px] border px-[2.4rem] py-[1.1rem] text-[1.8rem] leading-[1.2em] font-bold uppercase transition-colors`}
         >
           {bookSubmitLabel}
         </button>
