@@ -8,7 +8,8 @@ export default function Values() {
     >
       {/* live: this section's column is 1065px wide (1045px of content), not the full 1098px boxed width */}
       <div className="ec mx-auto max-w-[1065px]! text-center">
-        <h2 className="mb-[2rem] text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
+        {/* 7e03a53: widget-container margin-bottom -1rem below 768px */}
+        <h2 className="mb-[1rem] text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           Our Values &amp; Guarantee
         </h2>
         <Image

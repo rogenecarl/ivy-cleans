@@ -30,13 +30,19 @@ export default function Hero() {
           <div className="mb-[2rem]">
             <CtaButton />
           </div>
-          <p className="mb-[2rem] text-[1.6rem] leading-[1.5em] font-bold lg:text-[2rem]">
+          {/* live 985f4a8: widget-container margin-bottom -3.5rem cancels most of the
+              kit's 2rem widget spacing — probe gap to the phone line is 4.1px @1440 /
+              5px @390, i.e. 0.5rem */}
+          <p className="mb-[0.5rem] text-[1.6rem] leading-[1.5em] font-bold lg:text-[2rem]">
             Prefer to call? We&rsquo;re available now.
           </p>
-          <p className="flex items-center text-[3rem] leading-[1.2em]">
-            <PhoneIcon className="mr-[0.5rem] h-[2.4rem] w-[2.4rem]" />
+          {/* a div, not a <p>: globals.css `p { line-height: 1.5 }` is unlayered and
+              would beat the leading-[1.2em] utility that post-2035.css f29432c wants.
+              Icon box is --e-icon-list-icon-size:3rem with a 25% right margin. */}
+          <div className="flex items-center text-[3rem] leading-[1.2em]">
+            <PhoneIcon className="mr-[0.75rem] h-[3rem] w-[3rem]" />
             <a href={site.phoneHref}>{site.phone}</a>
-          </p>
+          </div>
         </div>
       </div>
     </section>

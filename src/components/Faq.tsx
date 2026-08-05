@@ -9,8 +9,13 @@ import { faqs } from "@/data/faqs";
  * questionsHeading props that only /home ever varied are gone).
  */
 export default function Faq() {
-  /* live: every accordion item renders with aria-expanded="false" — nothing is open on load */
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  /*
+   * Live RUNTIME state (post-JS probe at 1440 and 390): item 0 carries
+   * `elementor-active` / aria-expanded="true" with its panel displayed, every other
+   * item is closed. The static markup says otherwise — elementor's accordion JS
+   * opens the first tab on load.
+   */
+  const [openIdx, setOpenIdx] = useState<number | null>(0);
   return (
     <section
       className="bg-cover bg-top pt-[1rem] md:py-[2rem] lg:py-[3rem]"
@@ -19,15 +24,19 @@ export default function Faq() {
       <div className="ec">
         {/* live: 824px column with elementor's 10px widget-wrap padding => 804px of content */}
         <div className="mx-auto max-w-[824px] lg:px-[10px]">
-          <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
+          {/* b8c7976: widget-container margin-bottom -1rem below 768px */}
+          <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
             Frequently Asked Questions
           </h2>
-          <p className="mb-[2rem] text-center text-[1.7rem] leading-[1.5em] lg:text-[2.2rem]">
+          {/* live 4542…: the intro paragraph keeps its own 2rem margin inside the
+              text widget, so the gap to the accordion is 2x2rem (probe: 33.3px) */}
+          <p className="mb-[2rem] text-center text-[1.7rem] leading-[1.5em] md:mb-[4rem] lg:text-[2.2rem]">
             If you need further assistance, please do not hesitate to contact us.
           </p>
           <div>
             {faqs.map((f, i) => (
-              <div key={f.q} className="mb-[2rem] overflow-hidden rounded-[1.2rem]">
+              /* live accordion item: border-radius 10px, 2rem bottom margin */
+              <div key={f.q} className="mb-[2rem] overflow-hidden rounded-[10px]">
                 <button
                   onClick={() => setOpenIdx(openIdx === i ? null : i)}
                   aria-expanded={openIdx === i}
@@ -41,9 +50,11 @@ export default function Faq() {
                   </span>
                 </button>
                 {openIdx === i && (
-                  <p className="border-brand border-b-[0.6rem] bg-white px-[2rem] pb-[2rem] text-[1.6rem] leading-[1.2em] font-light">
+                  /* live .elementor-tab-content: 0/2rem/2rem padding and a 5px
+                     #D5D8DC bottom border */
+                  <div className="border-b-[5px] border-[#d5d8dc] bg-white px-[2rem] pb-[2rem] text-[1.6rem] leading-[1.2em] font-light">
                     {f.a}
-                  </p>
+                  </div>
                 )}
               </div>
             ))}

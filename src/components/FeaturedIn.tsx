@@ -1,11 +1,26 @@
 import Image from "next/image";
+import { Raleway } from "next/font/google";
+
+/*
+ * post-2035.css 744760e: `.elementor-heading-title{font-family:"Raleway",Sans-serif}`
+ * — the only place on the front page where the kit's Raleway is used (live probe
+ * confirms computed font-family Raleway on this heading). Scoped to this heading
+ * so no other route's markup changes.
+ */
+const raleway = Raleway({ subsets: ["latin"], weight: ["700"], display: "swap" });
 
 export default function FeaturedIn() {
   return (
     <section className="bg-brand py-[1rem] md:py-[3rem]">
       {/* full-bleed on the live site — the logo strip spans the viewport */}
       <div className="p-[10px] text-center">
-        <h3 className="mb-[2rem] text-[1.8rem] leading-[1.2em] font-bold text-white">FEATURED IN:</h3>
+        {/* 744760e widget-container margin-bottom: 1rem on top of the kit's 2rem
+            widget spacing, reset to 0 below 768px */}
+        <h3
+          className={`${raleway.className} mb-[2rem] text-[1.8rem] leading-[1.2em] font-bold text-white md:mb-[3rem]`}
+        >
+          FEATURED IN:
+        </h3>
         <Image
           src="/images/Group-5.png"
           alt=""

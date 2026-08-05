@@ -50,14 +50,19 @@ export function CheckItemIcon({ className }: IconProps) {
   );
 }
 
-/* rounded grey tile with a green glyph, as used in the live top bar */
+/*
+ * Rounded grey tile with a green glyph, as used in the live top bar (TopBar is
+ * the only caller). The live tile is a single 38x40 SVG rendered by elementor's
+ * icon-box at a fixed 50x50 (probe: 50x50 at both 1440 and 390), so it must NOT
+ * track the rem ladder — px on purpose.
+ */
 export function TileIcon({ kind }: { kind: "phone" | "email" }) {
   return (
-    <span className="flex h-[5rem] w-[5rem] shrink-0 items-center justify-center rounded-[1rem] bg-[#f2f2f2]">
+    <span className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px] bg-[#f2f2f2]">
       {kind === "phone" ? (
-        <PhoneIcon className="text-brand h-[2.6rem] w-[2.6rem]" />
+        <PhoneIcon className="text-brand h-[26px] w-[26px]" />
       ) : (
-        <EnvelopeIcon className="text-brand h-[2.6rem] w-[2.6rem]" />
+        <EnvelopeIcon className="text-brand h-[26px] w-[26px]" />
       )}
     </span>
   );

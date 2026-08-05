@@ -8,16 +8,19 @@ export default function BeforeAfter() {
       style={{ backgroundImage: "url(/images/cleaning-bg2.jpg)" }}
     >
       <div className="ec">
-        <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
+        {/* 0cf4515: widget-container margin-bottom -1rem below 768px */}
+        <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           Our Cleaning Work In Action
         </h2>
-        <div className="mt-[1rem] mb-[4rem] flex flex-wrap">
+        {/* padding, not margin: the h2's own 2rem bottom margin would swallow it.
+            Live probe gap from the caption bar to the button: 41.5px @1440, 11px @390 */}
+        <div className="flex flex-wrap md:mt-0 md:mb-[4rem] md:pt-[1rem]">
           {[
             { src: "/images/before.jpg", label: "before" },
             { src: "/images/after.jpg", label: "after" },
           ].map((item) => (
             /* live: elementor's inner columns add their own 10px widget-wrap padding */
-            <figure key={item.label} className="w-full px-[1rem] py-[10px] lg:w-1/2">
+            <figure key={item.label} className="w-full px-[10px] py-[10px] lg:w-1/2">
               <Image src={item.src} alt="" width={555} height={417} className="mb-[2rem] h-auto w-full" />
               {/*
                 live: the caption widget-container is #000 with 1.5rem padding and margin-top:-2rem,

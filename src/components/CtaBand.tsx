@@ -7,12 +7,24 @@ import { PhoneIcon } from "./Icons";
  * host section (Packages / BeforeAfter on the live site) so it sits on that
  * section's own background.
  */
-export function CtaCompact({ light = false }: { light?: boolean }) {
+export function CtaCompact({
+  light = false,
+  variant = "band",
+}: {
+  light?: boolean;
+  variant?: "band" | "packages";
+}) {
   const tone = light ? "text-white" : "text-black";
+  /*
+   * Live probe gaps around the button widget:
+   *   CtaBand / BeforeAfter — 1rem lead (on top of the host's 2rem), 3rem to the
+   *   "prefer to call" line.  Packages (7d490e5) — 5rem lead, 2rem after.
+   */
+  const buttonBox =
+    variant === "packages" ? "pt-[2rem] mb-[2rem] md:pt-[5rem]" : "mb-[3rem] pt-[1rem]";
   return (
     <div className={`text-center ${tone}`}>
-      {/* live: the button's widget-container adds 1rem above/below on top of the kit's 2rem widget spacing */}
-      <div className="mb-[3rem] pt-[1rem]">
+      <div className={buttonBox}>
         <CtaButton size="lg" />
       </div>
       {/*
@@ -37,7 +49,8 @@ export default function CtaBand() {
       style={{ backgroundImage: "url(/images/bg.jpg)" }}
     >
       <div className="ec">
-        <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:text-[4rem] lg:text-[4.5rem]">
+        {/* b165434/022049e/24e2e95: widget-container margin-bottom -1rem below 768px */}
+        <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           Ready For a Sparkling Clean House? Book Your Cleaning Service Minneapolis
         </h2>
         <CtaCompact light />

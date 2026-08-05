@@ -7,7 +7,9 @@ export default function TopBar() {
   return (
     <div className="bg-white">
       <div className="ec flex flex-col items-center gap-0 lg:flex-row lg:items-center lg:justify-between">
-        <Link href="/" className="py-[1rem] lg:py-0">
+        {/* live: the logo column carries only elementor's 10px widget-wrap padding
+            (reproduced by .ec) — no extra vertical padding on the link itself */}
+        <Link href="/">
           <Image
             src="/images/Logo.png"
             alt="Ivy Cleans"
