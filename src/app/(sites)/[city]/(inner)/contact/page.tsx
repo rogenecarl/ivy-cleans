@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cityFromParams, type CityParams } from "@/content/city-param";
+import { citySlug } from "@/content/interpolate";
 import { contactData } from "@/data/contact";
 import ContactHeader from "@/components/contact/ContactHeader";
 import ContactFormDisplay from "@/components/contact/ContactFormDisplay";
@@ -56,8 +57,14 @@ export async function generateMetadata({
  */
 export default async function ContactPage({ params }: { params: CityParams }) {
   const c = await cityFromParams(params);
-  const { contactHeader, contactFields, contactSubmitLabel, contactMap, contactInfo } =
-    contactData(c);
+  const {
+    contactHeader,
+    contactFields,
+    contactSubmitLabel,
+    contactMap,
+    contactInfo,
+    contactResult,
+  } = contactData(c);
   return (
     <>
       <ContactHeader variant="banner" contactHeader={contactHeader} />
@@ -67,8 +74,10 @@ export default async function ContactPage({ params }: { params: CityParams }) {
             <div className="w-full border-y border-l border-[#E5E7EB] bg-white p-[2rem] md:w-1/2 lg:p-[4.8rem]">
               <ContactHeader variant="form" contactHeader={contactHeader} />
               <ContactFormDisplay
+                cityKey={citySlug(c.city)}
                 contactFields={contactFields}
                 contactSubmitLabel={contactSubmitLabel}
+                contactResult={contactResult}
               />
             </div>
             <div className="w-full border-y border-r border-[#E5E7EB] bg-[#ECF9F9] p-[2rem] md:w-1/2 lg:p-[2.4rem]">

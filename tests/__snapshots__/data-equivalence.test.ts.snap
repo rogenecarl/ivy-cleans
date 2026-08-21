@@ -174,6 +174,12 @@ exports[`data module values are unchanged by the content-layer refactor > contac
     "description": "Give us a call, we try to answer all enquiries within 24 hours on business days.",
     "title": "Contact - Ivy Cleans",
   },
+  "contactResult": {
+    "errorBody": "Please call us instead and we’ll get straight to it.",
+    "errorHeading": "Something went wrong.",
+    "successBody": "We try to answer all enquiries within 24 hours on business days.",
+    "successHeading": "Thanks, we’ve got your message.",
+  },
   "contactSubmitLabel": "Send",
 }
 `;

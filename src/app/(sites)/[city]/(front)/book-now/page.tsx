@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cityFromParams, type CityParams } from "@/content/city-param";
+import { citySlug } from "@/content/interpolate";
 import { bookData } from "@/data/book";
 import BookNowSection from "@/components/book/BookNowSection";
 
@@ -35,6 +36,7 @@ export default async function BookNowPage({ params }: { params: CityParams }) {
       bookFields={bookFields}
       bookSubmitLabel={bookSubmitLabel}
       comingSoon={comingSoon}
+      cityKey={citySlug(c.city)}
     />
   );
 }

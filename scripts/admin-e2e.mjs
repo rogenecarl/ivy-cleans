@@ -21,9 +21,26 @@
  *   H1, correctly-prefixed "Other Services" links) — not just that the link
  *   exists.
  *
+ *   Task 13 (leads capture and the CRM dashboard): a separate case, gated on
+ *   DATABASE_URL, submits the real /minneapolis/contact form in a real
+ *   browser, then drives the admin leads list and detail screen to confirm
+ *   the row that came out of it, its status transition and its saved note.
+ *   This is the ONLY place in the whole plan that exercises the submit ->
+ *   store -> dashboard chain end to end; every other leads test either mocks
+ *   the store (tests/leads-submit.test.ts) or is itself skipped without a
+ *   database (tests/leads-store.test.ts). See that case below for exactly
+ *   what it does and does not prove.
+ *
  * REQUIRED SERVER MODE: `next dev`, NOT `next start`.
  *
- *     fuser -k 3100/tcp; STUB_MODEL=1 pnpm dev --port 3100
+ *     fuser -k 3100/tcp; STUB_MODEL=1 STUB_EMAIL=1 pnpm dev --port 3100
+ *
+ *   STUB_EMAIL=1 is required for the Task 13 case specifically: without it, a
+ *   real minneapolis SiteSettings.notifyEmails row would make the contact
+ *   submission attempt a real Resend send. The vitest suite forces this
+ *   centrally (see vitest.config.ts); this script talks to a server running
+ *   in a separate process, so it has to be set on that process's own
+ *   environment instead.
  *
  *   Two independent reasons, both about the production build, neither about
  *   the env var (STUB_MODEL does reach server actions under `next start` —
@@ -65,13 +82,39 @@
  * exact HTML, so "close enough" is not enough. It runs in a finally block, so a
  * failed assertion still leaves content/ pristine.
  *
- * Exit code 0 only if every check passed.
+ * DATABASE: the Task 13 leads-capture case is gated on DATABASE_URL being set
+ * in THIS script's own process (not just the server's) -- it deletes the row
+ * it creates directly through Prisma, and needs a real connection to do that.
+ * Absent, the case SKIPs loudly (a "SKIP" line, not a "PASS") and every other
+ * case still runs. It is not counted in the pass/fail totals either way.
+ *
+ * Exit code 0 only if every check passed. A skip never causes a nonzero exit
+ * by itself, but it does mean the leads chain was NOT verified this run --
+ * check the "skipped" line in the summary.
  */
 
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import { createRequire } from 'node:module'
+
+// Loads .env.local / .env the way `next dev` does, mirroring
+// tests/setup-env.ts's rationale: this script is invoked with plain `node`,
+// which does not read either file, so DATABASE_URL would otherwise appear
+// absent even on a machine that has it configured for the app itself. Each
+// load is its own try/catch so a machine missing one file still runs. Load
+// .env.local first: process.loadEnvFile only sets a key that isn't already
+// present, so the first file to set a key wins.
+try {
+  process.loadEnvFile('.env.local')
+} catch {
+  // No .env.local present.
+}
+try {
+  process.loadEnvFile('.env')
+} catch {
+  // No .env present.
+}
 
 /* ── args ─────────────────────────────────────────────────────────────────── */
 
@@ -126,6 +169,15 @@ function check(name, ok, detail = '') {
 }
 function note(message) {
   console.log(`note  ${message}`)
+}
+// Distinct from check(): a skip is neither a pass nor a fail. It must never
+// be silently indistinguishable from a pass (the whole reason this case is
+// gated at all), so it gets its own loud console line and its own bucket in
+// the summary, and it never touches `results` / the exit code.
+const skipped = []
+function skip(name, reason) {
+  skipped.push({ name, reason })
+  console.log(`SKIP  ${name} — ${reason}`)
 }
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
@@ -486,6 +538,143 @@ try {
   const mplsAfter = await rowText('minneapolis')
   check('Minneapolis is still LIVE after the run', mplsAfter.includes('LIVE'), mplsAfter)
   await shot(page, 'dashboard-after')
+
+  /* 8. Leads capture end-to-end (Task 13) ──────────────────────────────────
+   * Everything above this point is the Stubville pipeline and never touches
+   * the database. This case is the only place in the whole leads-and-CRM
+   * plan that runs the real chain: a real /minneapolis/contact submission,
+   * through the real server action and src/leads/submit.ts, into a real
+   * Postgres row, read back by the real admin dashboard, mutated by the
+   * real status/notes server actions. Everything else (tests/leads-*.test.ts)
+   * either mocks the store or is itself skipped without a database.
+   *
+   * Guarded on DATABASE_URL in THIS process (see the file header for why),
+   * and self-cleaning: it deletes the row(s) it creates in a finally block
+   * so a repeat run — or a run that fails partway — never leaves a fixture
+   * lead sitting in a real inbox operator's dashboard, mirroring
+   * tests/leads-store.test.ts's `ztest-` + unconditional-afterAll pattern.
+   * The cityKey here is deliberately the real "minneapolis" (attribution
+   * runs exactly as it would for a real customer), so the marker instead
+   * lives in the email address.
+   *
+   * It also depends on content/minneapolis.json being `"status": "live"`.
+   * That is what makes this a REAL lead rather than a draft preview, and so
+   * what makes it appear in the dashboard list at all — the list hides test
+   * rows by default. A draft city here would (correctly) be filed as a test
+   * row and the "present in the dashboard list" check below would fail.
+   */
+  if (!process.env.DATABASE_URL) {
+    skip(
+      'leads capture end-to-end (submit → dashboard → status → notes)',
+      'DATABASE_URL is not set (checked .env.local, .env, and the ambient environment). ' +
+        'tests/leads-store.test.ts is skipping for the same reason — the submit-to-dashboard ' +
+        'chain has never been run against a real database. Set DATABASE_URL (and start the dev ' +
+        'server with it set) to exercise this case.',
+    )
+  } else {
+    const { PrismaClient } = require('@prisma/client')
+    const leadsPrisma = new PrismaClient()
+    const LEAD_EMAIL = `ztest-e2e-${Date.now()}@example.com`
+    const LEAD_NAME = 'Ztest E2E Runner'
+    const LEAD_PHONE = '(612) 555-0199'
+    const LEAD_NOTE = 'Called, left voicemail.'
+    const SUCCESS_HEADING = 'Thanks, we’ve got your message.'
+    try {
+      const contact = await context.newPage()
+      await contact.goto(`${BASE}/minneapolis/contact`, { waitUntil: 'networkidle' })
+      await contact.fill('#form-field-name', LEAD_NAME)
+      await contact.fill('#form-field-email', LEAD_EMAIL)
+      await contact.fill('#form-field-field_66433ea', LEAD_PHONE)
+      await contact.selectOption('#form-field-message', 'Yes')
+      await contact.fill(
+        '#form-field-field_45db7dd',
+        'admin-e2e.mjs fixture submission — safe to delete.',
+      )
+      await shot(contact, 'leads-contact-filled')
+      await contact.click('button[type="submit"]')
+      await contact.waitForSelector(`text=${SUCCESS_HEADING}`, { timeout: 15_000 })
+
+      const afterSubmit = await text(contact)
+      check(
+        'contact form shows the success panel in place of the form',
+        afterSubmit.includes(SUCCESS_HEADING) &&
+          (await contact.locator('form[aria-label="New Form"]').count()) === 0,
+      )
+      await shot(contact, 'leads-contact-success')
+      await contact.close()
+
+      await page.goto(`${BASE}${ADMIN}/leads`, { waitUntil: 'networkidle' })
+      const leadRow = page.locator('a', { hasText: LEAD_NAME }).first()
+      check('submitted lead is present in the dashboard list', (await leadRow.count()) > 0)
+      const leadRowText = (await leadRow.textContent())?.replace(/\s+/g, ' ').trim() ?? ''
+      /*
+       * "Minneapolis", not "MINNEAPOLIS". This assertion was wrong from the
+       * day it was written and nobody saw it, because this case has only ever
+       * taken its skip path. The list's pill renders cityDisplayName()
+       * (src/app/admin-x7kq92mpfw4rt8vz/leads/logic.ts), which returns the
+       * city's DISPLAY NAME for a city that exists; the uppercased key is only
+       * the fallback for a lead whose city has since been deleted. The lead
+       * DETAIL screen is the one that uppercases (lead.cityKey.toUpperCase()).
+       * Playwright's textContent() returns the DOM text either way -- CSS
+       * text-transform would not have saved the old assertion.
+       */
+      check(
+        'dashboard row carries a Minneapolis pill',
+        leadRowText.includes('Minneapolis'),
+        leadRowText,
+      )
+      await shot(page, 'leads-list')
+
+      await leadRow.click()
+      await page.waitForURL(`**${ADMIN}/leads/*`)
+      const detailBefore = await text(page)
+      check('lead detail page opens for the submitted lead', detailBefore.includes(LEAD_NAME))
+      // The detail screen is the one that uppercases the city (it renders
+      // lead.cityKey.toUpperCase(), not the display-name lookup the list
+      // uses). Asserted explicitly so the two renderings stay distinguishable
+      // and the list assertion above cannot silently drift back.
+      check(
+        'lead detail page shows the uppercased city key',
+        detailBefore.includes('MINNEAPOLIS'),
+      )
+
+      await clickText(page, 'button', 'contacted')
+      await page.waitForFunction(() => document.body.innerText.includes('CONTACTED'), null, {
+        timeout: 15_000,
+      })
+      const afterStatus = await text(page)
+      check(
+        'clicking "contacted" renders the CONTACTED chip',
+        afterStatus.includes('CONTACTED'),
+      )
+      await shot(page, 'leads-detail-contacted')
+
+      await page.fill('textarea[name="notes"]', LEAD_NOTE)
+      await page.click('button:has-text("Save notes")')
+      // saveNotesAction only revalidates the detail path; give the write a
+      // moment to land before the reload below re-reads it from storage.
+      await page.waitForTimeout(500)
+      await page.reload({ waitUntil: 'networkidle' })
+      const notesValue = await page.inputValue('textarea[name="notes"]')
+      check('saved note survives a reload', notesValue === LEAD_NOTE, notesValue)
+      await shot(page, 'leads-detail-note-saved')
+    } catch (err) {
+      check(
+        'leads capture end-to-end completed without throwing',
+        false,
+        err instanceof Error ? err.message : String(err),
+      )
+    } finally {
+      // Unconditional, like tests/leads-store.test.ts's afterAll: runs whether
+      // the case above passed, failed a check, or threw. Deletes by the
+      // unique fixture email rather than by id, since a throw before the
+      // dashboard list step means this script never captured an id.
+      await leadsPrisma.lead.deleteMany({ where: { email: LEAD_EMAIL } })
+      const remaining = await leadsPrisma.lead.count({ where: { email: LEAD_EMAIL } })
+      check('cleanup deleted every row this case created', remaining === 0, `remaining=${remaining}`)
+      await leadsPrisma.$disconnect()
+    }
+  }
 } catch (err) {
   check('run completed without throwing', false, err instanceof Error ? err.message : String(err))
 } finally {
@@ -514,5 +703,9 @@ const failed = results.filter((r) => !r.ok)
 console.log('\n──────── summary ────────')
 for (const r of results) console.log(`${r.ok ? 'PASS' : 'FAIL'}  ${r.name}`)
 console.log(`${results.length - failed.length}/${results.length} checks passed`)
+if (skipped.length > 0) {
+  console.log(`${skipped.length} case(s) SKIPPED — not counted as pass or fail:`)
+  for (const s of skipped) console.log(`  SKIP  ${s.name} — ${s.reason}`)
+}
 console.log(`screenshots: ${OUT}`)
 process.exit(failed.length === 0 ? 0 : 1)

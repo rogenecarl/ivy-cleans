@@ -1,7 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import type { ContactData } from "@/data/contact";
+import { submitLeadAction } from "@/app/(sites)/[city]/lead-actions";
 
 /*
- * Display-only reproduction of contact.html's #30bda89 Elementor form
+ * Reproduction of contact.html's #30bda89 Elementor form
  * (elementor-widget-form, "New Form"). Deliberate deviation from live: the
  * live markup is `<form class="elementor-form" method="post" name="New Form"
  * aria-label="New Form">` — this clone drops `method`/`name` (there's
@@ -9,6 +13,13 @@ import type { ContactData } from "@/data/contact";
  * task brief. The four WP-plumbing hidden fields
  * (post_id/form_id/referer_title/queried_id) are display-irrelevant and are
  * intentionally omitted rather than faked.
+ *
+ * Submit is intercepted client-side (mirrors BookingForm.tsx's approach —
+ * see that file for the honeypot/pending/per-field-error rationale): a
+ * hidden `website_url` honeypot field is added before the submit row, and
+ * the field-name expression already used for each control's `name` attribute
+ * doubles as the key into the per-field error map returned by
+ * submitLeadAction.
  *
  * Field set/order/ids/placeholders/required verbatim from contact.html:
  * Name (text, optional) + Email (email, required) sit side by side
@@ -68,68 +79,128 @@ const SELECT_ARROW: React.CSSProperties = {
 };
 
 export default function ContactFormDisplay({
+  cityKey,
   contactFields,
   contactSubmitLabel,
+  contactResult,
 }: {
+  cityKey: string;
   contactFields: ContactData["contactFields"];
   contactSubmitLabel: ContactData["contactSubmitLabel"];
+  contactResult: ContactData["contactResult"];
 }) {
+  const [result, setResult] = useState<"idle" | "pending" | "success" | "error">("idle");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  if (result === "success" || result === "error") {
+    const copy =
+      result === "success"
+        ? { heading: contactResult.successHeading, body: contactResult.successBody }
+        : { heading: contactResult.errorHeading, body: contactResult.errorBody };
+    return (
+      <div className="py-[2rem]">
+        <h3 className="text-herogreen mb-[1rem] text-[2rem] leading-[1.2em] font-semibold">
+          {copy.heading}
+        </h3>
+        <p className="text-[1.6rem] leading-[1.5em]">{copy.body}</p>
+      </div>
+    );
+  }
+
   return (
-    <form aria-label="New Form" className="flex flex-wrap gap-[10px]">
-      {contactFields.map((field) => (
-        <div
-          key={field.id}
-          className={
-            HALF_WIDTH_IDS.has(field.id)
-              ? "w-full md:w-[calc(50%-5px)]"
-              : "w-full"
-          }
-        >
-          <label
-            htmlFor={field.id}
-            className="text-herogreen block pb-[0.5rem] text-[1.6rem] leading-[1em]"
+    <form
+      aria-label="New Form"
+      className="flex flex-wrap gap-[10px]"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (result === "pending") return;
+        setResult("pending");
+        setFieldErrors({});
+        const data = new FormData(e.currentTarget);
+        const outcome = await submitLeadAction("contact", cityKey, data);
+        if (outcome.ok) {
+          setResult("success");
+          return;
+        }
+        if (outcome.error === "validation") {
+          setFieldErrors(outcome.fieldErrors);
+          setResult("idle");
+          return;
+        }
+        setResult("error");
+      }}
+    >
+      {contactFields.map((field) => {
+        const name = `form_fields[${field.id.replace("form-field-", "")}]`;
+        return (
+          <div
+            key={field.id}
+            className={
+              HALF_WIDTH_IDS.has(field.id)
+                ? "w-full md:w-[calc(50%-5px)]"
+                : "w-full"
+            }
           >
-            {field.label}
-          </label>
-          {field.kind === "select" ? (
-            <select
-              id={field.id}
-              name={`form_fields[${field.id.replace("form-field-", "")}]`}
-              required={field.required}
-              className={SELECT_CLASS}
-              style={SELECT_ARROW}
+            <label
+              htmlFor={field.id}
+              className="text-herogreen block pb-[0.5rem] text-[1.6rem] leading-[1em]"
             >
-              {field.options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          ) : field.kind === "textarea" ? (
-            <textarea
-              id={field.id}
-              name={`form_fields[${field.id.replace("form-field-", "")}]`}
-              placeholder={field.placeholder}
-              rows={field.rows}
-              required={field.required}
-              className={TEXTAREA_CLASS}
-            />
-          ) : (
-            <input
-              id={field.id}
-              name={`form_fields[${field.id.replace("form-field-", "")}]`}
-              type={field.kind}
-              placeholder={field.placeholder}
-              required={field.required}
-              className={INPUT_CLASS}
-            />
-          )}
-        </div>
-      ))}
+              {field.label}
+            </label>
+            {field.kind === "select" ? (
+              <select
+                id={field.id}
+                name={name}
+                required={field.required}
+                className={SELECT_CLASS}
+                style={SELECT_ARROW}
+              >
+                {field.options.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : field.kind === "textarea" ? (
+              <textarea
+                id={field.id}
+                name={name}
+                placeholder={field.placeholder}
+                rows={field.rows}
+                required={field.required}
+                className={TEXTAREA_CLASS}
+              />
+            ) : (
+              <input
+                id={field.id}
+                name={name}
+                type={field.kind}
+                placeholder={field.placeholder}
+                required={field.required}
+                className={INPUT_CLASS}
+              />
+            )}
+            {fieldErrors[name] && (
+              <p className="mt-[0.5rem] text-[1.4rem] text-rust">{fieldErrors[name]}</p>
+            )}
+          </div>
+        );
+      })}
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="website_url">Leave this field empty</label>
+        <input
+          id="website_url"
+          name="form_fields[website_url]"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
       <div className="flex w-full justify-end">
         <button
           type="submit"
-          className="min-h-[40px] rounded-[5px] border border-white bg-[#BF360C] px-[2.4rem] py-[1.1rem] text-[1.8rem] leading-[1.2em] font-bold text-white uppercase"
+          disabled={result === "pending"}
+          className={`min-h-[40px] rounded-[5px] border border-white bg-[#BF360C] px-[2.4rem] py-[1.1rem] text-[1.8rem] leading-[1.2em] font-bold text-white uppercase${result === "pending" ? " opacity-70" : ""}`}
         >
           {contactSubmitLabel}
         </button>

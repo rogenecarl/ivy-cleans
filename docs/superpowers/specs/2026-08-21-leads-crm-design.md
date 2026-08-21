@@ -96,9 +96,23 @@ with `isTest: true`, and **sends no email**. Test rows are hidden from the
 dashboard behind a toggle.
 
 The bound value is client-influenceable, which is why it is used *only* on this
-branch: a tampered value can produce a test row attributed to the wrong city and
-nothing else. Real leads on real domains never consult it. This keeps draft
-previews genuinely testable without weakening attribution where it matters.
+branch. Real leads on real domains never consult it.
+
+**Corrected 2026-08-21 after the Task 3 review**, which caught this paragraph
+overstating the safety. An earlier draft claimed the worst case was "a test row
+attributed to the wrong city and nothing else." That is true for a preview
+submission, but not for the default-host branch: because `content/_domains.json`
+currently has `hosts: {}`, no host is validated, so a scripted POST supplying any
+Host header plus `renderedCityKey` equal to the default city produces a real,
+non-test, emailed lead.
+
+The accurate statement of the exposure is that it grants **no capability the
+attacker does not already have**. Submitting the public form on the live site
+produces the same row. Crucially, the `=== domains.default` comparison means a
+forged key cannot reach any *other* city: aim it at `miami` from the default host
+and it falls through to the preview branch, stored and never emailed. So the
+attack surface is ordinary public-form spam, which the honeypot and per-IP rate
+limit in §3.3 exist to blunt, not cross-tenant lead injection.
 
 ### 3.2 Data model
 

@@ -62,6 +62,9 @@ export type BookData = {
     phoneHref: string;
     email: string;
     emailHref: string;
+    successHeading: string;
+    successBody: string;
+    errorHeading: string;
   };
 };
 
@@ -268,6 +271,11 @@ export function bookData(c: CityContent): BookData {
     // this static clone. The phone number embedded in `body` is FACT-class
     // (CityContent.phone) tokenized through t(), same format as `phone` below.
     comingSoon: {
+      // NOT RENDERED ON ANY PATH TODAY. `heading`/`body` are the original
+      // pre-capture "the form goes nowhere yet" copy; now that the form really
+      // submits, the panel shows successHeading/successBody or errorHeading
+      // instead. Kept because they are the approved copy for that state, but
+      // do not reach for `heading` on the error path — that was the bug.
       heading: "Online booking is coming soon!",
       body: t(
         "In the meantime, call us at {phone} or email Support@ivycleans.com.",
@@ -277,6 +285,17 @@ export function bookData(c: CityContent): BookData {
       phoneHref: c.phoneHref,
       email: "Support@ivycleans.com",
       emailHref: "mailto:Support@ivycleans.com",
+      successHeading: "Thanks, we’ve got your request.",
+      successBody: "Someone from our team will be in touch shortly.",
+      // The FAILURE heading, and the reason it is not `heading` above: the
+      // error panel used to reuse "Online booking is coming soon!", so a
+      // customer whose ten-field submission had just been LOST was told the
+      // feature does not exist yet — no hint that anything had gone wrong, no
+      // reason to call. Mirrors src/data/contact.ts's contactResult.errorHeading
+      // word for word rather than inventing a third variant; the panel keeps
+      // the phone/email fallback line below it, which the contact form has no
+      // room for.
+      errorHeading: "Something went wrong.",
     },
   };
 }

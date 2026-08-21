@@ -14,7 +14,7 @@
 
 Every task's requirements implicitly include this section.
 
-- **DO NOT COMMIT.** This repo has a standing rule: never `git commit` without the user explicitly asking. Every task below ends with staging and a verification run, never a commit. The whole branch is committed once, by the user, at the end.
+- **Commit each task on the `feat/leads-crm` branch when it passes review** (user-approved 2026-08-21, superseding this plan's original no-commit constraint). Per-task commits are what let each review see exactly one task's diff. `main` is untouched; the branch stays the user's to squash, reset, or discard. Implementers still stage and stop: the controller commits after review, so an unreviewed change never lands.
 - **Phase 0 is a prerequisite outside this plan.** Plans 1 to 5 are complete but uncommitted; `HEAD` (ead724c) is still the old single-city site. This plan's code sits on top of that uncommitted work in the same working tree.
 - **Public sites must not change visually.** The HTML crawler must report `EQUIVALENT` on all public routes at the end. The only permitted change to public markup is the addition of a hidden honeypot input and the form's post-submit state.
 - **Apostrophes in JSX copy must render U+2019** — use `&rsquo;` or a literal `’`. A straight `'` fails lint and mismatches the live copy (`AGENTS.md`).
@@ -1398,18 +1398,26 @@ import type { LeadInput, LeadRecord } from '../src/leads/types'
 
 const domains: DomainsIndex = { default: 'minneapolis', hosts: { 'miamicleans.com': 'miami' } }
 
+/*
+ * CORRECTED 2026-08-21 after the Task 2 review. These are the field names the
+ * booking form ACTUALLY submits, read from src/data/book.ts:128-262. Note that
+ * `form_fields[email]` is the SERVICE-TYPE DROPDOWN on this form, not an email
+ * address -- Elementor reused the slot. The real email is
+ * `form_fields[field_ca2243e]` and the real phone is
+ * `form_fields[field_deeaf01]`.
+ */
 function bookingForm(over: Record<string, string> = {}): FormData {
   const f = new FormData()
-  f.set('form_fields[field_22aa910]', 'Deep Cleaning ( Most Popular Option)')
-  f.set('form_fields[message]', 'Slightly Dirty (Nothing crazy)')
+  f.set('form_fields[email]', 'Deep Cleaning ( Most Popular Option)')
+  f.set('form_fields[field_22aa910]', 'Slightly Dirty (Nothing crazy)')
   f.set('form_fields[field_c4cfac1]', '3')
   f.set('form_fields[field_caacb3a]', '2')
-  f.set('form_fields[field_1abcd81]', 'Sometime this week')
+  f.set('form_fields[message]', 'Sometime this week')
   f.set('form_fields[field_1872bc3]', '1420 Brickell Ave')
   f.set('form_fields[name]', 'Dana Whitfield')
-  f.set('form_fields[email]', 'dana@example.com')
-  f.set('form_fields[field_ca2243e]', '305-555-0184')
-  f.set('form_fields[field_deeaf01]', 'Call Me')
+  f.set('form_fields[field_ca2243e]', 'dana@example.com')
+  f.set('form_fields[field_deeaf01]', '305-555-0184')
+  f.set('form_fields[field_1abcd81]', 'Call Me')
   for (const [k, v] of Object.entries(over)) f.set(k, v)
   return f
 }
@@ -1518,7 +1526,7 @@ describe('submitLead', () => {
 
   it('returns field errors and writes nothing when validation fails', async () => {
     const { ports: p, calls } = ports()
-    const result = await submitLead(args(bookingForm({ 'form_fields[email]': 'bad' })), p)
+    const result = await submitLead(args(bookingForm({ 'form_fields[field_ca2243e]': 'bad' })), p)
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.error).toBe('validation')

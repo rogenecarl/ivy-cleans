@@ -1,9 +1,15 @@
 /*
- * Pins the exported VALUES of every data module being refactored. Snapshots
- * are captured while the modules are still hardcoded; after the refactor the
- * same values must be reproduced from content/minneapolis.json + tokens.
- * If a snapshot ever needs --update during this plan, the refactor changed
- * user-visible copy — that is a bug, not a snapshot to accept.
+ * Pins the exported VALUES of every data module. The snapshots were captured
+ * while the modules were still hardcoded, and the content refactor had to
+ * reproduce them exactly from content/minneapolis.json + tokens.
+ *
+ * That refactor is finished, so a --update is no longer automatically a bug:
+ * later plans legitimately ADD copy (post-submit result strings, for
+ * instance), and the snapshot has been updated for exactly that twice. The
+ * rule now is narrower and still worth enforcing by eye: an update that ADDS
+ * a key is normal; an update that CHANGES or REMOVES an existing string means
+ * a plan altered user-visible copy that was cloned from the live site, and
+ * that still needs justifying before it is accepted.
  */
 import { describe, expect, test } from 'vitest'
 import { getDefaultCity } from '../src/content/store'

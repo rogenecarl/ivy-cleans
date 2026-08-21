@@ -32,11 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-# ...except the template. `.env*` already covers .env.local (the real
-# ANTHROPIC_API_KEY lives there and must never be committed), but it also
-# swallowed the example file that documents which variables to set, which is
-# exactly the file that IS meant to be in the repo.
+# ...except the templates. `.env*` already covers .env.local and .env (the
+# real ANTHROPIC_API_KEY and DATABASE_URL live there and must never be
+# committed), but it also swallowed the example files that document which
+# variables to set, which are exactly the files that ARE meant to be in the
+# repo.
 !.env.local.example
+!.env.example
 
 # vercel
 .vercel
