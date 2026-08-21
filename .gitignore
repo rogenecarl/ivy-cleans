@@ -60,3 +60,7 @@ scripts/.snapshots/
 
 # harness-managed worktrees and local settings
 .claude/
+
+# Sibling project checked out inside this repo. It has its own .git and its
+# own history; it must never be committed here.
+/trip-scheduler/
