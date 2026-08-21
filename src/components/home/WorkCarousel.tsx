@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
-import { workImages } from "@/data/home";
 import { ChevronRightIcon } from "@/components/Icons";
 
 /*
@@ -26,7 +25,6 @@ import { ChevronRightIcon } from "@/components/Icons";
  * 1024 up (334.66 of 1004 at 1024, 395 of 1185 at >=1280). Note 1024 is
  * already 3-up — the carousel's desktop threshold is *not* the site's 1025.
  */
-const TOTAL = workImages.length; // 5
 const MAX_PER_VIEW = 3;
 
 /*
@@ -50,7 +48,6 @@ const MAX_PER_VIEW = 3;
  * the *container* width. One page is exactly perView * (100/perView)% = 100%,
  * which is why the transform is -page*100% for every breakpoint.
  */
-const RENDERED = TOTAL + MAX_PER_VIEW - 1; // 7
 
 /* the slide widths below are plain CSS, but the page size (and therefore the
    dot count and the wrap point) has to be known in JS, so read the same two
@@ -73,7 +70,19 @@ function readPerView(): number {
    perView, so the first paint is correct at all three widths regardless. */
 const serverPerView = () => MAX_PER_VIEW;
 
-export default function WorkCarousel() {
+/*
+ * The carousel itself (this component's second <section>, everything below)
+ * is also reused, unstyled-heading-free, by the suburb pages' "Our Work In
+ * Action" gallery (src/components/suburb/WorkInAction.tsx) — that page's own
+ * heading uses a completely different treatment (43px flat, no responsive
+ * variance, see that file's own citation) so it renders its own heading
+ * separately and only needs the carousel/container piece below. Extracted as
+ * WorkCarouselGallery so this file's default export (used by /home, heading
+ * included) is unchanged byte-for-byte.
+ */
+export function WorkCarouselGallery({ workImages }: { workImages: string[] }) {
+  const TOTAL = workImages.length;
+  const RENDERED = TOTAL + MAX_PER_VIEW - 1;
   const perView = useSyncExternalStore(subscribePerView, readPerView, serverPerView);
   const [rawPage, setRawPage] = useState(0);
   const [instant, setInstant] = useState(false);
@@ -118,16 +127,8 @@ export default function WorkCarousel() {
   }, [autoplay, hovered, page, pageCount]);
 
   return (
-    <>
-      <section className="bg-white">
-        <div className="ec flex flex-col">
-          <h2 className="text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
-            Our Cleaning Work In Action
-          </h2>
-        </div>
-      </section>
-      <section className="bg-white">
-        <div className="mx-auto flex min-h-[395px] w-full max-w-[1205px] items-center">
+    <section className="bg-white">
+      <div className="mx-auto flex min-h-[395px] w-full max-w-[1205px] items-center">
           {/* the column's own widget-wrap gutter */}
           <div className="w-full p-[10px]">
             <div
@@ -200,7 +201,24 @@ export default function WorkCarousel() {
             </div>
           </div>
         </div>
+    </section>
+  );
+}
+
+/* Default export unchanged: the heading section (verbatim, byte-identical to
+   before this file's carousel body was extracted above) plus the extracted
+   gallery. Used by /home only. */
+export default function WorkCarousel({ workImages }: { workImages: string[] }) {
+  return (
+    <>
+      <section className="bg-white">
+        <div className="ec flex flex-col">
+          <h2 className="text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
+            Our Cleaning Work In Action
+          </h2>
+        </div>
       </section>
+      <WorkCarouselGallery workImages={workImages} />
     </>
   );
 }

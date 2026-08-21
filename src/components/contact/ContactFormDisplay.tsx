@@ -1,4 +1,4 @@
-import { contactFields, contactSubmitLabel } from "@/data/contact";
+import type { ContactData } from "@/data/contact";
 
 /*
  * Display-only reproduction of contact.html's #30bda89 Elementor form
@@ -67,7 +67,13 @@ const SELECT_ARROW: React.CSSProperties = {
   backgroundSize: "11px 7px",
 };
 
-export default function ContactFormDisplay() {
+export default function ContactFormDisplay({
+  contactFields,
+  contactSubmitLabel,
+}: {
+  contactFields: ContactData["contactFields"];
+  contactSubmitLabel: ContactData["contactSubmitLabel"];
+}) {
   return (
     <form aria-label="New Form" className="flex flex-wrap gap-[10px]">
       {contactFields.map((field) => (

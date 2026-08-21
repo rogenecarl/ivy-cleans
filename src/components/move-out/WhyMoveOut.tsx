@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { whyMoveOut } from "@/data/move-out";
+import type { MoveOutData } from "@/data/move-out";
 
 /*
  * Section ebf286a (post-241.css): bg #F9FFFD, padding 6/3/2rem. Heading
@@ -23,7 +23,14 @@ import { whyMoveOut } from "@/data/move-out";
  * appointment 👈" → /book body CTA — with a top margin of 5rem desktop /
  * 3rem tablet / 0 mobile.
  */
-export default function WhyMoveOut() {
+export default function WhyMoveOut({
+  whyMoveOut,
+  bookHref,
+}: {
+  whyMoveOut: MoveOutData["whyMoveOut"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   return (
     <section className="bg-[#F9FFFD] py-[2rem] md:py-[3rem] lg:py-[6rem]">
       <div className="ec">
@@ -93,7 +100,7 @@ export default function WhyMoveOut() {
 
         <div className="text-center">
           <Link
-            href="/book"
+            href={bookHref}
             className="bg-rust border-rust hover:text-rust inline-block md:mt-[3rem] lg:mt-[5rem] rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white"
           >
             Set an appointment 👈

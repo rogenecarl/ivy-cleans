@@ -1,11 +1,17 @@
 import Link from "next/link";
-import { site } from "@/data/site";
+import type { SiteData } from "@/data/site";
 
 /**
  * size "base" — hero / top-bar button (1.8rem)
  * size "lg"   — CTA band and in-section CTAs (2rem mobile, 2.4rem desktop)
  */
-export default function CtaButton({ size = "base" }: { size?: "base" | "lg" }) {
+export default function CtaButton({
+  size = "base",
+  site,
+}: {
+  size?: "base" | "lg";
+  site: SiteData["site"];
+}) {
   return (
     <Link
       href={site.bookingUrl}

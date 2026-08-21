@@ -1,4 +1,6 @@
-import { site } from "@/data/site";
+import type { SiteData } from "@/data/site";
+import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/content/interpolate";
 import CtaButton from "./CtaButton";
 import { PhoneIcon } from "./Icons";
 
@@ -8,9 +10,11 @@ import { PhoneIcon } from "./Icons";
  * section's own background.
  */
 export function CtaCompact({
+  site,
   light = false,
   variant = "band",
 }: {
+  site: SiteData["site"];
   light?: boolean;
   variant?: "band" | "packages";
 }) {
@@ -25,7 +29,7 @@ export function CtaCompact({
   return (
     <div className={`text-center ${tone}`}>
       <div className={buttonBox}>
-        <CtaButton size="lg" />
+        <CtaButton size="lg" site={site} />
       </div>
       {/*
         live: the "prefer to call" icon-list sits on a 2.6rem/1.2em line and its widget-container
@@ -42,7 +46,13 @@ export function CtaCompact({
   );
 }
 
-export default function CtaBand() {
+export default function CtaBand({
+  site,
+  bits,
+}: {
+  site: SiteData["site"];
+  bits: TokenSource;
+}) {
   return (
     <section
       className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[5rem]"
@@ -51,9 +61,9 @@ export default function CtaBand() {
       <div className="ec">
         {/* b165434/022049e/24e2e95: widget-container margin-bottom -1rem below 768px */}
         <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
-          Ready For a Sparkling Clean House? Book Your Cleaning Service Minneapolis
+          {t("Ready For a Sparkling Clean House? Book Your Cleaning Service {city}", bits)}
         </h2>
-        <CtaCompact light />
+        <CtaCompact site={site} light />
       </div>
     </section>
   );

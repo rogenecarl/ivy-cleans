@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 /* innerSite.copyright is the same verbatim string the front footer's 50e4d28
    heading renders; reused rather than duplicated so src/data stays untouched */
-import { site, innerSite } from "@/data/site";
+import type { SiteData } from "@/data/site";
 import { ChevronRightIcon, EnvelopeIcon, MapMarkerIcon, PhoneIcon } from "./Icons";
 
 /* live footer headings: 2rem/500 on mobile, 2.4rem/500 from the desktop breakpoint up */
@@ -15,7 +15,21 @@ const itemClass =
   "flex items-start justify-center gap-[0.6rem] text-[1.6rem] leading-[1.2em] font-medium md:justify-start";
 const iconClass = "mt-[0.2rem] h-[1.6rem] w-[1.6rem] shrink-0";
 
-export default function Footer() {
+export default function Footer({
+  site,
+  innerSite,
+  quickLinks,
+}: {
+  site: SiteData["site"];
+  innerSite: SiteData["innerSite"];
+  /*
+   * Home/Blog/Contact/FAQ, in that order. These used to be an inline literal
+   * array here, which meant they were the one set of front-chrome links that
+   * did NOT go through cityHref — a single click ejected a draft-city preview
+   * to the default tenant. Built by (front)/layout.tsx instead.
+   */
+  quickLinks: { label: string; href: string }[];
+}) {
   return (
     /* live mobile footer: no top padding on the section, everything centred */
     <footer className="bg-brand pb-[1rem] text-white md:py-[2rem] lg:py-[5rem]">
@@ -63,12 +77,7 @@ export default function Footer() {
             <h3 className={headingClass}>Quick Links</h3>
             <div className={dividerClass} />
             <ul className="mx-auto w-fit space-y-[0.8rem] md:mx-0 md:w-auto">
-              {[
-                { label: "Home", href: "/" },
-                { label: "Blog", href: "/blog" },
-                { label: "Contact", href: "/contact" },
-                { label: "FAQ", href: "/faq" },
-              ].map((l) => (
+              {quickLinks.map((l) => (
                 <li key={l.href} className={itemClass}>
                   <ChevronRightIcon className={iconClass} />
                   <Link href={l.href}>{l.label}</Link>

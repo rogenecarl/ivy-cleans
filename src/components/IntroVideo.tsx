@@ -10,12 +10,15 @@
  * i.e. a 16:9 player — so we embed the standard YouTube player in a matching
  * aspect-ratio box rather than inventing a fixed pixel size.
  */
-export default function IntroVideo() {
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
+
+export default function IntroVideo({ bits }: { bits: TokenSource }) {
   return (
     <div className="aspect-video w-full">
       <iframe
         src="https://www.youtube.com/embed/OBgUjubbP88?start=1"
-        title="Book Your House Cleaning with Ivy Cleans | Minneapolis’s Top Cleaning Service"
+        title={t("Book Your House Cleaning with Ivy Cleans | {city}’s Top Cleaning Service", bits)}
         className="h-full w-full"
         loading="lazy"
         // Standard YouTube iframe embed `allow` list — not reference-derived (the live

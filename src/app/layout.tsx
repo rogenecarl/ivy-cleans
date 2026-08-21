@@ -18,7 +18,8 @@ const poppins = Poppins({
  * exactly how /book-now ended up rendering the homepage's <meta
  * name="description">, since /book-now deliberately sets no description
  * (live has none). The homepage's title+description now live on
- * src/app/(front)/page.tsx instead, so the root layout is left with none:
+ * src/app/(sites)/[city]/(front)/page.tsx instead, so the root layout is
+ * left with none:
  * every route must set its own metadata (all 11 page.tsx files do).
  */
 export default function RootLayout({

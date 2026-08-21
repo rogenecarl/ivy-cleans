@@ -1,6 +1,8 @@
 import Image from "next/image";
-import { serviceIntro, services } from "@/data/services";
-import { innerSite } from "@/data/site";
+import type { Service } from "@/data/services";
+import type { SiteData } from "@/data/site";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 
 /*
  * Section 6cbc7976 (post-8.css): padding 6rem (>=1280) / 3rem (768–1024) /
@@ -24,12 +26,22 @@ import { innerSite } from "@/data/site";
  * (17px/20px at <=767, where it is also left-aligned) and a 3rem top margin
  * only at >=1280.
  */
-export default function HomeServices() {
+export default function HomeServices({
+  serviceIntro,
+  services,
+  innerSite,
+  bits,
+}: {
+  serviceIntro: string[];
+  services: Service[];
+  innerSite: SiteData["innerSite"];
+  bits: TokenSource;
+}) {
   return (
     <section className="bg-white py-[2rem] md:py-[3rem] lg:py-[6rem]">
       <div className="ec flex flex-col">
         <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
-          Professional Cleaning Services Minneapolis, MN
+          {t("Professional Cleaning Services {city}, {state}", bits)}
         </h2>
         <div className="mx-auto max-w-[112rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:mb-[1rem] lg:text-[2rem]">
           {serviceIntro.map((p) => (

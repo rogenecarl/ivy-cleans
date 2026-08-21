@@ -14,22 +14,26 @@
  * line-box descender under the inline frame (reproduced as the wrapper's
  * bottom padding).
  */
-export default function MapEmbed() {
+export default function MapEmbed({ mapSrc }: { mapSrc: string | null }) {
   return (
     <section className="bg-white">
       <div className="ec">
         <div className="pb-[0.4rem]">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d11291.840137965126!2d-93.3546582!3d44.9648053!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa37096c9a1657e4f%3A0x5ad9dc450f082983!2sIvy%20Cleans!5e0!3m2!1sen!2sus!4v1690993615991!5m2!1sen!2sus"
-            width={600}
-            height={450}
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Ivy Cleans location on Google Maps"
-            className="block h-[450px] w-full"
-          />
+          {/* mapSrc is city-sourced (CityContent.maps.home); null omits the
+              iframe entirely rather than rendering a broken embed. */}
+          {mapSrc !== null && (
+            <iframe
+              src={mapSrc}
+              width={600}
+              height={450}
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Ivy Cleans location on Google Maps"
+              className="block h-[450px] w-full"
+            />
+          )}
         </div>
       </div>
     </section>

@@ -1,0 +1,60 @@
+{
+  "city": "Testville",
+  "state": "TS",
+  "phone": "555-0100-TEST",
+  "phoneHref": "tel:5550100",
+  "address": "1 Fixture Way, Suite TEST, Testville, TS 00001",
+  "status": "draft",
+  "stateName": "Testonia",
+  "phoneDisplay": "(555) 010-0000",
+  "contactAddress": "1 Fixture Way Suite TEST Testville, TS 00001",
+  "hasSuburbPages": true,
+  "maps": {
+    "front": null,
+    "home": null,
+    "contact": null
+  },
+  "research": {
+    "suburbs": [
+      {
+        "name": "North Testburg",
+        "slug": "house-cleaning-north-testburg"
+      },
+      {
+        "name": "Faketon",
+        "slug": "cleaning-services-faketon"
+      },
+      {
+        "name": "Mockville",
+        "slug": "cleaning-service-mockville"
+      }
+    ],
+    "zips": [],
+    "landmarks": [],
+    "mapEmbedUrl": null
+  },
+  "sections": {
+    "services.heroParagraphs": [
+      "FIXTURE COPY 1 — Testville hero paragraph one. This city document exists only to exercise the new-city rendering paths (draft status, no suburb pages, no map embeds); none of this text is real marketing copy.",
+      "FIXTURE COPY 2 — Testville hero paragraph two. Every slot the src/data builders read is filled here so validateCityContent and the s()/sl() accessors both succeed.",
+      "FIXTURE COPY 3 — Testville hero paragraph three, deliberately short.",
+      "FIXTURE COPY 4 — Testville hero paragraph four, deliberately short.",
+      "FIXTURE COPY 5 — Testville hero paragraph five, the bolded closing line."
+    ],
+    "services.serviceIntro": [
+      "FIXTURE COPY — Testville service intro paragraph one.",
+      "FIXTURE COPY — Testville service intro paragraph two, about dusting in Testville.",
+      "FIXTURE COPY — Testville service intro paragraph three, about vacuuming in Testville.",
+      "FIXTURE COPY — Testville service intro paragraph four, about bathroom cleaning in Testville.",
+      "FIXTURE COPY — Testville service intro paragraph five, about window cleaning in Testville."
+    ],
+    "services.cards.dusting": "FIXTURE COPY — dusting card text for Testville.",
+    "services.cards.vacuuming": "FIXTURE COPY — vacuuming card text for Testville.",
+    "services.cards.bathroom": "FIXTURE COPY — bathroom cleaning card text for Testville.",
+    "services.cards.window": "FIXTURE COPY — window cleaning card text for Testville.",
+    "services.cards.upholstery": "FIXTURE COPY — upholstery cleaning card text for Testville.",
+    "deep.whatIs": "FIXTURE COPY — what deep cleaning is, as written for Testville.",
+    "home.zipParagraph": "FIXTURE COPY — we offer home cleaning service in most or all of the following Testville ZIP Codes: 00001, 00002, 00003.",
+    "home.landmarksParagraph": "FIXTURE COPY — Ivy Cleans serves almost all of Testville including the Fixture Museum, Mock Park and the Placeholder Bridge."
+  }
+}

@@ -1,4 +1,4 @@
-import { contactInfo } from "@/data/contact";
+import type { ContactData } from "@/data/contact";
 
 /*
  * contact.html's three text-editor blocks stacked below the map in the
@@ -21,7 +21,11 @@ import { contactInfo } from "@/data/contact";
  * padding, y=951.9). Reproduced here as mb-[1rem] on the headings and
  * mb-[2rem] on every paragraph but the last.
  */
-export default function ContactInfo() {
+export default function ContactInfo({
+  contactInfo,
+}: {
+  contactInfo: ContactData["contactInfo"];
+}) {
   return (
     <div>
       <h2 className="text-herogreen mb-[1rem] text-[2.2rem] leading-[1.2em] font-semibold lg:text-[2.4rem]">

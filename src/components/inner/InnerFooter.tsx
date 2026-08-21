@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { site, innerSite } from "@/data/site";
+import type { SiteData } from "@/data/site";
 import { EnvelopeIcon, MapMarkerIcon, PhoneIcon } from "@/components/Icons";
 
 /*
@@ -38,7 +38,13 @@ const itemClass =
 const iconClass =
   "mt-[0.1em] ml-[0.125em] mr-[calc(0.125em+5px)] h-[1em] w-[1em] shrink-0";
 
-export default function InnerFooter() {
+export default function InnerFooter({
+  site,
+  innerSite,
+}: {
+  site: SiteData["site"];
+  innerSite: SiteData["innerSite"];
+}) {
   return (
     <footer className="text-herogreen bg-[#FDECE7] pt-[1rem] pb-[1rem] md:pt-[3rem] lg:pt-[4rem]">
       {/* live's box model puts the 10px gutter on each column's widget-wrap and

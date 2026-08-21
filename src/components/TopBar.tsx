@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { site } from "@/data/site";
+import type { SiteData } from "@/data/site";
 import { TileIcon } from "./Icons";
 
 /*
@@ -20,7 +20,14 @@ import { TileIcon } from "./Icons";
  * on the column centre (900.69 vs 900.70) and the CTA anchor's right edge on the
  * column's 10px content edge (1605.5 vs 1605.6).
  */
-export default function TopBar() {
+export default function TopBar({
+  site,
+  homeHref,
+}: {
+  site: SiteData["site"];
+  /* cityHref(c, "/") — "/" for a live tenant, "/<cityKey>" for a draft preview. */
+  homeHref: string;
+}) {
   return (
     <div className="bg-white">
       {/* the columns are elementor flex items: at 1025-1280 they sum to 101.014%
@@ -30,7 +37,7 @@ export default function TopBar() {
         {/* 889f16a: img max-width 16.5rem, 10rem at <=1024 (live: 165 @1920,
             137.27 @1440, 100 @1024); text-align start, centred at <=767 */}
         <div className="flex w-full items-center p-[10px] md:w-[17%] lg:w-[16%] xl:w-[15%]">
-          <Link href="/" className="w-full text-center md:text-start">
+          <Link href={homeHref} className="w-full text-center md:text-start">
             <Image
               src="/images/Logo.png"
               alt="Ivy Cleans"

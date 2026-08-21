@@ -1,5 +1,5 @@
 import { Lato, Roboto } from "next/font/google";
-import { bookCallNow, bookHeader, bookLeadIn } from "@/data/book";
+import type { BookData } from "@/data/book";
 import BookingForm from "@/components/book/BookingForm";
 import { PhoneIcon } from "@/components/Icons";
 
@@ -62,7 +62,21 @@ import { PhoneIcon } from "@/components/Icons";
 const lato = Lato({ subsets: ["latin"], weight: ["900"], variable: "--font-lato" });
 const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto" });
 
-export default function BookSection() {
+export default function BookSection({
+  bookHeader,
+  bookLeadIn,
+  bookCallNow,
+  bookFields,
+  bookSubmitLabel,
+  comingSoon,
+}: {
+  bookHeader: BookData["bookHeader"];
+  bookLeadIn: BookData["bookLeadIn"];
+  bookCallNow: BookData["bookCallNow"];
+  bookFields: BookData["bookFields"];
+  bookSubmitLabel: BookData["bookSubmitLabel"];
+  comingSoon: BookData["comingSoon"];
+}) {
   return (
     <div className={`${lato.variable} ${roboto.variable}`}>
       <section className="bg-[#EEF7F4] pt-[2rem] pb-[1rem] md:pt-[3rem] md:pb-[2rem] lg:pt-[8.6rem] lg:pb-[3.8rem]">
@@ -119,7 +133,12 @@ export default function BookSection() {
             {/* #3ef7408c */}
             <div className="w-full md:w-1/2">
               <div className="bg-[#ECECEC] p-[5%] max-md:m-[10px]">
-                <BookingForm size="sm" />
+                <BookingForm
+                  size="sm"
+                  bookFields={bookFields}
+                  bookSubmitLabel={bookSubmitLabel}
+                  comingSoon={comingSoon}
+                />
               </div>
             </div>
           </div>

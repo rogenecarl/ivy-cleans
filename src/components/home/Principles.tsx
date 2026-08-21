@@ -1,5 +1,3 @@
-import { principles } from "@/data/home";
-
 /*
  * Live splits this into two top-level sections, and the split is load-bearing:
  * 2fad378 holds only the heading (padding 4rem 0 0 at every breakpoint, widget
@@ -9,7 +7,7 @@ import { principles } from "@/data/home";
  * further apart than a single section would put them.
  * Heading is 4.5/4/2.8rem; the body is 2/1.9/1.7rem at weight 300.
  */
-export default function Principles() {
+export default function Principles({ principles }: { principles: string[] }) {
   return (
     <>
       <section className="bg-white pt-[4rem]">

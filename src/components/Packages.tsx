@@ -1,8 +1,17 @@
 import Image from "next/image";
-import { packages, packagesIntro } from "@/data/packages";
+import type { Pkg } from "@/data/packages";
+import type { SiteData } from "@/data/site";
 import { CtaCompact } from "./CtaBand";
 
-export default function Packages() {
+export default function Packages({
+  packagesIntro,
+  packages,
+  site,
+}: {
+  packagesIntro: string;
+  packages: Pkg[];
+  site: SiteData["site"];
+}) {
   return (
     <section className="bg-white py-[1rem] md:py-[2rem] lg:py-[5rem]">
       {/* post-2035.css `.sec06 > .elementor-container{max-width:131.1rem!important}` —
@@ -51,7 +60,7 @@ export default function Packages() {
             </div>
           ))}
         </div>
-        <CtaCompact variant="packages" />
+        <CtaCompact site={site} variant="packages" />
       </div>
     </section>
   );

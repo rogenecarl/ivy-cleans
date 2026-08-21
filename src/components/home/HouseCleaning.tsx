@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { houseCleaning } from "@/data/home";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 
 /*
  * Section 71b51dd4 (post-8.css): cleaning-bg2.jpg `top center / cover` with
@@ -18,7 +19,23 @@ import { houseCleaning } from "@/data/home";
  * The h2 widget's `margin-bottom:2rem` and the body's trailing paragraph
  * margin are both kept by elementor's flex widget-wrap — hence `flex flex-col`.
  */
-export default function HouseCleaning() {
+export default function HouseCleaning({
+  houseCleaning,
+  bits,
+  deepHref,
+  moveOutHref,
+}: {
+  houseCleaning: string[];
+  bits: TokenSource;
+  /*
+   * The two service-page hrefs arrive built (page-side cityHref) rather than
+   * being t()'d here: only the page knows whether this city is live (public
+   * paths) or a draft being previewed under /<cityKey>. The LABELS stay
+   * token-built, they carry no path.
+   */
+  deepHref: string;
+  moveOutHref: string;
+}) {
   return (
     <section
       className="bg-cover bg-top bg-no-repeat pt-[2rem] pb-0 text-white md:pt-[3rem] md:pb-[1rem] lg:py-[6rem]"
@@ -26,7 +43,7 @@ export default function HouseCleaning() {
     >
       <div className="ec flex flex-col">
         <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
-          House Cleaning Services Minneapolis
+          {t("House Cleaning Services {city}", bits)}
         </h2>
         <div className="text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
           {houseCleaning.map((p) => (
@@ -36,12 +53,12 @@ export default function HouseCleaning() {
           ))}
           <p className="mb-[2rem]">
             In addition to our main services, We also offer{" "}
-            <Link href="/deep-cleaning-minneapolis" className="font-normal underline">
-              Deep Cleaning in Minneapolis
+            <Link href={deepHref} className="font-normal underline">
+              {t("Deep Cleaning in {city}", bits)}
             </Link>{" "}
             and{" "}
-            <Link href="/minneapolis-move-out-cleaning-services" className="font-normal underline">
-              Move-out cleaning Minneapolis
+            <Link href={moveOutHref} className="font-normal underline">
+              {t("Move-out cleaning {city}", bits)}
             </Link>
             , if you&rsquo;re interested.
           </p>

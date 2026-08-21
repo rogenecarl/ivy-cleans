@@ -1,24 +1,41 @@
-export const heroParagraphs: string[] = [
-  "As a local and insured business, Ivy Cleans is thrilled to be providing cleaning and janitorial services across various areas of Minneapolis. Our experienced team, backed by a life-long dedication to cleanliness, is committed to delivering outstanding house cleaning services that our loyal customers cherish. We are proudly invested in the exceptional results we achieve with every clean. Having established our roots in the industry, we can assertively declare that our business ethos is unmatched. We take care of all cleaning aspects, from all surfaces to the tiniest nooks, and always supersede our client’s expectations, a trait we believe sets us apart.",
-  "That is why we hold fast to the notion that our services are the top most in the Minneapolis area. The cornerstone of our success lies in our diligent effort, our transparent communication, and our spectacular results. No matter what cleaning jobs come our way, we approach each one with the same level of enthusiasm and professionalism. No matter what aspect of our business you scrutinize, it is the epitome of excellence. We have meticulously refined our house cleaning services in Minneapolis, leaving no room for questions.",
-  "Do you have a mess that needs cleaning? Or perhaps you’re after a cleaner household or workplace? Do you have any cleaning project on your radar?",
-  "Whether it’s your home or business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
-  "Call our professional cleaning company Ivy Cleans today, get an estimate of our prices and put us to the test!",
-];
-
-export const serviceIntro: string[] = [
-  "Ivy Cleans is known to provide an array of professional cleaning services including home cleaning services and maid service in Minneapolis and nearby cities. Whether it’s residential or commercial cleaning, or even office upkeep, our team of professional house cleaners, with their years of experience, are equipped to handle any cleaning job, regardless of its size. We utilize top-notch cleaning products and equipment to ensure the best possible results for our clients. Understanding that people lead busy lives, we offer flexible services tailored to their convenience.",
-  "Whether you live in a quiet suburb or the bustling heart of Minneapolis, one thing is certain – dusting is an unavoidable part of maintaining a clean home. With its varied climate, Minneapolis is prone to dust and allergen accumulation. Our dusting services ensure a breathable, dust-free environment for you and your family.",
-  "Given Minneapolis’ infamous cold winters where indoor living is predominant, maintaining clean floors and carpets is vital. Our professional vacuuming services guarantee a home cleared of grime and dust, providing a sanitized and welcoming living environment.",
-  "Just like the janitorial services we offer for local businesses, our residential cleaning services include comprehensive bathroom cleaning – a necessary yet often dreaded task. Despite Minneapolis’ unpredictable weather, it’s essential to ensure a clean and sanitized bathroom environment. Our bathroom cleaning services aim to eliminate germs and bacteria, providing a safe and healthy space for your family.",
-  "The cold and snow-laden winters of Minneapolis might make window cleaning a daunting task but fret not as Ivy Cleans has got you covered. Our professional window cleaners ensure your windows are sparkling clean, free from dirt and streaks, providing a noticeably brighter living space.",
-];
+// src/data/services.ts
+import type { CityContent } from '../content/types'
+import { s, sl } from '../content/slots'
+import { t } from '../content/interpolate'
 
 export type Service = { title: string; text: string; image: string; alt: string; width: number; height: number };
-export const services: Service[] = [
-  { title: "Dusting", text: "Dusting is an essential part of keeping a home clean and healthy. Minneapolis area is known for its diverse climate, which can contribute to the buildup of dust and allergens in homes. Our dusting services ensure that your home is free from dust and other airborne particles, providing a healthier living environment for you and your family.", image: "/images/dusting.jpg", alt: "home cleaning services minneapolis mn", width: 401, height: 275 },
-  { title: "Vacuuming", text: "Vacuuming is another crucial cleaning service that is particularly important in Minneapolis. The city’s cold winters mean that people spend more time indoors, leading to a buildup of dirt and debris on floors and carpets. Our professional vacuuming services ensure that your home is free from dirt and dust, providing a more pleasant and hygienic living environment.", image: "/images/vacuuming.jpg", alt: "", width: 401, height: 275 },
-  { title: "Bathroom Cleaning", text: "Bathroom cleaning is a task that many homeowners find daunting, but it is crucial for maintaining a clean and healthy home. In Minneapolis, where the weather can be unpredictable, maintaining a clean and hygienic bathroom is particularly important. Our bathroom cleaning services ensure that your bathroom is free from germs and bacteria, providing a safe and healthy environment for you and your family.", image: "/images/bathroom-cleaning.jpg", alt: "bathroom-cleaning minneapolis", width: 401, height: 275 },
-  { title: "Window Cleaning", text: "Window cleaning is another essential service that is particularly important in Minneapolis. With its cold and snowy winters, it can be challenging to keep windows clean and clear. Our professional window cleaning services ensure that your windows are free from dirt, grime, and streaks, providing a clearer view and a brighter, more inviting living space.", image: "/images/window.jpg", alt: "", width: 401, height: 275 },
-  { title: "Upholstery Cleaning", text: "Upholstery cleaning is a service that is often overlooked but is crucial for maintaining a clean and healthy home. Minneapolis residents spend a lot of time indoors during the winter months, and this can lead to a buildup of dirt and allergens on upholstered furniture. Our upholstery cleaning services ensure that your furniture is free from dust, dirt, and allergens, providing a more comfortable and healthy living environment.", image: "/images/upholstery.jpg", alt: "professional cleaning services minneapolis", width: 401, height: 275 },
-];
+
+export type ServicesData = {
+  heroParagraphs: string[];
+  serviceIntro: string[];
+  services: Service[];
+};
+
+/* AI-class copy (per the content contract) comes from city sections; only
+ * the card titles, images and dimensions are fixed template structure.
+ * Alt templates use {cityLower} verbatim (no slugging) — for a multi-word
+ * city ("St. Louis Park") they render with spaces/periods, faithfully
+ * reproducing the live site's inconsistent alt conventions. */
+export function servicesData(c: CityContent): ServicesData {
+  return {
+    heroParagraphs: sl(c, 'services.heroParagraphs'),
+
+    serviceIntro: sl(c, 'services.serviceIntro'),
+
+    /*
+     * These slot ids (services.cards.*) are the contract Plan 3's writer schemas
+     * must emit — renaming one here without updating the generator breaks builds.
+     * s()/sl() throw when the builder runs (render/build time for the city
+     * being rendered), so a missing slot fails that city's page or build —
+     * never the whole process.
+     */
+    services: [
+      { title: "Dusting", text: s(c, 'services.cards.dusting'), image: "/images/dusting.jpg", alt: t("home cleaning services {cityLower} {stateLower}", c), width: 401, height: 275 },
+      // empty on the live site — fidelity, not an oversight (Vacuuming, Window Cleaning)
+      { title: "Vacuuming", text: s(c, 'services.cards.vacuuming'), image: "/images/vacuuming.jpg", alt: "", width: 401, height: 275 },
+      { title: "Bathroom Cleaning", text: s(c, 'services.cards.bathroom'), image: "/images/bathroom-cleaning.jpg", alt: t("bathroom-cleaning {cityLower}", c), width: 401, height: 275 },
+      { title: "Window Cleaning", text: s(c, 'services.cards.window'), image: "/images/window.jpg", alt: "", width: 401, height: 275 },
+      { title: "Upholstery Cleaning", text: s(c, 'services.cards.upholstery'), image: "/images/upholstery.jpg", alt: t("professional cleaning services {cityLower}", c), width: 401, height: 275 },
+    ],
+  };
+}

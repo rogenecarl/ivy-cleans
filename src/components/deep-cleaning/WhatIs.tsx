@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { whatIs } from "@/data/deep-cleaning";
+import type { DeepCleaningData } from "@/data/deep-cleaning";
 
 /*
  * Section a759e86: padding 6rem 0 (3rem <=1024, 0/2rem <=767). This is a
@@ -14,7 +14,11 @@ import { whatIs } from "@/data/deep-cleaning";
  * Heading (4ce0b2c) left-aligned, 4.5/4/2.8rem, 1rem bottom margin at
  * desktop only; paragraph (c9c902e) left-aligned, 2/1.9/1.7rem font-light.
  */
-export default function WhatIs() {
+export default function WhatIs({
+  whatIs,
+}: {
+  whatIs: DeepCleaningData["whatIs"];
+}) {
   /*
    * The live heading markup is `What is Deep <br> House Cleaning?` — a hard
    * break after the third word. Without it the line fits ("What is Deep

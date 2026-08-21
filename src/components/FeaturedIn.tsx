@@ -22,12 +22,18 @@ export default function FeaturedIn() {
         >
           FEATURED IN:
         </h3>
+        {/* Asset refreshed 2026-08-11 from the live site, which replaced the
+            original 1824x51 export (still in the reference dump) with a
+            1600x45 version whose logos are drawn larger. Live keeps the old
+            width="1824" attr, whose presentational width upscales the bitmap
+            back to 1824px (capped by max-width:100%) — w-[1824px] mirrors
+            that; w-auto would render the natural 1600px and shrink the logos. */}
         <Image
           src="/images/Group-5.png"
           alt=""
           width={1824}
           height={51}
-          className="mx-auto mb-[2rem] hidden h-auto w-auto max-w-full md:block"
+          className="mx-auto mb-[2rem] hidden h-auto w-[1824px] max-w-full md:block"
         />
         <div className="space-y-[2rem] md:hidden">
           <Image src="/images/logo-mbl1.png" alt="" width={800} height={51} className="h-auto w-full" />

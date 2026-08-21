@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { moveHero } from "@/data/move-out";
+import type { MoveOutData } from "@/data/move-out";
 
 /*
  * Section 8e7126c (post-241.css): out-bg1.jpg (top center / no-repeat /
@@ -15,7 +15,14 @@ import { moveHero } from "@/data/move-out";
  * 6rem 7.4rem / 3rem / 2rem, and the text widget (29455cb) is left-aligned
  * 2/1.9/1.7rem font-light.
  */
-export default function MoveHero() {
+export default function MoveHero({
+  moveHero,
+  bookHref,
+}: {
+  moveHero: MoveOutData["moveHero"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   const [first, ...rest] = moveHero.paragraphs;
   /*
    * live markup: `Minneapolis Move Out <br> Cleaning Services`. The theme
@@ -36,7 +43,7 @@ export default function MoveHero() {
         </div>
         <div className="pb-[2rem] text-center">
           <Link
-            href="/book"
+            href={bookHref}
             className="bg-rust border-rust hover:text-rust inline-block rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white md:mt-[3rem]"
           >
             Set an appointment 👈

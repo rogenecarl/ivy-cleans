@@ -1,11 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckItemIcon } from "@/components/Icons";
-import {
-  deepServices,
-  deepServicesLinkHref,
-  deepServicesLinkedItemIndex,
-} from "@/data/deep-cleaning";
+import type { DeepCleaningData } from "@/data/deep-cleaning";
 
 /*
  * Section ada1bba ("deep-sec03"): deep-bg3.jpg (top center / no-repeat /
@@ -34,7 +30,18 @@ import {
  * and disinfecting of kitchen appliances..."), icon included. Reproduced
  * as-is via deepServicesLinkedItemIndex rather than "fixed."
  */
-export default function DeepServices() {
+export default function DeepServices({
+  deepServices,
+  deepServicesLinkHref,
+  deepServicesLinkedItemIndex,
+  bookHref,
+}: {
+  deepServices: DeepCleaningData["deepServices"];
+  deepServicesLinkHref: DeepCleaningData["deepServicesLinkHref"];
+  deepServicesLinkedItemIndex: DeepCleaningData["deepServicesLinkedItemIndex"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   return (
     <>
       <section className="bg-[url(/images/deep-bg3.jpg)] bg-top bg-cover bg-no-repeat py-[2rem] md:py-[3rem] lg:py-[6rem]">
@@ -102,7 +109,7 @@ export default function DeepServices() {
             </p>
           </div>
           <Link
-            href="/book"
+            href={bookHref}
             className="bg-rust border-rust hover:text-rust inline-block rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white md:mt-[3rem] lg:mt-[1rem]"
           >
             Set an appointment 👈

@@ -1,5 +1,6 @@
-import { site } from "@/data/site";
-import { heroParagraphs } from "@/data/services";
+import type { SiteData } from "@/data/site";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 import CtaButton from "./CtaButton";
 import { PhoneIcon } from "./Icons";
 
@@ -14,7 +15,15 @@ function boldIvyCleans(text: string) {
   );
 }
 
-export default function Hero() {
+export default function Hero({
+  site,
+  heroParagraphs,
+  bits,
+}: {
+  site: SiteData["site"];
+  heroParagraphs: string[];
+  bits: TokenSource;
+}) {
   return (
     <section
       className="relative bg-cover bg-top py-[1rem] md:py-[3rem]"
@@ -38,7 +47,7 @@ export default function Hero() {
         <div className="p-[10px] lg:w-[50%] 2xl:w-[54.848%]">
           {/* 6e13d81: 7.2rem, 4rem at <=1024 (live probe @1024: 40px), 3rem at <=767 */}
           <h1 className="text-herogreen mb-[2rem] text-[3rem] leading-[1em] font-bold md:text-[4rem] lg:text-[7.2rem]">
-            Cleaning Services Minneapolis
+            {t("Cleaning Services {city}", bits)}
           </h1>
           {/* 2018238: 1.9rem, 1.8rem at <=1024, 1.6rem at <=767 */}
           <div className="text-[1.6rem] leading-[1.5em] font-light md:text-[1.8rem] lg:text-[1.9rem]">
@@ -49,7 +58,7 @@ export default function Hero() {
             ))}
           </div>
           <div className="mb-[2rem]">
-            <CtaButton />
+            <CtaButton site={site} />
           </div>
           {/* live 985f4a8: widget-container margin-bottom -3.5rem cancels most of the
               kit's 2rem widget spacing — probe gap to the phone line is 4.1px @1440 /

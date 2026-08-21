@@ -1,0 +1,107 @@
+{
+  "city": "Miami",
+  "state": "FL",
+  "stateName": "Florida",
+  "phone": "305-555-0142",
+  "phoneDisplay": "(305) 555-0142",
+  "phoneHref": "tel:3055550142",
+  "address": "Miami — address pending",
+  "status": "draft",
+  "hasSuburbPages": true,
+  "maps": {
+    "front": null,
+    "home": null,
+    "contact": null
+  },
+  "research": {
+    "suburbs": [
+      {
+        "name": "Coconut Grove",
+        "slug": "house-cleaning-coconut-grove"
+      },
+      {
+        "name": "Brickell",
+        "slug": "cleaning-services-brickell"
+      },
+      {
+        "name": "Coral Gables",
+        "slug": "cleaning-service-coral-gables"
+      },
+      {
+        "name": "Miami Beach",
+        "slug": "miami-beach-cleaning-services"
+      },
+      {
+        "name": "Key Biscayne",
+        "slug": "house-cleaning-key-biscayne"
+      },
+      {
+        "name": "Hialeah",
+        "slug": "cleaning-services-hialeah"
+      },
+      {
+        "name": "Doral",
+        "slug": "cleaning-service-doral"
+      },
+      {
+        "name": "Kendall",
+        "slug": "kendall-cleaning-services"
+      },
+      {
+        "name": "West Kendall",
+        "slug": "house-cleaning-west-kendall"
+      },
+      {
+        "name": "South Miami",
+        "slug": "cleaning-services-south-miami"
+      },
+      {
+        "name": "Homestead",
+        "slug": "cleaning-service-homestead"
+      }
+    ],
+    "zips": [
+      "33012",
+      "33125",
+      "33133",
+      "33186"
+    ],
+    "landmarks": [
+      "Vizcaya Museum and Gardens",
+      "Bayfront Park",
+      "Fairchild Tropical Botanic Garden",
+      "Holocaust Memorial",
+      "Ocean Drive",
+      "Zoo Miami",
+      "Everglades National Park",
+      "Hialeah Park Casino",
+      "Amelia Earhart Park",
+      "Cape Florida Lighthouse"
+    ],
+    "mapEmbedUrl": null
+  },
+  "sections": {
+    "services.heroParagraphs": [
+      "As a local and insured business, Ivy Cleans is proud to provide cleaning and janitorial services throughout Miami and the communities around it. Our experienced team understands what this city asks of a home, from salt-hazed glass along the water to condo towers where the air conditioning runs every month of the year. We are devoted to the detail work others skip: baseboards, blind slats, tile grout, the tops of kitchen cabinets. Our customers receive careful attention, honest work, and a home that feels genuinely fresh rather than merely tidied, and we hold that standard on every visit.",
+      "That is why we hold fast to the belief that our house cleaning in Miami stands up to any scrutiny you care to give it. The foundation of our reputation is straightforward: real effort, plain and clear communication, and results you can see the moment you walk in. A studio in Brickell or a family home with a pool deck receives the same thoroughness from us. We have refined our methods for this humid, coastal climate, and we leave no corner in question.",
+      "Do you have a mess that needs cleaning? Are you hoping for a fresher home or workplace? Is there a cleaning project sitting on your list?",
+      "Whether it’s your home or your business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
+      "Reach out to Ivy Cleans today, ask us for an estimate, and let us show you what a properly cleaned space feels like!"
+    ],
+    "services.serviceIntro": [
+      "Ivy Cleans provides a full range of professional cleaning services in Miami and the surrounding areas, including residential cleaning, commercial work, ongoing office upkeep, and dependable maid service. Our professional house cleaners bring years of experience to high-rise condos, single-family homes, and beach rentals alike, and we work with quality products and equipment suited to the demands of a subtropical coast. Because life here rarely slows down, we build flexible schedules around your week, whether that means weekly upkeep or a deep seasonal reset.",
+      "Dust in Miami has plenty of company. Fine sand drifts in from the beach, construction rises constantly across the city, and Saharan dust arrives on the summer wind to settle over every shelf and ceiling fan. Our dusting service lifts it all away and leaves the air in your rooms noticeably easier to breathe.",
+      "With the pool, the patio, and the shoreline all part of daily life here, floors take a steady beating from sand, sunscreen, and rainy-season mud tracked in during afternoon downpours. Our professional vacuuming reaches deep into carpet and along tile edges, leaving your floors clean underfoot and your home far more inviting.",
+      "Miami humidity never truly relents, and bathrooms feel it first, with mildew shadowing grout lines and hard water clouding glass and fixtures. Alongside the janitorial work we handle for local businesses, our bathroom cleaning scrubs those surfaces back to bright and clears away germs and bacteria, giving your family a safe, healthy space.",
+      "Salt air off Biscayne Bay leaves a stubborn film on glass, and sea spray, blowing sand, and summer storms finish the job with streaks and spots. Our window cleaners cut through all of it, inside and out, so the strong Miami sunlight pours in clean and your rooms feel brighter."
+    ],
+    "services.cards.dusting": "Dusting keeps a home both clean and comfortable, and in Miami there is no shortage of what needs dusting away. Beach sand travels indoors on the breeze, nearby building work adds its own gritty film, and pollen drifts through our long growing season. Our dusting service clears surfaces, vents, fans, and the forgotten high ledges, so your rooms stay fresh and your household breathes easier.",
+    "services.cards.vacuuming": "Vacuuming matters especially in a city built around the outdoors. Sandals, pool towels, and dog paws carry sand and damp grit across floors all year, and it works its way into carpet fibers and tile joints where it grinds and dulls. Our vacuuming service draws out that buried debris thoroughly, leaving carpets softer, hard floors clear, and your living space pleasant to walk through barefoot.",
+    "services.cards.bathroom": "Bathroom cleaning is one job no Miami home can postpone. With moisture in the air year-round and showers that never fully dry out, mildew takes hold in grout and along caulk lines while mineral deposits cloud glass doors and chrome. Our team scours every surface, treats the damp corners properly, and clears away germs, handing back a bathroom that is bright, sanitary, and safe for your family.",
+    "services.cards.window": "Window cleaning transforms a home here more than almost anywhere, because so much of Miami is built to look outward at water, palms, and sky. Yet salt carried inland, wind-driven sand, and hard tropical rain leave glass hazy within weeks. Our professional window cleaners wash panes, frames, and sills until the streaks are gone, letting that famous light fill your rooms again.",
+    "services.cards.upholstery": "Upholstery absorbs everything the Miami climate offers: humidity that lingers in cushions, sunscreen and salt water transferred from skin and swimsuits, and the faint mustiness that follows a rainy stretch. Sofas in condos and rental homes take heavy use as well. Our upholstery cleaning draws moisture, oils, and trapped odors out of the fabric, leaving your furniture fresher to sit on and better looking for longer.",
+    "deep.whatIs": "A deep clean is a thorough, top-to-bottom service that reaches well past the tidying of a routine visit. We work every surface, baseboard, floor, carpet, and piece of furniture, including the corners and undersides an ordinary cleaning passes over, lifting out the dirt, dust, and allergens that settle in and stay. In Miami that matters more than most places, because our humidity never truly lets up and salt air drifts in off the water, leaving a fine film on glass, tile, and fixtures while damp air encourages mildew in bathrooms, closets, and around air handlers. Removing all of it leaves your home healthier, fresher, and far more comfortable.",
+    "home.zipParagraph": "We offer home cleaning service in most or all of the following Miami ZIP Codes: 33012, 33125, 33133, and 33186.",
+    "home.landmarksParagraph": "Ivy cleans serves in almost all the area of Miami including Vizcaya Museum and Gardens, Bayfront Park, Fairchild Tropical Botanic Garden, Holocaust Memorial, Ocean Drive, Zoo Miami, Everglades National Park, Hialeah Park Casino, Amelia Earhart Park, Cape Florida Lighthouse and so on."
+  }
+}

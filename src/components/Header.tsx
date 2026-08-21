@@ -2,25 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { site } from "@/data/site";
+import type { SiteData } from "@/data/site";
 import { CaretDownIcon } from "./Icons";
-
-const topLevel = site.nav.filter(
-  (n) =>
-    n.label !== "Deep Cleaning Minneapolis" &&
-    n.label !== "Minneapolis Move Out Cleaning Services"
-);
-const dropdown = site.nav.filter(
-  (n) =>
-    n.label === "Deep Cleaning Minneapolis" ||
-    n.label === "Minneapolis Move Out Cleaning Services"
-);
 
 const linkClass =
   "flex items-center py-[1rem] text-[1.8rem] leading-[1.2em] font-bold uppercase text-white hover:opacity-80";
 
-export default function Header() {
+export default function Header({ site }: { site: SiteData["site"] }) {
   const [open, setOpen] = useState(false);
+  // nav[2]/nav[3] are the per-city service pages — index-based, label text is
+  // city-dependent (see src/data/site.ts).
+  const dropdown = [site.nav[2], site.nav[3]];
+  const topLevel = site.nav.filter((_, i) => i !== 2 && i !== 3);
   return (
     <header className="bg-brand sticky top-0 z-50">
       <div className="ec">

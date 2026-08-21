@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { bookFields, bookSubmitLabel } from "@/data/book";
+import type { BookData } from "@/data/book";
 import ComingSoonPanel from "@/components/book/ComingSoonPanel";
 
 /*
@@ -60,7 +60,17 @@ const SELECT_ARROW: React.CSSProperties = {
   backgroundSize: "11px 7px",
 };
 
-export default function BookingForm({ size }: { size: "md" | "sm" }) {
+export default function BookingForm({
+  size,
+  bookFields,
+  bookSubmitLabel,
+  comingSoon,
+}: {
+  size: "md" | "sm";
+  bookFields: BookData["bookFields"];
+  bookSubmitLabel: BookData["bookSubmitLabel"];
+  comingSoon: BookData["comingSoon"];
+}) {
   const [submitted, setSubmitted] = useState(false);
   const md = size === "md";
 
@@ -136,7 +146,7 @@ export default function BookingForm({ size }: { size: "md" | "sm" }) {
     : "border-white bg-[#6474f3] text-white text-[15px]";
 
   if (submitted) {
-    return <ComingSoonPanel />;
+    return <ComingSoonPanel comingSoon={comingSoon} />;
   }
 
   return (

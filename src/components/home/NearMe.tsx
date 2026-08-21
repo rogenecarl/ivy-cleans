@@ -1,4 +1,6 @@
-import { nearMe } from "@/data/home";
+import type { Feature } from "@/data/home";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 import Features from "@/components/home/Features";
 
 /*
@@ -16,7 +18,17 @@ import Features from "@/components/home/Features";
  * leaves 2rem. `flex flex-col` reproduces elementor's flex widget-wrap, where
  * these margins never collapse into one another.
  */
-export default function NearMe() {
+export default function NearMe({
+  nearMe,
+  features,
+  featuresOutro,
+  bits,
+}: {
+  nearMe: string[];
+  features: Feature[];
+  featuresOutro: string;
+  bits: TokenSource;
+}) {
   return (
     <section
       className="bg-cover bg-top bg-no-repeat pt-[2rem] pb-0 md:pt-[3rem] md:pb-[1rem] lg:pt-[8rem] lg:pb-[10rem]"
@@ -24,7 +36,7 @@ export default function NearMe() {
     >
       <div className="ec flex flex-col">
         <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[3rem] md:text-[4rem] lg:text-[4.5rem]">
-          Cleaning Services Near Me In Minneapolis, MN
+          {t("Cleaning Services Near Me In {city}, {state}", bits)}
         </h2>
         <div className="text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:mb-[2rem] lg:text-[2rem]">
           {nearMe.map((p) => (
@@ -33,7 +45,7 @@ export default function NearMe() {
             </p>
           ))}
         </div>
-        <Features />
+        <Features features={features} featuresOutro={featuresOutro} />
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+import type { BookData } from "@/data/book";
 import BookingForm from "@/components/book/BookingForm";
 
 /*
@@ -27,13 +28,26 @@ import BookingForm from "@/components/book/BookingForm";
  * Tailwind breakpoints per globals.css: default = live's <=767px, md: =
  * live's 768-1024px band, lg: = live's >=1025px (desktop).
  */
-export default function BookNowSection() {
+export default function BookNowSection({
+  bookFields,
+  bookSubmitLabel,
+  comingSoon,
+}: {
+  bookFields: BookData["bookFields"];
+  bookSubmitLabel: BookData["bookSubmitLabel"];
+  comingSoon: BookData["comingSoon"];
+}) {
   return (
     <section className="py-[2rem] md:py-[4rem]">
       <div className="ec flex flex-wrap justify-center">
         <div className="w-full md:w-4/5 lg:w-1/2">
           <div className="rounded-[8px] bg-[#40907A] p-[5%] max-md:m-[10px]">
-            <BookingForm size="md" />
+            <BookingForm
+              size="md"
+              bookFields={bookFields}
+              bookSubmitLabel={bookSubmitLabel}
+              comingSoon={comingSoon}
+            />
           </div>
         </div>
       </div>

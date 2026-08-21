@@ -1,5 +1,5 @@
 import { CheckItemIcon } from "@/components/Icons";
-import { included } from "@/data/move-out";
+import type { MoveOutData } from "@/data/move-out";
 
 /*
  * Section 86d3a37 (post-241.css): out-bg2.jpg (no-repeat / cover),
@@ -13,7 +13,11 @@ import { included } from "@/data/move-out";
  * icon color #4D9682 with a 0.5rem icon padding (rather than the 8px
  * default), 2.5rem between items and --icon-vertical-offset 4px.
  */
-export default function IncludedServices() {
+export default function IncludedServices({
+  included,
+}: {
+  included: MoveOutData["included"];
+}) {
   return (
     <section className="bg-[url(/images/out-bg2.jpg)] bg-[position:top_right] bg-cover bg-no-repeat pt-[2rem] pb-[2rem] md:bg-top md:pt-[3rem] md:pb-[3rem] lg:pt-[6rem] lg:pb-[9rem]">
       <div className="ec">

@@ -1,6 +1,8 @@
 import Image from "next/image";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 
-export default function Values() {
+export default function Values({ bits }: { bits: TokenSource }) {
   return (
     <section
       className="bg-cover bg-top pt-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]"
@@ -23,10 +25,13 @@ export default function Values() {
         />
         <div className="text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
           <p className="mb-[2rem]">
-            To be brief, <strong className="font-bold">Ivy cleans offers the highest quality cleaning services in Minneapolis</strong>. We take the time to do our work properly, effectively, and as conveniently as possible for the homeowner. We pride ourselves in our work and the results that we have for our customers. Our drive is in executing our knowledge of cleaning to best suit the needs of all of our clients. That&rsquo;s what differentiates us from the competition. We truly care about the services we provide, making sure that they are the best they can be.
+            To be brief, <strong className="font-bold">{t("Ivy cleans offers the highest quality cleaning services in {city}", bits)}</strong>. We take the time to do our work properly, effectively, and as conveniently as possible for the homeowner. We pride ourselves in our work and the results that we have for our customers. Our drive is in executing our knowledge of cleaning to best suit the needs of all of our clients. That&rsquo;s what differentiates us from the competition. We truly care about the services we provide, making sure that they are the best they can be.
           </p>
           <p className="mb-[2rem]">
-            We continually change our techniques, tools, and products to find what works best for us and our customers. Always learning more and more about the industry with each passing day, is what makes Ivy cleans the only company in Minneapolis the company you should choose for deep cleaning.
+            {t(
+              "We continually change our techniques, tools, and products to find what works best for us and our customers. Always learning more and more about the industry with each passing day, is what makes Ivy cleans the only company in {city} the company you should choose for deep cleaning.",
+              bits,
+            )}
           </p>
         </div>
       </div>

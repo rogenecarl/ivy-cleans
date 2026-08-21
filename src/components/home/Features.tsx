@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { features, featuresOutro } from "@/data/home";
+import type { Feature } from "@/data/home";
 
 /*
  * Nested section 1e52af1a inside 102673a0: margin 2rem/7rem at >=1280,
@@ -22,7 +22,13 @@ import { features, featuresOutro } from "@/data/home";
  * >=768 / 1rem at <=767 — 4rem and 3rem net; the last item has neither.
  * The closing paragraph 5d938fe is full width at 2/1.9/1.7rem.
  */
-export default function Features() {
+export default function Features({
+  features,
+  featuresOutro,
+}: {
+  features: Feature[];
+  featuresOutro: string;
+}) {
   return (
     <>
       <div className="mt-0 mb-[1rem] flex flex-wrap md:mb-[2rem] lg:mt-[2rem] lg:mb-[7rem]">

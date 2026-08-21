@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckItemIcon } from "@/components/Icons";
-import { benefits, benefitsBgImage } from "@/data/deep-cleaning";
+import type { DeepCleaningData } from "@/data/deep-cleaning";
 
 /*
  * Section b30eca6 ("deep-sec03"): deep-bg2.jpg background declared with no
@@ -36,7 +36,16 @@ import { benefits, benefitsBgImage } from "@/data/deep-cleaning";
  * Outro (11ebcf1) matches the intro paragraph style; button (216a703) is
  * centered with a 1rem top margin at desktop only.
  */
-export default function Benefits() {
+export default function Benefits({
+  benefits,
+  benefitsBgImage,
+  bookHref,
+}: {
+  benefits: DeepCleaningData["benefits"];
+  benefitsBgImage: DeepCleaningData["benefitsBgImage"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   return (
     <section className="bg-[url(/images/deep-bg2.jpg)] py-[2rem] md:py-[3rem] lg:py-[6rem]">
       <div className="ec">
@@ -96,7 +105,7 @@ export default function Benefits() {
 
         <div className="text-center">
           <Link
-            href="/book"
+            href={bookHref}
             className="bg-rust border-rust hover:text-rust inline-block lg:mt-[1rem] rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white"
           >
             Set an appointment 👈

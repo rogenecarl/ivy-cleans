@@ -1,7 +1,14 @@
-import { serviceIntro } from "@/data/services";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 import IntroVideo from "./IntroVideo";
 
-export default function Intro() {
+export default function Intro({
+  serviceIntro,
+  bits,
+}: {
+  serviceIntro: string[];
+  bits: TokenSource;
+}) {
   return (
     <>
       {/* live: its own #F7F7F7 band, 7rem vertical padding */}
@@ -18,7 +25,7 @@ export default function Intro() {
               column's last child (live probe: content-stack sums to container
               height only with this margin included, both @1440 and @390) */}
           <div className="mb-[2rem]">
-            <IntroVideo />
+            <IntroVideo bits={bits} />
           </div>
         </div>
       </section>
@@ -30,7 +37,7 @@ export default function Intro() {
           {/* b8a2ade: widget-container margin-bottom -1rem below 768px, so the kit's
               2rem widget spacing collapses to 1rem there */}
           <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
-            Professional Cleaning Services Minneapolis, MN
+            {t("Professional Cleaning Services {city}, {state}", bits)}
           </h2>
           {/*
             9ed19e9 widget-container margin-bottom: 3rem desktop / 0 at <=1024 /

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import { reviews, reviewsSummary } from "@/data/reviews";
-import { site } from "@/data/site";
+import type { SiteData } from "@/data/site";
+import type { TokenSource } from "@/content/interpolate";
+import { t } from "@/content/interpolate";
 
 /* the live Google-reviews widget renders at fixed px sizes, so this snapshot
    deliberately uses px rather than the rem scale of the rest of the page */
@@ -46,7 +48,13 @@ function GoogleWord() {
   );
 }
 
-export default function Reviews() {
+export default function Reviews({
+  site,
+  bits,
+}: {
+  site: SiteData["site"];
+  bits: TokenSource;
+}) {
   const [start, setStart] = useState(0);
   const prev = () => setStart((s) => (s - 1 + reviews.length) % reviews.length);
   const next = () => setStart((s) => (s + 1) % reviews.length);
@@ -88,7 +96,7 @@ export default function Reviews() {
                     rel="nofollow noopener"
                     className="text-[18px] leading-[21.6px] text-[#333]"
                   >
-                    Ivy Cleans Minneapolis
+                    {t("Ivy Cleans {city}", bits)}
                   </a>
                 </div>
                 <span className="flex h-[20px] items-center font-black text-[#fb8e28]">

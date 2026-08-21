@@ -1,0 +1,144 @@
+{
+  "city": "Minneapolis",
+  "state": "MN",
+  "phone": "612-424-0391",
+  "phoneHref": "tel:6124240391",
+  "address": "5821 Cedar Lake Road, West Unit 208, Minneapolis, MN 55416",
+  "status": "live",
+  "stateName": "Minnesota",
+  "phoneDisplay": "(612) 424-0391",
+  "contactAddress": "5821 Cedar Lake Road Suite 208 Minneapolis, MN 55416",
+  "hasSuburbPages": true,
+  "maps": {
+    "front": "https://maps.google.com/maps?q=Ivy%20Cleans%205821&t=m&z=14&output=embed&iwloc=near",
+    "home": "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d11291.840137965126!2d-93.3546582!3d44.9648053!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa37096c9a1657e4f%3A0x5ad9dc450f082983!2sIvy%20Cleans!5e0!3m2!1sen!2sus!4v1690993615991!5m2!1sen!2sus",
+    "contact": "https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near"
+  },
+  "research": {
+    "suburbs": [
+      {
+        "name": "Apple Valley",
+        "slug": "house-cleaning-apple-valley"
+      },
+      {
+        "name": "Farmington",
+        "slug": "cleaning-services-farmington"
+      },
+      {
+        "name": "Rosemount",
+        "slug": "cleaning-services-rosemount"
+      },
+      {
+        "name": "Lakeville",
+        "slug": "cleaning-services-lakeville"
+      },
+      {
+        "name": "Eagan",
+        "slug": "cleaning-services-eagan"
+      },
+      {
+        "name": "Burnsville",
+        "slug": "cleaning-services-burnsville"
+      },
+      {
+        "name": "Bloomington",
+        "slug": "cleaning-services-bloomington"
+      },
+      {
+        "name": "Shakopee",
+        "slug": "cleaning-services-shakopee"
+      },
+      {
+        "name": "Eden Prairie",
+        "slug": "cleaning-services-eden-prairie"
+      },
+      {
+        "name": "Hopkins",
+        "slug": "cleaning-services-hopkins"
+      },
+      {
+        "name": "St. Louis Park",
+        "slug": "cleaning-services-st-louis-park"
+      },
+      {
+        "name": "Edina",
+        "slug": "cleaning-services-edina"
+      },
+      {
+        "name": "Inver Grove",
+        "slug": "cleaning-services-inver-grove"
+      },
+      {
+        "name": "Maple Grove",
+        "slug": "cleaning-services-maple-grove"
+      },
+      {
+        "name": "Maplewood",
+        "slug": "cleaning-service-maplewood"
+      },
+      {
+        "name": "St. Paul",
+        "slug": "cleaning-service-st-paul"
+      },
+      {
+        "name": "New Brighton",
+        "slug": "cleaning-service-new-brighton"
+      },
+      {
+        "name": "Plymouth",
+        "slug": "cleaning-service-plymouth-mn"
+      },
+      {
+        "name": "Richfield",
+        "slug": "cleaning-service-richfield"
+      },
+      {
+        "name": "Roseville",
+        "slug": "cleaning-services-roseville"
+      },
+      {
+        "name": "Savage",
+        "slug": "cleaning-service-savage-mn"
+      },
+      {
+        "name": "Wayzata",
+        "slug": "cleaning-service-wayzata"
+      },
+      {
+        "name": "Woodbury",
+        "slug": "cleaning-service-woodbury"
+      },
+      {
+        "name": "Vadnais Heights",
+        "slug": "vadnais-heights-cleaning-services"
+      }
+    ],
+    "zips": [],
+    "landmarks": [],
+    "mapEmbedUrl": "https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near"
+  },
+  "sections": {
+    "services.heroParagraphs": [
+      "As a local and insured business, Ivy Cleans is thrilled to be providing cleaning and janitorial services across various areas of Minneapolis. Our experienced team, backed by a life-long dedication to cleanliness, is committed to delivering outstanding house cleaning services that our loyal customers cherish. We are proudly invested in the exceptional results we achieve with every clean. Having established our roots in the industry, we can assertively declare that our business ethos is unmatched. We take care of all cleaning aspects, from all surfaces to the tiniest nooks, and always supersede our client’s expectations, a trait we believe sets us apart.",
+      "That is why we hold fast to the notion that our services are the top most in the Minneapolis area. The cornerstone of our success lies in our diligent effort, our transparent communication, and our spectacular results. No matter what cleaning jobs come our way, we approach each one with the same level of enthusiasm and professionalism. No matter what aspect of our business you scrutinize, it is the epitome of excellence. We have meticulously refined our house cleaning services in Minneapolis, leaving no room for questions.",
+      "Do you have a mess that needs cleaning? Or perhaps you’re after a cleaner household or workplace? Do you have any cleaning project on your radar?",
+      "Whether it’s your home or business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
+      "Call our professional cleaning company Ivy Cleans today, get an estimate of our prices and put us to the test!"
+    ],
+    "services.serviceIntro": [
+      "Ivy Cleans is known to provide an array of professional cleaning services including home cleaning services and maid service in Minneapolis and nearby cities. Whether it’s residential or commercial cleaning, or even office upkeep, our team of professional house cleaners, with their years of experience, are equipped to handle any cleaning job, regardless of its size. We utilize top-notch cleaning products and equipment to ensure the best possible results for our clients. Understanding that people lead busy lives, we offer flexible services tailored to their convenience.",
+      "Whether you live in a quiet suburb or the bustling heart of Minneapolis, one thing is certain – dusting is an unavoidable part of maintaining a clean home. With its varied climate, Minneapolis is prone to dust and allergen accumulation. Our dusting services ensure a breathable, dust-free environment for you and your family.",
+      "Given Minneapolis’ infamous cold winters where indoor living is predominant, maintaining clean floors and carpets is vital. Our professional vacuuming services guarantee a home cleared of grime and dust, providing a sanitized and welcoming living environment.",
+      "Just like the janitorial services we offer for local businesses, our residential cleaning services include comprehensive bathroom cleaning – a necessary yet often dreaded task. Despite Minneapolis’ unpredictable weather, it’s essential to ensure a clean and sanitized bathroom environment. Our bathroom cleaning services aim to eliminate germs and bacteria, providing a safe and healthy space for your family.",
+      "The cold and snow-laden winters of Minneapolis might make window cleaning a daunting task but fret not as Ivy Cleans has got you covered. Our professional window cleaners ensure your windows are sparkling clean, free from dirt and streaks, providing a noticeably brighter living space."
+    ],
+    "services.cards.dusting": "Dusting is an essential part of keeping a home clean and healthy. Minneapolis area is known for its diverse climate, which can contribute to the buildup of dust and allergens in homes. Our dusting services ensure that your home is free from dust and other airborne particles, providing a healthier living environment for you and your family.",
+    "services.cards.vacuuming": "Vacuuming is another crucial cleaning service that is particularly important in Minneapolis. The city’s cold winters mean that people spend more time indoors, leading to a buildup of dirt and debris on floors and carpets. Our professional vacuuming services ensure that your home is free from dirt and dust, providing a more pleasant and hygienic living environment.",
+    "services.cards.bathroom": "Bathroom cleaning is a task that many homeowners find daunting, but it is crucial for maintaining a clean and healthy home. In Minneapolis, where the weather can be unpredictable, maintaining a clean and hygienic bathroom is particularly important. Our bathroom cleaning services ensure that your bathroom is free from germs and bacteria, providing a safe and healthy environment for you and your family.",
+    "services.cards.window": "Window cleaning is another essential service that is particularly important in Minneapolis. With its cold and snowy winters, it can be challenging to keep windows clean and clear. Our professional window cleaning services ensure that your windows are free from dirt, grime, and streaks, providing a clearer view and a brighter, more inviting living space.",
+    "services.cards.upholstery": "Upholstery cleaning is a service that is often overlooked but is crucial for maintaining a clean and healthy home. Minneapolis residents spend a lot of time indoors during the winter months, and this can lead to a buildup of dirt and allergens on upholstered furniture. Our upholstery cleaning services ensure that your furniture is free from dust, dirt, and allergens, providing a more comfortable and healthy living environment.",
+    "deep.whatIs": "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.",
+    "home.zipParagraph": "We offer home cleaning service in most or all of the following Minneapolis ZIP Codes: 55401, 55402, 55403, 55404, 55405, 55406, 55407, 55408, 55409, 55410, 55411, 55412, 55413, 55414, 55415, 55416, 55417, 55418, 55419, 55421, 55423, 55430, 55450, 55454, and 55455.",
+    "home.landmarksParagraph": "Ivy cleans serves in almost all the area of Minneapolis including Mill City Museum, Walker Art Center, Stone Arch Bridge, Minneapolis Institute of Art, Target Field and so on."
+  }
+}

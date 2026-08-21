@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { whyIvy } from "@/data/move-out";
+import type { MoveOutData } from "@/data/move-out";
 
 /*
  * Section 5f8003a (post-241.css): padding 6rem 0 6rem desktop, 3rem 0 1rem
@@ -47,7 +47,11 @@ function Description({ text, index }: { text: string; index: number }) {
   );
 }
 
-export default function WhyIvy() {
+export default function WhyIvy({
+  whyIvy,
+}: {
+  whyIvy: MoveOutData["whyIvy"];
+}) {
   return (
     <section className="pt-[2rem] pb-0 md:pt-[3rem] md:pb-[1rem] lg:pt-[6rem] lg:pb-[6rem]">
       <div className="ec">

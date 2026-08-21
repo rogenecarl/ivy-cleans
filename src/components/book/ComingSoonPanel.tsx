@@ -1,4 +1,4 @@
-import { comingSoon } from "@/data/book";
+import type { BookData } from "@/data/book";
 
 /*
  * Shown by BookingForm in place of the field list once the (intercepted)
@@ -9,7 +9,11 @@ import { comingSoon } from "@/data/book";
  * (src/app/globals.css --color-rust / --color-herogreen) rather than any
  * page-specific CSS, since no live markup exists for this state.
  */
-export default function ComingSoonPanel() {
+export default function ComingSoonPanel({
+  comingSoon,
+}: {
+  comingSoon: BookData["comingSoon"];
+}) {
   return (
     <div className="text-center">
       <h3 className="text-herogreen mb-[1.5rem] text-[2.4rem] leading-[1.2em] font-semibold">

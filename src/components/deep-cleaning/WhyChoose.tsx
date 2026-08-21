@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { whyChoose } from "@/data/deep-cleaning";
+import type { DeepCleaningData } from "@/data/deep-cleaning";
 
 /*
  * Section 6c3aa11: padding 6/3/2rem. Heading (531e5f2) centered black,
@@ -24,7 +24,14 @@ import { whyChoose } from "@/data/deep-cleaning";
  */
 const qualityIconMargin = ["mb-[1.1rem]", "mb-[1.6rem]", "mb-[1rem]", "mb-[1rem]"];
 
-export default function WhyChoose() {
+export default function WhyChoose({
+  whyChoose,
+  bookHref,
+}: {
+  whyChoose: DeepCleaningData["whyChoose"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   return (
     <>
       <section className="py-[2rem] md:py-[3rem] lg:py-[6rem]">
@@ -79,7 +86,7 @@ export default function WhyChoose() {
           </div>
           <div className="text-center">
             <Link
-              href="/book"
+              href={bookHref}
               className="bg-rust border-rust hover:text-rust inline-block rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white md:mt-[3rem] lg:mt-[1rem]"
             >
               Set an appointment 👈

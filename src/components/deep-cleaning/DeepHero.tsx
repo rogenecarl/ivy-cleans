@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { deepHero } from "@/data/deep-cleaning";
+import type { DeepCleaningData } from "@/data/deep-cleaning";
 
 /*
  * Section 1edd646 (post-245.css): deep-bg1.jpg (bottom center / no-repeat /
@@ -12,7 +12,14 @@ import { deepHero } from "@/data/deep-cleaning";
  * margin, which the widget-container's -2rem cancels at tablet. Button
  * (51884af) margin-top 3rem at desktop/tablet, 0 at mobile.
  */
-export default function DeepHero() {
+export default function DeepHero({
+  deepHero,
+  bookHref,
+}: {
+  deepHero: DeepCleaningData["deepHero"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   return (
     <section className="bg-[url(/images/deep-bg1.jpg)] bg-bottom bg-cover bg-no-repeat pt-[2rem] pb-[18rem] text-center md:pt-[3rem] md:pb-[30rem] lg:pt-[6rem] lg:pb-[50rem]">
       <div className="ec">
@@ -30,7 +37,7 @@ export default function DeepHero() {
           ))}
         </div>
         <Link
-          href="/book"
+          href={bookHref}
           className="bg-rust border-rust hover:text-rust inline-block rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white md:mt-[3rem]"
         >
           Set an appointment 👈

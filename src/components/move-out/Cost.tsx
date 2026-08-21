@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cost } from "@/data/move-out";
+import type { MoveOutData } from "@/data/move-out";
 
 /*
  * Section 2e0aad8 (post-241.css): padding 6/3/2rem. Heading (4a76afe)
@@ -9,7 +9,14 @@ import { cost } from "@/data/move-out";
  * margin. Background is out-bg3.jpg (top center / no-repeat / cover), the
  * dark art the white text sits on.
  */
-export default function Cost() {
+export default function Cost({
+  cost,
+  bookHref,
+}: {
+  cost: MoveOutData["cost"];
+  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  bookHref: string;
+}) {
   return (
     <section className="bg-[url(/images/out-bg3.jpg)] bg-cover bg-top bg-no-repeat py-[2rem] md:py-[3rem] lg:py-[6rem]">
       <div className="ec">
@@ -28,7 +35,7 @@ export default function Cost() {
         </div>
         <div className="text-center">
           <Link
-            href="/book"
+            href={bookHref}
             className="bg-rust border-rust hover:text-rust inline-block lg:mt-[1rem] rounded-[5px] border-[1px] px-[30px] py-[17px] text-[1.9rem] leading-[1.2em] font-bold tracking-[1px] text-white uppercase transition-colors hover:bg-white"
           >
             Set an appointment 👈

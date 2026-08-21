@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { areas, type Area } from "@/data/areas";
-import { zipParagraph, landmarksParagraph } from "@/data/home";
+import type { Area } from "@/data/areas";
 import MapEmbed from "@/components/home/MapEmbed";
 
 /* live: the text-editor widgets (4e4f0435 et al) are 2/1.9/1.7rem at weight
@@ -8,14 +7,33 @@ import MapEmbed from "@/components/home/MapEmbed";
 const bodyClass =
   "text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]";
 
-function LocationRow({ list, trailingComma }: { list: Area[]; trailingComma: boolean }) {
+const itemClass = "hover:text-rust font-normal underline";
+/* Same weight, no underline and no link hover colour — dead text must not look
+   clickable. Only reachable when hasSuburbPages is false, i.e. never for the
+   live city, so it carries no fidelity risk. */
+const plainItemClass = "font-normal";
+
+function LocationRow({
+  list,
+  trailingComma,
+  linked,
+}: {
+  list: Area[];
+  trailingComma: boolean;
+  linked: boolean;
+}) {
   return (
     <p className={`mb-[2rem] ${bodyClass}`}>
       {list.map((a, i) => (
         <span key={a.href}>
-          <Link href={a.href} className="hover:text-rust font-normal underline">
-            {a.name}
-          </Link>
+          {linked ? (
+            <Link href={a.href} className={itemClass}>
+              {a.name}
+            </Link>
+          ) : (
+            // Same box, no anchor: this city has no suburb pages to link to.
+            <span className={plainItemClass}>{a.name}</span>
+          )}
           {i < list.length - 1 ? ", " : trailingComma ? "," : ""}
         </span>
       ))}
@@ -37,7 +55,24 @@ function LocationRow({ list, trailingComma }: { list: Area[]; trailingComma: boo
  * Keeping them as four sections is what puts the 10+10px widget gutters
  * between the blocks — a single section would run 20px short at each seam.
  */
-export default function Locations() {
+export default function Locations({
+  areas,
+  zipParagraph,
+  landmarksParagraph,
+  mapSrc,
+  hasSuburbPages,
+}: {
+  areas: Area[];
+  zipParagraph: string;
+  landmarksParagraph: string;
+  mapSrc: string | null;
+  /** False for a city whose suburb pages do not exist — names render unlinked. */
+  hasSuburbPages: boolean;
+}) {
+  // Two paragraphs, first one longer on an odd count. Minneapolis's 24 entries
+  // give 12/12 — the same split the hardcoded slices used to make — and no
+  // entry can fall off the end for a longer or shorter list.
+  const half = Math.ceil(areas.length / 2);
   return (
     <>
       <section className="my-[15px] bg-white">
@@ -47,12 +82,12 @@ export default function Locations() {
           </h2>
         </div>
       </section>
-      <MapEmbed />
+      <MapEmbed mapSrc={mapSrc} />
       <section className="bg-white">
         <div className="ec flex flex-col">
           <div>
-            <LocationRow list={areas.slice(0, 12)} trailingComma />
-            <LocationRow list={areas.slice(12, 24)} trailingComma={false} />
+            <LocationRow list={areas.slice(0, half)} trailingComma linked={hasSuburbPages} />
+            <LocationRow list={areas.slice(half)} trailingComma={false} linked={hasSuburbPages} />
           </div>
         </div>
       </section>

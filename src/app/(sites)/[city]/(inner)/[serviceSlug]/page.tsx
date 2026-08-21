@@ -1,0 +1,199 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { cityFromParams } from "@/content/city-param";
+import { citySlug } from "@/content/interpolate";
+import type { CityContent } from "@/content/types";
+import { getCity } from "@/content/store";
+import { deepCleaningData } from "@/data/deep-cleaning";
+import { moveOutData } from "@/data/move-out";
+import { suburbData, type SuburbRef } from "@/data/suburb";
+import { siteData } from "@/data/site";
+import DeepHero from "@/components/deep-cleaning/DeepHero";
+import WhatIs from "@/components/deep-cleaning/WhatIs";
+import Benefits from "@/components/deep-cleaning/Benefits";
+import DeepServices from "@/components/deep-cleaning/DeepServices";
+import WhyChoose from "@/components/deep-cleaning/WhyChoose";
+import MoveHero from "@/components/move-out/MoveHero";
+import WhyMoveOut from "@/components/move-out/WhyMoveOut";
+import IncludedServices from "@/components/move-out/IncludedServices";
+import WhyIvy from "@/components/move-out/WhyIvy";
+import Cost from "@/components/move-out/Cost";
+import SuburbHero from "@/components/suburb/SuburbHero";
+import HouseCleaning from "@/components/suburb/HouseCleaning";
+import SuburbBenefits from "@/components/suburb/Benefits";
+import OtherServices from "@/components/suburb/OtherServices";
+import WorkInAction from "@/components/suburb/WorkInAction";
+import SuburbClosing from "@/components/suburb/Closing";
+
+/*
+ * This dynamic segment now has THREE legal value classes, all computed from
+ * the city document — anything else still 404s, and it must never become a
+ * catch-all that swallows typos:
+ *
+ *   1. /deep-cleaning-<citySlug>              (kind "deep")
+ *   2. /<citySlug>-move-out-cleaning-services  (kind "move")
+ *   3. any stored suburb slug, c.research.suburbs[].slug (kind "suburb")
+ *
+ * The first two carry the city name IN THE URL; they used to be two literal
+ * route folders, but a folder name cannot be interpolated, so per city they
+ * collapse onto this one dynamic segment. Suburb slugs are looked up by exact
+ * match against c.research.suburbs — never derived, since the live site's
+ * suburb URL patterns vary (house-cleaning-*, cleaning-services-*,
+ * cleaning-service-*, *-cleaning-services, all four appear in the fixtures).
+ * The literal sibling routes (blog, book, contact, faq, home,
+ * cleaning-services, the blog post) still win because Next matches static
+ * segments before dynamic ones.
+ *
+ * The nav/body links that point here are built from the SAME templates
+ * (`/deep-cleaning-{citySlug}` in src/data/site.ts and
+ * src/components/home/HouseCleaning.tsx) or from stored suburb slugs
+ * (src/data/areas.ts, ServiceArea.tsx/Locations.tsx), so slugs and hrefs
+ * cannot drift.
+ */
+type ServiceParams = Promise<{ city: string; serviceSlug: string }>;
+
+function serviceSlugs(c: CityContent) {
+  const slug = citySlug(c.city);
+  return {
+    deep: `deep-cleaning-${slug}`,
+    move: `${slug}-move-out-cleaning-services`,
+  };
+}
+
+/**
+ * Which of the three pages this slug addresses, or `notFound()`. Both the
+ * page and generateMetadata dispatch through here so they can never disagree.
+ */
+async function resolveService(params: ServiceParams) {
+  const c = await cityFromParams(params);
+  const { serviceSlug } = await params;
+  const slugs = serviceSlugs(c);
+  if (serviceSlug === slugs.deep) return { c, kind: "deep" as const };
+  if (serviceSlug === slugs.move) return { c, kind: "move" as const };
+  const suburb = c.research.suburbs.find((s) => s.slug === serviceSlug);
+  if (suburb !== undefined) return { c, kind: "suburb" as const, suburb };
+  notFound();
+}
+
+/*
+ * Runs once per city emitted by the parent [city] segment's
+ * generateStaticParams, receiving that city in `params` (Next merges parent
+ * params into the child call — next/dist/build/static-paths/app.js). Cities
+ * are re-read here rather than threaded, because generateStaticParams gets a
+ * plain params object, not the request-time Promise.
+ *
+ * Suburb slugs are only appended when c.hasSuburbPages — a city whose suburb
+ * pages are not live yet must not get real routes for slugs Areas We Serve
+ * still renders unlinked (src/data/areas.ts / ServiceArea.tsx honour the same
+ * flag). dynamicParams below still lets a draft preview reach an un-generated
+ * suburb slug on demand.
+ */
+export async function generateStaticParams({ params }: { params: { city: string } }) {
+  const c = await getCity(params.city);
+  const { deep, move } = serviceSlugs(c);
+  const slugs = [{ serviceSlug: deep }, { serviceSlug: move }];
+  if (c.hasSuburbPages) {
+    for (const suburb of c.research.suburbs) slugs.push({ serviceSlug: suburb.slug });
+  }
+  return slugs;
+}
+
+// Draft cities are not in the parent's static params, so their service pages
+// render on demand at /<draftCity>/deep-cleaning-<draftCity> — the preview.
+export const dynamicParams = true;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: ServiceParams;
+}): Promise<Metadata> {
+  const resolved = await resolveService(params);
+  const { c, kind } = resolved;
+  if (kind === "deep") {
+    const { deepMeta } = deepCleaningData(c);
+    return { title: deepMeta.title, description: deepMeta.description };
+  }
+  if (kind === "move") {
+    const { moveOutMeta } = moveOutData(c);
+    return { title: moveOutMeta.title, description: moveOutMeta.description };
+  }
+  const { suburbMeta } = suburbData(c, resolved.suburb);
+  return { title: suburbMeta.title, description: suburbMeta.description };
+}
+
+export default async function ServicePage({ params }: { params: ServiceParams }) {
+  const resolved = await resolveService(params);
+  const { c, kind } = resolved;
+  if (kind === "deep") return <DeepCleaningPage c={c} />;
+  if (kind === "move") return <MoveOutPage c={c} />;
+  return <SuburbPage c={c} suburb={resolved.suburb} />;
+}
+
+/* Was src/app/(inner)/deep-cleaning-minneapolis/page.tsx — JSX unchanged. */
+function DeepCleaningPage({ c }: { c: CityContent }) {
+  const {
+    deepHero,
+    whatIs,
+    benefits,
+    benefitsBgImage,
+    deepServices,
+    deepServicesLinkHref,
+    deepServicesLinkedItemIndex,
+    whyChoose,
+  } = deepCleaningData(c);
+  // The four "Set an appointment" CTAs used to hardcode "/book"; sourcing them
+  // from innerSite keeps a draft city's preview inside its own tree.
+  const { innerSite } = siteData(c);
+  return (
+    <>
+      <DeepHero deepHero={deepHero} bookHref={innerSite.bookUrl} />
+      <WhatIs whatIs={whatIs} />
+      <Benefits
+        benefits={benefits}
+        benefitsBgImage={benefitsBgImage}
+        bookHref={innerSite.bookUrl}
+      />
+      <DeepServices
+        deepServices={deepServices}
+        deepServicesLinkHref={deepServicesLinkHref}
+        deepServicesLinkedItemIndex={deepServicesLinkedItemIndex}
+        bookHref={innerSite.bookUrl}
+      />
+      <WhyChoose whyChoose={whyChoose} bookHref={innerSite.bookUrl} />
+    </>
+  );
+}
+
+/* Was src/app/(inner)/minneapolis-move-out-cleaning-services/page.tsx — JSX unchanged. */
+function MoveOutPage({ c }: { c: CityContent }) {
+  const { moveHero, whyMoveOut, included, whyIvy, cost } = moveOutData(c);
+  const { innerSite } = siteData(c);
+  return (
+    <>
+      <MoveHero moveHero={moveHero} bookHref={innerSite.bookUrl} />
+      <WhyMoveOut whyMoveOut={whyMoveOut} bookHref={innerSite.bookUrl} />
+      <IncludedServices included={included} />
+      <WhyIvy whyIvy={whyIvy} />
+      <Cost cost={cost} bookHref={innerSite.bookUrl} />
+    </>
+  );
+}
+
+/* New for Plan 5, Task 2 — one page per suburb.slug (c.research.suburbs). */
+function SuburbPage({ c, suburb }: { c: CityContent; suburb: SuburbRef }) {
+  const { hero, houseCleaning, benefits, otherServices, workInAction, closing } = suburbData(
+    c,
+    suburb,
+  );
+  const { innerSite } = siteData(c);
+  return (
+    <>
+      <SuburbHero hero={hero} bookHref={innerSite.bookUrl} />
+      <HouseCleaning houseCleaning={houseCleaning} />
+      <SuburbBenefits benefits={benefits} bookHref={innerSite.bookUrl} />
+      <OtherServices otherServices={otherServices} />
+      <WorkInAction workInAction={workInAction} />
+      <SuburbClosing closing={closing} bookHref={innerSite.bookUrl} />
+    </>
+  );
+}

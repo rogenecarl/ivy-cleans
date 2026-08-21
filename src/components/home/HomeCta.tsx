@@ -1,4 +1,4 @@
-import { innerSite } from "@/data/site";
+import type { SiteData } from "@/data/site";
 
 /* live layout: the "Do you have any Questions?" H3 sits inside the FAQ
    section (between the "Frequently Asked Questions" H2 and the static Q/A
@@ -14,7 +14,7 @@ import { innerSite } from "@/data/site";
    5572535 is 1.9rem at every width with 17px/30px padding (17px/20px and
    left-aligned at <=767) and its container adds a 3rem top margin only at
    >=1280. */
-export default function HomeCta() {
+export default function HomeCta({ innerSite }: { innerSite: SiteData["innerSite"] }) {
   return (
     <section
       className="bg-cover bg-top bg-no-repeat py-[2rem] md:py-[3rem] lg:py-[6rem]"

@@ -1,0 +1,138 @@
+{
+  "city": "Houston",
+  "state": "TX",
+  "stateName": "Texas",
+  "phone": "786-460-6564",
+  "phoneDisplay": "(786) 460-6564",
+  "phoneHref": "tel:7864606564",
+  "address": "Houston — address pending",
+  "status": "draft",
+  "hasSuburbPages": true,
+  "maps": {
+    "front": null,
+    "home": null,
+    "contact": null
+  },
+  "research": {
+    "suburbs": [
+      {
+        "name": "Katy",
+        "slug": "house-cleaning-katy"
+      },
+      {
+        "name": "The Woodlands",
+        "slug": "cleaning-services-the-woodlands"
+      },
+      {
+        "name": "Sugar Land",
+        "slug": "cleaning-service-sugar-land"
+      },
+      {
+        "name": "Cinco Ranch",
+        "slug": "cinco-ranch-cleaning-services"
+      },
+      {
+        "name": "Missouri City",
+        "slug": "house-cleaning-missouri-city"
+      },
+      {
+        "name": "Spring",
+        "slug": "cleaning-services-spring"
+      },
+      {
+        "name": "Pearland",
+        "slug": "cleaning-service-pearland"
+      },
+      {
+        "name": "Pecan Grove",
+        "slug": "pecan-grove-cleaning-services"
+      },
+      {
+        "name": "Fulshear",
+        "slug": "house-cleaning-fulshear"
+      },
+      {
+        "name": "The Heights",
+        "slug": "cleaning-services-the-heights"
+      },
+      {
+        "name": "River Oaks",
+        "slug": "cleaning-service-river-oaks"
+      },
+      {
+        "name": "Montrose",
+        "slug": "montrose-cleaning-services"
+      }
+    ],
+    "zips": [
+      "77002",
+      "77003",
+      "77004",
+      "77005",
+      "77006",
+      "77007",
+      "77008",
+      "77009",
+      "77019",
+      "77023",
+      "77024",
+      "77025",
+      "77027",
+      "77035",
+      "77036",
+      "77055",
+      "77056",
+      "77057",
+      "77063",
+      "77070",
+      "77077",
+      "77079",
+      "77080",
+      "77084",
+      "77095",
+      "77096",
+      "77098"
+    ],
+    "landmarks": [
+      "Space Center Houston",
+      "The Galleria",
+      "San Jacinto Monument",
+      "San Jacinto Battleground",
+      "NRG Stadium",
+      "Memorial Park",
+      "Sam Houston Park",
+      "Buffalo Bayou Park Cistern",
+      "Museum of Fine Arts",
+      "Houston Botanic Garden",
+      "Theater District",
+      "Hermann Park",
+      "Kemah Boardwalk",
+      "Daikin Park"
+    ],
+    "mapEmbedUrl": null
+  },
+  "sections": {
+    "services.heroParagraphs": [
+      "As a local and insured business, Ivy Cleans is proud to provide residential cleaning and commercial janitorial services throughout Houston and the communities that ring it. Our experienced team understands what this city does to a home — the Gulf humidity, the pollen, the clay tracked in off a driveway — and we clean with that knowledge in hand. We attend to every surface, every baseboard, every corner behind a door, and our customers receive a home that feels genuinely cared for. Having built our reputation one house at a time, we can assertively declare that our standard of work is unmatched.",
+      "That is why we hold fast to the belief that our house cleaning services stand among the finest in the Houston area. The foundation of our work is honest effort, plain and open communication, and results you can see the moment you walk through the door. A studio near the loop or a five-bedroom home out on the west side receives the same care and the same thoroughness. Examine any part of how we operate, and you will find nothing we would hesitate to show you.",
+      "Do you have a mess that needs cleaning? Or are you hoping for a fresher household or workplace? Is there a cleaning project sitting on your list?",
+      "Whether it’s your home or your business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
+      "Reach out to Ivy Cleans today, ask us for an estimate, and let us show you what a proper clean looks like!"
+    ],
+    "services.serviceIntro": [
+      "Ivy Cleans provides a full range of professional cleaning services across Houston and the surrounding cities, from recurring home cleaning and dependable maid service to move-in and move-out work, top-to-bottom deep cleaning, post-renovation cleanup, short-term-rental turnovers, and steady office upkeep for small businesses. Our professional house cleaners bring years of experience along with quality products and commercial-grade equipment suited to each surface. We know Houston keeps long hours and longer commutes, so we schedule weekly, biweekly, monthly, or one-time visits around the way you actually live.",
+      "Houston homes take in a remarkable amount of dust, from the yellow film of live oak pollen every spring to the fine grit that rides in on humid air and settles across ceiling fans, blinds, and vents that run nearly year-round. Our dusting service clears those surfaces properly so the air in your home feels lighter to breathe.",
+      "Between the heavy gumbo clay that clings to shoes after a downpour and the many months when the heat keeps everyone indoors with the air conditioning humming, Houston floors work hard. Our vacuuming service lifts embedded grit from carpet and hard flooring alike, leaving rooms that feel clean underfoot rather than merely tidy.",
+      "Few cities test a bathroom like ours. Gulf humidity lingers in tile grout and around tubs, mildew takes hold in a shower that never fully dries, and mineral deposits cloud glass and fixtures. Our bathroom cleaning removes that buildup along with the germs and bacteria behind it, giving your family a safe, healthy space.",
+      "Houston windows rarely stay clear for long. Pollen sticks to the glass in spring, driving summer rain leaves muddy spatter along the sills, and the haze of traffic and industry dulls whatever is left. Our professional window cleaning removes the film and the streaks, and the difference in daylight through your rooms is immediate."
+    ],
+    "services.cards.dusting": "Dusting matters more here than most people expect. Warm air moves through Houston homes for the better part of the year, carrying pollen, mold spores, and fine outdoor particles onto shelves, plantation shutters, and the tops of door frames where they quietly accumulate. Our dusting service works through those overlooked places with proper cloths and care, so your rooms look settled and the air inside your home is kinder to allergy sufferers.",
+    "services.cards.vacuuming": "Vacuuming is a service Houston households cannot skip. Wet lawns and dark clay soil come inside on shoes and paws after every storm, and long stretches of triple-digit heat mean families live almost entirely indoors, working the carpet daily. Our professional cleaners vacuum thoroughly along edges, beneath furniture, and across every traffic path, so your floors are free of grit and your home feels fresh again.",
+    "services.cards.bathroom": "Bathroom cleaning is the task Houston homeowners dread most, and with good reason. Damp coastal air keeps showers from drying out, so mildew shadows the grout while hard water leaves chalky rings on faucets and glass doors. Our team scrubs tile, tubs, toilets, and fixtures down to the surface and disinfects as we go, handing back a bathroom that is sanitary, bright, and safe for everyone in the house.",
+    "services.cards.window": "Window cleaning transforms a Houston home, whether it’s a bungalow with original wood sashes or a high-rise unit facing the skyline. Oak pollen, mud from summer thunderstorms, and the gray haze that hangs over the freeways build a film that dims every room behind the glass. Our window cleaners leave panes, frames, and sills clear and streak-free, so your home fills with the daylight you are paying for.",
+    "services.cards.upholstery": "Upholstery holds onto Houston in ways you can smell before you see it. Humidity settles into sofa cushions and dining chairs, sunscreen and sweat transfer on hot afternoons, and pollen works deep into the weave each spring. Our upholstery cleaning draws out that trapped soil and odor with methods matched to the fabric, so your furniture looks refreshed, feels dry, and no longer carries the season indoors with it.",
+    "deep.whatIs": "Deep cleaning is a comprehensive service that reaches well past the tidying of a routine visit. We work through every surface, floor, carpet, and piece of furniture in your home, drawing out the dirt, dust, and allergens an ordinary clean leaves sitting in baseboards, grout, vents, and upholstery. Houston gives us plenty to find. Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds. The result is a healthier, more comfortable home for your family.",
+    "home.zipParagraph": "We offer home cleaning service in most or all of the following Houston ZIP Codes: 77002, 77003, 77004, 77005, 77006, 77007, 77008, 77009, 77019, 77023, 77024, 77025, 77027, 77035, 77036, 77055, 77056, 77057, 77063, 77070, 77077, 77079, 77080, 77084, 77095, 77096, and 77098.",
+    "home.landmarksParagraph": "Ivy cleans serves in almost all the area of Houston including Space Center Houston, The Galleria, San Jacinto Monument, San Jacinto Battleground, NRG Stadium, Memorial Park, Sam Houston Park, Buffalo Bayou Park Cistern, Museum of Fine Arts, Houston Botanic Garden, Theater District, Hermann Park, Kemah Boardwalk, Daikin Park and so on."
+  }
+}

@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { services } from "@/data/services";
+import type { Service } from "@/data/services";
 
-export default function ServiceTypes() {
+export default function ServiceTypes({ services }: { services: Service[] }) {
   return (
     /* continues the white "Professional Cleaning Services" band on the live site */
     <section className="bg-white pb-[1rem] md:pb-[3rem] lg:pb-[6rem]">

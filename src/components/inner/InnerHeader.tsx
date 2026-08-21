@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { site } from "@/data/site";
+import type { SiteData } from "@/data/site";
 import { CaretDownIcon } from "@/components/Icons";
 
 /*
@@ -15,17 +15,6 @@ import { CaretDownIcon } from "@/components/Icons";
  * `elementor-nav-menu--dropdown-mobile` => the burger only replaces the nav at
  * the mobile breakpoint (<=767px), so the horizontal nav survives on tablet.
  */
-const topLevel = site.nav.filter(
-  (n) =>
-    n.label !== "Deep Cleaning Minneapolis" &&
-    n.label !== "Minneapolis Move Out Cleaning Services"
-);
-const dropdown = site.nav.filter(
-  (n) =>
-    n.label === "Deep Cleaning Minneapolis" ||
-    n.label === "Minneapolis Move Out Cleaning Services"
-);
-
 /* r7 probe of live a.elementor-item (1440 + 1024 + 768 + 390, /home and
    /cleaning-services agree): display:flex, padding 13px 20px (flat px at every
    width), font-size 1.6rem, font-weight 600 and line-height **0.5em** — the
@@ -36,10 +25,48 @@ const dropdown = site.nav.filter(
 const linkClass =
   "relative flex px-[20px] py-[13px] text-[1.6rem] leading-[0.5em] font-semibold";
 
-export default function InnerHeader() {
+export default function InnerHeader({
+  site,
+  cityKey,
+  homeHref,
+}: {
+  site: SiteData["site"];
+  cityKey: string;
+  /* cityHref(c, "/") — "/" for a live tenant, "/<cityKey>" for a draft preview. */
+  homeHref: string;
+}) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const isActive = (href: string) => pathname === href;
+  /*
+   * usePathname() reports whichever URL this render happened at, and after the
+   * [city] restructure that is TWO different things: the prerender runs at the
+   * internal /minneapolis/home, while the browser (reached through the proxy
+   * rewrite) is at the public /home. Comparing the raw value against site.nav
+   * hrefs — which are always public — would light no nav item on the server
+   * and the right one after hydration, i.e. a mismatch and a crawler diff.
+   * Stripping this city's prefix normalises both back to the public path, and
+   * leaves the internal preview URLs (/testville/home) working too.
+   */
+  const rawPathname = usePathname();
+  /*
+   * Both sides of the comparison get normalised, not just the pathname: a DRAFT
+   * city's nav hrefs carry the same /<cityKey> prefix (cityHref) so its preview
+   * stays browsable, so an un-normalised href would never match the stripped
+   * pathname. For a live city both sides are already public paths and this is a
+   * no-op (no public path starts with "/<cityKey>/" — "/deep-cleaning-minneapolis"
+   * and "/minneapolis-move-out-cleaning-services" both fail that prefix test).
+   */
+  const stripCity = (p: string) =>
+    p === `/${cityKey}`
+      ? "/"
+      : p.startsWith(`/${cityKey}/`)
+        ? p.slice(cityKey.length + 1)
+        : p;
+  const pathname = stripCity(rawPathname);
+  const isActive = (href: string) => pathname === stripCity(href);
+  // nav[2]/nav[3] are the per-city service pages — index-based, label text is
+  // city-dependent (see src/data/site.ts).
+  const dropdown = [site.nav[2], site.nav[3]];
+  const topLevel = site.nav.filter((_, i) => i !== 2 && i !== 3);
 
   return (
     // live: section padding 1.4rem 0 on top of the column's own 10px (.ec) =>
@@ -51,7 +78,7 @@ export default function InnerHeader() {
           why the burger sits centred at 390 (toggle y=27.75 in a 40.5px row). */}
       <div className="ec flex items-start">
         {/* live wraps the logo in a link to the site root, not /home */}
-        <Link href="/" className="shrink-0">
+        <Link href={homeHref} className="shrink-0">
           <Image
             src="/images/Logo.png"
             alt="Ivy Cleans"

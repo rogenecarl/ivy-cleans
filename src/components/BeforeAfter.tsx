@@ -1,7 +1,8 @@
 import Image from "next/image";
+import type { SiteData } from "@/data/site";
 import { CtaCompact } from "./CtaBand";
 
-export default function BeforeAfter() {
+export default function BeforeAfter({ site }: { site: SiteData["site"] }) {
   return (
     <section
       className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[9rem]"
@@ -43,7 +44,7 @@ export default function BeforeAfter() {
             </figure>
           ))}
         </div>
-        <CtaCompact />
+        <CtaCompact site={site} />
       </div>
     </section>
   );

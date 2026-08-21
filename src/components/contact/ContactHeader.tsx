@@ -1,4 +1,4 @@
-import { contactHeader } from "@/data/contact";
+import type { ContactData } from "@/data/contact";
 
 /*
  * contact.html splits contactHeader's four fields across two different
@@ -26,8 +26,10 @@ import { contactHeader } from "@/data/contact";
  */
 export default function ContactHeader({
   variant,
+  contactHeader,
 }: {
   variant: "banner" | "form";
+  contactHeader: ContactData["contactHeader"];
 }) {
   if (variant === "banner") {
     return (

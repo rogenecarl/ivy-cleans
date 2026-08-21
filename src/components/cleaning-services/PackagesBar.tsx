@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { innerSite } from "@/data/site";
+import type { SiteData } from "@/data/site";
 import { tiers } from "@/data/cleaning-services";
 
 /*
@@ -13,7 +13,11 @@ import { tiers } from "@/data/cleaning-services";
  * container edge to edge (x=225..1215 @1440, x=10..380 @390), so the wrapper
  * is the bare 119rem container and only the section keeps its 1rem gutter.
  */
-export default function PackagesBar() {
+export default function PackagesBar({
+  innerSite,
+}: {
+  innerSite: SiteData["innerSite"];
+}) {
   return (
     <>
       {/* "Most Popular" tab strip (its own section on the live page) */}
