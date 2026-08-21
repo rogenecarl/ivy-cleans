@@ -44,6 +44,12 @@ export type ContactData = {
     phone: string;
     email: string;
   };
+  contactResult: {
+    successHeading: string;
+    successBody: string;
+    errorHeading: string;
+    errorBody: string;
+  };
 };
 
 export function contactData(c: CityContent): ContactData {
@@ -146,6 +152,18 @@ export function contactData(c: CityContent): ContactData {
       // page layout/copy frozen, location details swap per city).
       phone: c.phone,
       email: "Support@ivycleans.com",
+    },
+
+    // OUR copy (user-approved) for the post-submit state — mirrors book.ts's
+    // comingSoon precedent, adapted to this form's shape (no phone/email
+    // fallback line; see ContactFormDisplay.tsx). Apostrophes are literal
+    // U+2019: these strings render as JSX expressions, so an `&rsquo;`
+    // entity would print literally instead of being decoded.
+    contactResult: {
+      successHeading: "Thanks, we’ve got your message.",
+      successBody: "We try to answer all enquiries within 24 hours on business days.",
+      errorHeading: "Something went wrong.",
+      errorBody: "Please call us instead and we’ll get straight to it.",
     },
   };
 }
