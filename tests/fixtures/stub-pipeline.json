@@ -1,0 +1,60 @@
+{
+  "_comment": "Canned model output for StubModelClient (src/pipeline/model.ts). Every test and every STUB_MODEL=1 run of the admin pipeline reads this file instead of calling Claude, so it must stay valid against src/pipeline/schemas.ts. The city is the fictional Stubville: obviously fake copy, so a stub run that accidentally reaches a real page is unmistakable. Keys match src/pipeline/stages.ts MODEL_KEYS.",
+  "research": {
+    "research": "STUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Landmarks: Stub Tower, Fixture Park.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust."
+  },
+  "generated": {
+    "research.structure": {
+      "suburbs": [
+        { "name": "North Stubville", "slug": "house-cleaning-north-stubville" },
+        { "name": "Mock Hollow", "slug": "cleaning-services-mock-hollow" },
+        { "name": "Fixture Heights", "slug": "fixture-heights-cleaning-services" }
+      ],
+      "zips": ["00001", "00002"],
+      "landmarks": ["Stub Tower", "Fixture Park"],
+      "keywords": [
+        "cleaning services stubville",
+        "house cleaning stubville",
+        "maid service stubville",
+        "deep cleaning stubville"
+      ]
+    },
+    "front": {
+      "heroParagraphs": [
+        "As a local and insured business, Ivy Cleans is glad to be providing cleaning and janitorial services across every district of Stubville. Our experienced team knows the mock bungalows and stub-frame duplexes this city is built from, and we clean them the way the people who live in them would if they had the afternoon free. Every visit ends with the same standard, whether it is a first clean or a fiftieth.",
+        "That is why we hold that our work in the Stubville area holds up to any inspection. The cornerstone of it is plain effort, clear communication about what we will do, and a result you can see from the doorway. No job here is too small to get our full attention, and none is too large to get our full care.",
+        "Do you have a mess that has outlasted your weekend? Are you after a calmer home or a tidier workplace? Is there a cleaning project you keep postponing?",
+        "Whether it is your home or your business, give our professional cleaning company a call today, request your quote, and put our skills to the test.",
+        "Call Ivy Cleans today, get an estimate for the work, and let us show you what a properly cleaned Stubville home looks like."
+      ],
+      "serviceIntro": [
+        "Ivy Cleans provides a full range of professional cleaning services in Stubville and the fixture districts around it, from regular home cleaning and maid service to commercial and office upkeep. Our professional house cleaners bring their own equipment and products, and we schedule around the hours you are actually at home, because nobody in this city keeps simple hours.",
+        "Whether you live in a quiet corner of North Stubville or beside the fixture line downtown, dusting is unavoidable here. Stubville’s placeholder climate drives test dust through every window seal in the city. Our dusting services leave a home you can breathe in.",
+        "With half the Stubville year spent indoors waiting on assertions, floors and carpets take a beating. Our professional vacuuming services lift out the grit that gets tracked across them, and leave rooms that feel finished rather than merely tidied.",
+        "Alongside the janitorial work we do for local businesses, our residential cleaning includes a full bathroom clean — the job everyone in Stubville puts off. The damp that settles into stub-frame houses makes it the room that most rewards attention, so we take it down to clean, sanitised surfaces every visit.",
+        "Fixture dust settles on Stubville windows within days of a clean, which is why so many homes here give up on them. Our window cleaners work through them inside and out and hand back rooms that are noticeably brighter."
+      ],
+      "cards": {
+        "dusting": "Dusting is where a clean Stubville home begins. The city's placeholder climate keeps fixture dust moving through the air for most of the year, and mock bungalows with their original window frames let a fair share of it inside. Our dusting service takes every surface, ledge and overlooked corner, so what settles in your rooms stops building up.",
+        "vacuuming": "Vacuuming matters more in Stubville than in most places. Six months of test season keep everyone indoors, and floors and carpets collect everything that comes in on shoes. Our professional vacuuming reaches under the furniture and along the edges where grit gathers, leaving floors that are genuinely clean rather than freshly patterned.",
+        "bathroom": "Bathroom cleaning is the task most Stubville homeowners would happily hand over, and we are happy to take it. Damp lingers in stub-frame houses long after the fixture season ends, which is exactly what mildew and bacteria want. Our bathroom cleaning clears them out and leaves a room that is safe for your family to use.",
+        "window": "Window cleaning is hard to keep up with in Stubville, where fixture dust films the glass within days of a wash. Our professional window cleaners work on both sides of every pane, clearing the streaks and the grime along the frames, and the rooms behind them come back brighter than their owners remember.",
+        "upholstery": "Upholstery cleaning is the service Stubville households forget until they look closely. Sofas and armchairs absorb the dust of a long indoor season, and no amount of vacuuming the floor reaches them. Our upholstery cleaning draws the dirt and allergens back out of the fabric, so the furniture you sit on every evening is as clean as the room around it."
+      }
+    },
+    "home": {
+      "zipParagraph": "We offer home cleaning service in most or all of the following Stubville ZIP Codes: 00001, and 00002.",
+      "landmarksParagraph": "Ivy cleans serves in almost all the area of Stubville including Stub Tower, Fixture Park and so on."
+    },
+    "deep": {
+      "whatIs": "Deep cleaning is a thorough service that goes well past a regular visit. It works through every surface, floor, carpet and piece of furniture in your home, lifting out the dirt, dust and allergens that ordinary cleaning passes over. In Stubville that matters more than most places: the mock bungalows and stub-frame duplexes here spend half the year sealed against the test season, and fixture dust settles into fabric and skirting the whole time. A deep clean resets all of it and gives you back a healthier, more comfortable home."
+    }
+  },
+  "events": {
+    "research": [
+      { "kind": "search", "label": "Searching: Stubville Texas suburbs and neighborhoods" },
+      { "kind": "search", "label": "Searching: Stubville TX residential ZIP codes" },
+      { "kind": "reading", "label": "Reading search results…" }
+    ]
+  }
+}

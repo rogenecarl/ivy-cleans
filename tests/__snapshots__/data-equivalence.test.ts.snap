@@ -1,0 +1,701 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`data module values are unchanged by the content-layer refactor > areas 1`] = `
+{
+  "areas": [
+    {
+      "href": "/house-cleaning-apple-valley",
+      "name": "Apple Valley",
+    },
+    {
+      "href": "/cleaning-services-farmington",
+      "name": "Farmington",
+    },
+    {
+      "href": "/cleaning-services-rosemount",
+      "name": "Rosemount",
+    },
+    {
+      "href": "/cleaning-services-lakeville",
+      "name": "Lakeville",
+    },
+    {
+      "href": "/cleaning-services-eagan",
+      "name": "Eagan",
+    },
+    {
+      "href": "/cleaning-services-burnsville",
+      "name": "Burnsville",
+    },
+    {
+      "href": "/cleaning-services-bloomington",
+      "name": "Bloomington",
+    },
+    {
+      "href": "/cleaning-services-shakopee",
+      "name": "Shakopee",
+    },
+    {
+      "href": "/cleaning-services-eden-prairie",
+      "name": "Eden Prairie",
+    },
+    {
+      "href": "/cleaning-services-hopkins",
+      "name": "Hopkins",
+    },
+    {
+      "href": "/cleaning-services-st-louis-park",
+      "name": "St. Louis Park",
+    },
+    {
+      "href": "/cleaning-services-edina",
+      "name": "Edina",
+    },
+    {
+      "href": "/cleaning-services-inver-grove",
+      "name": "Inver Grove",
+    },
+    {
+      "href": "/cleaning-services-maple-grove",
+      "name": "Maple Grove",
+    },
+    {
+      "href": "/cleaning-service-maplewood",
+      "name": "Maplewood",
+    },
+    {
+      "href": "/cleaning-service-st-paul",
+      "name": "St. Paul",
+    },
+    {
+      "href": "/cleaning-service-new-brighton",
+      "name": "New Brighton",
+    },
+    {
+      "href": "/cleaning-service-plymouth-mn",
+      "name": "Plymouth",
+    },
+    {
+      "href": "/cleaning-service-richfield",
+      "name": "Richfield",
+    },
+    {
+      "href": "/cleaning-services-roseville",
+      "name": "Roseville",
+    },
+    {
+      "href": "/cleaning-service-savage-mn",
+      "name": "Savage",
+    },
+    {
+      "href": "/cleaning-service-wayzata",
+      "name": "Wayzata",
+    },
+    {
+      "href": "/cleaning-service-woodbury",
+      "name": "Woodbury",
+    },
+    {
+      "href": "/vadnais-heights-cleaning-services",
+      "name": "Vadnais Heights",
+    },
+  ],
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > contact 1`] = `
+{
+  "contactFields": [
+    {
+      "id": "form-field-name",
+      "kind": "text",
+      "label": "Name",
+      "placeholder": "Your Name",
+      "required": false,
+    },
+    {
+      "id": "form-field-email",
+      "kind": "email",
+      "label": "Email",
+      "placeholder": "Email",
+      "required": true,
+    },
+    {
+      "id": "form-field-field_66433ea",
+      "kind": "text",
+      "label": "Phone Number",
+      "placeholder": "(777) 777-7777",
+      "required": false,
+    },
+    {
+      "id": "form-field-message",
+      "kind": "select",
+      "label": "Are You Looking For Help With A Cleaning Project?",
+      "options": [
+        "-",
+        "Yes",
+        "No",
+      ],
+      "required": true,
+    },
+    {
+      "id": "form-field-field_45db7dd",
+      "kind": "textarea",
+      "label": "How Can We Help?",
+      "placeholder": "Give us some more details on how we can help.",
+      "required": false,
+      "rows": 4,
+    },
+  ],
+  "contactHeader": {
+    "h2a": "Contact Us",
+    "h2b": "We would love to hear from you!",
+    "intro": "Give us a call, we try to answer all enquiries within 24 hours on business days.",
+    "overline": "GET IN TOUCH WITH OUR TEAM",
+  },
+  "contactInfo": {
+    "address": "5821 Cedar Lake Road Suite 208 Minneapolis, MN 55416",
+    "email": "Support@ivycleans.com",
+    "hours": [
+      "Mon-Fri: 8:00 AM – 5:00 PM",
+      "Sat: 8:00 AM – 5:00 PM",
+      "Sun: 8:00 AM – 5:00 PM",
+    ],
+    "hoursHeading": "Hours",
+    "location2Heading": "Location",
+    "locationHeading": "Location",
+    "phone": "612-424-0391",
+  },
+  "contactMap": {
+    "src": "https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near",
+    "title": "ivy cleans",
+  },
+  "contactMeta": {
+    "description": "Give us a call, we try to answer all enquiries within 24 hours on business days.",
+    "title": "Contact - Ivy Cleans",
+  },
+  "contactSubmitLabel": "Send",
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > deep 1`] = `
+{
+  "benefits": {
+    "h2": "Benefits of Deep Cleaning Minneapolis",
+    "intro": [
+      "Deep cleaning is the most intensive cleaning service available. When you request these services you can assure yourself not only of the quality you’re going to receive but also of the depth of the services. We make sure that your home is ready to turn into a landlord, incoming homeowner, or current homeowner.",
+      "The benefits of deep cleaning really come in because the service is so comprehensive. Areas that aren’t typically cleaned are covered, wiped down, and sanitized. Ivy cleans specializes in improving the cleanliness of clients’ homes that’s why we offer deep cleaning. To offer the most comprehensive service available, making sure that there isn’t a single box we leave unchecked.",
+    ],
+    "items": [
+      "Reducing the number of allergens in your home",
+      "Improving indoor air quality",
+      "Preventing the spread of germs and bacteria",
+      "Removing stubborn stains and dirt buildup",
+      "Creating a more comfortable living environment",
+    ],
+    "listIntro": "There are many benefits to deep cleaning your home in Minneapolis, including:",
+    "outro": "At Ivy Cleans, we use eco-friendly cleaning products and techniques to ensure that your home is not only clean but also safe for you, your family, and your pets. It is important to us that you’re as comfortable as possible in your freshly cleaned home.",
+  },
+  "benefitsBgImage": "/images/deep-bg4.jpg",
+  "deepHero": {
+    "h1": "Deep Cleaning Minneapolis",
+    "paragraphs": [
+      "At Ivy Cleans, we specialize in providing exceptional deep cleaning services to individuals in Minneapolis and the surrounding areas. We understand the importance of a clean and comfortable living environment, so we are committed to providing top-notch cleaning services that meet your needs.",
+      "Contact us today to book your quote.",
+    ],
+  },
+  "deepMeta": {
+    "description": "For a deep clean that revitalizes your Minneapolis home, trust Ivy Cleans. Our deep cleaning service ensures a thorough sparkle. Book now!",
+    "title": "Deep Clean Minneapolis",
+  },
+  "deepServices": {
+    "contact": "Contact us today to discuss your deep cleaning requirements in Minneapolis.",
+    "h2": "Deep Cleaning Services Minneapolis",
+    "image": "/images/deep-img2.jpg",
+    "items": [
+      "Thorough cleaning of all surfaces, including countertops, cabinets, and furniture",
+      "Cleaning of floors, carpets, and rugs",
+      "Scrubbing and disinfecting of bathrooms, including toilets, sinks, and showers",
+      "Cleaning and disinfecting of kitchen appliances, including stoves, ovens, and refrigerators",
+      "Dusting and cleaning of all surfaces, including baseboards, light fixtures, and ceiling fans",
+      "Removal of trash and recycling",
+    ],
+    "listIntro": "Our deep cleaning services in Minneapolis include:",
+    "note": "We understand that every home in Minneapolis is unique, which is why we offer customized cleaning services to meet your specific needs.",
+  },
+  "deepServicesLinkHref": "https://ivycleans.com/how-to-clean-a-bathroom/",
+  "deepServicesLinkedItemIndex": 3,
+  "whatIs": {
+    "h2": "What is Deep House Cleaning?",
+    "image": "/images/deep-img1.jpg",
+    "text": "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.",
+  },
+  "whyChoose": {
+    "closing": "That being said, if you’re looking for exceptional deep cleaning services in Minneapolis, look no further than Ivy Cleans. Our experience. Our dedication. Our motivation is to provide our customers with the best cleaning services in the area. We’re different from the competition and we know it, so give us a call.",
+    "contact": "Contact us today to schedule your deep cleaning appointment and experience the benefits of deep cleaning.",
+    "h2": "Why Choose Ivy Cleans for Deep Cleaning Minneapolis?",
+    "listIntro": "Here is a brief list of our best qualities:",
+    "paragraphs": [
+      "To be brief, Ivycleans offers the highest quality cleaning services in Minneapolis. We take the time to do our work properly, effectively, and as conveniently as possible for the homeowner. We pride ourselves in our work and the results that we have for our customers. Our drive is in executing our knowledge of cleaning to best suit the needs of all of our clients. That’s what differentiates us from the competition. We truly care about the services we provide, making sure that they are the best they can be.",
+      "We continually change our techniques, tools, and products to find what works best for us and our customers. Always learning more and more about the industry with each passing day, is what makes Ivy cleans the only company in Minneapolis the company you should choose for deep cleaning.",
+    ],
+    "qualities": [
+      {
+        "height": 86,
+        "icon": "/images/deep-icon1.png",
+        "text": "At Ivy Cleans, we take great pride in our attention to detail regarding deep cleaning in Minneapolis. Our experienced cleaners will leave no stone unturned in our quest to make your home as clean and comfortable as possible.",
+        "title": "Attention to Detail",
+        "width": 86,
+      },
+      {
+        "height": 82,
+        "icon": "/images/deep-icon2.png",
+        "text": "We also understand the importance of trust and safety when it comes to allowing cleaners into your home, which is why all of our cleaners are carefully screened and trained to handle your belongings with care.",
+        "title": "Safety",
+        "width": 82,
+      },
+      {
+        "height": 88,
+        "icon": "/images/deep-icon3.png",
+        "text": "In addition, we are committed to arriving on time and completing our deep cleaning services in a timely and efficient manner. We will work with you to create a cleaning schedule that fits your needs and preferences in Minneapolis.",
+        "title": "On-time",
+        "width": 88,
+      },
+      {
+        "height": 88,
+        "icon": "/images/deep-icon4.png",
+        "text": "At Ivy Cleans, we don’t turn in the house until it meets our standards of deep cleaning in Minneapolis. We take pride in the quality of our work and will always strive to exceed your expectations. If you are not satisfied with our services, we will work with you to make it right.",
+        "title": "Results",
+        "width": 88,
+      },
+    ],
+  },
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > home 1`] = `
+{
+  "features": [
+    {
+      "height": 86,
+      "icon": "/images/service-icon1.png",
+      "text": "At Ivy Cleans, we understand that every house is unique and requires personalize attention. Our team takes the time to get to know each client and their specific cleaning needs. We pay close attention to detail and ensure that every nook and cranny is thoroughly cleaned.",
+      "title": "Attention to Detail",
+      "width": 86,
+    },
+    {
+      "height": 87,
+      "icon": "/images/service-icon2.png",
+      "text": "We are committed to using eco-friendly cleaning products that are safe for your family and pets, as well as the environment. Our products are effective in cleaning and disinfecting your home without leaving behind any harmful residues.",
+      "title": "Eco-Friendly Cleaning Products",
+      "width": 87,
+    },
+    {
+      "height": 87,
+      "icon": "/images/service-icon3.png",
+      "text": "Our cleaning staff or cleaner is highly trained and experienced. We carefully select our team members and ensure that they share our values of professionalism, honesty, and attention to detail. You can trust that our staff will treat your home with the utmost care and respect.",
+      "title": "Highly-Trained and Professional Staff",
+      "width": 87,
+    },
+    {
+      "height": 87,
+      "icon": "/images/service-icon4.png",
+      "text": "We offer customizable cleaning plans to meet the unique needs of each client. Whether you need weekly, bi-weekly, or monthly cleaning services, we can tailor our services to fit your schedule and budget.",
+      "title": "Customizable Cleaning Plans",
+      "width": 87,
+    },
+    {
+      "height": 87,
+      "icon": "/images/service-icon5.png",
+      "text": "We understand that affordability is important to our clients. That’s why we offer competitive pricing without sacrificing the quality of our services. Satisfaction Guarantee: We stand behind the quality of our work and offer a satisfaction guarantee. If you’re not completely satisfied with our cleaning services, we will work with you to make it right.",
+      "title": "Affordable Pricing",
+      "width": 85,
+    },
+  ],
+  "featuresOutro": "Ivy Cleans is committed to providing exceptional cleaning services in Minneapolis throughout homes, apartments and offices. Our services are personalized, eco-friendly, and affordable. Our highly-trained staff takes pride in their work and always goes the extra mile to ensure that your home is thoroughly cleaned and disinfected.",
+  "homeMeta": {
+    "description": "Ivy Cleans is a great choice for all of your home cleaning needs. We offer a 100% satisfaction on all of our cleans. Check us out today!",
+    "title": "Cleaning Service in Minneapolis, MN | Ivy Cleans",
+  },
+  "houseCleaning": [
+    "At Ivy Cleans, our passion for providing high-quality house cleaning services in Minneapolis is unmatched. Our team prides itself on professionalism, and we prioritize the trust and reliability which come with inviting cleaning professionals into your home. As a reliable, professional, and trustworthy house cleaning service in Minneapolis, we are the clear choice for anyone seeking top-notch service.",
+    "That being said, if you’re thinking about enlisting the services of a professional cleaning team in Minneapolis, don’t hesitate to let us know. It’s only through acting on our company’s deeply-held values that we can ensure your home gets the attention it richly deserves.",
+    "We promise all of our clients phenomenal results, competitive pricing, and a level of communication that sets us apart from other companies. Our commitment to creating a well-rounded customer experience starts from the moment you pick up the phone to schedule an appointment, and it doesn’t end until our professionals leave your home in perfect condition.",
+  ],
+  "landmarksParagraph": "Ivy cleans serves in almost all the area of Minneapolis including Mill City Museum, Walker Art Center, Stone Arch Bridge, Minneapolis Institute of Art, Target Field and so on.",
+  "nearMe": [
+    "At Ivy Cleans, our passion is providing high-quality house cleaning services in Minneapolis. We are a team of professional adults, dedicated to excellence, who act as much more than just maids. We understand the importance of trust and reliability – factors that are highlighted in our positive customer reviews. We are the perfect choice for anyone looking for a reliable, professional, and trustworthy house cleaning service in Minneapolis.",
+    "That being said, if you’re interested in top-tier cleaning services in Minneapolis, don’t hesitate to let us know. We would love to make sure that your house gets the attention it deserves because those are the values that have been instilled in our company since our inception.",
+  ],
+  "principles": [
+    "Our objective is to cater to your needs and establish a connection with you, as well as your loved ones and household. Our aim is to simplify your life rather than complicate it, by offering a hassle-free home cleaning service experience that you can rely on through the assistance of a reliable pair of cleaners.",
+    "We have full assurance that you will observe the excellence in our services, encompassing our team and thorough cleaning procedures. As a result, we extend a 100% satisfaction guarantee, with no inquiries asked. If, within the initial 24 hours following completion of the service, you are dissatisfied, we will refund your payment in its entirety.",
+  ],
+  "workImages": [
+    "/images/rn_image_picker_lib_temp_d129a169-21-1.jpg",
+    "/images/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg",
+    "/images/Untitled-design.png",
+    "/images/Untitled-design-1-2.png",
+    "/images/Untitled-design-2.png",
+  ],
+  "zipParagraph": "We offer home cleaning service in most or all of the following Minneapolis ZIP Codes: 55401, 55402, 55403, 55404, 55405, 55406, 55407, 55408, 55409, 55410, 55411, 55412, 55413, 55414, 55415, 55416, 55417, 55418, 55419, 55421, 55423, 55430, 55450, 55454, and 55455.",
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > moveOut 1`] = `
+{
+  "cost": {
+    "h2": "How much does a move-out cleaning cost?",
+    "paragraphs": [
+      "The cost of move-out cleaning services can vary depending on several factors. The size of the property, the level of cleaning required, and the location are some of the key factors that can influence the price.",
+      "Smaller properties typically cost less to clean than larger ones, as there is less surface area to cover. However, the level of cleaning required can also play a role. If the property is particularly dirty or has not been cleaned regularly, it may require more time and effort to clean, which can increase the cost.",
+      "The location of the property can also affect the price of move-out cleaning services. Properties in more affluent areas or those that are more difficult to access may be more expensive to clean due to the additional time and resources required.",
+      "IVYCleans is committed to providing top-quality move-out cleaning services in Minneapolis. Schedule your cleaning appointment today to ensure your property is left spotless before you leave.",
+    ],
+  },
+  "included": {
+    "h2": "What services are included in a move-out cleaning?",
+    "items": [
+      "Dusting and wiping all surfaces, including countertops, cabinets, and appliances",
+      "Cleaning the floors, including vacuuming and mopping",
+      "Removing cobwebs",
+      "Cleaning bathrooms, including the shower, sink, and toilet",
+      "Emptying all trash cans and disposing of trash",
+      "Cleaning the kitchen, including the stove, oven, refrigerator, and dishwasher",
+      "Cleaning the windows, window sills, and tracks",
+      "Cleaning all mirrors",
+      "Cleaning all light fixtures and switches",
+      "Cleaning all baseboards and moldings",
+      "Cleaning all doors and door frames",
+    ],
+  },
+  "moveHero": {
+    "h1": "Minneapolis Move Out Cleaning Services",
+    "paragraphs": [
+      "Looking for a reliable move-out cleaning service in Minneapolis? Look no further than IVYCleans! We understand that moving out of a house can be a daunting task, and cleaning the entire property before you leave can add to the stress. That’s why we offer comprehensive Minneapolis move-out cleaning services to make the transition easier for you.",
+      "Our move-out cleaning service is designed to leave your property in top condition for the next tenants or the landlord. Our team of professionals pays attention to every detail when cleaning your property, ensuring that nothing is overlooked. We use the latest cleaning techniques and equipment to deliver outstanding results, and we’ll keep you informed every step of the way.",
+      "Our move-out cleaning service in Minneapolis includes dusting and wiping all surfaces, cleaning the floors, removing cobwebs, cleaning bathrooms and kitchens, emptying all trash cans and disposing of trash, cleaning windows and mirrors, cleaning light fixtures and switches, and much more.",
+      "At IVYCleans, we believe in open and honest communication with our clients. We’ll work closely with you to ensure that your property is cleaned to the highest standard and that you’re satisfied with the results. Our goal is to exceed your expectations and deliver great results every time.",
+      "Don’t stress about cleaning your property before you leave. Contact IVYCleans today to schedule your Minneapolis move-out cleaning service and make the transition easier and stress-free. We’ll take care of everything, so you can focus on your move and enjoy peace of mind knowing that your property is in good hands.",
+    ],
+  },
+  "moveOutMeta": {
+    "description": "Looking for a reliable move-out cleaning service in Minneapolis? Look no further than IVYCleans! We understand that moving out of a house can be a daunting",
+    "title": "Minneapolis Move Out Cleaning Services - Ivy Cleans",
+  },
+  "whyIvy": {
+    "h2": "Move out cleaning service in Minneapolis",
+    "image": "/images/out-img3.jpg",
+    "intro": "IVYCleans is an excellent choice for move-out cleaning services in Minneapolis because we provide exceptional attention to detail, and expertise, have a long-standing time in the industry, have effective communication, and have consistent quality.",
+    "qualities": [
+      {
+        "alt": "",
+        "height": 86,
+        "icon": "/images/service-icon1.png",
+        "text": "Our attention to detail is unparalleled, and we leave no stone unturned when it comes to ensuring that the property is left in pristine condition. we understand that every nook and cranny of the property needs to be thoroughly cleaned, and we use specialized equipment and techniques to achieve this.",
+        "title": "Attention to Detail",
+        "width": 86,
+      },
+      {
+        "alt": "",
+        "height": 87,
+        "icon": "/images/service-icon3.png",
+        "text": "IVYCleans has years of experience in providing move-out cleaning services in Minneapolis. We have honed our skills over the years and can tackle even the most challenging cleaning tasks. our expertise ensures that the job is done efficiently and effectively, saving you time and energy.",
+        "title": "Expertise",
+        "width": 87,
+      },
+      {
+        "alt": "",
+        "height": 87,
+        "icon": "/images/out-icon1.png",
+        "text": "The company has been in the industry for a long time, and this longevity is a testament to its commitment to providing high-quality services. We have built a reputation for excellence, and our track record speaks for itself.",
+        "title": "Industry experience",
+        "width": 87,
+      },
+      {
+        "alt": "",
+        "height": 79,
+        "icon": "/images/out-icon2.png",
+        "text": "Effective communication is another hallmark of IVYCleans’ move-out cleaning services. We listen to our client’s needs and requirements, and we keep them updated throughout the cleaning process. This communication ensures that everyone is on the same page, and there are no surprises at the end of the job. From the second you call us, you’ll realize what separates us from the competition.",
+        "title": "Effective communication",
+        "width": 87,
+      },
+      {
+        "alt": "In this image we explain what are the things you would like to ask your cleaning service provider",
+        "height": 88,
+        "icon": "/images/out-icon3.png",
+        "text": "Finally, high quality is a top priority for IVYCleans. we strive to maintain our high standards of cleaning on every job we undertake, ensuring that every property is left spotless and ready for the next occupants. We refuse to turn in a house to a client without making sure that it not only reaches our standards but also, those of the client.",
+        "title": "High-quality results",
+        "width": 88,
+      },
+    ],
+  },
+  "whyMoveOut": {
+    "h2": "Move out cleaning Minneapolis",
+    "row1": {
+      "image": "/images/out-img1.jpg",
+      "paragraphs": [
+        "Move-out cleaning is an essential task that you should undertake before leaving a rental property in Minneapolis. It’s a responsibility that ensures that the property is left in good condition for the next tenant or the landlord.",
+        "Move-out cleaning is also an excellent opportunity to inspect the property for any damages or repairs that need to be done. By identifying these issues early, you can address them before leaving the property and avoid any disputes or legal action in the future.",
+      ],
+    },
+    "row2": {
+      "image": "/images/out-img2.jpg",
+      "paragraphs": [
+        "Moreover, move-out cleaning gives you the chance to show that you’re a responsible tenant who takes care of the property. Leaving the property in excellent condition reflects positively on you as a tenant and can help you secure good references and recommendations for future rentals.",
+        "In conclusion, move-out cleaning is an essential task that you should undertake before leaving a rental property in Minneapolis. It’s your responsibility to ensure that the property is left in good condition for the next tenant or the landlord. Hiring a professional cleaning service like IVYCleans can make the task easier and more efficient, ensuring that the property is left spotless and ready for the next occupants.",
+      ],
+    },
+  },
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > packages 1`] = `
+{
+  "packages": [
+    {
+      "icon": "/images/icon1.png",
+      "text": "Maintaining frequently used sections of your household ensures a worry-free living experience. Choose between scheduling one-time, bi-weekly, or monthly services!",
+      "title": "Standard Cleaning",
+    },
+    {
+      "icon": "/images/icon6.png",
+      "text": "A comprehensive sanitation of your residence, encompassing inaccessible regions such as beneath furniture and appliances, as well as baseboards and window sills.",
+      "title": "Deep Cleaning",
+    },
+    {
+      "icon": "/images/icon2.png",
+      "text": "A comprehensive cleaning service that covers all areas of the home, from top to bottom, including activities such as dusting, vacuuming, and disinfecting surfaces in order to ready the residence for its new occupants.",
+      "title": "Move In/Move Out Cleaning",
+    },
+    {
+      "icon": "/images/icon7.png",
+      "text": "Efficient and comprehensive cleaning service designed specifically for condominiums, ensuring every room is meticulously cleaned, from living areas to bedrooms and kitchens.",
+      "title": "Condo Cleaning",
+    },
+    {
+      "icon": "/images/icon3.png",
+      "text": "A specialized cleaning service designed specifically for the maintenance of temporary accommodations, which includes tasks such as handling laundry, restocking supplies, and guaranteeing excellent guest reviews.",
+      "title": "AirBnB Cleaning",
+    },
+    {
+      "icon": "/images/icon8.png",
+      "text": "A specialized cleaning service tailored for extended rental properties, guaranteeing that the property is immaculate and in a hospitable state for future tenants.",
+      "title": "Rental Cleaning",
+    },
+    {
+      "icon": "/images/icon4.png",
+      "text": "A cleaning process that entails the elimination of dust, debris, and other construction materials following a renovation or construction endeavor.",
+      "title": "Renovation & Post Construction Cleaning",
+    },
+    {
+      "icon": "/images/icon9.png",
+      "text": "Upon your preference, we are able to employ organic cleaning substances in order to guarantee a chemical-free environment in your residence.",
+      "title": "Eco Friendly Green Cleaning",
+    },
+    {
+      "icon": "/images/icon5.png",
+      "text": "A cleaning service that entails the preservation of cleanliness and maintenance of office spaces and clinics.",
+      "title": "Commercial & Office Cleaning",
+    },
+    {
+      "icon": "/images/icon10.png",
+      "text": "Consistent and thorough cleaning of your entire residence, customized to fit your individual lifestyle and timetable.",
+      "title": "Maid Service",
+    },
+  ],
+  "packagesIntro": "Under this section, we provide different types of cleaning services in Minneapolis. Our services include residential cleaning, commercial cleaning, office cleaning, and more. Our team of professional cleaners is experienced in handling any type of cleaning job, no matter how big or small. We use high-quality cleaning products and equipment to ensure the best possible results for our clients. Our team is also flexible, and we work around our client’s schedules to provide cleaning services at a time that is convenient for them.",
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > services 1`] = `
+{
+  "heroParagraphs": [
+    "As a local and insured business, Ivy Cleans is thrilled to be providing cleaning and janitorial services across various areas of Minneapolis. Our experienced team, backed by a life-long dedication to cleanliness, is committed to delivering outstanding house cleaning services that our loyal customers cherish. We are proudly invested in the exceptional results we achieve with every clean. Having established our roots in the industry, we can assertively declare that our business ethos is unmatched. We take care of all cleaning aspects, from all surfaces to the tiniest nooks, and always supersede our client’s expectations, a trait we believe sets us apart.",
+    "That is why we hold fast to the notion that our services are the top most in the Minneapolis area. The cornerstone of our success lies in our diligent effort, our transparent communication, and our spectacular results. No matter what cleaning jobs come our way, we approach each one with the same level of enthusiasm and professionalism. No matter what aspect of our business you scrutinize, it is the epitome of excellence. We have meticulously refined our house cleaning services in Minneapolis, leaving no room for questions.",
+    "Do you have a mess that needs cleaning? Or perhaps you’re after a cleaner household or workplace? Do you have any cleaning project on your radar?",
+    "Whether it’s your home or business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
+    "Call our professional cleaning company Ivy Cleans today, get an estimate of our prices and put us to the test!",
+  ],
+  "serviceIntro": [
+    "Ivy Cleans is known to provide an array of professional cleaning services including home cleaning services and maid service in Minneapolis and nearby cities. Whether it’s residential or commercial cleaning, or even office upkeep, our team of professional house cleaners, with their years of experience, are equipped to handle any cleaning job, regardless of its size. We utilize top-notch cleaning products and equipment to ensure the best possible results for our clients. Understanding that people lead busy lives, we offer flexible services tailored to their convenience.",
+    "Whether you live in a quiet suburb or the bustling heart of Minneapolis, one thing is certain – dusting is an unavoidable part of maintaining a clean home. With its varied climate, Minneapolis is prone to dust and allergen accumulation. Our dusting services ensure a breathable, dust-free environment for you and your family.",
+    "Given Minneapolis’ infamous cold winters where indoor living is predominant, maintaining clean floors and carpets is vital. Our professional vacuuming services guarantee a home cleared of grime and dust, providing a sanitized and welcoming living environment.",
+    "Just like the janitorial services we offer for local businesses, our residential cleaning services include comprehensive bathroom cleaning – a necessary yet often dreaded task. Despite Minneapolis’ unpredictable weather, it’s essential to ensure a clean and sanitized bathroom environment. Our bathroom cleaning services aim to eliminate germs and bacteria, providing a safe and healthy space for your family.",
+    "The cold and snow-laden winters of Minneapolis might make window cleaning a daunting task but fret not as Ivy Cleans has got you covered. Our professional window cleaners ensure your windows are sparkling clean, free from dirt and streaks, providing a noticeably brighter living space.",
+  ],
+  "services": [
+    {
+      "alt": "home cleaning services minneapolis mn",
+      "height": 275,
+      "image": "/images/dusting.jpg",
+      "text": "Dusting is an essential part of keeping a home clean and healthy. Minneapolis area is known for its diverse climate, which can contribute to the buildup of dust and allergens in homes. Our dusting services ensure that your home is free from dust and other airborne particles, providing a healthier living environment for you and your family.",
+      "title": "Dusting",
+      "width": 401,
+    },
+    {
+      "alt": "",
+      "height": 275,
+      "image": "/images/vacuuming.jpg",
+      "text": "Vacuuming is another crucial cleaning service that is particularly important in Minneapolis. The city’s cold winters mean that people spend more time indoors, leading to a buildup of dirt and debris on floors and carpets. Our professional vacuuming services ensure that your home is free from dirt and dust, providing a more pleasant and hygienic living environment.",
+      "title": "Vacuuming",
+      "width": 401,
+    },
+    {
+      "alt": "bathroom-cleaning minneapolis",
+      "height": 275,
+      "image": "/images/bathroom-cleaning.jpg",
+      "text": "Bathroom cleaning is a task that many homeowners find daunting, but it is crucial for maintaining a clean and healthy home. In Minneapolis, where the weather can be unpredictable, maintaining a clean and hygienic bathroom is particularly important. Our bathroom cleaning services ensure that your bathroom is free from germs and bacteria, providing a safe and healthy environment for you and your family.",
+      "title": "Bathroom Cleaning",
+      "width": 401,
+    },
+    {
+      "alt": "",
+      "height": 275,
+      "image": "/images/window.jpg",
+      "text": "Window cleaning is another essential service that is particularly important in Minneapolis. With its cold and snowy winters, it can be challenging to keep windows clean and clear. Our professional window cleaning services ensure that your windows are free from dirt, grime, and streaks, providing a clearer view and a brighter, more inviting living space.",
+      "title": "Window Cleaning",
+      "width": 401,
+    },
+    {
+      "alt": "professional cleaning services minneapolis",
+      "height": 275,
+      "image": "/images/upholstery.jpg",
+      "text": "Upholstery cleaning is a service that is often overlooked but is crucial for maintaining a clean and healthy home. Minneapolis residents spend a lot of time indoors during the winter months, and this can lead to a buildup of dirt and allergens on upholstered furniture. Our upholstery cleaning services ensure that your furniture is free from dust, dirt, and allergens, providing a more comfortable and healthy living environment.",
+      "title": "Upholstery Cleaning",
+      "width": 401,
+    },
+  ],
+}
+`;
+
+exports[`data module values are unchanged by the content-layer refactor > site 1`] = `
+{
+  "innerSite": {
+    "address": "5821 Cedar Lake Road, West Unit 208, Minneapolis, MN 55416",
+    "bookUrl": "/book",
+    "companyLinks": [
+      {
+        "href": "/privacy-policy",
+        "label": "Privacy Policy",
+      },
+      {
+        "href": "/contact",
+        "label": "Contact Us",
+      },
+      {
+        "href": "/faq",
+        "label": "FAQ",
+      },
+    ],
+    "copyright": "© 2026 IvyCleans. All rights reserved.",
+    "email": "support@ivycleans.com",
+    "footerLinks": [
+      {
+        "href": "/home",
+        "label": "Home",
+      },
+      {
+        "href": "/blog",
+        "label": "Blog",
+      },
+      {
+        "href": "/contact",
+        "label": "Contact",
+      },
+      {
+        "href": "/faq",
+        "label": "FAQ",
+      },
+      {
+        "href": "/privacy-policy",
+        "label": "Privacy Policy",
+      },
+    ],
+    "footerPhone": "612-424-0391",
+    "phone": "612-482-5001",
+    "phoneHref": "tel: +16124825001",
+    "servicesLinks": [
+      {
+        "href": "/book",
+        "label": "Book Now",
+      },
+      {
+        "href": "/cleaning-services",
+        "label": "Cleaning Services",
+      },
+    ],
+  },
+  "site": {
+    "address": "5821 Cedar Lake Road,West Unit 208, Minneapolis, N 55416",
+    "bookingUrl": "/book-now",
+    "email": "Support@ivycleans.com",
+    "googleMapsUrl": "https://maps.google.com/?cid=6546505722522773891",
+    "nav": [
+      {
+        "href": "/home",
+        "label": "Home",
+      },
+      {
+        "href": "/cleaning-services",
+        "label": "Cleaning Services",
+      },
+      {
+        "href": "/deep-cleaning-minneapolis",
+        "label": "Deep Cleaning Minneapolis",
+      },
+      {
+        "href": "/minneapolis-move-out-cleaning-services",
+        "label": "Minneapolis Move Out Cleaning Services",
+      },
+      {
+        "href": "/blog",
+        "label": "Blog",
+      },
+      {
+        "href": "/contact",
+        "label": "Contact",
+      },
+      {
+        "href": "/faq",
+        "label": "FAQ",
+      },
+    ],
+    "phone": "612-424-0391",
+    "phoneHref": "tel:6124240391",
+    "socials": [
+      {
+        "href": "https://www.facebook.com/ivy.cleans1/",
+        "icon": "/icons/facebook.svg",
+        "label": "Facebook",
+      },
+      {
+        "href": "https://twitter.com/Ivycleans",
+        "icon": "/icons/x.svg",
+        "label": "Twitter",
+      },
+      {
+        "href": "https://www.youtube.com/channel/UCZIsiCt4aoUbrzbPmpVwQGA",
+        "icon": "/icons/youtube.svg",
+        "label": "YouTube",
+      },
+      {
+        "href": "https://www.instagram.com/ivy.cleans1/",
+        "icon": "/icons/instagram.svg",
+        "label": "Instagram",
+      },
+      {
+        "href": "https://www.pinterest.com/ivycleans/",
+        "icon": "/icons/pinterest.svg",
+        "label": "Pinterest",
+      },
+      {
+        "href": "https://www.tiktok.com/@ivy.cleans1",
+        "icon": "/icons/tiktok.svg",
+        "label": "TikTok",
+      },
+    ],
+    "writeReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJT35locmWcKMRgykID0Xc2Vo",
+  },
+}
+`;

@@ -1,0 +1,192 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`bookData(minneapolis) is stable > book 1`] = `
+{
+  "bookCallNow": {
+    "href": "tel:6124240391",
+    "label": "Call Now",
+  },
+  "bookFields": [
+    {
+      "id": "form-field-email",
+      "kind": "select",
+      "label": "What Type of Service Are Your Looking For?",
+      "name": "form_fields[email]",
+      "options": [
+        {
+          "label": "Standard Cleaning (Basic Cleaning Package)",
+          "value": "Standard Cleaning",
+        },
+        {
+          "label": "Recurring Cleaning ( Standard + Additional Discounts)",
+          "value": "Recurring Cleaning",
+        },
+        {
+          "label": "Deep Cleaning ( Most Popular Option)",
+          "value": "Deep Cleaning",
+        },
+        {
+          "label": "Move-In/Move-Out Cleaning (Most Comprehensive, Total Clean)",
+          "value": "Moving Cleaning",
+        },
+      ],
+      "required": true,
+    },
+    {
+      "id": "form-field-field_22aa910",
+      "kind": "select",
+      "label": "How Would Your Describe Your Home Right Now?",
+      "name": "form_fields[field_22aa910]",
+      "options": [
+        {
+          "label": "Slightly Dirty (Nothing crazy)",
+          "value": "Slightly Dirty",
+        },
+        {
+          "label": "Pretty Dirty (It’s been awhile since we cleaned, it’s pretty dirty)",
+          "value": "Pretty Dirty",
+        },
+        {
+          "label": "Very Dirty (It’s a nightmare, please save me)",
+          "value": "Very Diry",
+        },
+      ],
+      "required": true,
+    },
+    {
+      "id": "form-field-field_c4cfac1",
+      "kind": "number",
+      "label": "How Many Bedrooms?",
+      "name": "form_fields[field_c4cfac1]",
+      "placeholder": "ex. 3",
+      "required": true,
+    },
+    {
+      "id": "form-field-field_caacb3a",
+      "kind": "number",
+      "label": "How Many Bathrooms?",
+      "name": "form_fields[field_caacb3a]",
+      "placeholder": "ex. 2",
+      "required": true,
+    },
+    {
+      "id": "form-field-message",
+      "kind": "select",
+      "label": "How Soon Are You Looking To Have This Cleaned?",
+      "name": "form_fields[message]",
+      "options": [
+        {
+          "label": " ",
+          "value": " ",
+        },
+        {
+          "label": "ASAP (It’s an emergency)",
+          "value": "ASAP (It’s an emergency)",
+        },
+        {
+          "label": "Sometime this week",
+          "value": "Sometime this week",
+        },
+        {
+          "label": "Sometime next week",
+          "value": "Sometime next week",
+        },
+        {
+          "label": "No Rush",
+          "value": "No Rush",
+        },
+        {
+          "label": "Not Sure (Just price shopping right now)",
+          "value": "Not Sure (Just price shopping right now)",
+        },
+      ],
+      "required": true,
+    },
+    {
+      "id": "form-field-field_1872bc3",
+      "kind": "text",
+      "label": "What’s the Address of the Property?",
+      "name": "form_fields[field_1872bc3]",
+      "placeholder": "Message",
+      "required": true,
+    },
+    {
+      "id": "form-field-name",
+      "kind": "text",
+      "label": "Full Name",
+      "name": "form_fields[name]",
+      "placeholder": "Full Name",
+      "required": true,
+    },
+    {
+      "id": "form-field-field_ca2243e",
+      "kind": "email",
+      "label": "Email Address",
+      "name": "form_fields[field_ca2243e]",
+      "placeholder": "example@gmail.com",
+      "required": true,
+    },
+    {
+      "id": "form-field-field_deeaf01",
+      "kind": "tel",
+      "label": "Phone Number",
+      "name": "form_fields[field_deeaf01]",
+      "placeholder": "777-777-7777",
+      "required": true,
+    },
+    {
+      "id": "form-field-field_1abcd81",
+      "kind": "select",
+      "label": "How Would You Prefer To Be Contacted?",
+      "name": "form_fields[field_1abcd81]",
+      "options": [
+        {
+          "label": "Call Me",
+          "value": "Call Me",
+        },
+        {
+          "label": "Text Me",
+          "value": "Text Me",
+        },
+        {
+          "label": "Email Me",
+          "value": "Email Me",
+        },
+        {
+          "label": "It’s all the same to me",
+          "value": "It’s all the same to me",
+        },
+      ],
+      "required": true,
+    },
+  ],
+  "bookHeader": {
+    "h2": "Book Now",
+    "overline": "REQUEST OUR SERVICES",
+  },
+  "bookLeadIn": {
+    "callPrompt": "Prefer To Call? Sure!",
+    "heading": "A Couple of Questions For Your FREE Quote!",
+    "hours": "We’re Available Monday-Friday 7 am-7 pm",
+    "intro": "You’re just 3 steps away from a clean house!",
+    "phone": "(612) 424-0391",
+    "phoneHref": "tel:6124240391",
+  },
+  "bookMeta": {
+    "description": "A Couple of Questions For Your FREE Quote!",
+    "title": "Book - Ivy Cleans",
+  },
+  "bookNowMeta": {
+    "title": "Book Now - Ivy Cleans",
+  },
+  "bookSubmitLabel": "Claim",
+  "comingSoon": {
+    "body": "In the meantime, call us at 612-424-0391 or email Support@ivycleans.com.",
+    "email": "Support@ivycleans.com",
+    "emailHref": "mailto:Support@ivycleans.com",
+    "heading": "Online booking is coming soon!",
+    "phone": "612-424-0391",
+    "phoneHref": "tel:6124240391",
+  },
+}
+`;
