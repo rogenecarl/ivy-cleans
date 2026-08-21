@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { listCities } from '@/pipeline/admin-logic'
 import { parseLeadQuery } from '@/leads/filters'
 import { listLeads } from '@/leads/store'
-import { LEAD_STATUSES } from '@/leads/types'
+import { LEAD_STATUSES, type LeadRecord } from '@/leads/types'
 import { ADMIN_BASE } from '../base'
 import { LeadStatusChip, Pill } from '../ui'
 import { buildCityLookup, cityDisplayName, filterHref } from './logic'
@@ -30,8 +30,47 @@ export default async function LeadsPage({
 }) {
   const params = await searchParams
   const query = parseLeadQuery(params)
-  const [leads, cities] = await Promise.all([listLeads(query), listCities()])
+  const cities = await listCities()
   const cityLookup = buildCityLookup(cities)
+
+  /*
+   * Unlike the Sites screen, this screen has no useful content once the
+   * store is unreachable -- it exists to list, filter and open leads, and
+   * every one of those needs a working database. So it does not degrade;
+   * it fails legibly instead of the raw 500 an uncaught throw here would
+   * produce. Scoped to exactly this call, per the Sites-screen precedent.
+   */
+  let leads: LeadRecord[] = []
+  let leadsError = false
+  try {
+    leads = await listLeads(query)
+  } catch (err) {
+    leadsError = true
+    // Loud on purpose, no lead contents: this catch wraps only the listLeads
+    // call above, so whatever it caught is a connection/query failure, never
+    // a row's data.
+    console.error('LeadsPage: listLeads(query) failed -- lead data is unavailable:', err)
+  }
+
+  if (leadsError) {
+    return (
+      <>
+        <div className="mb-6">
+          <h1 className="text-[1.4rem] font-semibold tracking-tight">Leads</h1>
+        </div>
+        <div
+          role="alert"
+          className="rounded-lg border border-[#f3b4b4] bg-[#fdecec] px-4 py-6 text-[0.9rem] text-[#7a1414]"
+        >
+          <p className="font-semibold">Lead data is unavailable.</p>
+          <p className="mt-1 text-[0.85rem]">
+            The leads store could not be reached, so no leads can be listed, filtered, or opened
+            right now. Check the database connection and reload.
+          </p>
+        </div>
+      </>
+    )
+  }
 
   const unworked = leads.filter((l) => l.status !== 'booked' && l.status !== 'lost').length
 

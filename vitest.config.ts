@@ -17,6 +17,11 @@ export default defineConfig({
     // tests/setup-env.ts.
     setupFiles: ['./tests/setup-env.ts'],
     /*
+     * No test may reach Resend. Set here rather than per-file so a new suite
+     * cannot forget it and start sending real mail from CI.
+     */
+    env: { STUB_EMAIL: '1' },
+    /*
      * The pipeline/draft/admin suites all write into the real content/
      * directory — sidecars, city documents, and the two shared indexes
      * (_cities.json, _domains.json) which each suite snapshots and restores.

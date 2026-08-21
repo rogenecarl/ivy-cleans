@@ -5,6 +5,7 @@ import { STAGE_IDS } from '@/pipeline/stages'
 import { leadQueryToSearch } from '@/leads/filters'
 import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
 import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
+import type { LeadCounts, SiteSettingsRecord } from '@/leads/types'
 import { ADMIN_BASE } from './base'
 import { BTN, BTN_PRIMARY, ReadinessChips, StatusChip } from './ui'
 
@@ -31,9 +32,43 @@ function primaryLink(row: CityRow): { href: string; label: string } {
 }
 
 export default async function AdminDashboard() {
-  const [rows, counts] = await Promise.all([listCities(), leadCountsByCity()])
-  // One query for every row's settings, not one query per row (was N+1).
-  const settingsByCity = await getSiteSettingsMany(rows.map((row) => row.key))
+  const rows = await listCities()
+
+  /*
+   * Lead data is an ENHANCEMENT to this screen, not a prerequisite for it.
+   * The cities table -- reading from disk/Blob via listCities() above -- has
+   * nothing to do with the leads database and must keep working even when
+   * Postgres is unreachable (a Neon outage, or a fresh clone with no
+   * DATABASE_URL provisioned yet). Scoped to exactly these two store calls,
+   * not the JSX below: a genuine rendering bug must still throw, not get
+   * swallowed into a friendly banner.
+   *
+   * On failure: counts/settingsByCity stay empty and `leadsUnavailable`
+   * flips true, which suppresses the leads column and the readiness chips
+   * entirely below (see the row-rendering code) rather than computing them
+   * from empty data -- an empty read would otherwise report 0 leads and
+   * flag every live city as having no inbox, which is a lie, not a
+   * degradation.
+   */
+  let counts: Record<string, LeadCounts> = {}
+  let settingsByCity: Record<string, SiteSettingsRecord> = {}
+  let leadsUnavailable = false
+  try {
+    // One query for every row's settings, not one query per row (was N+1).
+    ;[counts, settingsByCity] = await Promise.all([
+      leadCountsByCity(),
+      getSiteSettingsMany(rows.map((row) => row.key)),
+    ])
+  } catch (err) {
+    leadsUnavailable = true
+    // Loud on purpose: an operator sees the banner below, but only the logs
+    // say WHY. Never log lead contents here -- this catch only ever wraps
+    // the two aggregate/settings queries above, neither of which returns
+    // anything resembling a lead's PII, so the caught error itself is safe
+    // to log in full.
+    console.error('AdminDashboard: lead data unavailable (leadCountsByCity/getSiteSettingsMany failed):', err)
+  }
+
   const domains = domainsJson as DomainsIndex
 
   return (
@@ -49,6 +84,17 @@ export default async function AdminDashboard() {
           + New City
         </Link>
       </div>
+
+      {leadsUnavailable && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-[#f0cf9a] bg-[#fff4e5] px-4 py-3 text-[0.85rem] text-[#8a5300]"
+        >
+          Lead data is unavailable right now, so lead counts and readiness chips are not shown
+          below. This is different from zero leads -- it means the leads store could not be
+          reached. The cities table and every action on it are unaffected.
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-lg border border-[#d8dde2] bg-white">
         <table className="w-full border-collapse text-[0.9rem]">
@@ -74,13 +120,21 @@ export default async function AdminDashboard() {
               const primary = primaryLink(row)
               const previewable = row.status === 'live' || row.status === 'draft'
               const domain = domainFor(row.key, domains)
-              const cityCounts = counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 }
-              const readiness = siteReadiness({
-                isLive: row.status === 'live',
-                domain,
-                notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
-                counts: cityCounts,
-              })
+              // null, not a zeroed-out fallback, when the store read failed --
+              // computing either from empty counts/settings would render
+              // real-looking numbers and chips that are actually fabricated.
+              const cityCounts = leadsUnavailable
+                ? null
+                : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
+              const readiness =
+                leadsUnavailable || cityCounts === null
+                  ? null
+                  : siteReadiness({
+                      isLive: row.status === 'live',
+                      domain,
+                      notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
+                      counts: cityCounts,
+                    })
               return (
                 <tr key={row.key} className="border-b border-[#e6eaee] last:border-b-0">
                   <td className="px-4 py-3">
@@ -102,21 +156,33 @@ export default async function AdminDashboard() {
                     {domain ?? <span className="text-[#8a949d]">not attached</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
-                        city: row.key,
-                        status: null,
-                        formType: null,
-                        includeTest: false,
-                      })}`}
-                      className="font-medium"
-                    >
-                      {cityCounts.unworked}
-                    </Link>
-                    <span className="ml-1 text-[0.75rem] text-[#8a949d]">/ {cityCounts.total}</span>
+                    {cityCounts ? (
+                      <>
+                        <Link
+                          href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
+                            city: row.key,
+                            status: null,
+                            formType: null,
+                            includeTest: false,
+                          })}`}
+                          className="font-medium"
+                        >
+                          {cityCounts.unworked}
+                        </Link>
+                        <span className="ml-1 text-[0.75rem] text-[#8a949d]">
+                          / {cityCounts.total}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-[#8a949d]">unavailable</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
-                    <ReadinessChips readiness={readiness} />
+                    {readiness ? (
+                      <ReadinessChips readiness={readiness} />
+                    ) : (
+                      <span className="text-[0.75rem] text-[#8a949d]">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
