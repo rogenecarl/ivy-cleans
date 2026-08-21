@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckItemIcon } from "@/components/Icons";
-import type { DeepCleaningData } from "@/data/deep-cleaning";
+import type { ServiceContent } from "@/data/service-types";
 
 /*
  * Section ada1bba ("deep-sec03"): deep-bg3.jpg (top center / no-repeat /
@@ -28,17 +28,17 @@ import type { DeepCleaningData } from "@/data/deep-cleaning";
  * <a href="https://ivycleans.com/how-to-clean-a-bathroom/"> does not wrap
  * the bathroom item's text — it wraps the ENTIRE following <li> ("Cleaning
  * and disinfecting of kitchen appliances..."), icon included. Reproduced
- * as-is via deepServicesLinkedItemIndex rather than "fixed."
+ * as-is via servicesLinkedItemIndex rather than "fixed."
  */
-export default function DeepServices({
-  deepServices,
-  deepServicesLinkHref,
-  deepServicesLinkedItemIndex,
+export default function ServicesList({
+  services,
+  servicesLinkHref,
+  servicesLinkedItemIndex,
   bookHref,
 }: {
-  deepServices: DeepCleaningData["deepServices"];
-  deepServicesLinkHref: DeepCleaningData["deepServicesLinkHref"];
-  deepServicesLinkedItemIndex: DeepCleaningData["deepServicesLinkedItemIndex"];
+  services: ServiceContent["services"];
+  servicesLinkHref: ServiceContent["servicesLinkHref"];
+  servicesLinkedItemIndex: ServiceContent["servicesLinkedItemIndex"];
   /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
   bookHref: string;
 }) {
@@ -47,12 +47,12 @@ export default function DeepServices({
       <section className="bg-[url(/images/deep-bg3.jpg)] bg-top bg-cover bg-no-repeat py-[2rem] md:py-[3rem] lg:py-[6rem]">
         <div className="ec">
           <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:text-[4rem] lg:mb-[3rem] lg:text-[4.5rem]">
-            {deepServices.h2}
+            {services.h2}
           </h2>
           <div className="flex flex-wrap items-center md:pt-[1rem]">
             <div className="w-full pb-[1rem] md:w-[50%] md:pr-[1rem] md:pb-0">
               <Image
-                src={deepServices.image}
+                src={services.image}
                 alt=""
                 width={586}
                 height={613}
@@ -62,11 +62,11 @@ export default function DeepServices({
             <div className="w-full pt-[1rem] md:w-[50%] md:pt-0 md:pl-[1rem] lg:pl-[3rem]">
               <div className="flow-root mb-0 lg:mb-[2rem]">
                 <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-bold text-white md:text-[1.9rem] lg:text-[2rem]">
-                  {deepServices.listIntro}
+                  {services.listIntro}
                 </p>
               </div>
               <ul>
-                {deepServices.items.map((item, i) => {
+                {services.items.map((item, i) => {
                   const row = (
                     <>
                       <span className="mt-[1px] flex w-[2.125rem] shrink-0 md:w-[2.375rem] lg:w-[2.5rem]">
@@ -79,9 +79,9 @@ export default function DeepServices({
                   );
                   return (
                     <li key={item} className="mb-[1.5rem] last:mb-0">
-                      {i === deepServicesLinkedItemIndex ? (
+                      {i === servicesLinkedItemIndex ? (
                         <a
-                          href={deepServicesLinkHref}
+                          href={servicesLinkHref}
                           className="flex items-start gap-[1rem]"
                         >
                           {row}
@@ -101,11 +101,11 @@ export default function DeepServices({
       <section className="bg-[url(/images/deep-bg4.jpg)] bg-top bg-cover bg-no-repeat pt-[2rem] pb-[11rem] text-center md:pt-[3rem] md:pb-[24rem] lg:pt-[8rem] lg:pb-[60rem]">
         <div className="ec">
           <h3 className="mb-[2rem] text-[2rem] leading-[1.2em] font-light text-black md:text-[2.5rem] lg:mb-[3rem] lg:text-[2.9rem]">
-            {deepServices.note}
+            {services.note}
           </h3>
           <div className="flow-root mb-0 lg:mb-[2rem]">
             <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light text-black md:text-[1.9rem] lg:text-[2rem]">
-              {deepServices.contact}
+              {services.contact}
             </p>
           </div>
           <Link

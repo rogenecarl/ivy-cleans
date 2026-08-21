@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { DeepCleaningData } from "@/data/deep-cleaning";
+import type { ServiceContent } from "@/data/service-types";
 
 /*
  * Section 1edd646 (post-245.css): deep-bg1.jpg (bottom center / no-repeat /
@@ -12,11 +12,11 @@ import type { DeepCleaningData } from "@/data/deep-cleaning";
  * margin, which the widget-container's -2rem cancels at tablet. Button
  * (51884af) margin-top 3rem at desktop/tablet, 0 at mobile.
  */
-export default function DeepHero({
-  deepHero,
+export default function Hero({
+  hero,
   bookHref,
 }: {
-  deepHero: DeepCleaningData["deepHero"];
+  hero: ServiceContent["hero"];
   /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
   bookHref: string;
 }) {
@@ -24,10 +24,10 @@ export default function DeepHero({
     <section className="bg-[url(/images/deep-bg1.jpg)] bg-bottom bg-cover bg-no-repeat pt-[2rem] pb-[18rem] text-center md:pt-[3rem] md:pb-[30rem] lg:pt-[6rem] lg:pb-[50rem]">
       <div className="ec">
         <h1 className="text-herogreen mb-0 text-[3rem] leading-[1.2em] font-bold uppercase md:mb-[2rem] md:text-[4rem] lg:text-[7.2rem]">
-          {deepHero.h1}
+          {hero.h1}
         </h1>
         <div className="mx-auto max-w-[106rem] flow-root md:mb-[-2rem] lg:mb-0">
-          {deepHero.paragraphs.map((p) => (
+          {hero.paragraphs.map((p) => (
             <p
               key={p.slice(0, 40)}
               className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]"

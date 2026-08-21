@@ -203,18 +203,18 @@ exports[`data module values are unchanged by the content-layer refactor > deep 1
     "outro": "At Ivy Cleans, we use eco-friendly cleaning products and techniques to ensure that your home is not only clean but also safe for you, your family, and your pets. It is important to us that you’re as comfortable as possible in your freshly cleaned home.",
   },
   "benefitsBgImage": "/images/deep-bg4.jpg",
-  "deepHero": {
+  "hero": {
     "h1": "Deep Cleaning Minneapolis",
     "paragraphs": [
       "At Ivy Cleans, we specialize in providing exceptional deep cleaning services to individuals in Minneapolis and the surrounding areas. We understand the importance of a clean and comfortable living environment, so we are committed to providing top-notch cleaning services that meet your needs.",
       "Contact us today to book your quote.",
     ],
   },
-  "deepMeta": {
+  "meta": {
     "description": "For a deep clean that revitalizes your Minneapolis home, trust Ivy Cleans. Our deep cleaning service ensures a thorough sparkle. Book now!",
     "title": "Deep Clean Minneapolis",
   },
-  "deepServices": {
+  "services": {
     "contact": "Contact us today to discuss your deep cleaning requirements in Minneapolis.",
     "h2": "Deep Cleaning Services Minneapolis",
     "image": "/images/deep-img2.jpg",
@@ -229,8 +229,8 @@ exports[`data module values are unchanged by the content-layer refactor > deep 1
     "listIntro": "Our deep cleaning services in Minneapolis include:",
     "note": "We understand that every home in Minneapolis is unique, which is why we offer customized cleaning services to meet your specific needs.",
   },
-  "deepServicesLinkHref": "https://ivycleans.com/how-to-clean-a-bathroom/",
-  "deepServicesLinkedItemIndex": 3,
+  "servicesLinkHref": "https://ivycleans.com/how-to-clean-a-bathroom/",
+  "servicesLinkedItemIndex": 3,
   "whatIs": {
     "h2": "What is Deep House Cleaning?",
     "image": "/images/deep-img1.jpg",

@@ -15,44 +15,11 @@
 import type { CityContent } from '../content/types'
 import { s } from '../content/slots'
 import { t } from '../content/interpolate'
+import type { ServiceContent } from './service-types'
 
-export type DeepQuality = { title: string; text: string; icon: string; width: number; height: number };
-
-export type DeepCleaningData = {
-  deepMeta: { title: string; description: string };
-  deepHero: { h1: string; paragraphs: string[] };
-  whatIs: { h2: string; text: string; image: string };
-  benefitsBgImage: string;
-  benefits: {
-    h2: string;
-    intro: string[];
-    listIntro: string;
-    items: string[];
-    outro: string;
-  };
-  deepServices: {
-    h2: string;
-    image: string;
-    listIntro: string;
-    items: string[];
-    note: string;
-    contact: string;
-  };
-  deepServicesLinkHref: string;
-  deepServicesLinkedItemIndex: number;
-  whyChoose: {
-    h2: string;
-    paragraphs: string[];
-    listIntro: string;
-    qualities: DeepQuality[];
-    closing: string;
-    contact: string;
-  };
-};
-
-export function deepCleaningData(c: CityContent): DeepCleaningData {
+export function deepCleaningData(c: CityContent): ServiceContent {
   return {
-    deepMeta: {
+    meta: {
       title: t("Deep Clean {city}", c),
       description: t(
         "For a deep clean that revitalizes your {city} home, trust Ivy Cleans. Our deep cleaning service ensures a thorough sparkle. Book now!",
@@ -60,7 +27,7 @@ export function deepCleaningData(c: CityContent): DeepCleaningData {
       ),
     },
 
-    deepHero: {
+    hero: {
       h1: t("Deep Cleaning {city}", c),
       paragraphs: [
         t(
@@ -101,7 +68,7 @@ export function deepCleaningData(c: CityContent): DeepCleaningData {
         "At Ivy Cleans, we use eco-friendly cleaning products and techniques to ensure that your home is not only clean but also safe for you, your family, and your pets. It is important to us that you’re as comfortable as possible in your freshly cleaned home.",
     },
 
-    deepServices: {
+    services: {
       h2: t("Deep Cleaning Services {city}", c),
       image: "/images/deep-img2.jpg",
       listIntro: t("Our deep cleaning services in {city} include:", c),
@@ -124,11 +91,11 @@ export function deepCleaningData(c: CityContent): DeepCleaningData {
      * Elementor quirk on the live page: the <a href="https://ivycleans.com/how-to-clean-a-bathroom/">
      * anchor (dump line 67, elementor-element-c1f51fd markup) does NOT wrap the bathroom
      * list item's text — it wraps the ENTIRE next <li> ("Cleaning and disinfecting of
-     * kitchen appliances, including stoves, ovens, and refrigerators", deepServices.items[3]),
-     * icon included. Reproduced as-is in DeepServices.tsx rather than "corrected."
+     * kitchen appliances, including stoves, ovens, and refrigerators", services.items[3]),
+     * icon included. Reproduced as-is in ServicesList.tsx rather than "corrected."
      */
-    deepServicesLinkHref: "https://ivycleans.com/how-to-clean-a-bathroom/",
-    deepServicesLinkedItemIndex: 3,
+    servicesLinkHref: "https://ivycleans.com/how-to-clean-a-bathroom/",
+    servicesLinkedItemIndex: 3,
 
     whyChoose: {
       h2: t("Why Choose Ivy Cleans for Deep Cleaning {city}?", c),

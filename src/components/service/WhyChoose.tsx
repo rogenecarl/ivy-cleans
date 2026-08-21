@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { DeepCleaningData } from "@/data/deep-cleaning";
+import type { ServiceContent } from "@/data/service-types";
 
 /*
  * Section 6c3aa11: padding 6/3/2rem. Heading (531e5f2) centered black,
@@ -28,7 +28,7 @@ export default function WhyChoose({
   whyChoose,
   bookHref,
 }: {
-  whyChoose: DeepCleaningData["whyChoose"];
+  whyChoose: ServiceContent["whyChoose"];
   /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
   bookHref: string;
 }) {

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CheckItemIcon } from "@/components/Icons";
-import type { DeepCleaningData } from "@/data/deep-cleaning";
+import type { ServiceContent } from "@/data/service-types";
 
 /*
  * Section b30eca6 ("deep-sec03"): deep-bg2.jpg background declared with no
@@ -41,8 +41,8 @@ export default function Benefits({
   benefitsBgImage,
   bookHref,
 }: {
-  benefits: DeepCleaningData["benefits"];
-  benefitsBgImage: DeepCleaningData["benefitsBgImage"];
+  benefits: ServiceContent["benefits"];
+  benefitsBgImage: ServiceContent["benefitsBgImage"];
   /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
   bookHref: string;
 }) {

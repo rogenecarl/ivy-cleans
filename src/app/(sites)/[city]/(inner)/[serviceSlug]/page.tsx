@@ -8,11 +8,11 @@ import { deepCleaningData } from "@/data/deep-cleaning";
 import { moveOutData } from "@/data/move-out";
 import { suburbData, type SuburbRef } from "@/data/suburb";
 import { siteData } from "@/data/site";
-import DeepHero from "@/components/deep-cleaning/DeepHero";
-import WhatIs from "@/components/deep-cleaning/WhatIs";
-import Benefits from "@/components/deep-cleaning/Benefits";
-import DeepServices from "@/components/deep-cleaning/DeepServices";
-import WhyChoose from "@/components/deep-cleaning/WhyChoose";
+import Hero from "@/components/service/Hero";
+import WhatIs from "@/components/service/WhatIs";
+import Benefits from "@/components/service/Benefits";
+import ServicesList from "@/components/service/ServicesList";
+import WhyChoose from "@/components/service/WhyChoose";
 import MoveHero from "@/components/move-out/MoveHero";
 import WhyMoveOut from "@/components/move-out/WhyMoveOut";
 import IncludedServices from "@/components/move-out/IncludedServices";
@@ -110,8 +110,8 @@ export async function generateMetadata({
   const resolved = await resolveService(params);
   const { c, kind } = resolved;
   if (kind === "deep") {
-    const { deepMeta } = deepCleaningData(c);
-    return { title: deepMeta.title, description: deepMeta.description };
+    const { meta } = deepCleaningData(c);
+    return { title: meta.title, description: meta.description };
   }
   if (kind === "move") {
     const { moveOutMeta } = moveOutData(c);
@@ -132,13 +132,13 @@ export default async function ServicePage({ params }: { params: ServiceParams })
 /* Was src/app/(inner)/deep-cleaning-minneapolis/page.tsx — JSX unchanged. */
 function DeepCleaningPage({ c }: { c: CityContent }) {
   const {
-    deepHero,
+    hero,
     whatIs,
     benefits,
     benefitsBgImage,
-    deepServices,
-    deepServicesLinkHref,
-    deepServicesLinkedItemIndex,
+    services,
+    servicesLinkHref,
+    servicesLinkedItemIndex,
     whyChoose,
   } = deepCleaningData(c);
   // The four "Set an appointment" CTAs used to hardcode "/book"; sourcing them
@@ -146,17 +146,17 @@ function DeepCleaningPage({ c }: { c: CityContent }) {
   const { innerSite } = siteData(c);
   return (
     <>
-      <DeepHero deepHero={deepHero} bookHref={innerSite.bookUrl} />
+      <Hero hero={hero} bookHref={innerSite.bookUrl} />
       <WhatIs whatIs={whatIs} />
       <Benefits
         benefits={benefits}
         benefitsBgImage={benefitsBgImage}
         bookHref={innerSite.bookUrl}
       />
-      <DeepServices
-        deepServices={deepServices}
-        deepServicesLinkHref={deepServicesLinkHref}
-        deepServicesLinkedItemIndex={deepServicesLinkedItemIndex}
+      <ServicesList
+        services={services}
+        servicesLinkHref={servicesLinkHref}
+        servicesLinkedItemIndex={servicesLinkedItemIndex}
         bookHref={innerSite.bookUrl}
       />
       <WhyChoose whyChoose={whyChoose} bookHref={innerSite.bookUrl} />

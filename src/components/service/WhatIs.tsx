@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { DeepCleaningData } from "@/data/deep-cleaning";
+import type { ServiceContent } from "@/data/service-types";
 
 /*
  * Section a759e86: padding 6rem 0 (3rem <=1024, 0/2rem <=767). This is a
@@ -17,7 +17,7 @@ import type { DeepCleaningData } from "@/data/deep-cleaning";
 export default function WhatIs({
   whatIs,
 }: {
-  whatIs: DeepCleaningData["whatIs"];
+  whatIs: ServiceContent["whatIs"];
 }) {
   /*
    * The live heading markup is `What is Deep <br> House Cleaning?` — a hard
