@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum FormType {
+  booking
+  contact
+}
+
+enum LeadStatus {
+  new
+  contacted
+  quoted
+  booked
+  lost
+}
+
+enum EmailStatus {
+  pending
+  sent
+  failed
+  skipped
+}
+
+model Lead {
+  id          String      @id @default(uuid())
+  cityKey     String
+  formType    FormType
+  name        String?
+  email       String?
+  phone       String?
+  payload     Json
+  status      LeadStatus  @default(new)
+  notes       String      @default("")
+  emailStatus EmailStatus @default(pending)
+  emailError  String?
+  isTest      Boolean     @default(false)
+  ipHash      String?
+  submittedAt DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([cityKey, submittedAt(sort: Desc)])
+  @@index([status, submittedAt(sort: Desc)])
+  @@index([submittedAt(sort: Desc)])
+  @@index([ipHash, submittedAt(sort: Desc)])
+}
+
+model SiteSettings {
+  cityKey      String   @id
+  notifyEmails String[] @default([])
+  updatedAt    DateTime @updatedAt
+}

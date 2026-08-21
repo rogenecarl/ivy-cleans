@@ -11,6 +11,11 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    // Loads .env.local the way `next dev`/`next build` do, since Vitest
+    // doesn't — without it, DATABASE_URL is absent and the leads-store
+    // suite's describe.skipIf silently skips on every machine. See
+    // tests/setup-env.ts.
+    setupFiles: ['./tests/setup-env.ts'],
     /*
      * The pipeline/draft/admin suites all write into the real content/
      * directory — sidecars, city documents, and the two shared indexes
