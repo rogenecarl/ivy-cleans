@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { SiteData } from "@/data/site";
-import { EnvelopeIcon, MapMarkerIcon, PhoneIcon } from "@/components/Icons";
+import { EnvelopeIcon, PhoneIcon } from "@/components/Icons";
 
 /*
  * Inner-template footer. The live footer template ships four sections but the
@@ -72,14 +72,13 @@ export default function InnerFooter({
               <PhoneIcon className={iconClass} />
               <span>{innerSite.footerPhone}</span>
             </li>
+            {/* Client instruction 2026-08-22: the office address is no longer
+                shown in the footer, phone and email only. This is a deliberate
+                divergence from the live site, which does render it here. */}
             <li className={`${itemClass} justify-center md:justify-start`}>
               <EnvelopeIcon className={iconClass} />
               {/* live renders the email as plain text — no mailto anchor */}
               <span>{innerSite.email}</span>
-            </li>
-            <li className={`${itemClass} justify-center md:justify-start`}>
-              <MapMarkerIcon className={iconClass} />
-              <span>{innerSite.address}</span>
             </li>
           </ul>
         </div>

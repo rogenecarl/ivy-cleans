@@ -7,7 +7,6 @@ export type SiteData = {
     phone: string;
     phoneHref: string;
     email: string;
-    address: string;
     bookingUrl: string;
     googleMapsUrl: string;
     writeReviewUrl: string;
@@ -19,7 +18,6 @@ export type SiteData = {
     phoneHref: string;
     footerPhone: string;
     email: string;
-    address: string;
     bookUrl: string;
     copyright: string;
     servicesLinks: { label: string; href: string }[];
@@ -34,14 +32,6 @@ export function siteData(c: CityContent): SiteData {
       phone: c.phone,
       phoneHref: c.phoneHref,
       email: "Support@ivycleans.com",
-      /*
-       * Live-site fidelity artifact: the front chrome shows a typo'd address
-       * ("Road,West", state marker "N" instead of "MN"). Only {city} varies here —
-       * the street, the "N" marker, and ZIP 55416 are still Minneapolis's literal
-       * values. A future city with a different office address needs a manual edit
-       * of this template, not just a new CityContent document.
-       */
-      address: t("5821 Cedar Lake Road,West Unit 208, {city}, N 55416", c),
       /*
        * Every internal href below goes through cityHref(): a live city is
        * served from its own host and keeps the public path (identity), a draft
@@ -105,7 +95,6 @@ export function siteData(c: CityContent): SiteData {
        */
       footerPhone: c.phone,
       email: "support@ivycleans.com",
-      address: c.address,
       bookUrl: cityHref(c, "/book"),
       copyright: "© 2026 IvyCleans. All rights reserved.",
       servicesLinks: [

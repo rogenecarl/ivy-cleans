@@ -3,7 +3,7 @@ import Link from "next/link";
 /* innerSite.copyright is the same verbatim string the front footer's 50e4d28
    heading renders; reused rather than duplicated so src/data stays untouched */
 import type { SiteData } from "@/data/site";
-import { ChevronRightIcon, EnvelopeIcon, MapMarkerIcon, PhoneIcon } from "./Icons";
+import { ChevronRightIcon, EnvelopeIcon, PhoneIcon } from "./Icons";
 
 /* live footer headings: 2rem/500 on mobile, 2.4rem/500 from the desktop breakpoint up */
 const headingClass = "text-center text-[2rem] leading-[1.2em] font-medium md:text-start lg:text-[2.4rem]";
@@ -61,13 +61,12 @@ export default function Footer({
                 <PhoneIcon className={iconClass} />
                 <a href={site.phoneHref}>{site.phone}</a>
               </li>
+              {/* Client instruction 2026-08-22: the office address is no longer
+                  shown in the footer, phone and email only. This is a deliberate
+                  divergence from the live site, which does render it here. */}
               <li className={itemClass}>
                 <EnvelopeIcon className={iconClass} />
                 <a href={`mailto:${site.email}`}>{site.email.toLowerCase()}</a>
-              </li>
-              <li className={itemClass}>
-                <MapMarkerIcon className={iconClass} />
-                <span className="font-bold">{site.address}</span>
               </li>
             </ul>
           </div>

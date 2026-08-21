@@ -578,7 +578,6 @@ exports[`data module values are unchanged by the content-layer refactor > servic
 exports[`data module values are unchanged by the content-layer refactor > site 1`] = `
 {
   "innerSite": {
-    "address": "5821 Cedar Lake Road, West Unit 208, Minneapolis, MN 55416",
     "bookUrl": "/book",
     "companyLinks": [
       {
@@ -633,7 +632,6 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
     ],
   },
   "site": {
-    "address": "5821 Cedar Lake Road,West Unit 208, Minneapolis, N 55416",
     "bookingUrl": "/book-now",
     "email": "Support@ivycleans.com",
     "googleMapsUrl": "https://maps.google.com/?cid=6546505722522773891",
