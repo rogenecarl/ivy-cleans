@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { BookData } from "@/data/book";
-import ComingSoonPanel from "@/components/book/ComingSoonPanel";
+import SubmitResultPanel from "@/components/book/ComingSoonPanel";
+import { submitLeadAction } from "@/app/(sites)/[city]/lead-actions";
 
 /*
  * Shared renderer for the identical 10-field Elementor form on both
@@ -65,13 +66,16 @@ export default function BookingForm({
   bookFields,
   bookSubmitLabel,
   comingSoon,
+  cityKey,
 }: {
   size: "md" | "sm";
   bookFields: BookData["bookFields"];
   bookSubmitLabel: BookData["bookSubmitLabel"];
   comingSoon: BookData["comingSoon"];
+  cityKey: string;
 }) {
-  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState<"idle" | "pending" | "success" | "error">("idle");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const md = size === "md";
 
   /*
@@ -145,17 +149,31 @@ export default function BookingForm({
     ? "border-rust bg-rust text-white hover:bg-white hover:text-rust text-[2.4rem]"
     : "border-white bg-[#6474f3] text-white text-[15px]";
 
-  if (submitted) {
-    return <ComingSoonPanel comingSoon={comingSoon} />;
+  if (result === "success" || result === "error") {
+    return <SubmitResultPanel comingSoon={comingSoon} state={result} />;
   }
 
   return (
     <form
       aria-label="New Form"
       className={`flex flex-wrap ${wrapperClass}`}
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        setSubmitted(true);
+        if (result === "pending") return;
+        setResult("pending");
+        setFieldErrors({});
+        const data = new FormData(e.currentTarget);
+        const outcome = await submitLeadAction("booking", cityKey, data);
+        if (outcome.ok) {
+          setResult("success");
+          return;
+        }
+        if (outcome.error === "validation") {
+          setFieldErrors(outcome.fieldErrors);
+          setResult("idle");
+          return;
+        }
+        setResult("error");
       }}
     >
       {bookFields.map((field) => (
@@ -192,12 +210,26 @@ export default function BookingForm({
               className={inputClass}
             />
           )}
+          {fieldErrors[field.name] && (
+            <p className="mt-[0.5rem] text-[1.4rem] text-rust">{fieldErrors[field.name]}</p>
+          )}
         </div>
       ))}
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="website_url">Leave this field empty</label>
+        <input
+          id="website_url"
+          name="form_fields[website_url]"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
       <div className={`${groupClass} w-full`}>
         <button
           type="submit"
-          className={`${buttonClass} block min-h-[40px] w-full rounded-[5px] border px-[2.4rem] py-[1.1rem] leading-[1.2em] font-bold uppercase transition-colors`}
+          disabled={result === "pending"}
+          className={`${buttonClass} block min-h-[40px] w-full rounded-[5px] border px-[2.4rem] py-[1.1rem] leading-[1.2em] font-bold uppercase transition-colors${result === "pending" ? " opacity-70" : ""}`}
         >
           {bookSubmitLabel}
         </button>

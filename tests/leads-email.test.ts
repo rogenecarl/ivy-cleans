@@ -63,13 +63,25 @@ describe('buildLeadEmail', () => {
     expect(mail.html).toContain('&quot;hi&quot;')
   })
 
-  it('includes the dashboard link', () => {
+  it('includes the dashboard link in both bodies when one is given', () => {
     const mail = buildLeadEmail({
       cityName: 'Miami',
       lead,
       dashboardUrl: 'https://x/admin/leads/abc',
     })
     expect(mail.html).toContain('https://x/admin/leads/abc')
+    expect(mail.html).toContain('Open in dashboard')
+    expect(mail.text).toContain('https://x/admin/leads/abc')
+  })
+
+  it('renders no link in either body when dashboardUrl is null, and leaks no undefined/null', () => {
+    const mail = buildLeadEmail({ cityName: 'Miami', lead, dashboardUrl: null })
+    expect(mail.html).not.toContain('href=')
+    expect(mail.html).not.toContain('undefined')
+    expect(mail.html).not.toContain('null')
+    expect(mail.text).not.toContain('undefined')
+    expect(mail.text).not.toContain('null')
+    expect(mail.text).toContain('Open the dashboard to see this lead.')
   })
 
   it('collapses a newline in a submitted value so it cannot forge an extra line in the plaintext body', () => {

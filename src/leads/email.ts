@@ -35,7 +35,14 @@ function collapseNewlines(value: string): string {
 export function buildLeadEmail(args: {
   cityName: string
   lead: LeadInput
-  dashboardUrl: string
+  /**
+   * null when the deployment has no configured canonical origin
+   * (LEADS_DASHBOARD_ORIGIN unset -- see lead-actions.ts). A URL placed in an
+   * outbound email must never be guessed from request input, so the caller
+   * fails closed instead of deriving one from the Host header: this function
+   * renders no clickable link at all rather than an attacker-influenced one.
+   */
+  dashboardUrl: string | null
 }): LeadEmail {
   const { cityName, lead, dashboardUrl } = args
   const kind = lead.formType === 'booking' ? 'New booking request' : 'New contact message'
@@ -44,12 +51,16 @@ export function buildLeadEmail(args: {
 
   const entries = Object.entries(lead.payload).filter(([, value]) => value.trim() !== '')
 
+  const dashboardLine = dashboardUrl
+    ? `Open in dashboard: ${dashboardUrl}`
+    : 'Open the dashboard to see this lead.'
+
   const text = [
     `${kind} from the ${cityName} website.`,
     '',
     ...entries.map(([label, value]) => `${label}: ${collapseNewlines(value)}`),
     '',
-    `Open in dashboard: ${dashboardUrl}`,
+    dashboardLine,
   ].join('\n')
 
   const rows = entries
@@ -61,14 +72,16 @@ export function buildLeadEmail(args: {
     )
     .join('')
 
+  const dashboardBlock = dashboardUrl
+    ? `<p style="margin-top:16px"><a href="${escapeHtml(dashboardUrl)}" style="background:#1b6f56;color:#fff;border-radius:5px;padding:8px 14px;text-decoration:none;font-size:13px">Open in dashboard</a></p>`
+    : '<p style="margin-top:16px;color:#6b7680;font-size:13px">Open the dashboard to see this lead.</p>'
+
   const html = [
     '<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1b1f23">',
     `<p style="font-size:14px"><strong>${escapeHtml(kind)}</strong> from the `,
     `<strong>${escapeHtml(cityName)}</strong> website.</p>`,
     `<table cellpadding="0" cellspacing="0">${rows}</table>`,
-    `<p style="margin-top:16px"><a href="${escapeHtml(dashboardUrl)}" `,
-    'style="background:#1b6f56;color:#fff;border-radius:5px;padding:8px 14px;',
-    'text-decoration:none;font-size:13px">Open in dashboard</a></p>',
+    dashboardBlock,
     '</div>',
   ].join('')
 

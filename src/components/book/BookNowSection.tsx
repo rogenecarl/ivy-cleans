@@ -32,10 +32,12 @@ export default function BookNowSection({
   bookFields,
   bookSubmitLabel,
   comingSoon,
+  cityKey,
 }: {
   bookFields: BookData["bookFields"];
   bookSubmitLabel: BookData["bookSubmitLabel"];
   comingSoon: BookData["comingSoon"];
+  cityKey: string;
 }) {
   return (
     <section className="py-[2rem] md:py-[4rem]">
@@ -47,6 +49,7 @@ export default function BookNowSection({
               bookFields={bookFields}
               bookSubmitLabel={bookSubmitLabel}
               comingSoon={comingSoon}
+              cityKey={cityKey}
             />
           </div>
         </div>

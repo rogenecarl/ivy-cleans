@@ -187,6 +187,8 @@ exports[`bookData(minneapolis) is stable > book 1`] = `
     "heading": "Online booking is coming soon!",
     "phone": "612-424-0391",
     "phoneHref": "tel:6124240391",
+    "successBody": "Someone from our team will be in touch shortly.",
+    "successHeading": "Thanks, we’ve got your request.",
   },
 }
 `;

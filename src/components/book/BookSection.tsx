@@ -69,6 +69,7 @@ export default function BookSection({
   bookFields,
   bookSubmitLabel,
   comingSoon,
+  cityKey,
 }: {
   bookHeader: BookData["bookHeader"];
   bookLeadIn: BookData["bookLeadIn"];
@@ -76,6 +77,7 @@ export default function BookSection({
   bookFields: BookData["bookFields"];
   bookSubmitLabel: BookData["bookSubmitLabel"];
   comingSoon: BookData["comingSoon"];
+  cityKey: string;
 }) {
   return (
     <div className={`${lato.variable} ${roboto.variable}`}>
@@ -138,6 +140,7 @@ export default function BookSection({
                   bookFields={bookFields}
                   bookSubmitLabel={bookSubmitLabel}
                   comingSoon={comingSoon}
+                  cityKey={cityKey}
                 />
               </div>
             </div>

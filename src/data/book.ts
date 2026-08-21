@@ -62,6 +62,8 @@ export type BookData = {
     phoneHref: string;
     email: string;
     emailHref: string;
+    successHeading: string;
+    successBody: string;
   };
 };
 
@@ -277,6 +279,8 @@ export function bookData(c: CityContent): BookData {
       phoneHref: c.phoneHref,
       email: "Support@ivycleans.com",
       emailHref: "mailto:Support@ivycleans.com",
+      successHeading: "Thanks, we’ve got your request.",
+      successBody: "Someone from our team will be in touch shortly.",
     },
   };
 }

@@ -1,19 +1,31 @@
 import type { BookData } from "@/data/book";
 
 /*
- * Shown by BookingForm in place of the field list once the (intercepted)
- * form is submitted. This copy is OUR content — book.ts's comment explains
- * why: both /book-now and /book post to a live WordPress form handler this
- * static clone can't reach, so there is no live "thank you" state to
- * reproduce. Styled with the site's existing rust/herogreen tokens
- * (src/app/globals.css --color-rust / --color-herogreen) rather than any
- * page-specific CSS, since no live markup exists for this state.
+ * Shown by BookingForm in place of the field list after submit.
+ *
+ * Two states. `success` is the normal path. `error` reuses the original
+ * call/email fallback copy, and is shown ONLY when the lead did not survive:
+ * a storage failure or a rate-limit rejection. A failed notification email is
+ * NOT an error here, because the lead is saved either way.
  */
-export default function ComingSoonPanel({
+export default function SubmitResultPanel({
   comingSoon,
+  state,
 }: {
   comingSoon: BookData["comingSoon"];
+  state: "success" | "error";
 }) {
+  if (state === "success") {
+    return (
+      <div className="text-center">
+        <h3 className="text-herogreen mb-[1.5rem] text-[2.4rem] leading-[1.2em] font-semibold">
+          {comingSoon.successHeading}
+        </h3>
+        <p className="text-[1.6rem] leading-[1.5em]">{comingSoon.successBody}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="text-center">
       <h3 className="text-herogreen mb-[1.5rem] text-[2.4rem] leading-[1.2em] font-semibold">
