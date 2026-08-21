@@ -15,6 +15,11 @@
 import type { CityContent } from '@/content/types'
 import type { ServiceContent } from '@/data/service-types'
 import { deepCleaningData } from '@/data/deep-cleaning'
+import { standardCleaningData } from './standard'
+import { apartmentCleaningData } from './apartment'
+import { airbnbCleaningData } from './airbnb'
+import { postConstructionCleaningData } from './post-construction'
+import { preListingCleaningData } from './pre-listing'
 
 export const SERVICE_SLUGS = [
   'standard-cleaning',
@@ -33,8 +38,23 @@ export type ServiceEntry =
   | { slug: ServiceSlug; name: string; kind: 'bespoke' }
 
 const ENTRIES: ServiceEntry[] = [
+  { slug: 'standard-cleaning', name: 'Standard Cleaning', kind: 'template', content: standardCleaningData },
   { slug: 'deep-cleaning', name: 'Deep Cleaning', kind: 'template', content: deepCleaningData },
   { slug: 'move-in-move-out-cleaning', name: 'Move In / Move Out Cleaning', kind: 'bespoke' },
+  { slug: 'apartment-cleaning', name: 'Apartment & Condo Cleaning', kind: 'template', content: apartmentCleaningData },
+  { slug: 'airbnb-cleaning', name: 'Airbnb & Short-Term Rental Cleaning', kind: 'template', content: airbnbCleaningData },
+  {
+    slug: 'post-construction-cleaning',
+    name: 'Post-Construction & Renovation Cleaning',
+    kind: 'template',
+    content: postConstructionCleaningData,
+  },
+  {
+    slug: 'pre-listing-cleaning',
+    name: 'Real Estate & Pre-Listing Cleaning',
+    kind: 'template',
+    content: preListingCleaningData,
+  },
 ]
 
 export function serviceBySlug(slug: string): ServiceEntry | undefined {

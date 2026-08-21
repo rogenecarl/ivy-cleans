@@ -27,36 +27,28 @@ describe('service registry', () => {
     expect(serviceBySlug('../etc')).toBeUndefined()
   })
 
-  /*
-   * These three iterate REGISTERED entries, not SERVICE_SLUGS. Five services
-   * are still unimplemented at this point in the plan and resolve to
-   * undefined; asserting over all seven now would fail for a reason that is
-   * not a defect. Task 5 registers the rest and switches these to
-   * SERVICE_SLUGS, at which point they also prove nothing was left unwired.
-   */
-  const registered = SERVICE_SLUGS.filter((s) => serviceBySlug(s) !== undefined)
-
-  it('registers at least the two services that already exist', () => {
-    expect(registered).toContain('deep-cleaning')
-    expect(registered).toContain('move-in-move-out-cleaning')
+  it('registers every client-specified slug', () => {
+    for (const slug of SERVICE_SLUGS) {
+      expect(serviceBySlug(slug)).not.toBeUndefined()
+    }
   })
 
-  it('marks move-in-move-out as bespoke and every other registered service as templated', () => {
-    for (const slug of registered) {
+  it('marks move-in-move-out as bespoke and every other service as templated', () => {
+    for (const slug of SERVICE_SLUGS) {
       const entry = serviceBySlug(slug)!
       expect(entry.kind).toBe(slug === 'move-in-move-out-cleaning' ? 'bespoke' : 'template')
     }
   })
 
-  it('gives every registered templated service a content builder', () => {
-    for (const slug of registered) {
+  it('gives every templated service a content builder', () => {
+    for (const slug of SERVICE_SLUGS) {
       const entry = serviceBySlug(slug)!
       if (entry.kind === 'template') expect(typeof entry.content).toBe('function')
     }
   })
 
-  it('gives every registered service a display name', () => {
-    for (const slug of registered) {
+  it('gives every service a display name', () => {
+    for (const slug of SERVICE_SLUGS) {
       expect(serviceBySlug(slug)!.name.length).toBeGreaterThan(0)
     }
   })
