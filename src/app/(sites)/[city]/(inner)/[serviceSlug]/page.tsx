@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { cityFromParams } from "@/content/city-param";
-import { citySlug } from "@/content/interpolate";
+import { citySlug, cityHref } from "@/content/interpolate";
 import type { CityContent } from "@/content/types";
 import { getCity } from "@/content/store";
-import { deepCleaningData } from "@/data/deep-cleaning";
-import { moveOutData } from "@/data/move-out";
 import { suburbData, type SuburbRef } from "@/data/suburb";
 import { siteData } from "@/data/site";
-import Hero from "@/components/service/Hero";
-import WhatIs from "@/components/service/WhatIs";
-import Benefits from "@/components/service/Benefits";
-import ServicesList from "@/components/service/ServicesList";
-import WhyChoose from "@/components/service/WhyChoose";
-import MoveHero from "@/components/move-out/MoveHero";
-import WhyMoveOut from "@/components/move-out/WhyMoveOut";
-import IncludedServices from "@/components/move-out/IncludedServices";
-import WhyIvy from "@/components/move-out/WhyIvy";
-import Cost from "@/components/move-out/Cost";
 import SuburbHero from "@/components/suburb/SuburbHero";
 import HouseCleaning from "@/components/suburb/HouseCleaning";
 import SuburbBenefits from "@/components/suburb/Benefits";
@@ -61,17 +49,26 @@ function serviceSlugs(c: CityContent) {
 }
 
 /**
- * Which of the three pages this slug addresses, or `notFound()`. Both the
- * page and generateMetadata dispatch through here so they can never disagree.
+ * Which slug this request addresses, or `notFound()`. The deep and move
+ * slugs no longer render here — they redirect permanently to their
+ * /services/... equivalents, since those two URLs are indexed and must
+ * keep whatever search ranking they've earned instead of 404ing. The new
+ * route (services/[serviceSlug]) is where service pages live now. Only a
+ * suburb slug still resolves to page content here. Both the page and
+ * generateMetadata dispatch through here so they can never disagree.
  */
 async function resolveService(params: ServiceParams) {
   const c = await cityFromParams(params);
   const { serviceSlug } = await params;
   const slugs = serviceSlugs(c);
-  if (serviceSlug === slugs.deep) return { c, kind: "deep" as const };
-  if (serviceSlug === slugs.move) return { c, kind: "move" as const };
+  if (serviceSlug === slugs.deep) {
+    permanentRedirect(cityHref(c, "/services/deep-cleaning"));
+  }
+  if (serviceSlug === slugs.move) {
+    permanentRedirect(cityHref(c, "/services/move-in-move-out-cleaning"));
+  }
   const suburb = c.research.suburbs.find((s) => s.slug === serviceSlug);
-  if (suburb !== undefined) return { c, kind: "suburb" as const, suburb };
+  if (suburb !== undefined) return { c, suburb };
   notFound();
 }
 
@@ -107,76 +104,14 @@ export async function generateMetadata({
 }: {
   params: ServiceParams;
 }): Promise<Metadata> {
-  const resolved = await resolveService(params);
-  const { c, kind } = resolved;
-  if (kind === "deep") {
-    const { meta } = deepCleaningData(c);
-    return { title: meta.title, description: meta.description };
-  }
-  if (kind === "move") {
-    const { moveOutMeta } = moveOutData(c);
-    return { title: moveOutMeta.title, description: moveOutMeta.description };
-  }
-  const { suburbMeta } = suburbData(c, resolved.suburb);
+  const { c, suburb } = await resolveService(params);
+  const { suburbMeta } = suburbData(c, suburb);
   return { title: suburbMeta.title, description: suburbMeta.description };
 }
 
 export default async function ServicePage({ params }: { params: ServiceParams }) {
-  const resolved = await resolveService(params);
-  const { c, kind } = resolved;
-  if (kind === "deep") return <DeepCleaningPage c={c} />;
-  if (kind === "move") return <MoveOutPage c={c} />;
-  return <SuburbPage c={c} suburb={resolved.suburb} />;
-}
-
-/* Was src/app/(inner)/deep-cleaning-minneapolis/page.tsx — JSX unchanged. */
-function DeepCleaningPage({ c }: { c: CityContent }) {
-  const {
-    hero,
-    whatIs,
-    benefits,
-    benefitsBgImage,
-    services,
-    servicesLinkHref,
-    servicesLinkedItemIndex,
-    whyChoose,
-  } = deepCleaningData(c);
-  // The four "Set an appointment" CTAs used to hardcode "/book"; sourcing them
-  // from innerSite keeps a draft city's preview inside its own tree.
-  const { innerSite } = siteData(c);
-  return (
-    <>
-      <Hero hero={hero} bookHref={innerSite.bookUrl} />
-      <WhatIs whatIs={whatIs} />
-      <Benefits
-        benefits={benefits}
-        benefitsBgImage={benefitsBgImage}
-        bookHref={innerSite.bookUrl}
-      />
-      <ServicesList
-        services={services}
-        servicesLinkHref={servicesLinkHref}
-        servicesLinkedItemIndex={servicesLinkedItemIndex}
-        bookHref={innerSite.bookUrl}
-      />
-      <WhyChoose whyChoose={whyChoose} bookHref={innerSite.bookUrl} />
-    </>
-  );
-}
-
-/* Was src/app/(inner)/minneapolis-move-out-cleaning-services/page.tsx — JSX unchanged. */
-function MoveOutPage({ c }: { c: CityContent }) {
-  const { moveHero, whyMoveOut, included, whyIvy, cost } = moveOutData(c);
-  const { innerSite } = siteData(c);
-  return (
-    <>
-      <MoveHero moveHero={moveHero} bookHref={innerSite.bookUrl} />
-      <WhyMoveOut whyMoveOut={whyMoveOut} bookHref={innerSite.bookUrl} />
-      <IncludedServices included={included} />
-      <WhyIvy whyIvy={whyIvy} />
-      <Cost cost={cost} bookHref={innerSite.bookUrl} />
-    </>
-  );
+  const { c, suburb } = await resolveService(params);
+  return <SuburbPage c={c} suburb={suburb} />;
 }
 
 /* New for Plan 5, Task 2 — one page per suburb.slug (c.research.suburbs). */

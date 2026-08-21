@@ -21,13 +21,14 @@ import Cost from "@/components/move-out/Cost";
  * The shared-template home for all seven services. Only two are registered
  * in src/data/services/registry.ts today (deep-cleaning as `template`,
  * move-in-move-out-cleaning as `bespoke`); the other five slugs 404 here
- * until Task 5 registers them — resolveService() below is what makes that
+ * until they get registered — resolveService() below is what makes that
  * happen for free, since serviceBySlug() returns undefined for them.
  *
- * This route runs ALONGSIDE the older [serviceSlug] catch-all (which still
- * owns /deep-cleaning-<city>, /<city>-move-out-cleaning-services, and every
- * suburb slug) until Task 4 turns those old URLs into redirects. Nothing
- * here modifies that route or its components.
+ * This route runs ALONGSIDE the older [serviceSlug] catch-all, which still
+ * owns every suburb slug but no longer renders /deep-cleaning-<city> or
+ * /<city>-move-out-cleaning-services — those two are indexed elsewhere, so
+ * it permanently redirects them here instead of 404ing. Nothing here
+ * modifies that route or its components.
  */
 type ServiceParams = Promise<{ city: string; serviceSlug: string }>;
 
@@ -40,10 +41,11 @@ async function resolveService(params: ServiceParams) {
 }
 
 /*
- * Runs once per city emitted by the parent [city] segment's
- * generateStaticParams, receiving that city in `params` (Next merges parent
- * params into the child call — next/dist/build/static-paths/app.js). All
- * seven slugs are emitted regardless of which are registered: an
+ * Emits all seven SERVICE_SLUGS, unconditionally and without touching
+ * `params` — unlike the sibling [serviceSlug] route, whose suburb slugs are
+ * per-city data read from c.research.suburbs, these seven slugs are the
+ * same for every city, so nothing here needs to know which city is being
+ * generated. All seven are emitted regardless of which are registered: an
  * unregistered slug's page calls notFound() at render, which Next handles
  * as a per-route 404 rather than a build failure (next/dist/docs/01-app/
  * 03-api-reference/04-functions/not-found.md).
