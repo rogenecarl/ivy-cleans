@@ -189,6 +189,28 @@ export async function getSiteSettings(cityKey: string): Promise<SiteSettingsReco
   return row ? { cityKey: row.cityKey, notifyEmails: row.notifyEmails } : null
 }
 
+/**
+ * Every requested city's settings in one query, keyed by cityKey. A city
+ * with no row is simply absent from the result -- same "not configured yet"
+ * meaning as getSiteSettings returning null, just batched.
+ *
+ * For the Sites table (one row per city, every row needing its own
+ * settings): calling getSiteSettings per row is an N+1 round trip, the same
+ * shape leadCountsByCity already avoids for lead counts. This is that same
+ * fix for settings.
+ */
+export async function getSiteSettingsMany(
+  cityKeys: string[],
+): Promise<Record<string, SiteSettingsRecord>> {
+  if (cityKeys.length === 0) return {}
+  const rows = await prisma.siteSettings.findMany({ where: { cityKey: { in: cityKeys } } })
+  const out: Record<string, SiteSettingsRecord> = {}
+  for (const row of rows) {
+    out[row.cityKey] = { cityKey: row.cityKey, notifyEmails: row.notifyEmails }
+  }
+  return out
+}
+
 export async function upsertSiteSettings(cityKey: string, notifyEmails: string[]): Promise<void> {
   await prisma.siteSettings.upsert({
     where: { cityKey },

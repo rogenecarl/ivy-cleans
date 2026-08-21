@@ -1,8 +1,12 @@
 import Link from 'next/link'
+import domainsJson from '../../../content/_domains.json'
 import { listCities, type CityRow } from '@/pipeline/admin-logic'
 import { STAGE_IDS } from '@/pipeline/stages'
+import { leadQueryToSearch } from '@/leads/filters'
+import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
+import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
 import { ADMIN_BASE } from './base'
-import { BTN, BTN_PRIMARY, StatusChip } from './ui'
+import { BTN, BTN_PRIMARY, ReadinessChips, StatusChip } from './ui'
 
 /*
  * Dashboard. Reads the store directly (server component) rather than calling
@@ -27,7 +31,10 @@ function primaryLink(row: CityRow): { href: string; label: string } {
 }
 
 export default async function AdminDashboard() {
-  const rows = await listCities()
+  const [rows, counts] = await Promise.all([listCities(), leadCountsByCity()])
+  // One query for every row's settings, not one query per row (was N+1).
+  const settingsByCity = await getSiteSettingsMany(rows.map((row) => row.key))
+  const domains = domainsJson as DomainsIndex
 
   return (
     <>
@@ -49,13 +56,16 @@ export default async function AdminDashboard() {
             <tr className="border-b border-[#d8dde2] bg-[#f2f4f6] text-left text-[0.75rem] uppercase tracking-wide text-[#6b7680]">
               <th className="px-4 py-2.5 font-semibold">City</th>
               <th className="px-4 py-2.5 font-semibold">Status</th>
+              <th className="px-4 py-2.5 font-semibold">Domain</th>
+              <th className="px-4 py-2.5 font-semibold">Leads</th>
+              <th className="px-4 py-2.5 font-semibold">Config</th>
               <th className="px-4 py-2.5 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-[#6b7680]">
+                <td colSpan={6} className="px-4 py-8 text-center text-[#6b7680]">
                   No cities yet. Start with “+ New City”.
                 </td>
               </tr>
@@ -63,6 +73,14 @@ export default async function AdminDashboard() {
             {rows.map((row) => {
               const primary = primaryLink(row)
               const previewable = row.status === 'live' || row.status === 'draft'
+              const domain = domainFor(row.key, domains)
+              const cityCounts = counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 }
+              const readiness = siteReadiness({
+                isLive: row.status === 'live',
+                domain,
+                notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
+                counts: cityCounts,
+              })
               return (
                 <tr key={row.key} className="border-b border-[#e6eaee] last:border-b-0">
                   <td className="px-4 py-3">
@@ -80,6 +98,26 @@ export default async function AdminDashboard() {
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-3 text-[0.8rem]">
+                    {domain ?? <span className="text-[#8a949d]">not attached</span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
+                        city: row.key,
+                        status: null,
+                        formType: null,
+                        includeTest: false,
+                      })}`}
+                      className="font-medium"
+                    >
+                      {cityCounts.unworked}
+                    </Link>
+                    <span className="ml-1 text-[0.75rem] text-[#8a949d]">/ {cityCounts.total}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <ReadinessChips readiness={readiness} />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       {previewable && (
@@ -94,6 +132,9 @@ export default async function AdminDashboard() {
                       )}
                       <Link href={primary.href} className={BTN}>
                         {primary.label}
+                      </Link>
+                      <Link href={`${ADMIN_BASE}/sites/${row.key}`} className={BTN}>
+                        Settings
                       </Link>
                     </div>
                   </td>
