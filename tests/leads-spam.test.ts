@@ -19,6 +19,14 @@ describe('hashIp', () => {
     expect(hashIp(null, 'pepper')).toBeNull()
   })
 
+  it('returns null when no salt is configured, rather than throwing', () => {
+    // `null` is what src/leads/env.ts produces for an IP_HASH_SALT that is
+    // absent OR blank -- the two used to mean different things, and the blank
+    // case refused every submission in production. The lead is now captured
+    // with no ipHash instead; only the per-IP rate limit is lost.
+    expect(hashIp('203.0.113.7', null)).toBeNull()
+  })
+
   it('throws on an empty salt', () => {
     expect(() => hashIp('203.0.113.7', '')).toThrow('IP_HASH_SALT')
   })

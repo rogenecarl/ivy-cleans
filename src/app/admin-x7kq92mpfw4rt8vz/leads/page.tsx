@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { listCities } from '@/pipeline/admin-logic'
 import { parseLeadQuery } from '@/leads/filters'
-import { listLeads } from '@/leads/store'
+import { countTestLeads, listLeads } from '@/leads/store'
 import { LEAD_STATUSES, type LeadRecord } from '@/leads/types'
 import { ADMIN_BASE } from '../base'
 import { LeadStatusChip, Pill } from '../ui'
@@ -41,15 +41,26 @@ export default async function LeadsPage({
    * produce. Scoped to exactly this call, per the Sites-screen precedent.
    */
   let leads: LeadRecord[] = []
+  let testCount = 0
   let leadsError = false
   try {
-    leads = await listLeads(query)
+    /*
+     * Both in the same try: the test count is not decoration, it is the
+     * safety net. Spec 3.1 promised test rows would be hidden BEHIND A
+     * TOGGLE, and until now nothing rendered one -- so a lead classified as a
+     * test row was invisible on every screen with no control to reveal it and
+     * no hint that anything was being withheld. The count and the toggle
+     * below exist so that can never be silent again.
+     */
+    const [rows, hidden] = await Promise.all([listLeads(query), countTestLeads(query)])
+    leads = rows
+    testCount = hidden
   } catch (err) {
     leadsError = true
-    // Loud on purpose, no lead contents: this catch wraps only the listLeads
-    // call above, so whatever it caught is a connection/query failure, never
+    // Loud on purpose, no lead contents: this catch wraps only the two store
+    // calls above, so whatever it caught is a connection/query failure, never
     // a row's data.
-    console.error('LeadsPage: listLeads(query) failed -- lead data is unavailable:', err)
+    console.error('LeadsPage: reading leads failed -- lead data is unavailable:', err)
   }
 
   if (leadsError) {
@@ -80,6 +91,18 @@ export default async function LeadsPage({
         <h1 className="text-[1.4rem] font-semibold tracking-tight">Leads</h1>
         <p className="mt-1 text-[0.85rem] text-[#6b7680]">
           {leads.length} shown, {unworked} still need action.
+          {!query.includeTest && testCount > 0 && (
+            <>
+              {' '}
+              <Link
+                href={filterHref(query, 'test', '1')}
+                className="font-semibold text-[#8a5300] underline"
+              >
+                {testCount} test {testCount === 1 ? 'row is' : 'rows are'} hidden
+              </Link>
+              .
+            </>
+          )}
         </p>
       </div>
 
@@ -105,6 +128,27 @@ export default async function LeadsPage({
           ]}
           href={(v) => filterHref(query, 'form', v)}
         />
+        {/*
+         * The toggle spec 3.1 promised. Not a FilterGroup: this dimension has
+         * two states, not "All plus some values", and calling the default
+         * state "All" would read as "everything is shown" when it is exactly
+         * the state that hides rows.
+         */}
+        <div className="flex items-center gap-1 rounded-md border border-[#d8dde2] bg-white px-2 py-1">
+          <span className="text-[0.7rem] font-semibold text-[#6b7680] uppercase">Test rows</span>
+          <Link
+            href={filterHref(query, 'test', null)}
+            className={!query.includeTest ? 'font-semibold' : 'text-[#6b7680]'}
+          >
+            hidden
+          </Link>
+          <Link
+            href={filterHref(query, 'test', '1')}
+            className={query.includeTest ? 'font-semibold' : 'text-[#6b7680]'}
+          >
+            shown
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-[#d8dde2] bg-white">
@@ -126,6 +170,12 @@ export default async function LeadsPage({
             <span className="flex-1 truncate text-[0.8rem] text-[#6b7680]">
               <Pill>{cityDisplayName(cityLookup, lead.cityKey)}</Pill>{' '}
               <Pill>{lead.formType.toUpperCase()}</Pill>{' '}
+              {/* Only reachable with the toggle on, and then it must be obvious which rows are the previews. */}
+              {lead.isTest && (
+                <>
+                  <Pill>TEST</Pill>{' '}
+                </>
+              )}
               {lead.phone ?? lead.email ?? 'No contact info'}
               {lead.emailStatus === 'failed' && (
                 <span className="ml-2 text-[#a11212]">email not sent</span>

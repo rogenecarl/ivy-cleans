@@ -27,46 +27,97 @@ export type ParseResult =
   | { ok: true; fields: ParsedFields }
   | { ok: false; fieldErrors: Record<string, string> }
 
-/** Live field name -> human label, in the order the form renders them. */
-export const BOOKING_FIELDS: readonly [string, string][] = [
-  ["form_fields[email]", "What Type of Service Are Your Looking For?"],
-  ["form_fields[field_22aa910]", "How Would Your Describe Your Home Right Now?"],
-  ["form_fields[field_c4cfac1]", "How Many Bedrooms?"],
-  ["form_fields[field_caacb3a]", "How Many Bathrooms?"],
-  ["form_fields[message]", "How Soon Are You Looking To Have This Cleaned?"],
-  ["form_fields[field_1872bc3]", "What’s the Address of the Property?"],
-  ["form_fields[name]", "Full Name"],
-  ["form_fields[field_ca2243e]", "Email Address"],
-  ["form_fields[field_deeaf01]", "Phone Number"],
-  ["form_fields[field_1abcd81]", "How Would You Prefer To Be Contacted?"],
+/**
+ * The live form's fields, in render order: the Elementor submission name, the
+ * human label the dashboard and the email show, and whether the field is
+ * marked required IN THE PUBLIC MARKUP.
+ *
+ * `required` is not decoration. It used to live only in src/data/*.ts while
+ * this module hardcoded its own idea of which fields were mandatory — and the
+ * two disagreed: the contact form renders Name as OPTIONAL and the server
+ * rejected any submission without one, so a customer doing exactly what the
+ * page allowed got an error. Nothing could catch it, because the drift guard
+ * (tests/leads-schema.test.ts) compared names and labels only.
+ *
+ * Both halves are now closed: the guard compares `required` too, and the
+ * validation below is DERIVED from these flags instead of restating them.
+ */
+export type LeadFormField = {
+  /** The live `name` attribute the browser actually submits. */
+  name: string
+  /** Human label, for the payload / dashboard / email. */
+  label: string
+  /** Marked required in the public markup (src/data/book.ts, src/data/contact.ts). */
+  required: boolean
+}
+
+/** Live fields, in the order the form renders them. */
+export const BOOKING_FIELDS: readonly LeadFormField[] = [
+  { name: "form_fields[email]", label: "What Type of Service Are Your Looking For?", required: true },
+  { name: "form_fields[field_22aa910]", label: "How Would Your Describe Your Home Right Now?", required: true },
+  { name: "form_fields[field_c4cfac1]", label: "How Many Bedrooms?", required: true },
+  { name: "form_fields[field_caacb3a]", label: "How Many Bathrooms?", required: true },
+  { name: "form_fields[message]", label: "How Soon Are You Looking To Have This Cleaned?", required: true },
+  { name: "form_fields[field_1872bc3]", label: "What’s the Address of the Property?", required: true },
+  { name: "form_fields[name]", label: "Full Name", required: true },
+  { name: "form_fields[field_ca2243e]", label: "Email Address", required: true },
+  { name: "form_fields[field_deeaf01]", label: "Phone Number", required: true },
+  { name: "form_fields[field_1abcd81]", label: "How Would You Prefer To Be Contacted?", required: true },
 ]
 
-export const CONTACT_FIELDS: readonly [string, string][] = [
-  ["form_fields[name]", "Name"],
-  ["form_fields[email]", "Email"],
-  ["form_fields[field_66433ea]", "Phone Number"],
-  ["form_fields[message]", "Are You Looking For Help With A Cleaning Project?"],
-  ["form_fields[field_45db7dd]", "How Can We Help?"],
+export const CONTACT_FIELDS: readonly LeadFormField[] = [
+  { name: "form_fields[name]", label: "Name", required: false },
+  { name: "form_fields[email]", label: "Email", required: true },
+  { name: "form_fields[field_66433ea]", label: "Phone Number", required: false },
+  { name: "form_fields[message]", label: "Are You Looking For Help With A Cleaning Project?", required: true },
+  { name: "form_fields[field_45db7dd]", label: "How Can We Help?", required: false },
 ]
 
-const identity = z.object({
-  name: z.string().trim().min(1, 'Please enter your name').max(200),
-  email: z.string().trim().email('Please enter a valid email address').max(320),
-  phone: z.string().trim().max(50),
-})
+/**
+ * The identity rules, derived from the field table so the server can never be
+ * STRICTER than the markup claims to be.
+ *
+ * The direction matters. Server-stricter-than-markup rejects a customer who
+ * did exactly what the page allowed — the I2 defect. Server-more-lenient is
+ * harmless: the browser already enforces `required`, and accepting a field
+ * the markup insisted on costs nothing (every one of these columns is
+ * nullable in Prisma).
+ *
+ * So `name` and `email` follow the table exactly, and `phone` stays optional
+ * unconditionally — booking marks it required, but refusing to store a lead
+ * that carries a name and a working email address, over a missing phone
+ * number, would lose a real customer to satisfy a form attribute.
+ */
+function identitySchema(nameRequired: boolean, emailRequired: boolean) {
+  const name = z.string().trim().max(200)
+  const email = z.string().trim().max(320)
+  return z.object({
+    name: nameRequired ? name.min(1, 'Please enter your name') : name,
+    email: emailRequired
+      ? email.email('Please enter a valid email address')
+      : z.union([z.literal(''), email.email('Please enter a valid email address')]),
+    phone: z.string().trim().max(50),
+  })
+}
 
 function str(form: FormData, key: string): string {
   const value = form.get(key)
   return typeof value === 'string' ? value.trim() : ''
 }
 
+/** Is `key` marked required in the live markup? Unknown keys default to required — a field this module lifts but the table does not describe is a bug, and the strict reading is the one that shows up in tests. */
+function isRequired(fields: readonly LeadFormField[], key: string): boolean {
+  return fields.find((field) => field.name === key)?.required ?? true
+}
+
 function parse(
   form: FormData,
-  fields: readonly [string, string][],
+  fields: readonly LeadFormField[],
   nameKey: string,
   emailKey: string,
   phoneKey: string,
 ): ParseResult {
+  const identity = identitySchema(isRequired(fields, nameKey), isRequired(fields, emailKey))
   const parsed = identity.safeParse({
     name: str(form, nameKey),
     email: str(form, emailKey),
@@ -84,13 +135,16 @@ function parse(
   }
 
   const payload: Record<string, string> = {}
-  for (const [key, label] of fields) payload[label] = str(form, key)
+  for (const field of fields) payload[field.label] = str(form, field.name)
 
+  // An optional field left blank is null, not '' -- Lead.name/email/phone are
+  // all nullable in Prisma, and the dashboard's "No name given" / "No contact
+  // info" fallbacks key off null. Same rule for all three.
   return {
     ok: true,
     fields: {
-      name: parsed.data.name,
-      email: parsed.data.email,
+      name: parsed.data.name === '' ? null : parsed.data.name,
+      email: parsed.data.email === '' ? null : parsed.data.email,
       phone: parsed.data.phone === '' ? null : parsed.data.phone,
       payload,
     },

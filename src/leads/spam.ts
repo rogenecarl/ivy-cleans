@@ -22,10 +22,25 @@ import { createHash } from 'node:crypto'
 export const RATE_LIMIT = 5
 export const RATE_WINDOW_MS = 10 * 60_000
 
-export function hashIp(ip: string | null, salt: string): string | null {
+/**
+ * `salt: null` means IP_HASH_SALT is not configured (src/leads/env.ts resolves
+ * both an absent variable and a blank one to null, and logs it once at boot).
+ * That returns null: the lead is captured with no ipHash and the per-IP rate
+ * limit is skipped for it. Refusing the submission instead would lose a real
+ * customer over a spam control, which is the worse trade.
+ *
+ * A blank/whitespace-only STRING still throws. env.ts is the only supported
+ * source of this argument and never produces one, so at this point it can
+ * only be a caller that reconstructed the salt itself -- exactly the mistake
+ * that must not silently produce a reversible hash.
+ */
+export function hashIp(ip: string | null, salt: string | null): string | null {
   if (!ip) return null
-  if (!salt || salt.trim() === '') {
-    throw new Error('IP_HASH_SALT must not be empty or whitespace-only')
+  if (salt === null) return null
+  if (salt.trim() === '') {
+    throw new Error(
+      'IP_HASH_SALT must not be empty or whitespace-only -- pass null when it is not configured (see src/leads/env.ts)',
+    )
   }
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex')
 }

@@ -47,6 +47,23 @@ describe('filterHref', () => {
     expect(href).toBe(`${ADMIN_BASE}/leads`)
   })
 
+  it('builds both ends of the test-row toggle', () => {
+    // Spec 3.1 promised test rows would be hidden BEHIND A TOGGLE. Nothing
+    // rendered one, so a lead classified as a test row was invisible on every
+    // screen with no way to reveal it -- the state in which a whole city's
+    // real customers accumulated unanswered. These are the two hrefs the
+    // control on the Leads screen points at.
+    const hidden = parseLeadQuery({ city: 'miami' })
+    const show = filterHref(hidden, 'test', '1')
+    expect(new URLSearchParams(show.slice(show.indexOf('?') + 1)).get('test')).toBe('1')
+    expect(new URLSearchParams(show.slice(show.indexOf('?') + 1)).get('city')).toBe('miami')
+
+    const shown = parseLeadQuery({ city: 'miami', test: '1' })
+    const hide = filterHref(shown, 'test', null)
+    expect(new URLSearchParams(hide.slice(hide.indexOf('?') + 1)).has('test')).toBe(false)
+    expect(new URLSearchParams(hide.slice(hide.indexOf('?') + 1)).get('city')).toBe('miami')
+  })
+
   it('preserves includeTest (the "test" param) across a filter change', () => {
     const query = parseLeadQuery({ city: 'miami', test: '1' })
     const href = filterHref(query, 'status', 'new')

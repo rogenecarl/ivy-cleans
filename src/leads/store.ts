@@ -136,6 +136,27 @@ export async function listLeads(query: LeadQuery): Promise<LeadRecord[]> {
   return rows.map(toRecord)
 }
 
+/**
+ * How many rows the CURRENT filters would show if test rows were included.
+ *
+ * The dashboard hides test rows by default, so without this the operator has
+ * no way to tell "there are genuinely no leads" from "everything here is
+ * classified as a preview and hidden from you". That second state is exactly
+ * how a whole city's real customers went unanswered behind a "0 / 0", so the
+ * hidden count is now always on screen. Ignores query.includeTest by design:
+ * it answers "how many are being hidden", not "what is displayed".
+ */
+export async function countTestLeads(query: LeadQuery): Promise<number> {
+  return prisma.lead.count({
+    where: {
+      ...(query.city ? { cityKey: query.city } : {}),
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.formType ? { formType: query.formType } : {}),
+      isTest: true,
+    },
+  })
+}
+
 export async function getLead(id: string): Promise<LeadRecord | null> {
   const row = await prisma.lead.findUnique({ where: { id } })
   return row ? toRecord(row) : null

@@ -184,6 +184,7 @@ exports[`bookData(minneapolis) is stable > book 1`] = `
     "body": "In the meantime, call us at 612-424-0391 or email Support@ivycleans.com.",
     "email": "Support@ivycleans.com",
     "emailHref": "mailto:Support@ivycleans.com",
+    "errorHeading": "Something went wrong.",
     "heading": "Online booking is coming soon!",
     "phone": "612-424-0391",
     "phoneHref": "tel:6124240391",

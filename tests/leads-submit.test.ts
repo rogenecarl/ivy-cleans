@@ -32,9 +32,22 @@ function bookingForm(over: Record<string, string> = {}): FormData {
 
 type Call = string
 
-function ports(over: Partial<SubmitPorts> = {}): { ports: SubmitPorts; calls: Call[] } {
+/*
+ * `draftCities` is the whole point of the isDraftCity port: a lead is a test
+ * row when THE CITY IS A DRAFT, never because of the host it arrived on. The
+ * default set marks only 'testville' a draft, so 'miami' and 'minneapolis'
+ * behave as the live cities they are in content/.
+ */
+function ports(
+  over: Partial<SubmitPorts> = {},
+  draftCities: string[] = ['testville'],
+): { ports: SubmitPorts; calls: Call[] } {
   const calls: Call[] = []
   const base: SubmitPorts = {
+    async isDraftCity(cityKey: string) {
+      calls.push(`draft?:${cityKey}`)
+      return draftCities.includes(cityKey)
+    },
     async countRecentByIpHash() {
       calls.push('count')
       return 0
@@ -132,7 +145,32 @@ describe('submitLead', () => {
     expect(calls).toContain('mark:sent')
   })
 
-  it('attributes a preview submission as a test row and sends no email', async () => {
+  /*
+   * THE C1 REGRESSION SET. isTest used to be decided by the request shape:
+   * any host not in _domains.hosts, rendering any city other than the default,
+   * produced a test row. _domains.hosts is EMPTY, so every real customer of
+   * every non-default city was silently filed as test data -- never emailed,
+   * filtered out of the leads list and the per-city counts, with no control on
+   * any screen to reveal them. These three cases pin the corrected semantics:
+   * the CITY'S status decides, the host decides only the key.
+   */
+  it('a LIVE city on an unmapped host is a real lead: not a test row, and emailed', async () => {
+    const { ports: p, calls } = ports()
+    let captured: LeadInput | null = null
+    p.createLead = async (input) => {
+      captured = input
+      return { ...input, id: 'lead-3', status: 'new', notes: '', emailStatus: 'pending', emailError: null, submittedAt: new Date(), updatedAt: new Date() }
+    }
+    // Exactly the deployment this app is in today: no host mapped, the city
+    // reached at <deploy-host>/miami/contact.
+    await submitLead(args(bookingForm(), { host: 'ivy-cleans.vercel.app', renderedCityKey: 'miami' }), p)
+    expect(captured!.cityKey).toBe('miami')
+    expect(captured!.isTest).toBe(false)
+    expect(calls).toContain('send')
+    expect(calls).toContain('mark:sent')
+  })
+
+  it('a DRAFT city is a test row and is never emailed, however it was reached', async () => {
     const { ports: p, calls } = ports()
     let captured: LeadInput | null = null
     p.createLead = async (input) => {
@@ -143,6 +181,50 @@ describe('submitLead', () => {
     expect(captured!.isTest).toBe(true)
     expect(captured!.cityKey).toBe('testville')
     expect(calls).not.toContain('send')
+    expect(calls).toContain('mark:skipped')
+  })
+
+  it('a draft city stays a test row even on its own mapped tenant domain', async () => {
+    // The mirror of the case above: a mapped host does not make a draft real,
+    // just as an unmapped one no longer makes a live city fake.
+    const { ports: p, calls } = ports({}, ['miami'])
+    let captured: LeadInput | null = null
+    p.createLead = async (input) => {
+      captured = input
+      return { ...input, id: 'lead-4', status: 'new', notes: '', emailStatus: 'pending', emailError: null, submittedAt: new Date(), updatedAt: new Date() }
+    }
+    await submitLead(args(bookingForm()), p) // host: miamicleans.com, mapped
+    expect(captured!.cityKey).toBe('miami')
+    expect(captured!.isTest).toBe(true)
+    expect(calls).not.toContain('send')
+  })
+
+  it('classifies by the city the HOST mapped to, not the one the browser claims', async () => {
+    // houstoncleans.com is mapped to houston; the browser claims testville
+    // (a draft). The mapped host wins for the key, so the draft lookup is made
+    // for houston and the lead is real.
+    const { ports: p } = ports()
+    let captured: LeadInput | null = null
+    p.createLead = async (input) => {
+      captured = input
+      return { ...input, id: 'lead-5', status: 'new', notes: '', emailStatus: 'pending', emailError: null, submittedAt: new Date(), updatedAt: new Date() }
+    }
+    await submitLead(
+      args(bookingForm(), {
+        host: 'houstoncleans.com',
+        renderedCityKey: 'testville',
+        domains: { default: 'minneapolis', hosts: { 'houstoncleans.com': 'houston' } },
+      }),
+      p,
+    )
+    expect(captured!.cityKey).toBe('houston')
+    expect(captured!.isTest).toBe(false)
+  })
+
+  it('asks about the city only after validation and the rate limit have passed', async () => {
+    const { ports: p, calls } = ports()
+    await submitLead(args(bookingForm({ 'form_fields[field_ca2243e]': 'bad' })), p)
+    expect(calls.filter((c) => c.startsWith('draft?:'))).toHaveLength(0)
   })
 
   it('returns field errors and writes nothing when validation fails', async () => {
@@ -192,15 +274,36 @@ describe('submitLead', () => {
     expect(result.error).toBe('storage')
   })
 
-  it('rejects (does not resolve a SubmitResult) when ipSalt is empty', async () => {
-    // hashIp throws on a misconfigured (empty/whitespace-only) salt rather than
-    // silently storing a reversible hash. submitLead deliberately does not
-    // catch that throw, so the promise itself rejects. The caller (the next
-    // task's server action / route handler) is responsible for catching this
-    // and returning a graceful failure to the customer -- letting it through
-    // unhandled would otherwise surface as a raw 500 on a real submission.
+  /*
+   * THE C2 REGRESSION SET. `ipSalt: null` is what src/leads/env.ts produces
+   * for an IP_HASH_SALT that is absent OR blank -- and `IP_HASH_SALT=` in a
+   * half-filled .env is the common case. That used to throw out of hashIp and
+   * turn EVERY submission into a storage error, which was invisible locally
+   * because `next dev` sets no forwarding headers, so clientIp is null and
+   * hashIp returned before it ever looked at the salt.
+   */
+  it('still captures the lead when no salt is configured, storing no ipHash', async () => {
+    const { ports: p, calls } = ports()
+    let captured: LeadInput | null = null
+    p.createLead = async (input) => {
+      captured = input
+      return { ...input, id: 'lead-6', status: 'new', notes: '', emailStatus: 'pending', emailError: null, submittedAt: new Date(), updatedAt: new Date() }
+    }
+    const result = await submitLead(args(bookingForm(), { ipSalt: null }), p)
+    expect(result).toEqual({ ok: true, leadId: 'lead-6' })
+    expect(captured!.ipHash).toBeNull()
+    // The rate limit degrades with it -- there is no hash to count against --
+    // but the customer is captured and emailed, which is the trade being made.
+    expect(calls).not.toContain('count')
+    expect(calls).toContain('send')
+  })
+
+  it('still rejects a blank salt STRING, which can now only be a caller bug', async () => {
+    // env.ts never produces '' (absent and blank both become null), so a blank
+    // string here means someone rebuilt the salt by hand -- exactly the path
+    // that must not silently produce a reversible hash.
     const { ports: p } = ports()
-    await expect(submitLead(args(bookingForm(), { ipSalt: '' }), p)).rejects.toThrow(
+    await expect(submitLead(args(bookingForm(), { ipSalt: '   ' }), p)).rejects.toThrow(
       'IP_HASH_SALT',
     )
   })

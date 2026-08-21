@@ -19,12 +19,32 @@
  */
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { listCities } from '@/pipeline/admin-logic'
 import { upsertSiteSettings } from '@/leads/store'
 import { ADMIN_BASE } from '../base'
 import { parseNotifyEmails } from './logic'
 
 export async function saveNotifyEmailsAction(cityKey: string, formData: FormData): Promise<void> {
   // AUTH GOES HERE, before anything below reads or writes.
+
+  /*
+   * `cityKey` is a bound argument, which round-trips through the client and
+   * is therefore untrusted -- and it was previously written straight into a
+   * SiteSettings row with no check at all. /sites/<anything> renders a
+   * working form, so a typo (or a hostile POST) created a settings row for a
+   * city that does not exist: invisible on the Sites table, never read by any
+   * submission, and quietly diverging from the operator's belief that they
+   * had configured an inbox.
+   *
+   * Validated against listCities(), the same list the Sites table itself is
+   * built from -- so every row the operator can actually click is accepted,
+   * drafts and mid-pipeline cities included, and nothing else is.
+   */
+  const known = await listCities()
+  if (!known.some((city) => city.key === cityKey)) {
+    throw new Error(`unknown city "${cityKey}"`)
+  }
+
   const result = parseNotifyEmails(formData.get('emails'))
 
   // An absent/non-string field is a malformed request, not "the operator

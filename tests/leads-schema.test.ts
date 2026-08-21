@@ -85,10 +85,39 @@ describe('parseContactForm', () => {
     if (!result.ok) return
     expect(result.fields.phone).toBeNull()
   })
+
+  it('accepts an empty name, because the contact form renders Name as optional', () => {
+    // src/data/contact.ts marks Name `required: false` (verbatim from the
+    // live markup) and Lead.name is nullable in Prisma. The server used to
+    // reject this outright, so a customer who did exactly what the page
+    // allowed was told to fix a field the page called optional.
+    const result = parseContactForm(contact({ 'form_fields[name]': '' }))
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.fields.name).toBeNull()
+    // Still captured in full: the blank name must not cost the payload.
+    expect(Object.keys(result.fields.payload)).toHaveLength(5)
+  })
+
+  it('still requires an email, which the contact form does mark required', () => {
+    const result = parseContactForm(contact({ 'form_fields[email]': '' }))
+    expect(result.ok).toBe(false)
+  })
 })
 
+/*
+ * THE DRIFT GUARD. The rendered form (src/data/*.ts) and the server's idea of
+ * that form (src/leads/schema.ts) are two hand-maintained lists that must
+ * describe the same thing.
+ *
+ * It used to compare names and labels only, and was therefore structurally
+ * blind to the divergence that mattered most: the contact form rendered Name
+ * as OPTIONAL while the server rejected a submission without one. `required`
+ * is compared here now, and schema.ts derives its validation from the same
+ * flags, so a future edit to either side has to move both.
+ */
 describe('schema validation against live data', () => {
-  it('BOOKING_FIELDS matches the actual booking form structure', async () => {
+  it('BOOKING_FIELDS matches the actual booking form structure, required flags included', async () => {
     const city = await getDefaultCity()
     const data = bookData(city)
     const bookFields = data.bookFields
@@ -97,14 +126,15 @@ describe('schema validation against live data', () => {
     expect(BOOKING_FIELDS.length).toBe(10)
 
     for (let i = 0; i < BOOKING_FIELDS.length; i++) {
-      const [fieldName, label] = BOOKING_FIELDS[i]
+      const field = BOOKING_FIELDS[i]
       const actualField = bookFields[i]
-      expect(fieldName).toBe(actualField.name)
-      expect(label).toBe(actualField.label)
+      expect(field.name).toBe(actualField.name)
+      expect(field.label).toBe(actualField.label)
+      expect(field.required).toBe(actualField.required)
     }
   })
 
-  it('CONTACT_FIELDS matches the actual contact form structure', async () => {
+  it('CONTACT_FIELDS matches the actual contact form structure, required flags included', async () => {
     const city = await getDefaultCity()
     const data = contactData(city)
     const contactFields = data.contactFields
@@ -113,13 +143,28 @@ describe('schema validation against live data', () => {
     expect(CONTACT_FIELDS.length).toBe(5)
 
     for (let i = 0; i < CONTACT_FIELDS.length; i++) {
-      const [fieldName, label] = CONTACT_FIELDS[i]
+      const field = CONTACT_FIELDS[i]
       const actualField = contactFields[i]
       // Contact form field names are built from the id: form_fields[${field.id.replace("form-field-", "")}]
       const expectedFieldName = `form_fields[${actualField.id.replace('form-field-', '')}]`
-      expect(fieldName).toBe(expectedFieldName)
-      expect(label).toBe(actualField.label)
+      expect(field.name).toBe(expectedFieldName)
+      expect(field.label).toBe(actualField.label)
+      expect(field.required).toBe(actualField.required)
     }
+  })
+
+  it('the server never demands a field the contact markup calls optional', async () => {
+    // The I2 regression, stated as the property rather than the instance: for
+    // every optional field the page renders, a submission omitting it parses.
+    const city = await getDefaultCity()
+    const optional = contactData(city)
+      .contactFields.filter((field) => !field.required)
+      .map((field) => `form_fields[${field.id.replace('form-field-', '')}]`)
+
+    expect(optional).toContain('form_fields[name]')
+    const blanked: Record<string, string> = {}
+    for (const key of optional) blanked[key] = ''
+    expect(parseContactForm(contact(blanked)).ok).toBe(true)
   })
 })
 

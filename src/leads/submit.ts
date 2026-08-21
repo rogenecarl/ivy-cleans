@@ -23,6 +23,20 @@ export type SubmitPorts = {
   createLead(input: LeadInput): Promise<LeadRecord>
   markLeadEmail(id: string, status: EmailStatus, error: string | null): Promise<void>
   getSiteSettings(cityKey: string): Promise<SiteSettingsRecord | null>
+  /**
+   * Is this city still a draft? A draft city's submissions are previews:
+   * stored, hidden from the dashboard by default, never emailed. A LIVE
+   * city's submissions are real customers no matter what host they arrived
+   * on -- see the header of attribution.ts for the bug this replaced.
+   *
+   * MUST NOT THROW and MUST FAIL OPEN: an implementation that cannot resolve
+   * the city (store unreachable, key unknown) reports `false`, i.e. "real".
+   * A real lead wrongly marked as a test row disappears from every screen and
+   * is never emailed; a preview wrongly marked real is merely a visible,
+   * clearly-labelled row someone can ignore. Only one of those loses a
+   * customer.
+   */
+  isDraftCity(cityKey: string): Promise<boolean>
   sendEmail(args: {
     to: string[]
     replyTo: string | null
@@ -40,7 +54,8 @@ export type SubmitArgs = {
   host: string
   renderedCityKey: string
   clientIp: string | null
-  ipSalt: string
+  /** Resolved once by src/leads/env.ts. `null` = not configured: no ipHash is stored and the per-IP rate limit is skipped, rather than refusing the customer. */
+  ipSalt: string | null
   domains: DomainsIndex
 }
 
@@ -61,12 +76,12 @@ export async function submitLead(args: SubmitArgs, ports: SubmitPorts): Promise<
   // honeypot is that catching one must be free, so this must run first.
   if (honeypotFilled(honeypotValue)) return { ok: true }
 
-  // hashIp throws if ipSalt is empty or whitespace-only -- a misconfigured
-  // deployment must fail loudly rather than store a reversible hash. That
-  // throw is deliberately NOT caught here, so submitLead rejects instead of
-  // resolving with a SubmitResult. The caller is responsible for catching it
-  // and showing the customer a graceful failure; letting it through raw would
-  // otherwise surface as an uncaught 500 on a real submission.
+  // `ipSalt: null` means "not configured" (env.ts already logged that, once,
+  // at boot): hashIp returns null, no ipHash is stored, and the rate limit is
+  // skipped. The customer is still captured -- losing the lead would be a far
+  // worse outcome than losing a spam control. A blank STRING never reaches
+  // here (env.ts normalizes it to null) and hashIp still throws on one, since
+  // at that point it can only be a programming error.
   const ipHash = hashIp(args.clientIp, args.ipSalt)
   const recentCount = ipHash ? await ports.countRecentByIpHash(ipHash, RATE_WINDOW_MS) : 0
   if (overRateLimit(recentCount)) return { ok: false, error: 'rate-limit' }
@@ -75,6 +90,15 @@ export async function submitLead(args: SubmitArgs, ports: SubmitPorts): Promise<
 
   const attribution = attributeCity(args.host, args.renderedCityKey, args.domains)
 
+  /*
+   * The city key decides WHOSE lead this is (attribution.ts, pure, Host-first).
+   * The city's own status decides whether it is a real customer or a draft
+   * preview -- a separate question, answered here because it needs I/O.
+   * Deliberately after validation and the rate limit, so a rejected or
+   * bot-filled submission never costs a city lookup.
+   */
+  const isTest = await ports.isDraftCity(attribution.cityKey)
+
   const input: LeadInput = {
     cityKey: attribution.cityKey,
     formType: args.formType,
@@ -82,7 +106,7 @@ export async function submitLead(args: SubmitArgs, ports: SubmitPorts): Promise<
     email: parsed.fields.email,
     phone: parsed.fields.phone,
     payload: parsed.fields.payload,
-    isTest: attribution.isTest,
+    isTest,
     ipHash,
   }
 
@@ -94,7 +118,7 @@ export async function submitLead(args: SubmitArgs, ports: SubmitPorts): Promise<
   }
 
   // From here on nothing may change the caller's result. The lead is durable.
-  await notify(lead, input, attribution.isTest, ports)
+  await notify(lead, input, isTest, ports)
   return { ok: true, leadId: lead.id }
 }
 

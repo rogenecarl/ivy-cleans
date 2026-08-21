@@ -554,9 +554,14 @@ try {
    * lead sitting in a real inbox operator's dashboard, mirroring
    * tests/leads-store.test.ts's `ztest-` + unconditional-afterAll pattern.
    * The cityKey here is deliberately the real "minneapolis" (attribution
-   * runs off the Host header exactly as it would for a real customer, and
-   * the brief's own assertion is a MINNEAPOLIS pill), so the marker instead
+   * runs exactly as it would for a real customer), so the marker instead
    * lives in the email address.
+   *
+   * It also depends on content/minneapolis.json being `"status": "live"`.
+   * That is what makes this a REAL lead rather than a draft preview, and so
+   * what makes it appear in the dashboard list at all — the list hides test
+   * rows by default. A draft city here would (correctly) be filed as a test
+   * row and the "present in the dashboard list" check below would fail.
    */
   if (!process.env.DATABASE_URL) {
     skip(
@@ -602,9 +607,20 @@ try {
       const leadRow = page.locator('a', { hasText: LEAD_NAME }).first()
       check('submitted lead is present in the dashboard list', (await leadRow.count()) > 0)
       const leadRowText = (await leadRow.textContent())?.replace(/\s+/g, ' ').trim() ?? ''
+      /*
+       * "Minneapolis", not "MINNEAPOLIS". This assertion was wrong from the
+       * day it was written and nobody saw it, because this case has only ever
+       * taken its skip path. The list's pill renders cityDisplayName()
+       * (src/app/admin-x7kq92mpfw4rt8vz/leads/logic.ts), which returns the
+       * city's DISPLAY NAME for a city that exists; the uppercased key is only
+       * the fallback for a lead whose city has since been deleted. The lead
+       * DETAIL screen is the one that uppercases (lead.cityKey.toUpperCase()).
+       * Playwright's textContent() returns the DOM text either way -- CSS
+       * text-transform would not have saved the old assertion.
+       */
       check(
-        'dashboard row carries a MINNEAPOLIS pill',
-        leadRowText.includes('MINNEAPOLIS'),
+        'dashboard row carries a Minneapolis pill',
+        leadRowText.includes('Minneapolis'),
         leadRowText,
       )
       await shot(page, 'leads-list')
@@ -613,6 +629,14 @@ try {
       await page.waitForURL(`**${ADMIN}/leads/*`)
       const detailBefore = await text(page)
       check('lead detail page opens for the submitted lead', detailBefore.includes(LEAD_NAME))
+      // The detail screen is the one that uppercases the city (it renders
+      // lead.cityKey.toUpperCase(), not the display-name lookup the list
+      // uses). Asserted explicitly so the two renderings stay distinguishable
+      // and the list assertion above cannot silently drift back.
+      check(
+        'lead detail page shows the uppercased city key',
+        detailBefore.includes('MINNEAPOLIS'),
+      )
 
       await clickText(page, 'button', 'contacted')
       await page.waitForFunction(() => document.body.innerText.includes('CONTACTED'), null, {
