@@ -44,10 +44,42 @@ if (DB_DISABLE_HAPPY_EYEBALLS) setDefaultAutoSelectFamily(false)
  * wrapping a real `pg` Pool instead, using the same pooled Neon connection
  * string the schema's `url` used to read directly.
  */
+/*
+ * Pool settings match trip-scheduler/src/lib/prisma.ts, the owner's other
+ * Prisma 7 + Neon project, because these are not arbitrary: pg's defaults are
+ * wrong for a serverless caller.
+ *
+ * connectionTimeoutMillis is the one that matters. Unset, pg-pool applies NO
+ * connect timeout at all (`if (!this.options.connectionTimeoutMillis)` in
+ * pg-pool/index.js) and a hung connect waits forever -- which in a Vercel
+ * function means a customer's form submission hanging until the platform kills
+ * it, instead of failing fast into the "call us instead" panel that submit.ts
+ * already renders on a storage error. Bounded, a stalled database costs that
+ * customer 30 seconds and a legible message.
+ *
+ * statement_timeout bounds a runaway query holding a pooled connection open.
+ * idleTimeoutMillis raises pg's 10s default so a warm function reuses its
+ * connection instead of reconnecting on every request.
+ */
 function createPrismaClient(): PrismaClient {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 30000,
+    statement_timeout: 30000,
+  })
   const adapter = new PrismaPg(pool)
-  return new PrismaClient({ adapter })
+  /*
+   * Without this, Prisma reports nothing: a failing query surfaces only as
+   * whatever the caller does with the rejection. The store's callers turn a
+   * failure into a friendly panel or a degraded dashboard, so the server log
+   * is the only place the real cause is ever visible.
+   */
+  return new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+  })
 }
 
 /*
