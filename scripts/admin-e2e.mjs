@@ -270,9 +270,9 @@ try {
   await shot(page, 'dashboard-before')
 
   /* 2. New city form ─────────────────────────────────────────────────────── */
-  await clickText(page, 'a', '+ New City')
+  await clickText(page, 'a', '+ New Site')
   await page.waitForURL(`**${ADMIN}/new`)
-  check('“+ New City” opens the form', page.url().endsWith(`${ADMIN}/new`))
+  check('“+ New Site” opens the form', page.url().endsWith(`${ADMIN}/new`))
 
   // 2a. The invalid-state path first: proves deriveFacts is the validator and
   // that the error round-trips back into the form.

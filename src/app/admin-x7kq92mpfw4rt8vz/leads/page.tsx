@@ -190,7 +190,7 @@ export default async function LeadsPage({
                        * validly nest inside another <a>. */}
                       <Link
                         href={`${ADMIN_BASE}/leads/${lead.id}`}
-                        className="inline-flex min-h-11 cursor-pointer items-center rounded-sm outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
+                        className="inline-flex min-h-11 cursor-pointer items-center rounded-sm font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
                       >
                         {lead.name ?? 'No name given'}
                       </Link>

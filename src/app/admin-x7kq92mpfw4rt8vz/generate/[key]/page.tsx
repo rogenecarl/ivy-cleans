@@ -50,7 +50,7 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
           className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
-          Cities
+          Sites
         </Link>
         <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">
           Generating {draft.facts.city}, {draft.facts.state}

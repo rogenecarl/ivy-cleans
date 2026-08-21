@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Building2, ExternalLink, TriangleAlert } from 'lucide-react'
+import { Building2, ExternalLink, MoreHorizontal, TriangleAlert } from 'lucide-react'
 import domainsJson from '../../../content/_domains.json'
 import { listCities, type CityRow } from '@/pipeline/admin-logic'
 import { STAGE_IDS } from '@/pipeline/stages'
@@ -9,6 +9,12 @@ import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
 import type { LeadCounts, SiteSettingsRecord } from '@/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE } from './base'
 import { EmptyState, ReadinessChips, StatusChip } from './ui'
@@ -79,13 +85,13 @@ export default async function AdminDashboard() {
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[1.4rem] font-semibold tracking-tight">Cities</h1>
+          <h1 className="text-[1.4rem] font-semibold tracking-tight">Sites</h1>
           <p className="mt-1 text-[0.85rem] text-muted-foreground">
             {rows.length} {rows.length === 1 ? 'site' : 'sites'} in the manager.
           </p>
         </div>
         <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-          <Link href={`${ADMIN_BASE}/new`}>+ New City</Link>
+          <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
         </Button>
       </div>
 
@@ -95,7 +101,7 @@ export default async function AdminDashboard() {
           <AlertTitle>Lead data is unavailable</AlertTitle>
           <AlertDescription className="text-amber-800">
             Lead counts and readiness chips are not shown below. This is different from zero
-            leads: it means the leads store could not be reached. The cities table and every
+            leads: it means the leads store could not be reached. The sites table and every
             action on it are unaffected.
           </AlertDescription>
         </Alert>
@@ -104,11 +110,11 @@ export default async function AdminDashboard() {
       {rows.length === 0 ? (
         <EmptyState
           icon={Building2}
-          title="No cities yet"
+          title="No sites yet"
           description="Start the pipeline for a new city and it will show up here."
           action={
             <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-              <Link href={`${ADMIN_BASE}/new`}>+ New City</Link>
+              <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
             </Button>
           }
         />
@@ -197,22 +203,43 @@ export default async function AdminDashboard() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap gap-2">
-                          {previewable && (
-                            <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
-                              <a href={`/${row.key}`} target="_blank" rel="noreferrer">
-                                Preview
-                                <ExternalLink className="size-3.5" aria-hidden="true" />
-                              </a>
+                        {/*
+                          * One menu rather than three buttons per row. Five rows
+                          * of three put fifteen equally-weighted controls on
+                          * screen, which reads as noise and makes the row itself
+                          * hard to scan. The mobile cards below deliberately keep
+                          * the three buttons: there is room, they are already
+                          * thumb-sized, and collapsing them into one small target
+                          * would make touch worse rather than better.
+                          */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="min-h-8 cursor-pointer"
+                              aria-label={`Actions for ${row.city}`}
+                            >
+                              <MoreHorizontal className="size-4" aria-hidden="true" />
                             </Button>
-                          )}
-                          <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
-                            <Link href={primary.href}>{primary.label}</Link>
-                          </Button>
-                          <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
-                            <Link href={`${ADMIN_BASE}/sites/${row.key}`}>Settings</Link>
-                          </Button>
-                        </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {previewable && (
+                              <DropdownMenuItem asChild>
+                                <a href={`/${row.key}`} target="_blank" rel="noreferrer">
+                                  <ExternalLink className="size-3.5" aria-hidden="true" />
+                                  Preview
+                                </a>
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem asChild>
+                              <Link href={primary.href}>{primary.label}</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`${ADMIN_BASE}/sites/${row.key}`}>Settings</Link>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   )

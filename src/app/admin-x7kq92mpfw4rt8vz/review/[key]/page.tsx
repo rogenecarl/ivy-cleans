@@ -68,7 +68,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
           className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
-          Cities
+          Sites
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-[1.4rem] font-semibold tracking-tight">
