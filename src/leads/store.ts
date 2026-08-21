@@ -33,7 +33,7 @@ import type {
  * everywhere. In particular, whether Node's `fetch`/undici (used for Resend,
  * Anthropic, Vercel Blob) inherits this same process-wide default is NOT
  * verified here either way -- do not assume it is unaffected. See
- * src/leads/env.ts for the full explanation and .env.example for when to
+ * src/leads/env.ts for the full explanation and example.env for when to
  * set it.
  */
 if (DB_DISABLE_HAPPY_EYEBALLS) setDefaultAutoSelectFamily(false)

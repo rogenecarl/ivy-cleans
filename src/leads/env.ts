@@ -68,7 +68,7 @@ export const LEADS_DASHBOARD_ORIGIN = read('LEADS_DASHBOARD_ORIGIN')
  * dual-stack Postgres host (Neon's pooler, for instance) time out even
  * though the host is reachable -- verifiable by connecting directly to one
  * resolved IPv4 address instead of the hostname and seeing it succeed
- * immediately. See .env.example.
+ * immediately. See example.env.
  */
 export const DB_DISABLE_HAPPY_EYEBALLS = read('DB_DISABLE_HAPPY_EYEBALLS') === '1'
 

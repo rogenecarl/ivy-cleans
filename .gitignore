@@ -38,7 +38,7 @@ yarn-error.log*
 # variables to set, which are exactly the files that ARE meant to be in the
 # repo.
 !.env.local.example
-!.env.example
+!example.env
 
 # vercel
 .vercel
