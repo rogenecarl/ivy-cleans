@@ -42,9 +42,12 @@ passing gates in a database-less environment proved less than it appeared to.
 
 ## Setup checklist before the first real run
 
-1. Put the rotated Neon credentials in **`.env`**, not `.env.local` — Prisma's
-   CLI auto-loads only a file named `.env`. Both `DATABASE_URL` (pooled) and
-   `DIRECT_DATABASE_URL` (non-pooler, required by Prisma Migrate).
+1. Put the rotated Neon credential in **`.env`**, not `.env.local` — Prisma's
+   CLI auto-loads only a file named `.env`. Just `DATABASE_URL` (pooled): as
+   of the Prisma 7 upgrade there is no `DIRECT_DATABASE_URL` — `prisma db
+   push` runs fine over the pooled connection through `@prisma/adapter-pg`,
+   and this project has never had a `prisma/migrations` directory (which is
+   what actually needed the non-pooler URL under Prisma 6).
 2. Set `IP_HASH_SALT`, `LEADS_FROM_EMAIL` and `LEADS_DASHBOARD_ORIGIN` in
    `.env.local`. A missing salt now degrades the rate limit rather than
    refusing customers, and a missing dashboard origin omits the email's link

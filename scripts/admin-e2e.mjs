@@ -84,7 +84,7 @@
  *
  * DATABASE: the Task 13 leads-capture case is gated on DATABASE_URL being set
  * in THIS script's own process (not just the server's) -- it deletes the row
- * it creates directly through Prisma, and needs a real connection to do that.
+ * it creates directly through Postgres, and needs a real connection to do that.
  * Absent, the case SKIPs loudly (a "SKIP" line, not a "PASS") and every other
  * case still runs. It is not counted in the pass/fail totals either way.
  *
@@ -97,6 +97,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import { createRequire } from 'node:module'
+import { setDefaultAutoSelectFamily } from 'node:net'
 
 // Loads .env.local / .env the way `next dev` does, mirroring
 // tests/setup-env.ts's rationale: this script is invoked with plain `node`,
@@ -115,6 +116,17 @@ try {
 } catch {
   // No .env present.
 }
+
+/*
+ * Same DB_DISABLE_HAPPY_EYEBALLS flag as src/leads/env.ts (see there for the
+ * full explanation), applied here because this script's own process opens a
+ * raw `pg` connection below (the Task 13 leads-capture cleanup) and is
+ * therefore subject to the same Node Happy Eyeballs behaviour independently
+ * of the app's own process. Read AFTER the .env load above, and OFF by
+ * default -- same reasoning as store.ts: this is a workaround for a sandbox
+ * with no IPv6 route, not something known to be safe to force everywhere.
+ */
+if (process.env.DB_DISABLE_HAPPY_EYEBALLS === '1') setDefaultAutoSelectFamily(false)
 
 /* ── args ─────────────────────────────────────────────────────────────────── */
 
@@ -572,8 +584,20 @@ try {
         'server with it set) to exercise this case.',
     )
   } else {
-    const { PrismaClient } = require('@prisma/client')
-    const leadsPrisma = new PrismaClient()
+    /*
+     * Raw `pg`, not the generated Prisma client: Prisma 7's `prisma-client`
+     * generator emits real TypeScript source (src/generated/prisma/) meant
+     * to be picked up by a bundler (Next's, in the app itself -- see
+     * src/leads/store.ts). This script runs as plain `node scripts/*.mjs`
+     * with no bundler in front of it, and that generated source uses
+     * extensionless relative imports (`./enums`) that Node's own type
+     * stripping does not resolve. The cleanup below only ever needed a
+     * delete-by-email and a count, so it talks to Postgres directly instead
+     * of fighting that resolution gap.
+     */
+    const { Client } = require('pg')
+    const leadsDb = new Client({ connectionString: process.env.DATABASE_URL })
+    await leadsDb.connect()
     const LEAD_EMAIL = `ztest-e2e-${Date.now()}@example.com`
     const LEAD_NAME = 'Ztest E2E Runner'
     const LEAD_PHONE = '(612) 555-0199'
@@ -669,10 +693,14 @@ try {
       // the case above passed, failed a check, or threw. Deletes by the
       // unique fixture email rather than by id, since a throw before the
       // dashboard list step means this script never captured an id.
-      await leadsPrisma.lead.deleteMany({ where: { email: LEAD_EMAIL } })
-      const remaining = await leadsPrisma.lead.count({ where: { email: LEAD_EMAIL } })
+      await leadsDb.query('DELETE FROM "Lead" WHERE email = $1', [LEAD_EMAIL])
+      const { rows } = await leadsDb.query(
+        'SELECT COUNT(*)::int AS count FROM "Lead" WHERE email = $1',
+        [LEAD_EMAIL],
+      )
+      const remaining = rows[0].count
       check('cleanup deleted every row this case created', remaining === 0, `remaining=${remaining}`)
-      await leadsPrisma.$disconnect()
+      await leadsDb.end()
     }
   }
 } catch (err) {

@@ -47,6 +47,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Prisma-generated client (Prisma 7 emits real source into the tree instead
+# of node_modules/.prisma; `prisma generate` recreates it, so it stays out of
+# git the same way trip-scheduler ignores its own).
+/src/generated/prisma
+
 # per-round fidelity-probe scratch dirs (live/local DOM dumps + screenshots).
 # Not just housekeeping: Tailwind v4 auto-scans every non-ignored file in the
 # project, and these dumps record each element's full `class` attribute — so an

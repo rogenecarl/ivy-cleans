@@ -9,9 +9,9 @@
  * never actually ran.
  *
  * Two files, layered to match Next's own precedence (.env.local overrides
- * .env): DATABASE_URL / DIRECT_DATABASE_URL live in .env because that's the
- * one filename the Prisma CLI itself auto-loads (see .env.example);
- * everything else lives in .env.local as before.
+ * .env): DATABASE_URL lives in .env because that's the one filename the
+ * Prisma CLI itself auto-loads (see .env.example); everything else lives in
+ * .env.local as before.
  *
  * Load order below is .env.local BEFORE .env, which looks backwards but
  * isn't: process.loadEnvFile only sets a key if it is not already present in

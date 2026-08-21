@@ -8,7 +8,9 @@
  * DATABASE_URL is absent so the rest of the suite still runs.
  */
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '@/generated/prisma/client'
 import {
   countRecentByIpHash,
   createLead,
@@ -25,7 +27,11 @@ import type { LeadInput } from '../src/leads/types'
 
 const CITY = 'ztest-miami'
 const OTHER = 'ztest-houston'
-const prisma = new PrismaClient()
+// Prisma 7's driver-adapter client needs an explicit adapter -- see
+// src/leads/store.ts for the same construction against the real app.
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(new Pool({ connectionString: process.env.DATABASE_URL })),
+})
 
 function input(over: Partial<LeadInput> = {}): LeadInput {
   return {

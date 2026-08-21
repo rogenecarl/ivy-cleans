@@ -24,6 +24,13 @@ const eslintConfig = defineConfig([
      */
     ".claude/**",
     ".superpowers/**",
+    /*
+     * Sibling project checked out inside this repo (see AGENTS.md / the
+     * repo .gitignore). It has its own lint config and its own history;
+     * ESLint has no notion of .gitignore, and without this the walk hits
+     * trip-scheduler/.next's minified vendor chunks and OOMs.
+     */
+    "trip-scheduler/**",
   ]),
 ]);
 

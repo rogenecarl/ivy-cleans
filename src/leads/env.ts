@@ -54,6 +54,24 @@ export const LEADS_FROM_EMAIL = read('LEADS_FROM_EMAIL')
 /** Canonical origin for the dashboard link in the notification email. `null` = not configured; the email omits the link rather than guess (see lead-actions.ts). */
 export const LEADS_DASHBOARD_ORIGIN = read('LEADS_DASHBOARD_ORIGIN')
 
+/**
+ * Opt-in only. When `'1'`, disables Node's Happy Eyeballs (RFC 8305) address
+ * racing process-wide before store.ts opens its `pg` Pool.
+ *
+ * Defaults OFF on purpose: racing addresses is the correct behaviour
+ * anywhere IPv6 actually works (including Vercel's dual-stack functions) --
+ * sequential connect attempts stall on an unreachable address for a full TCP
+ * timeout, and RFC 8305 exists precisely to avoid that. This flag is for the
+ * opposite failure mode, seen so far only in environments with NO IPv6 route
+ * at all: the race itself can spuriously time out an otherwise-reachable
+ * IPv4 address to a dual-stack host. Symptom to recognise: connections to a
+ * dual-stack Postgres host (Neon's pooler, for instance) time out even
+ * though the host is reachable -- verifiable by connecting directly to one
+ * resolved IPv4 address instead of the hostname and seeing it succeed
+ * immediately. See .env.example.
+ */
+export const DB_DISABLE_HAPPY_EYEBALLS = read('DB_DISABLE_HAPPY_EYEBALLS') === '1'
+
 /*
  * One loud line per missing variable, once per process, at import time.
  *

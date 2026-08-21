@@ -6,7 +6,11 @@
  * choice stays reversible: swapping Prisma out touches this file and
  * prisma/schema.prisma, not the actions, the screens, or their tests.
  */
-import { Prisma, PrismaClient, type Lead as PrismaLead } from '@prisma/client'
+import { setDefaultAutoSelectFamily } from 'node:net'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Prisma, PrismaClient, type Lead as PrismaLead } from '@/generated/prisma/client'
+import { DB_DISABLE_HAPPY_EYEBALLS } from './env'
 import type {
   EmailStatus,
   LeadCounts,
@@ -18,12 +22,43 @@ import type {
 } from './types'
 
 /*
+ * Prisma 6's connections went through its own Rust engine binary; Prisma 7's
+ * driver-adapter client routes them through Node's own `net` module instead,
+ * via `pg`. In this repo's own sandbox, that surfaced as connections to
+ * Neon's pooler hostname timing out (`ETIMEDOUT`) even though connecting
+ * directly to one of its resolved IPv4 addresses succeeded instantly --
+ * reproduced the same way against a second, unrelated Neon host from the
+ * same sandbox, which is why DB_DISABLE_HAPPY_EYEBALLS exists as an opt-in
+ * rather than being applied unconditionally: it is not certain this is safe
+ * everywhere. In particular, whether Node's `fetch`/undici (used for Resend,
+ * Anthropic, Vercel Blob) inherits this same process-wide default is NOT
+ * verified here either way -- do not assume it is unaffected. See
+ * src/leads/env.ts for the full explanation and .env.example for when to
+ * set it.
+ */
+if (DB_DISABLE_HAPPY_EYEBALLS) setDefaultAutoSelectFamily(false)
+
+/*
+ * Prisma 7 has no built-in engine for driver-adapter clients (schema.prisma's
+ * datasource carries no `url`); the client is handed a `@prisma/adapter-pg`
+ * wrapping a real `pg` Pool instead, using the same pooled Neon connection
+ * string the schema's `url` used to read directly.
+ */
+function createPrismaClient(): PrismaClient {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const adapter = new PrismaPg(pool)
+  return new PrismaClient({ adapter })
+}
+
+/*
  * One client per process. Next's dev server re-evaluates modules on every
  * edit, which would otherwise open a new pool per reload until Neon refuses
- * connections, so the instance is parked on globalThis in development.
+ * connections, so the instance is parked on globalThis in development. This
+ * matters even more now than under Prisma 6: the adapter holds a real `pg`
+ * Pool with live TCP sockets, not just a lazily-connected engine handle.
  */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 /**
