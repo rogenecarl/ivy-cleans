@@ -2,88 +2,104 @@ import type { ReactNode } from 'react'
 import type { CityStatus } from '@/pipeline/admin-logic'
 import type { LeadStatus } from '@/leads/types'
 import type { Readiness, ReadinessProblem } from '@/leads/readiness'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import type { VariantProps } from 'class-variance-authority'
 
 /*
- * Presentational scraps shared by the admin screens. Server-safe (no hooks,
- * no event handlers) so both server and client components can render them.
- * Deliberately tiny — this is an internal tool, not a design system.
+ * Presentational scraps shared by the admin screens, re-implemented on top of
+ * shadcn/ui (Stage 1 of the redesign). Server-safe (no hooks, no event
+ * handlers) so both server and client components can render them.
+ *
+ * Every export name and signature from the pre-shadcn version is kept as-is
+ * on purpose: nine screens import from here and none of them are converted
+ * in this stage. BTN / BTN_PRIMARY / INPUT / LABEL in particular are consumed
+ * as `className={BTN}` on raw <button>/<a>/<input>/<label> elements in those
+ * unconverted screens — they stay plain class strings (not shadcn components)
+ * so those screens keep working unmodified until stages 2 and 3 migrate them
+ * onto <Button>, <Input>, <Label> directly and delete these constants.
  */
 
-const CHIP: Record<CityStatus, { label: string; className: string }> = {
-  live: { label: 'LIVE', className: 'bg-[#e6f4ea] text-[#106b35] border-[#a8d8ba]' },
-  draft: { label: 'DRAFT', className: 'bg-[#fff4e5] text-[#8a5300] border-[#f0cf9a]' },
-  generating: { label: 'GENERATING', className: 'bg-[#e8f0fe] text-[#1a4fb4] border-[#b4c9f2]' },
-  'draft-unfinalized': {
-    label: 'NEEDS FINALIZE',
-    className: 'bg-[#e8f0fe] text-[#1a4fb4] border-[#b4c9f2]',
-  },
-  error: { label: 'ERROR', className: 'bg-[#fdeaea] text-[#a11212] border-[#f0b4b4]' },
+type BadgeVariant = VariantProps<typeof badgeVariants>['variant']
+
+const CHIP: Record<CityStatus, { label: string; variant: BadgeVariant }> = {
+  live: { label: 'LIVE', variant: 'success' },
+  draft: { label: 'DRAFT', variant: 'warning' },
+  generating: { label: 'GENERATING', variant: 'info' },
+  'draft-unfinalized': { label: 'NEEDS FINALIZE', variant: 'info' },
+  error: { label: 'ERROR', variant: 'danger' },
 }
+
+const CHIP_CLASS = 'px-2.5 text-[0.7rem] font-semibold tracking-wide'
 
 export function StatusChip({ status }: { status: CityStatus }) {
   const chip = CHIP[status]
   return (
-    <span
-      className={`inline-block rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold tracking-wide ${chip.className}`}
-    >
+    <Badge variant={chip.variant} className={CHIP_CLASS}>
       {chip.label}
-    </span>
+    </Badge>
   )
 }
 
 export function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="mb-6 rounded-lg border border-[#d8dde2] bg-white p-5">
-      <h2 className="mb-3 text-[1rem] font-semibold">{title}</h2>
-      {children}
-    </section>
+    <Card className="mb-6 gap-3 py-5">
+      <CardHeader className="px-5">
+        <CardTitle className="text-[1rem]">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-5">{children}</CardContent>
+    </Card>
   )
 }
 
-/** Shared button/link surface classes, so the two element types match. */
+/** Shared button/link surface classes, so the two element types match.
+ * Kept as plain class strings (not the <Button> component) because the
+ * screens that use these apply them to raw <button> and <Link>/<a>
+ * elements — see the file header. */
 export const BTN =
-  'inline-flex items-center rounded-md border border-[#c3cbd3] bg-white px-3 py-1.5 text-[0.85rem] font-medium text-[#1b1f23] hover:bg-[#eef1f4] disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-xs outline-none transition-all hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50'
 
 export const BTN_PRIMARY =
-  'inline-flex items-center rounded-md border border-transparent bg-[#1b6f56] px-4 py-2 text-[0.9rem] font-semibold text-white hover:bg-[#155a45] disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs outline-none transition-all hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50'
 
+/** Shared by <input> and <textarea>, so no fixed height (a `rows` textarea
+ * in ../new/page.tsx and suburbs-editor.tsx would clip against one). */
 export const INPUT =
-  'w-full rounded-md border border-[#c3cbd3] bg-white px-3 py-2 text-[0.9rem] outline-none focus:border-[#1b6f56]'
+  'w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20'
 
-export const LABEL = 'mb-1 block text-[0.8rem] font-semibold text-[#3a444d]'
+export const LABEL = 'mb-1 block text-[0.8rem] font-semibold text-foreground'
 
 export function ErrorText({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-2 rounded-md border border-[#f0b4b4] bg-[#fdeaea] px-3 py-2 text-[0.8rem] text-[#a11212]">
-      {children}
-    </p>
+    <Alert variant="destructive" className="mt-2 px-3 py-2">
+      <AlertDescription className="text-[0.8rem] text-destructive">{children}</AlertDescription>
+    </Alert>
   )
 }
 
-const LEAD_CHIP: Record<LeadStatus, { label: string; className: string }> = {
-  new: { label: 'NEW', className: 'bg-[#e8f0fe] text-[#1a4fb4] border-[#b4c9f2]' },
-  contacted: { label: 'CONTACTED', className: 'bg-[#fff4e5] text-[#8a5300] border-[#f0cf9a]' },
-  quoted: { label: 'QUOTED', className: 'bg-[#f3ecfb] text-[#5b2d90] border-[#d6c2ee]' },
-  booked: { label: 'BOOKED', className: 'bg-[#e6f4ea] text-[#106b35] border-[#a8d8ba]' },
-  lost: { label: 'LOST', className: 'bg-[#f2f4f6] text-[#6b7680] border-[#d8dde2]' },
+const LEAD_CHIP: Record<LeadStatus, { label: string; variant: BadgeVariant }> = {
+  new: { label: 'NEW', variant: 'info' },
+  contacted: { label: 'CONTACTED', variant: 'warning' },
+  quoted: { label: 'QUOTED', variant: 'plum' },
+  booked: { label: 'BOOKED', variant: 'success' },
+  lost: { label: 'LOST', variant: 'secondary' },
 }
 
 export function LeadStatusChip({ status }: { status: LeadStatus }) {
   const chip = LEAD_CHIP[status]
   return (
-    <span
-      className={`inline-block rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold tracking-wide ${chip.className}`}
-    >
+    <Badge variant={chip.variant} className={CHIP_CLASS}>
       {chip.label}
-    </span>
+    </Badge>
   )
 }
 
 export function Pill({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-block rounded border border-[#dde2e7] bg-[#eef1f4] px-1.5 text-[0.65rem] font-semibold text-[#4a545d]">
+    <Badge variant="secondary" className="rounded px-1.5 text-[0.65rem] font-semibold">
       {children}
-    </span>
+    </Badge>
   )
 }
 
@@ -98,20 +114,17 @@ const PROBLEM_LABEL: Record<ReadinessProblem, string> = {
 export function ReadinessChips({ readiness }: { readiness: Readiness }) {
   if (readiness.ready) {
     return (
-      <span className="inline-block rounded-full border border-[#a8d8ba] bg-[#e6f4ea] px-2.5 py-0.5 text-[0.7rem] font-semibold text-[#106b35]">
+      <Badge variant="success" className={CHIP_CLASS}>
         READY
-      </span>
+      </Badge>
     )
   }
   return (
     <span className="flex flex-wrap gap-1">
       {readiness.problems.map((problem) => (
-        <span
-          key={problem}
-          className="inline-block rounded-full border border-[#f0b4b4] bg-[#fdeaea] px-2.5 py-0.5 text-[0.7rem] font-semibold text-[#a11212]"
-        >
+        <Badge key={problem} variant="danger" className={CHIP_CLASS}>
           {PROBLEM_LABEL[problem]}
-        </span>
+        </Badge>
       ))}
     </span>
   )

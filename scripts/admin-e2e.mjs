@@ -250,7 +250,7 @@ try {
   /* 1. Dashboard ─────────────────────────────────────────────────────────── */
   await page.goto(`${BASE}${ADMIN}`, { waitUntil: 'networkidle' })
   const dash = await text(page)
-  check('dashboard renders the Site Manager shell', dash.includes('Ivy Cleans — Site Manager'))
+  check('dashboard renders the Site Manager shell', dash.includes('Ivy Cleans: Site Manager'))
   const rowText = async (key) =>
     (await page.locator('tbody tr', { hasText: `/${key}` }).first().textContent())
       ?.replace(/\s+/g, ' ')

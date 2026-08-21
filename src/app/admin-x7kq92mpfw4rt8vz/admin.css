@@ -31,6 +31,27 @@
 }
 
 /*
+ * shadcn's standard Tailwind v4 install writes these two rules at global
+ * `@layer base` scope: a `*` border-color reset (Tailwind v4 defaults
+ * unset borders to currentColor; shadcn's components assume the theme
+ * border color instead) and a `body` background/foreground. Global, that
+ * repaints every public page, so both are scoped to the admin shell here
+ * instead — the theme *variables* they read (`--border`, `--background`,
+ * ...) are still declared on `:root` in globals.css, which is safe on its
+ * own since a custom property has no effect until a class reads it.
+ */
+@layer base {
+  [data-admin-root] * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  [data-admin-root] {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
+
+/*
  * Marks the newest line in a running skill card's activity feed (generate/
  * [key]/stage-runner.tsx) so the operator's eye lands on what just happened.
  */

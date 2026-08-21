@@ -12,7 +12,7 @@ import { saveNotesAction, setStatusAction } from '../lead-actions'
  * cold build.
  *
  * No generateMetadata here on purpose -- the layout's fixed
- * "Ivy Cleans — Site Manager" title covers this route, and a lead's name is
+ * "Ivy Cleans: Site Manager" title covers this route, and a lead's name is
  * customer PII that must never end up in a page title, a URL, or a log line.
  */
 export const dynamic = 'force-dynamic'
