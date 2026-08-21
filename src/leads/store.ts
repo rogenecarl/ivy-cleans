@@ -6,7 +6,7 @@
  * choice stays reversible: swapping Prisma out touches this file and
  * prisma/schema.prisma, not the actions, the screens, or their tests.
  */
-import { PrismaClient, type Lead as PrismaLead } from '@prisma/client'
+import { Prisma, PrismaClient, type Lead as PrismaLead } from '@prisma/client'
 import type {
   EmailStatus,
   LeadCounts,
@@ -26,6 +26,55 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 export const prisma = globalForPrisma.prisma ?? new PrismaClient()
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
+/**
+ * Coerces a Prisma `Json` column's parsed value into the flat
+ * Record<string, string> that LeadRecord.payload claims to be.
+ *
+ * `payload` is written today only from src/leads/schema.ts, which always
+ * produces flat strings -- but the column's type is `Json`, which permits
+ * anything JSON allows, and nothing enforces the shape on the way back out.
+ * This is the one place that reads the column, so every consumer (this
+ * file's toRecord, the lead detail screen, the email builder) is safe by
+ * construction rather than trusting an unchecked cast. Latent today, not
+ * live: worth fixing anyway, because the next writer will not know.
+ */
+export function coercePayload(value: unknown): Record<string, string> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return {}
+  const out: Record<string, string> = {}
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof entry === 'string') {
+      out[key] = entry
+    } else if (entry === null || entry === undefined) {
+      out[key] = ''
+    } else {
+      try {
+        out[key] = JSON.stringify(entry)
+      } catch {
+        out[key] = String(entry)
+      }
+    }
+  }
+  return out
+}
+
+/**
+ * Thrown by setLeadStatus/setLeadNotes when `id` matches no row (Prisma's
+ * P2025). A plain Error subtype, not the Prisma error class itself, so
+ * callers outside this file can distinguish "no such lead" from every other
+ * database failure without importing Prisma -- this file is the only one
+ * that does.
+ */
+export class LeadNotFoundError extends Error {
+  constructor(id: string) {
+    super(`no lead with id "${id}"`)
+    this.name = 'LeadNotFoundError'
+  }
+}
+
+function isMissingRowError(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025'
+}
+
 function toRecord(row: PrismaLead): LeadRecord {
   return {
     id: row.id,
@@ -34,7 +83,7 @@ function toRecord(row: PrismaLead): LeadRecord {
     name: row.name,
     email: row.email,
     phone: row.phone,
-    payload: (row.payload ?? {}) as Record<string, string>,
+    payload: coercePayload(row.payload),
     status: row.status,
     notes: row.notes,
     emailStatus: row.emailStatus,
@@ -93,11 +142,21 @@ export async function getLead(id: string): Promise<LeadRecord | null> {
 }
 
 export async function setLeadStatus(id: string, status: LeadStatus): Promise<void> {
-  await prisma.lead.update({ where: { id }, data: { status } })
+  try {
+    await prisma.lead.update({ where: { id }, data: { status } })
+  } catch (err) {
+    if (isMissingRowError(err)) throw new LeadNotFoundError(id)
+    throw err
+  }
 }
 
 export async function setLeadNotes(id: string, notes: string): Promise<void> {
-  await prisma.lead.update({ where: { id }, data: { notes } })
+  try {
+    await prisma.lead.update({ where: { id }, data: { notes } })
+  } catch (err) {
+    if (isMissingRowError(err)) throw new LeadNotFoundError(id)
+    throw err
+  }
 }
 
 export async function countRecentByIpHash(ipHash: string, windowMs: number): Promise<number> {
