@@ -5,6 +5,7 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { getAdminPortalContainer } from "@/components/ui/portal-container"
 
 function AlertDialog({
   ...props
@@ -52,7 +53,7 @@ function AlertDialogContent({
   size?: "default" | "sm"
 }) {
   return (
-    <AlertDialogPortal>
+    <AlertDialogPortal container={getAdminPortalContainer()}>
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"

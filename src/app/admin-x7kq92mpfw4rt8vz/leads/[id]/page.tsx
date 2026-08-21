@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ChevronLeft, TriangleAlert } from 'lucide-react'
 import { getLead } from '@/leads/store'
-import { LEAD_STATUSES, type LeadRecord } from '@/leads/types'
+import type { LeadRecord } from '@/leads/types'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ADMIN_BASE } from '../../base'
-import { BTN_PRIMARY, INPUT, LeadStatusChip, Panel, Pill } from '../../ui'
-import { saveNotesAction, setStatusAction } from '../lead-actions'
+import { LeadStatusChip, Panel, Pill } from '../../ui'
+import { NotesForm } from './notes-form'
+import { StatusSelect } from './status-select'
 
 /*
  * force-dynamic for the same reason the list uses it: a status change or a
@@ -16,6 +19,16 @@ import { saveNotesAction, setStatusAction } from '../lead-actions'
  * customer PII that must never end up in a page title, a URL, or a log line.
  */
 export const dynamic = 'force-dynamic'
+
+/** A payload row whose label reads as a phone number gets a tel: link
+ * instead of plain text, so a lead is one tap to dial on a phone -- covers
+ * "Phone Number" (booking and contact forms both use that label; see
+ * src/leads/schema.ts) and anything else with "phone" in its label. */
+function contactHref(label: string, value: string): string | null {
+  if (/phone/i.test(label)) return `tel:${value.replace(/[^\d+]/g, '')}`
+  if (/email/i.test(label)) return `mailto:${value}`
+  return null
+}
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -43,20 +56,18 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         <div className="mb-6">
           <h1 className="text-[1.4rem] font-semibold tracking-tight">Lead</h1>
         </div>
-        <div
-          role="alert"
-          className="rounded-lg border border-[#f3b4b4] bg-[#fdecec] px-4 py-6 text-[0.9rem] text-[#7a1414]"
-        >
-          <p className="font-semibold">Lead data is unavailable.</p>
-          <p className="mt-1 text-[0.85rem]">
+        <Alert variant="destructive">
+          <TriangleAlert className="size-4" aria-hidden="true" />
+          <AlertTitle>Lead data is unavailable.</AlertTitle>
+          <AlertDescription>
             The leads store could not be reached, so this lead can&rsquo;t be confirmed to exist
-            or not. Check the database connection and reload — do not assume this lead was
+            or not. Check the database connection and reload. Do not assume this lead was
             deleted or never existed.
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
         <Link
           href={`${ADMIN_BASE}/leads`}
-          className="mt-4 inline-block text-[0.85rem] text-[#6b7680]"
+          className="mt-4 inline-flex min-h-11 cursor-pointer items-center rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
         >
           Back to all leads
         </Link>
@@ -67,16 +78,18 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[1.4rem] font-semibold tracking-tight">
             {lead.name ?? 'No name given'}
           </h1>
-          <p className="mt-1 text-[0.85rem] text-[#6b7680]">
-            <Pill>{lead.cityKey.toUpperCase()}</Pill> <Pill>{lead.formType.toUpperCase()}</Pill>{' '}
-            {lead.submittedAt.toLocaleString()}
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.85rem] text-muted-foreground">
+            <Pill>{lead.cityKey.toUpperCase()}</Pill> <Pill>{lead.formType.toUpperCase()}</Pill>
+            <span>{lead.submittedAt.toLocaleString()}</span>
             {lead.isTest && (
-              <span className="ml-2 font-semibold text-[#8a5300]">preview submission, not a real customer</span>
+              <span className="font-semibold text-amber-700">
+                preview submission, not a real customer
+              </span>
             )}
           </p>
         </div>
@@ -87,58 +100,52 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         <dl className="text-[0.9rem]">
           {Object.entries(lead.payload)
             .filter(([, value]) => value.trim() !== '')
-            .map(([label, value]) => (
-              <div key={label} className="flex gap-3 border-b border-[#e6eaee] py-1.5 last:border-b-0">
-                <dt className="min-w-[16rem] text-[0.8rem] text-[#6b7680]">{label}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
+            .map(([label, value]) => {
+              const href = contactHref(label, value)
+              return (
+                <div
+                  key={label}
+                  className="flex flex-col gap-1 border-b border-border py-1.5 last:border-b-0 sm:flex-row sm:gap-3"
+                >
+                  <dt className="text-[0.8rem] text-muted-foreground sm:min-w-[16rem]">{label}</dt>
+                  <dd>
+                    {href ? (
+                      <a
+                        href={href}
+                        className="cursor-pointer text-primary underline-offset-2 hover:underline"
+                      >
+                        {value}
+                      </a>
+                    ) : (
+                      value
+                    )}
+                  </dd>
+                </div>
+              )
+            })}
         </dl>
       </Panel>
 
       <Panel title="Status">
-        <div className="flex flex-wrap gap-2">
-          {LEAD_STATUSES.map((status) => (
-            <form key={status} action={setStatusAction.bind(null, lead.id, status)}>
-              <button
-                type="submit"
-                disabled={status === lead.status}
-                className={`rounded-full border px-3 py-1 text-[0.8rem] capitalize ${
-                  status === lead.status
-                    ? 'border-[#f0cf9a] bg-[#fff4e5] font-semibold text-[#8a5300]'
-                    : 'border-[#c3cbd3] bg-white text-[#4a545d] hover:bg-[#eef1f4]'
-                }`}
-              >
-                {status}
-              </button>
-            </form>
-          ))}
-        </div>
+        <StatusSelect id={lead.id} status={lead.status} />
       </Panel>
 
       <Panel title="Notes">
-        <form action={saveNotesAction.bind(null, lead.id)}>
-          <textarea
-            name="notes"
-            rows={4}
-            defaultValue={lead.notes}
-            placeholder="What happened on the call"
-            className={INPUT}
-          />
-          <button type="submit" className={`${BTN_PRIMARY} mt-3`}>
-            Save notes
-          </button>
-        </form>
+        <NotesForm id={lead.id} notes={lead.notes} />
       </Panel>
 
       <Panel title="Notification">
         <p className="text-[0.9rem]">
           Email status: <strong>{lead.emailStatus}</strong>
-          {lead.emailError && <span className="ml-2 text-[#a11212]">{lead.emailError}</span>}
+          {lead.emailError && <span className="ml-2 text-destructive">{lead.emailError}</span>}
         </p>
       </Panel>
 
-      <Link href={`${ADMIN_BASE}/leads`} className="text-[0.85rem] text-[#6b7680]">
+      <Link
+        href={`${ADMIN_BASE}/leads`}
+        className="inline-flex min-h-11 cursor-pointer items-center rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
+      >
+        <ChevronLeft className="size-4" aria-hidden="true" />
         Back to all leads
       </Link>
     </>

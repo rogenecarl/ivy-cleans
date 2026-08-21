@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import { ChevronLeft, TriangleAlert } from 'lucide-react'
 import { getSiteSettings } from '@/leads/store'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Label } from '@/components/ui/label'
 import { ADMIN_BASE } from '../../base'
-import { BTN_PRIMARY, ErrorText, INPUT, LABEL, Panel } from '../../ui'
-import { saveNotifyEmailsAction } from '../site-actions'
+import { ErrorText, Panel } from '../../ui'
+import { SettingsForm } from './settings-form'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,8 +56,12 @@ export default async function SiteSettingsPage({
 
   return (
     <>
-      <Link href={ADMIN_BASE} className="text-[0.85rem] text-[#6b7680] hover:underline">
-        ← Cities
+      <Link
+        href={ADMIN_BASE}
+        className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
+      >
+        <ChevronLeft className="size-4" aria-hidden="true" />
+        Cities
       </Link>
       <h1 className="mt-2 mb-6 text-[1.4rem] font-semibold tracking-tight">{key} settings</h1>
 
@@ -62,45 +69,34 @@ export default async function SiteSettingsPage({
 
       <Panel title="Notification inboxes">
         {settingsUnavailable ? (
-          <div
-            role="alert"
-            className="rounded-lg border border-[#f3b4b4] bg-[#fdecec] px-4 py-6 text-[0.9rem] text-[#7a1414]"
-          >
-            <p className="font-semibold">Settings are unavailable.</p>
-            <p className="mt-1 text-[0.85rem]">
+          <Alert variant="destructive">
+            <TriangleAlert className="size-4" aria-hidden="true" />
+            <AlertTitle>Settings are unavailable.</AlertTitle>
+            <AlertDescription>
               The leads store could not be reached, so this city&rsquo;s configured inboxes
               can&rsquo;t be confirmed. The form is hidden rather than shown empty, because
               saving an empty list here would overwrite a real, configured one. Check the
               database connection and reload before changing this city&rsquo;s notification
               inboxes.
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         ) : (
           <>
-            <form action={saveNotifyEmailsAction.bind(null, key)}>
-              <label htmlFor="emails" className={LABEL}>
-                One address per line. Every lead from this city is emailed to all of them.
-              </label>
-              <textarea
-                id="emails"
-                name="emails"
-                rows={4}
-                defaultValue={(settings?.notifyEmails ?? []).join('\n')}
-                placeholder="miami@example.com"
-                className={INPUT}
-              />
-              <button type="submit" className={`${BTN_PRIMARY} mt-3`}>
-                Save
-              </button>
-            </form>
-            <p className="mt-3 text-[0.8rem] text-[#6b7680]">
+            <Label htmlFor="emails" className="mb-1.5 block text-[0.8rem] font-semibold">
+              One address per line. Every lead from this city is emailed to all of them.
+            </Label>
+            <SettingsForm cityKey={key} defaultValue={(settings?.notifyEmails ?? []).join('\n')} />
+            <p className="mt-3 text-[0.8rem] text-muted-foreground">
               With no address here, leads are still saved but nobody is notified.
             </p>
           </>
         )}
       </Panel>
 
-      <Link href={ADMIN_BASE} className="text-[0.85rem] text-[#6b7680]">
+      <Link
+        href={ADMIN_BASE}
+        className="inline-flex min-h-11 cursor-pointer items-center rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
+      >
         Back to sites
       </Link>
     </>

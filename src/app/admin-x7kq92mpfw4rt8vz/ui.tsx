@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import type { CityStatus } from '@/pipeline/admin-logic'
 import type { LeadStatus } from '@/leads/types'
 import type { Readiness, ReadinessProblem } from '@/leads/readiness'
@@ -127,5 +128,41 @@ export function ReadinessChips({ readiness }: { readiness: Readiness }) {
         </Badge>
       ))}
     </span>
+  )
+}
+
+/**
+ * Designed empty state (Stage 2): an icon, one line of explanation, and an
+ * optional action -- for a table/list that has zero rows, as distinct from
+ * ErrorText/Alert above, which is for "the data couldn't be read at all."
+ * This dashboard starts empty and stays sparse, so "no rows" grey text is
+ * not an acceptable substitute here.
+ *
+ * `action` is a ReactNode (typically a <Link>), not an onClick prop, so this
+ * stays server-safe like every other export in this file -- a page can drop
+ * it in without becoming a client component.
+ */
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: {
+  icon: LucideIcon
+  title: string
+  description: string
+  action?: ReactNode
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center">
+      <div className="flex size-11 items-center justify-center rounded-full bg-muted">
+        <Icon className="size-5 text-muted-foreground" aria-hidden="true" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-[0.95rem] font-medium text-foreground">{title}</p>
+        <p className="mx-auto max-w-sm text-[0.85rem] text-muted-foreground">{description}</p>
+      </div>
+      {action}
+    </div>
   )
 }

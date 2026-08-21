@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Building2, ExternalLink, TriangleAlert } from 'lucide-react'
 import domainsJson from '../../../content/_domains.json'
 import { listCities, type CityRow } from '@/pipeline/admin-logic'
 import { STAGE_IDS } from '@/pipeline/stages'
@@ -6,8 +7,11 @@ import { leadQueryToSearch } from '@/leads/filters'
 import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
 import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
 import type { LeadCounts, SiteSettingsRecord } from '@/leads/types'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE } from './base'
-import { BTN, BTN_PRIMARY, ReadinessChips, StatusChip } from './ui'
+import { EmptyState, ReadinessChips, StatusChip } from './ui'
 
 /*
  * Dashboard. Reads the store directly (server component) rather than calling
@@ -73,56 +77,156 @@ export default async function AdminDashboard() {
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[1.4rem] font-semibold tracking-tight">Cities</h1>
-          <p className="mt-1 text-[0.85rem] text-[#6b7680]">
+          <p className="mt-1 text-[0.85rem] text-muted-foreground">
             {rows.length} {rows.length === 1 ? 'site' : 'sites'} in the manager.
           </p>
         </div>
-        <Link href={`${ADMIN_BASE}/new`} className={BTN_PRIMARY}>
-          + New City
-        </Link>
+        <Button asChild size="lg" className="min-h-11 sm:min-h-9">
+          <Link href={`${ADMIN_BASE}/new`}>+ New City</Link>
+        </Button>
       </div>
 
       {leadsUnavailable && (
-        <div
-          role="alert"
-          className="mb-4 rounded-lg border border-[#f0cf9a] bg-[#fff4e5] px-4 py-3 text-[0.85rem] text-[#8a5300]"
-        >
-          Lead data is unavailable right now, so lead counts and readiness chips are not shown
-          below. This is different from zero leads -- it means the leads store could not be
-          reached. The cities table and every action on it are unaffected.
-        </div>
+        <Alert className="mb-4 border-amber-600/30 bg-amber-50 text-amber-900">
+          <TriangleAlert className="size-4 text-amber-700" aria-hidden="true" />
+          <AlertTitle>Lead data is unavailable</AlertTitle>
+          <AlertDescription className="text-amber-800">
+            Lead counts and readiness chips are not shown below. This is different from zero
+            leads: it means the leads store could not be reached. The cities table and every
+            action on it are unaffected.
+          </AlertDescription>
+        </Alert>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-[#d8dde2] bg-white">
-        <table className="w-full border-collapse text-[0.9rem]">
-          <thead>
-            <tr className="border-b border-[#d8dde2] bg-[#f2f4f6] text-left text-[0.75rem] uppercase tracking-wide text-[#6b7680]">
-              <th className="px-4 py-2.5 font-semibold">City</th>
-              <th className="px-4 py-2.5 font-semibold">Status</th>
-              <th className="px-4 py-2.5 font-semibold">Domain</th>
-              <th className="px-4 py-2.5 font-semibold">Leads</th>
-              <th className="px-4 py-2.5 font-semibold">Config</th>
-              <th className="px-4 py-2.5 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[#6b7680]">
-                  No cities yet. Start with “+ New City”.
-                </td>
-              </tr>
-            )}
+      {rows.length === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title="No cities yet"
+          description="Start the pipeline for a new city and it will show up here."
+          action={
+            <Button asChild size="lg" className="min-h-11 sm:min-h-9">
+              <Link href={`${ADMIN_BASE}/new`}>+ New City</Link>
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="hidden overflow-hidden rounded-lg border border-border md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>City</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Domain</TableHead>
+                  <TableHead>Leads</TableHead>
+                  <TableHead>Config</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((row) => {
+                  const primary = primaryLink(row)
+                  const previewable = row.status === 'live' || row.status === 'draft'
+                  const domain = domainFor(row.key, domains)
+                  // null, not a zeroed-out fallback, when the store read failed --
+                  // computing either from empty counts/settings would render
+                  // real-looking numbers and chips that are actually fabricated.
+                  const cityCounts = leadsUnavailable
+                    ? null
+                    : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
+                  const readiness =
+                    leadsUnavailable || cityCounts === null
+                      ? null
+                      : siteReadiness({
+                          isLive: row.status === 'live',
+                          domain,
+                          notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
+                          counts: cityCounts,
+                        })
+                  return (
+                    <TableRow key={row.key}>
+                      <TableCell>
+                        <span className="font-medium">{row.city}</span>
+                        <span className="ml-2 text-[0.75rem] text-muted-foreground">/{row.key}</span>
+                        {row.error && (
+                          <span className="ml-2 text-[0.75rem] text-destructive">{row.error}</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <StatusChip status={row.status} />
+                        {row.status === 'generating' && (
+                          <span className="ml-2 text-[0.75rem] text-muted-foreground">
+                            {row.doneCount ?? 0}/{STAGE_IDS.length} stages
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-[0.8rem]">
+                        {domain ?? <span className="text-muted-foreground">not attached</span>}
+                      </TableCell>
+                      <TableCell>
+                        {cityCounts ? (
+                          <>
+                            <Link
+                              href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
+                                city: row.key,
+                                status: null,
+                                formType: null,
+                                includeTest: false,
+                              })}`}
+                              className="cursor-pointer font-medium hover:underline"
+                            >
+                              {cityCounts.unworked}
+                            </Link>
+                            <span className="ml-1 text-[0.75rem] text-muted-foreground">
+                              / {cityCounts.total}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">unavailable</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {readiness ? (
+                          <ReadinessChips readiness={readiness} />
+                        ) : (
+                          <span className="text-[0.75rem] text-muted-foreground">not available</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2">
+                          {previewable && (
+                            <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
+                              <a href={`/${row.key}`} target="_blank" rel="noreferrer">
+                                Preview
+                                <ExternalLink className="size-3.5" aria-hidden="true" />
+                              </a>
+                            </Button>
+                          )}
+                          <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
+                            <Link href={primary.href}>{primary.label}</Link>
+                          </Button>
+                          <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
+                            <Link href={`${ADMIN_BASE}/sites/${row.key}`}>Settings</Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="flex flex-col gap-3 md:hidden">
             {rows.map((row) => {
               const primary = primaryLink(row)
               const previewable = row.status === 'live' || row.status === 'draft'
               const domain = domainFor(row.key, domains)
-              // null, not a zeroed-out fallback, when the store read failed --
-              // computing either from empty counts/settings would render
-              // real-looking numbers and chips that are actually fabricated.
               const cityCounts = leadsUnavailable
                 ? null
                 : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
@@ -136,28 +240,28 @@ export default async function AdminDashboard() {
                       counts: cityCounts,
                     })
               return (
-                <tr key={row.key} className="border-b border-[#e6eaee] last:border-b-0">
-                  <td className="px-4 py-3">
-                    <span className="font-medium">{row.city}</span>
-                    <span className="ml-2 text-[0.75rem] text-[#8a949d]">/{row.key}</span>
-                    {row.error && (
-                      <span className="ml-2 text-[0.75rem] text-[#a11212]">{row.error}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
+                <div key={row.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium">{row.city}</p>
+                      <p className="text-[0.75rem] text-muted-foreground">/{row.key}</p>
+                    </div>
                     <StatusChip status={row.status} />
-                    {row.status === 'generating' && (
-                      <span className="ml-2 text-[0.75rem] text-[#6b7680]">
-                        {row.doneCount ?? 0}/{STAGE_IDS.length} stages
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-[0.8rem]">
-                    {domain ?? <span className="text-[#8a949d]">not attached</span>}
-                  </td>
-                  <td className="px-4 py-3">
-                    {cityCounts ? (
-                      <>
+                  </div>
+                  {row.error && <p className="text-[0.8rem] text-destructive">{row.error}</p>}
+                  {row.status === 'generating' && (
+                    <p className="text-[0.8rem] text-muted-foreground">
+                      {row.doneCount ?? 0}/{STAGE_IDS.length} stages done
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 gap-2 text-[0.8rem]">
+                    <div>
+                      <p className="text-[0.7rem] text-muted-foreground uppercase">Domain</p>
+                      <p>{domain ?? <span className="text-muted-foreground">not attached</span>}</p>
+                    </div>
+                    <div>
+                      <p className="text-[0.7rem] text-muted-foreground uppercase">Leads</p>
+                      {cityCounts ? (
                         <Link
                           href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
                             city: row.key,
@@ -165,55 +269,47 @@ export default async function AdminDashboard() {
                             formType: null,
                             includeTest: false,
                           })}`}
-                          className="font-medium"
+                          className="cursor-pointer font-medium hover:underline"
                         >
-                          {cityCounts.unworked}
+                          {cityCounts.unworked} / {cityCounts.total}
                         </Link>
-                        <span className="ml-1 text-[0.75rem] text-[#8a949d]">
-                          / {cityCounts.total}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-[#8a949d]">unavailable</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {readiness ? (
-                      <ReadinessChips readiness={readiness} />
-                    ) : (
-                      <span className="text-[0.75rem] text-[#8a949d]">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      {previewable && (
-                        <a
-                          href={`/${row.key}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={BTN}
-                        >
-                          Preview ↗
-                        </a>
+                      ) : (
+                        <span className="text-muted-foreground">unavailable</span>
                       )}
-                      <Link href={primary.href} className={BTN}>
-                        {primary.label}
-                      </Link>
-                      <Link href={`${ADMIN_BASE}/sites/${row.key}`} className={BTN}>
-                        Settings
-                      </Link>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                  {readiness && (
+                    <div>
+                      <p className="mb-1 text-[0.7rem] text-muted-foreground uppercase">Readiness</p>
+                      <ReadinessChips readiness={readiness} />
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {previewable && (
+                      <Button asChild variant="outline" size="sm" className="min-h-11">
+                        <a href={`/${row.key}`} target="_blank" rel="noreferrer">
+                          Preview
+                          <ExternalLink className="size-3.5" aria-hidden="true" />
+                        </a>
+                      </Button>
+                    )}
+                    <Button asChild variant="outline" size="sm" className="min-h-11">
+                      <Link href={primary.href}>{primary.label}</Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="min-h-11">
+                      <Link href={`${ADMIN_BASE}/sites/${row.key}`}>Settings</Link>
+                    </Button>
+                  </div>
+                </div>
               )
             })}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </>
+      )}
 
-      <p className="mt-4 text-[0.8rem] text-[#6b7680]">
-        Preview opens the city at its internal <code>/&lt;key&gt;</code> path — that unguessable URL
-        is the preview, no login required. A LIVE city also answers on its own domain.
+      <p className="mt-4 text-[0.8rem] text-muted-foreground">
+        Preview opens the city at its internal <code>/&lt;key&gt;</code> path. That unguessable
+        URL is the preview, no login required. A LIVE city also answers on its own domain.
       </p>
     </>
   )

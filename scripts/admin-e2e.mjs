@@ -628,8 +628,18 @@ try {
       await contact.close()
 
       await page.goto(`${BASE}${ADMIN}/leads`, { waitUntil: 'networkidle' })
-      const leadRow = page.locator('a', { hasText: LEAD_NAME }).first()
-      check('submitted lead is present in the dashboard list', (await leadRow.count()) > 0)
+      /*
+       * Stage 2: the list row is no longer one giant <a> wrapping the whole
+       * row (src/app/admin-x7kq92mpfw4rt8vz/leads/page.tsx) -- only the
+       * lead's name is a link now, so the assertions below split into "the
+       * link" (what gets clicked) and "the row" (what carries the city
+       * pill next to that link, asserted separately). The viewport is fixed
+       * at 1440x900 above, so this only ever sees the desktop <table>, never
+       * the parallel md:hidden mobile-card markup.
+       */
+      const leadLink = page.locator('a', { hasText: LEAD_NAME }).first()
+      check('submitted lead is present in the dashboard list', (await leadLink.count()) > 0)
+      const leadRow = page.locator('tr', { hasText: LEAD_NAME }).first()
       const leadRowText = (await leadRow.textContent())?.replace(/\s+/g, ' ').trim() ?? ''
       /*
        * "Minneapolis", not "MINNEAPOLIS". This assertion was wrong from the
@@ -649,7 +659,7 @@ try {
       )
       await shot(page, 'leads-list')
 
-      await leadRow.click()
+      await leadLink.click()
       await page.waitForURL(`**${ADMIN}/leads/*`)
       const detailBefore = await text(page)
       check('lead detail page opens for the submitted lead', detailBefore.includes(LEAD_NAME))
@@ -662,13 +672,25 @@ try {
         detailBefore.includes('MINNEAPOLIS'),
       )
 
-      await clickText(page, 'button', 'contacted')
+      /*
+       * Stage 2: the five status buttons collapsed into one shadcn Select
+       * (src/app/admin-x7kq92mpfw4rt8vz/leads/[id]/status-select.tsx). Its
+       * trigger is a Radix button labelled "Lead status"; picking an option
+       * calls the same setStatusAction directly (wrapped in useTransition,
+       * not a <form> submit), so this assertion moved from clicking a
+       * literal "contacted" button to opening the Select and choosing the
+       * "contacted" option, then confirming the header LeadStatusChip
+       * updates on its own -- no manual reload -- exactly like the old
+       * per-status <form> did.
+       */
+      await page.click('[aria-label="Lead status"]')
+      await page.getByRole('option', { name: 'contacted', exact: true }).click()
       await page.waitForFunction(() => document.body.innerText.includes('CONTACTED'), null, {
         timeout: 15_000,
       })
       const afterStatus = await text(page)
       check(
-        'clicking "contacted" renders the CONTACTED chip',
+        'picking "contacted" in the status Select renders the CONTACTED chip',
         afterStatus.includes('CONTACTED'),
       )
       await shot(page, 'leads-detail-contacted')
