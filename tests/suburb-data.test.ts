@@ -81,8 +81,8 @@ describe('suburbData', () => {
 
     test('otherServices hrefs and labels (live city: unprefixed)', () => {
       expect(data.otherServices.links).toEqual([
-        { label: 'Move-Out Cleanings Savage', href: '/minneapolis-move-out-cleaning-services' },
-        { label: 'Deep Cleaning Savage', href: '/deep-cleaning-minneapolis' },
+        { label: 'Move-Out Cleanings Savage', href: '/services/move-in-move-out-cleaning' },
+        { label: 'Deep Cleaning Savage', href: '/services/deep-cleaning' },
       ])
     })
 
@@ -122,8 +122,8 @@ describe('suburbData', () => {
 
     test('otherServices links carry the draft-preview prefix via cityHref', () => {
       expect(data.otherServices.links).toEqual([
-        { label: 'Move-Out Cleanings Coconut Grove', href: '/miami/miami-move-out-cleaning-services' },
-        { label: 'Deep Cleaning Coconut Grove', href: '/miami/deep-cleaning-miami' },
+        { label: 'Move-Out Cleanings Coconut Grove', href: '/miami/services/move-in-move-out-cleaning' },
+        { label: 'Deep Cleaning Coconut Grove', href: '/miami/services/deep-cleaning' },
       ])
     })
   })

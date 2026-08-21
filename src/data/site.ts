@@ -57,11 +57,11 @@ export function siteData(c: CityContent): SiteData {
          */
         {
           label: t("Deep Cleaning {city}", c),
-          href: cityHref(c, t("/deep-cleaning-{citySlug}", c)),
+          href: cityHref(c, "/services/deep-cleaning"),
         },
         {
           label: t("{city} Move Out Cleaning Services", c),
-          href: cityHref(c, t("/{citySlug}-move-out-cleaning-services", c)),
+          href: cityHref(c, "/services/move-in-move-out-cleaning"),
         },
         { label: "Blog", href: cityHref(c, "/blog") },
         { label: "Contact", href: cityHref(c, "/contact") },

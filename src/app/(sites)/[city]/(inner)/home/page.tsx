@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cityBits } from "@/content/store";
 import { cityFromParams, type CityParams } from "@/content/city-param";
-import { cityHref, t } from "@/content/interpolate";
+import { cityHref } from "@/content/interpolate";
 import { homeData } from "@/data/home";
 import { servicesData } from "@/data/services";
 import { areasData } from "@/data/areas";
@@ -61,8 +61,8 @@ export default async function HomePage({ params }: { params: CityParams }) {
       <HouseCleaning
         houseCleaning={houseCleaning}
         bits={bits}
-        deepHref={cityHref(c, t("/deep-cleaning-{citySlug}", bits))}
-        moveOutHref={cityHref(c, t("/{citySlug}-move-out-cleaning-services", bits))}
+        deepHref={cityHref(c, "/services/deep-cleaning")}
+        moveOutHref={cityHref(c, "/services/move-in-move-out-cleaning")}
       />
       <Principles principles={principles} />
       {/* Locations also renders the Google Maps embed (section 6455f48) between

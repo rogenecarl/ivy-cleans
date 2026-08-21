@@ -159,7 +159,7 @@ describe('cityHref-built navigation', () => {
   it('leaves a live city’s nav on its public paths', () => {
     const { site, innerSite } = siteData(minneapolis)
     expect(site.nav[0].href).toBe('/home')
-    expect(site.nav[2].href).toBe('/deep-cleaning-minneapolis')
+    expect(site.nav[2].href).toBe('/services/deep-cleaning')
     expect(site.bookingUrl).toBe('/book-now')
     expect(innerSite.bookUrl).toBe('/book')
     expect(areasData(minneapolis).areas[0].href).toBe('/house-cleaning-apple-valley')

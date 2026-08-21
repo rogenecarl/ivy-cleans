@@ -96,11 +96,11 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       links: [
         {
           label: `Move-Out Cleanings ${name}`,
-          href: cityHref(c, t('/{citySlug}-move-out-cleaning-services', c)),
+          href: cityHref(c, '/services/move-in-move-out-cleaning'),
         },
         {
           label: `Deep Cleaning ${name}`,
-          href: cityHref(c, t('/deep-cleaning-{citySlug}', c)),
+          href: cityHref(c, '/services/deep-cleaning'),
         },
       ],
     },

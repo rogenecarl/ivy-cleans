@@ -645,11 +645,11 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
         "label": "Cleaning Services",
       },
       {
-        "href": "/deep-cleaning-minneapolis",
+        "href": "/services/deep-cleaning",
         "label": "Deep Cleaning Minneapolis",
       },
       {
-        "href": "/minneapolis-move-out-cleaning-services",
+        "href": "/services/move-in-move-out-cleaning",
         "label": "Minneapolis Move Out Cleaning Services",
       },
       {
