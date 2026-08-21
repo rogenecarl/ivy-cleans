@@ -32,6 +32,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <span className="text-[0.8rem] text-[#6b7680]">internal</span>
         </div>
       </header>
+      <nav className="border-b border-[#d8dde2] bg-white">
+        <div className="mx-auto flex max-w-[64rem] gap-6 px-6">
+          <Link
+            href={ADMIN_BASE}
+            className="border-b-2 border-transparent py-3 text-[0.9rem] text-[#6b7680] hover:text-[#1b1f23]"
+          >
+            Sites
+          </Link>
+          <Link
+            href={`${ADMIN_BASE}/leads`}
+            className="border-b-2 border-transparent py-3 text-[0.9rem] text-[#6b7680] hover:text-[#1b1f23]"
+          >
+            Leads
+          </Link>
+        </div>
+      </nav>
       <main className="mx-auto max-w-[64rem] px-6 py-8">{children}</main>
     </div>
   )
