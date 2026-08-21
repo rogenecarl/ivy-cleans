@@ -117,6 +117,19 @@
    * 59.904px at 1440). Declaring them all here keeps the cascade ascending.
    */
   --breakpoint-*: initial;
+  /*
+   * Stage 3 of the admin's shadcn redesign added `sm:` back. The public site
+   * never uses it (grep confirms zero `sm:` classes outside admin-x7kq92mpfw4rt8vz
+   * and the shadcn primitives under components/ui, which nothing else imports),
+   * so this is a no-op for every public route — Tailwind only emits a
+   * breakpoint's media query for utility classes actually found in scanned
+   * content, and none exist outside the admin. Without it, `sm:` utilities
+   * (shadcn's own default breakpoint, used throughout the admin for
+   * "44px touch target on mobile, tighter on desktop") were silently dropped
+   * admin-wide: `--breakpoint-*: initial` above clears Tailwind's stock scale
+   * entirely, and only md/lg/xl/2xl were ever re-declared beneath it.
+   */
+  --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1025px;
   --breakpoint-xl: 1281px;

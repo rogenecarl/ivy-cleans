@@ -67,3 +67,13 @@
 [data-admin-root] .admin-pulse {
   animation: admin-pulse 1.4s ease-in-out infinite;
 }
+
+/* Stage 3: the pulse is purely decorative (it marks the newest activity
+ * line, the text itself is unaffected), so it is dropped entirely for
+ * operators who have asked the OS for less motion rather than merely slowed
+ * or muted. */
+@media (prefers-reduced-motion: reduce) {
+  [data-admin-root] .admin-pulse {
+    animation: none;
+  }
+}

@@ -13,13 +13,12 @@ import type { VariantProps } from 'class-variance-authority'
  * shadcn/ui (Stage 1 of the redesign). Server-safe (no hooks, no event
  * handlers) so both server and client components can render them.
  *
- * Every export name and signature from the pre-shadcn version is kept as-is
- * on purpose: nine screens import from here and none of them are converted
- * in this stage. BTN / BTN_PRIMARY / INPUT / LABEL in particular are consumed
- * as `className={BTN}` on raw <button>/<a>/<input>/<label> elements in those
- * unconverted screens — they stay plain class strings (not shadcn components)
- * so those screens keep working unmodified until stages 2 and 3 migrate them
- * onto <Button>, <Input>, <Label> directly and delete these constants.
+ * Stage 3 finished the migration onto real shadcn components: every screen
+ * now uses <Button>, <Input>, <Label> directly, and the BTN / BTN_PRIMARY /
+ * INPUT / LABEL plain-class-string constants that used to keep unconverted
+ * screens rendering during the staged migration are gone. Nothing in this
+ * file should go back to a class-string export — a future screen should use
+ * the shadcn components, not reintroduce that pattern.
  */
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant']
@@ -53,23 +52,6 @@ export function Panel({ title, children }: { title: string; children: ReactNode 
     </Card>
   )
 }
-
-/** Shared button/link surface classes, so the two element types match.
- * Kept as plain class strings (not the <Button> component) because the
- * screens that use these apply them to raw <button> and <Link>/<a>
- * elements — see the file header. */
-export const BTN =
-  'inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-xs outline-none transition-all hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50'
-
-export const BTN_PRIMARY =
-  'inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs outline-none transition-all hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50'
-
-/** Shared by <input> and <textarea>, so no fixed height (a `rows` textarea
- * in ../new/page.tsx and suburbs-editor.tsx would clip against one). */
-export const INPUT =
-  'w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20'
-
-export const LABEL = 'mb-1 block text-[0.8rem] font-semibold text-foreground'
 
 export function ErrorText({ children }: { children: ReactNode }) {
   return (

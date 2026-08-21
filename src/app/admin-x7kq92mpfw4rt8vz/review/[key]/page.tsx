@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { ChevronLeft, ExternalLink } from 'lucide-react'
 import { loadDraft } from '@/content/drafts'
 import { getCity } from '@/content/store'
 import { errorMessage } from '@/pipeline/admin-logic'
 import { STAGES } from '@/pipeline/stages'
+import { Button } from '@/components/ui/button'
 import { ADMIN_BASE } from '../../base'
-import { BTN, BTN_PRIMARY, ErrorText, Panel, StatusChip } from '../../ui'
+import { ErrorText, Panel, StatusChip } from '../../ui'
 import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
@@ -31,17 +33,17 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
       <>
         <h1 className="mb-2 text-[1.4rem] font-semibold tracking-tight">Not ready for review</h1>
         <ErrorText>{errorMessage(err)}</ErrorText>
-        <p className="mt-3 text-[0.85rem] text-[#6b7680]">
+        <p className="mt-3 text-[0.85rem] text-muted-foreground">
           A city reaches this screen once all four stages have finished and the site has been
           assembled.
         </p>
-        <div className="mt-4 flex gap-2">
-          <Link href={`${ADMIN_BASE}/generate/${key}`} className={BTN}>
-            Open progress
-          </Link>
-          <Link href={ADMIN_BASE} className={BTN}>
-            Back to cities
-          </Link>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
+            <Link href={`${ADMIN_BASE}/generate/${key}`}>Open progress</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
+            <Link href={ADMIN_BASE}>Back to cities</Link>
+          </Button>
         </div>
       </>
     )
@@ -61,24 +63,31 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
   return (
     <>
       <div className="mb-6">
-        <Link href={ADMIN_BASE} className="text-[0.85rem] text-[#6b7680] hover:underline">
-          ← Cities
+        <Link
+          href={ADMIN_BASE}
+          className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
+        >
+          <ChevronLeft className="size-4" aria-hidden="true" />
+          Cities
         </Link>
-        <div className="mt-2 flex items-center gap-3">
+        <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-[1.4rem] font-semibold tracking-tight">
             {doc.city}, {doc.state}
           </h1>
           <StatusChip status={doc.status} />
         </div>
-        <p className="mt-1 text-[0.85rem] text-[#6b7680]">
+        <p className="mt-1 text-[0.85rem] text-muted-foreground">
           {doc.phoneDisplay}
           {doc.domain ? ` · ${doc.domain}` : ''}
         </p>
       </div>
 
-      <a href={`/${key}`} target="_blank" rel="noreferrer" className={`${BTN_PRIMARY} mb-6`}>
-        Open preview ↗
-      </a>
+      <Button asChild size="lg" className="mb-6 min-h-11 sm:min-h-9">
+        <a href={`/${key}`} target="_blank" rel="noreferrer">
+          Open preview
+          <ExternalLink className="size-4" aria-hidden="true" />
+        </a>
+      </Button>
 
       <Panel title="Service areas">
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} />
@@ -91,7 +100,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
             stages={STAGES.map((stage) => ({ id: stage.id, label: stage.label }))}
           />
         ) : (
-          <p className="text-[0.85rem] text-[#6b7680]">
+          <p className="text-[0.85rem] text-muted-foreground">
             This city has been published, so its working draft has been retired — copy can no longer
             be regenerated from here.
           </p>
@@ -109,9 +118,12 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
                   : 'Live with no domain mapped yet.'}
               </span>
             </p>
-            <a href={`/${key}`} target="_blank" rel="noreferrer" className={`${BTN} mt-3`}>
-              Open preview ↗
-            </a>
+            <Button asChild variant="outline" className="mt-3 min-h-11 sm:min-h-9">
+              <a href={`/${key}`} target="_blank" rel="noreferrer">
+                Open preview
+                <ExternalLink className="size-4" aria-hidden="true" />
+              </a>
+            </Button>
           </div>
         ) : (
           <PublishBox cityKey={key} city={doc.city} />

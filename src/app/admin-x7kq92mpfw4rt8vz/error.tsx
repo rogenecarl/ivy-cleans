@@ -17,7 +17,14 @@
  * unstable_retry() (not reset()) is the Next 16 recovery call: it re-fetches
  * and re-renders the segment, which is what a transient database failure
  * actually needs. reset() alone would re-render the same stale attempt.
+ *
+ * <Alert> already sets role="alert" itself (src/components/ui/alert.tsx), so
+ * there is no separate wrapper div carrying that role here.
  */
+import { RotateCw, TriangleAlert } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+
 export default function AdminError({
   error,
   unstable_retry,
@@ -26,27 +33,28 @@ export default function AdminError({
   unstable_retry: () => void
 }) {
   return (
-    <div
-      role="alert"
-      className="rounded-lg border border-[#f3b4b4] bg-[#fdecec] px-4 py-6 text-[0.9rem] text-[#7a1414]"
-    >
-      <p className="font-semibold">That didn&rsquo;t go through.</p>
-      <p className="mt-1 text-[0.85rem]">
-        Something failed while loading or saving this screen — most often the database being
-        briefly unreachable. Nothing was lost that had already been saved, but anything you had
-        just submitted may not have been. Try again, and check the server logs if it keeps
-        happening.
-      </p>
-      {error.digest && (
-        <p className="mt-2 font-mono text-[0.75rem] text-[#8a5300]">digest: {error.digest}</p>
-      )}
-      <button
-        type="button"
-        onClick={() => unstable_retry()}
-        className="mt-4 inline-flex items-center rounded-md border border-[#c3cbd3] bg-white px-3 py-1.5 text-[0.85rem] font-medium text-[#1b1f23] hover:bg-[#eef1f4]"
-      >
-        Try again
-      </button>
-    </div>
+    <Alert variant="destructive">
+      <TriangleAlert className="size-4" aria-hidden="true" />
+      <AlertTitle>That didn&rsquo;t go through.</AlertTitle>
+      <AlertDescription className="gap-3">
+        <p>
+          Something failed while loading or saving this screen — most often the database being
+          briefly unreachable. Nothing was lost that had already been saved, but anything you had
+          just submitted may not have been. Try again, and check the server logs if it keeps
+          happening.
+        </p>
+        {error.digest && <p className="font-mono text-[0.75rem]">digest: {error.digest}</p>}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => unstable_retry()}
+          className="min-h-11 sm:min-h-8"
+        >
+          <RotateCw className="size-3.5" aria-hidden="true" />
+          Try again
+        </Button>
+      </AlertDescription>
+    </Alert>
   )
 }

@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { finalizeAction, regenerateAction } from '../../actions'
 import { ADMIN_BASE } from '../../base'
-import { BTN, ErrorText } from '../../ui'
+import { ErrorText } from '../../ui'
 
 /*
  * Per-stage regenerate. Regenerating `research` clears front, home and deep
@@ -77,21 +79,23 @@ export default function RegeneratePanel({
 
   return (
     <>
-      <p className="mb-3 text-[0.8rem] text-[#8a5300]">
+      <p className="mb-3 text-[0.8rem] text-amber-800">
         Research regeneration clears and re-runs all written copy.
       </p>
       <div className="flex flex-wrap gap-2">
         {stages.map((stage) => (
-          <button
+          <Button
             key={stage.id}
             type="button"
-            className={BTN}
+            variant="outline"
+            className="min-h-11 sm:min-h-9"
             disabled={running !== null}
             onClick={() => void regenerate(stage.id)}
             title={stage.label}
           >
+            {running === stage.id && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
             {running === stage.id ? `Regenerating ${stage.id}…` : `Regenerate ${stage.id}`}
-          </button>
+          </Button>
         ))}
       </div>
       {error && <ErrorText>{error}</ErrorText>}

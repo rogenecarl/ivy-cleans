@@ -513,7 +513,21 @@ try {
 
   /* 6. Publish ───────────────────────────────────────────────────────────── */
   await page.bringToFront()
+  /*
+   * Stage 3: publish's confirmation moved from window.confirm() to a shadcn
+   * AlertDialog (src/app/admin-x7kq92mpfw4rt8vz/review/[key]/publish-box.tsx)
+   * so the operator sees exactly what publishing will do instead of a
+   * generic "are you sure". That means clicking the "Publish" button now
+   * only OPENS the dialog; the click below that used to fire the publish
+   * directly now happens on the dialog's own "Publish" action button
+   * instead, scoped to `[role="alertdialog"]` (Radix's AlertDialog.Content
+   * sets that role) so it cannot match the still-visible trigger button
+   * behind it.
+   */
   await page.click('button:has-text("Publish")')
+  await page.locator('[role="alertdialog"]').waitFor({ state: 'visible' })
+  await shot(page, 'publish-confirm')
+  await page.click('[role="alertdialog"] button:has-text("Publish")')
   /*
    * Two different renderings can legitimately be on screen a moment after
    * publish, and which one wins is a race: PublishBox swaps itself for the

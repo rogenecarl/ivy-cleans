@@ -1,9 +1,11 @@
 import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 import { loadDraft } from '@/content/drafts'
 import { errorMessage } from '@/pipeline/admin-logic'
 import { STAGES } from '@/pipeline/stages'
+import { Button } from '@/components/ui/button'
 import { ADMIN_BASE } from '../../base'
-import { BTN, ErrorText } from '../../ui'
+import { ErrorText } from '../../ui'
 import StageRunner from './stage-runner'
 
 /*
@@ -28,13 +30,13 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
       <>
         <h1 className="mb-2 text-[1.4rem] font-semibold tracking-tight">Nothing to generate</h1>
         <ErrorText>{errorMessage(err)}</ErrorText>
-        <div className="mt-4 flex gap-2">
-          <Link href={`${ADMIN_BASE}/review/${key}`} className={BTN}>
-            Open review
-          </Link>
-          <Link href={ADMIN_BASE} className={BTN}>
-            Back to cities
-          </Link>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
+            <Link href={`${ADMIN_BASE}/review/${key}`}>Open review</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
+            <Link href={ADMIN_BASE}>Back to cities</Link>
+          </Button>
         </div>
       </>
     )
@@ -43,13 +45,17 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
   return (
     <>
       <div className="mb-6">
-        <Link href={ADMIN_BASE} className="text-[0.85rem] text-[#6b7680] hover:underline">
-          ← Cities
+        <Link
+          href={ADMIN_BASE}
+          className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
+        >
+          <ChevronLeft className="size-4" aria-hidden="true" />
+          Cities
         </Link>
         <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">
           Generating {draft.facts.city}, {draft.facts.state}
         </h1>
-        <p className="mt-1 text-[0.85rem] text-[#6b7680]">
+        <p className="mt-1 text-[0.85rem] text-muted-foreground">
           {draft.facts.phoneDisplay} · four stages, run one at a time so any single failure can be
           retried on its own.
         </p>
