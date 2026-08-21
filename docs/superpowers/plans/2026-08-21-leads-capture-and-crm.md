@@ -14,7 +14,7 @@
 
 Every task's requirements implicitly include this section.
 
-- **DO NOT COMMIT.** This repo has a standing rule: never `git commit` without the user explicitly asking. Every task below ends with staging and a verification run, never a commit. The whole branch is committed once, by the user, at the end.
+- **Commit each task on the `feat/leads-crm` branch when it passes review** (user-approved 2026-08-21, superseding this plan's original no-commit constraint). Per-task commits are what let each review see exactly one task's diff. `main` is untouched; the branch stays the user's to squash, reset, or discard. Implementers still stage and stop: the controller commits after review, so an unreviewed change never lands.
 - **Phase 0 is a prerequisite outside this plan.** Plans 1 to 5 are complete but uncommitted; `HEAD` (ead724c) is still the old single-city site. This plan's code sits on top of that uncommitted work in the same working tree.
 - **Public sites must not change visually.** The HTML crawler must report `EQUIVALENT` on all public routes at the end. The only permitted change to public markup is the addition of a hidden honeypot input and the form's post-submit state.
 - **Apostrophes in JSX copy must render U+2019** — use `&rsquo;` or a literal `’`. A straight `'` fails lint and mismatches the live copy (`AGENTS.md`).
