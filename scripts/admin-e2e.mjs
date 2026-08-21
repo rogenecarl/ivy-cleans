@@ -1,0 +1,518 @@
+#!/usr/bin/env node
+/*
+ * scripts/admin-e2e.mjs — stubbed browser end-to-end run of the admin pipeline.
+ *
+ * VERIFICATION TOOLING, RUN BY HAND. Not wired into `pnpm test` and not in CI:
+ * it needs a running server, a borrowed Playwright, and it writes into the real
+ * content/ directory (then puts it back). `pnpm test` stays a pure unit suite.
+ *
+ * WHAT IT PROVES
+ *   The four admin screens work as a chain in a real browser: dashboard →
+ *   new-city form → per-stage generation → review (suburb editor, preview) →
+ *   publish → dashboard shows LIVE. The unit tests exercise the same logic
+ *   (tests/admin-logic.test.ts) but call the functions directly; only this
+ *   script proves the server actions, the client runner's effect, the confirm
+ *   dialog and the rendered preview actually work end to end.
+ *
+ *   Plan 5 (suburb pages): finalizeDraft now stamps hasSuburbPages:true on
+ *   every new draft, so this run also proves the three fixture suburbs
+ *   render as real, /stubville/-prefixed links on the preview front page,
+ *   and that one of those suburb pages itself actually serves (200, correct
+ *   H1, correctly-prefixed "Other Services" links) — not just that the link
+ *   exists.
+ *
+ * REQUIRED SERVER MODE: `next dev`, NOT `next start`.
+ *
+ *     fuser -k 3100/tcp; STUB_MODEL=1 pnpm dev --port 3100
+ *
+ *   Two independent reasons, both about the production build, neither about
+ *   the env var (STUB_MODEL does reach server actions under `next start` —
+ *   it is read at call time by makeClient()):
+ *
+ *   1. src/content/resolve-rewrite.ts STATICALLY IMPORTS content/_cities.json,
+ *      so the proxy's city list is INLINED AT BUILD TIME. A city created after
+ *      the build is not in it, so on the default host /stubville is not
+ *      recognised as a preview path and gets rewritten to
+ *      /minneapolis/stubville → 404. The preview step cannot pass against a
+ *      build that predates the city. (In production this is not a bug: a real
+ *      publish is followed by a redeploy, which is when the domain gets
+ *      attached anyway.)
+ *   2. `next start` serves the prerendered city pages; a brand-new city's
+ *      pages have to be rendered on demand from a content file that did not
+ *      exist at build time.
+ *
+ *   Dev mode recompiles the proxy and the routes from the files on disk, which
+ *   is exactly what a from-scratch city needs.
+ *
+ * MODEL: the server MUST be started with STUB_MODEL=1 so makeClient() returns
+ * StubModelClient (canned Stubville copy from tests/fixtures/stub-pipeline.json).
+ * This script never causes a live API call; a server started without the flag
+ * would, so the first stage failing with an API-key error is the expected
+ * outcome there, not a silent charge.
+ *
+ * PLAYWRIGHT: borrowed from another project rather than added as a dependency.
+ *   PW_PATH=/home/kyousuke/Bajig/Intern-Project/epathways/node_modules/playwright
+ *
+ * USAGE
+ *   node scripts/admin-e2e.mjs [--out DIR] [--base URL] [--keep]
+ *     --out   screenshot directory (default: $TMPDIR/ivy-admin-e2e)
+ *     --base  server origin (default: http://localhost:3100)
+ *     --keep  skip cleanup, leaving the generated Stubville on disk
+ *
+ * CLEANUP (unless --keep): content/stubville.json and content/_drafts/stubville.json
+ * are deleted and content/_cities.json + content/_domains.json are restored
+ * BYTE-FOR-BYTE from copies taken before the run — the crawler gate compares
+ * exact HTML, so "close enough" is not enough. It runs in a finally block, so a
+ * failed assertion still leaves content/ pristine.
+ *
+ * Exit code 0 only if every check passed.
+ */
+
+import fs from 'node:fs'
+import path from 'node:path'
+import os from 'node:os'
+import { createRequire } from 'node:module'
+
+/* ── args ─────────────────────────────────────────────────────────────────── */
+
+function arg(name, fallback) {
+  const i = process.argv.indexOf(name)
+  return i === -1 ? fallback : process.argv[i + 1]
+}
+const KEEP = process.argv.includes('--keep')
+const BASE = arg('--base', 'http://localhost:3100').replace(/\/$/, '')
+const OUT = arg('--out', path.join(os.tmpdir(), 'ivy-admin-e2e'))
+
+const ADMIN = '/admin-x7kq92mpfw4rt8vz'
+const KEY = 'stubville'
+const CITY = 'Stubville'
+// The plan's "TS" is deliberately kept as the FIRST submission: it is not a
+// real state code, so deriveFacts rejects it and the form's error path gets
+// exercised. The real run then uses TX. (content/testville.json's "TS" was
+// hand-authored and never went through deriveFacts.)
+const BAD_STATE = 'TS'
+const STATE = 'TX'
+// Formatted on purpose: the digits-only rule lives in createDraftFromFields,
+// not in the input, so a formatted number proves the stripping.
+const PHONE_TYPED = '(555) 555-0123'
+const PHONE_DIGITS = '5555550123'
+const PHONE_DISPLAY = '(555) 555-0123'
+const NOTES = 'Fixture city. Housing stock is mock bungalows and stub-frame duplexes.'
+const SUBURBS = ['North Stubville', 'Mock Hollow', 'Fixture Heights']
+// Plan 5: name+slug pairs, mirroring tests/fixtures/stub-pipeline.json's own
+// research.structure.suburbs (the canned data StubModelClient serves) —
+// hardcoded here the same way SUBURBS itself is, rather than read from the
+// fixture file, so a change to the fixture is a visible diff in both places.
+const SUBURBS_STRUCT = [
+  { name: 'North Stubville', slug: 'house-cleaning-north-stubville' },
+  { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow' },
+  { name: 'Fixture Heights', slug: 'fixture-heights-cleaning-services' },
+]
+
+const ROOT = path.resolve(path.join(import.meta.dirname, '..'))
+const CONTENT = path.join(ROOT, 'content')
+const CITY_DOC = path.join(CONTENT, `${KEY}.json`)
+const SIDECAR = path.join(CONTENT, '_drafts', `${KEY}.json`)
+const PROGRESS = path.join(CONTENT, '_drafts', `${KEY}.progress.json`)
+const CITIES_JSON = path.join(CONTENT, '_cities.json')
+const DOMAINS_JSON = path.join(CONTENT, '_domains.json')
+
+/* ── result log ───────────────────────────────────────────────────────────── */
+
+const results = []
+function check(name, ok, detail = '') {
+  results.push({ name, ok, detail })
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`)
+}
+function note(message) {
+  console.log(`note  ${message}`)
+}
+
+/* ── helpers ──────────────────────────────────────────────────────────────── */
+
+let shotIndex = 0
+async function shot(page, name) {
+  shotIndex += 1
+  const file = path.join(OUT, `${String(shotIndex).padStart(2, '0')}-${name}.png`)
+  await page.screenshot({ path: file, fullPage: true })
+  return file
+}
+
+/** Whole-page text, whitespace-collapsed, for `contains` assertions. */
+async function text(page) {
+  const body = await page.textContent('body')
+  return (body ?? '').replace(/\s+/g, ' ')
+}
+
+async function clickText(page, selector, label) {
+  const el = page.locator(selector, { hasText: label }).first()
+  await el.click()
+}
+
+/* ── run ──────────────────────────────────────────────────────────────────── */
+
+fs.mkdirSync(OUT, { recursive: true })
+
+// Byte snapshots for the restore. Taken before anything is launched so a crash
+// during setup still has them.
+const citiesBefore = fs.readFileSync(CITIES_JSON)
+const domainsBefore = fs.readFileSync(DOMAINS_JSON)
+
+const require = createRequire(import.meta.url)
+const pwPath =
+  process.env.PW_PATH ?? '/home/kyousuke/Bajig/Intern-Project/epathways/node_modules/playwright'
+const { chromium } = require(pwPath)
+
+let browser
+try {
+  // Pre-flight: a leftover Stubville from an interrupted run would make
+  // createDraft fail with "already exists" and every later assertion cascade.
+  if (fs.existsSync(CITY_DOC) || fs.existsSync(SIDECAR)) {
+    console.error(
+      `refusing to start: a previous Stubville is still on disk (${CITY_DOC} / ${SIDECAR}). ` +
+        'Remove it (and its content/_cities.json entry) first.',
+    )
+    process.exit(2)
+  }
+
+  browser = await chromium.launch({ args: ['--no-sandbox'] })
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  const page = await context.newPage()
+  // Publish puts a window.confirm() in front of going live; nothing else in
+  // the flow opens a dialog, so a blanket accept is safe and keeps the handler
+  // registered for the whole run.
+  page.on('dialog', (dialog) => void dialog.accept())
+
+  /* 1. Dashboard ─────────────────────────────────────────────────────────── */
+  await page.goto(`${BASE}${ADMIN}`, { waitUntil: 'networkidle' })
+  const dash = await text(page)
+  check('dashboard renders the Site Manager shell', dash.includes('Ivy Cleans — Site Manager'))
+  const rowText = async (key) =>
+    (await page.locator('tbody tr', { hasText: `/${key}` }).first().textContent())
+      ?.replace(/\s+/g, ' ')
+      .trim() ?? ''
+  const mplsRow = await rowText('minneapolis')
+  check(
+    'dashboard: Minneapolis LIVE',
+    mplsRow.includes('Minneapolis') && mplsRow.includes('LIVE'),
+    mplsRow,
+  )
+  const testRow = await rowText('testville')
+  check(
+    'dashboard: Testville DRAFT',
+    testRow.includes('Testville') && testRow.includes('DRAFT'),
+    testRow,
+  )
+  await shot(page, 'dashboard-before')
+
+  /* 2. New city form ─────────────────────────────────────────────────────── */
+  await clickText(page, 'a', '+ New City')
+  await page.waitForURL(`**${ADMIN}/new`)
+  check('“+ New City” opens the form', page.url().endsWith(`${ADMIN}/new`))
+
+  // 2a. The invalid-state path first: proves deriveFacts is the validator and
+  // that the error round-trips back into the form.
+  await page.fill('#city', CITY)
+  await page.fill('#state', BAD_STATE)
+  await page.fill('#phone', PHONE_TYPED)
+  await page.fill('#notes', NOTES)
+  await shot(page, 'new-form-filled')
+  await page.click('button[type="submit"]')
+  await page.waitForURL(`**${ADMIN}/new?error=*`)
+  const errText = await text(page)
+  check(
+    `invalid state "${BAD_STATE}" is rejected with the reason on screen`,
+    errText.includes('unknown state code') && errText.includes(BAD_STATE),
+    errText.slice(errText.indexOf('deriveFacts'), errText.indexOf('deriveFacts') + 60),
+  )
+  check(
+    'no draft sidecar was created by the rejected submit',
+    !fs.existsSync(SIDECAR) && !fs.existsSync(CITY_DOC),
+  )
+  await shot(page, 'new-form-state-error')
+
+  // 2b. The real submission.
+  await page.fill('#city', CITY)
+  await page.fill('#state', STATE)
+  await page.fill('#phone', PHONE_TYPED)
+  await page.fill('#notes', NOTES)
+  await page.click('button[type="submit"]')
+  await page.waitForURL(`**${ADMIN}/generate/${KEY}`, { timeout: 60_000 })
+  check('submit lands on the generate screen', page.url().endsWith(`${ADMIN}/generate/${KEY}`))
+
+  /* 3. Stage runner ──────────────────────────────────────────────────────── */
+  const genHead = await text(page)
+  check(
+    'generate screen shows the derived facts',
+    genHead.includes(`Generating ${CITY}, ${STATE}`) && genHead.includes(PHONE_DISPLAY),
+    `phoneDisplay ${PHONE_DISPLAY} derived from typed "${PHONE_TYPED}"`,
+  )
+
+  // Each <li> is a skill card: a status glyph (✓/⏳/✗/•) and the skill name
+  // from SKILL_META, both tagged with data-role so markup changes elsewhere
+  // in the card (activity lines, research chips) cannot shift which element
+  // these selectors land on.
+  const stageStates = () =>
+    page.$$eval('ol li', (items) =>
+      items.map((li) => ({
+        icon: li.querySelector('[data-role="status-icon"]')?.textContent?.trim() ?? '',
+        label: li.querySelector('[data-role="skill-name"]')?.textContent?.trim() ?? '',
+      })),
+    )
+
+  // Generous: stub stages are instant, but a cold dev server compiles the
+  // action modules on the first call to each.
+  let allDone = false
+  const deadline = Date.now() + 180_000
+  while (Date.now() < deadline) {
+    const states = await stageStates()
+    if (states.length > 0 && states.every((s) => s.icon === '✓')) {
+      allDone = true
+      break
+    }
+    if (states.some((s) => s.icon === '✗')) break
+    await page.waitForTimeout(500)
+  }
+  const finalStates = await stageStates()
+  check(
+    'all four stages complete',
+    allDone && finalStates.length === 4,
+    finalStates.map((s) => `${s.icon} ${s.label.slice(0, 28)}`).join(' | '),
+  )
+  await shot(page, 'stages-done')
+
+  /* 3a. Skill cards + activity feed (Task 4) ────────────────────────────── */
+  const genScreenText = await text(page)
+  check(
+    'generate screen shows the four skill names',
+    ['City Research', 'Front-Page Copywriter', 'Local Area Writer', 'Deep-Clean Copywriter'].every(
+      (name) => genScreenText.includes(name),
+    ),
+  )
+
+  // Stub stages are instant, so the four runStageAction calls above can beat
+  // the 1.2s poll to the punch. Give the snapshot a few beats to land before
+  // asserting on it.
+  let chipsText = genScreenText
+  let chipsFound = SUBURBS.every((s) => chipsText.includes(s))
+  const chipDeadline = Date.now() + 10_000
+  while (!chipsFound && Date.now() < chipDeadline) {
+    await page.waitForTimeout(500)
+    chipsText = await text(page)
+    chipsFound = SUBURBS.every((s) => chipsText.includes(s))
+  }
+  check('research chips render all three fixture suburbs', chipsFound, SUBURBS.join(', '))
+
+  const summaryMatch = chipsText.match(/\d+ areas · \d+ ZIP codes · \d+ landmarks/)
+  check(
+    'research summary line reports the areas/ZIP/landmarks digest',
+    summaryMatch !== null,
+    summaryMatch?.[0] ?? chipsText.slice(0, 0),
+  )
+  await shot(page, 'skill-cards')
+
+  check(
+    'progress log persisted a search event for research',
+    (() => {
+      if (!fs.existsSync(PROGRESS)) return false
+      const events = JSON.parse(fs.readFileSync(PROGRESS, 'utf-8'))
+      return (
+        Array.isArray(events) &&
+        events.some((e) => e.kind === 'search' && typeof e.label === 'string' && e.label.includes('Searching:'))
+      )
+    })(),
+    fs.existsSync(PROGRESS) ? PROGRESS : 'file missing',
+  )
+
+  await page.waitForSelector('text=Draft ready', { timeout: 120_000 })
+  check('finalize succeeds and offers “Draft ready →”', true)
+  check('finalize wrote content/stubville.json', fs.existsSync(CITY_DOC))
+  const citiesAfterFinalize = JSON.parse(fs.readFileSync(CITIES_JSON, 'utf-8'))
+  check('finalize registered the key in _cities.json', citiesAfterFinalize.includes(KEY))
+
+  /* 4. Review ────────────────────────────────────────────────────────────── */
+  await clickText(page, 'a', 'Draft ready')
+  await page.waitForURL(`**${ADMIN}/review/${KEY}`)
+  const review = await text(page)
+  check(
+    'review screen headers the city as a DRAFT',
+    review.includes(`${CITY}, ${STATE}`) && review.includes('DRAFT'),
+  )
+  const editorNames = await page.$$eval('input[aria-label$=" name"]', (els) =>
+    els.map((el) => el.value),
+  )
+  check(
+    'suburbs editor lists the three fixture areas',
+    SUBURBS.every((s) => editorNames.includes(s)) && editorNames.length === SUBURBS.length,
+    editorNames.join(', '),
+  )
+  await shot(page, 'review-draft')
+
+  /* 5. Preview ───────────────────────────────────────────────────────────── */
+  const preview = await context.newPage()
+  const res = await preview.goto(`${BASE}/${KEY}`, { waitUntil: 'networkidle' })
+  check(`preview /${KEY} responds 200`, res?.status() === 200, `status ${res?.status()}`)
+  const previewText = await text(preview)
+  check('preview renders the generated city copy', previewText.includes(CITY))
+  check(
+    'preview carries the derived phone number',
+    (await preview.locator(`a[href="tel:${PHONE_DIGITS}"]`).count()) > 0,
+  )
+
+  const navHrefs = await preview.$$eval('header nav a[href^="/"]', (as) =>
+    as.map((a) => a.getAttribute('href')),
+  )
+  check(
+    'preview nav links are all /stubville-prefixed',
+    navHrefs.length > 0 && navHrefs.every((h) => h === `/${KEY}` || h.startsWith(`/${KEY}/`)),
+    navHrefs.join(' '),
+  )
+
+  // Every other internal link is reported, not asserted: the blog cards point
+  // at the shared /blog… paths and escape the preview prefix. That is a known
+  // limitation (see the design spec), so it is surfaced here rather than
+  // failing a run that is otherwise correct.
+  const escapes = await preview.$$eval(
+    'a[href^="/"]',
+    (as, key) =>
+      as
+        .map((a) => a.getAttribute('href'))
+        .filter(
+          (h) =>
+            h &&
+            !h.startsWith(`/${key}`) &&
+            !/^\/(images|icons|_next|favicon)/.test(h) &&
+            !/\.\w+$/.test(h),
+        ),
+    KEY,
+  )
+  note(
+    escapes.length === 0
+      ? 'no preview-escaping internal links'
+      : `preview-escaping links (known limitation): ${[...new Set(escapes)].join(' ')}`,
+  )
+
+  // Plan 5: finalizeDraft now stamps hasSuburbPages:true on every new draft
+  // (src/content/drafts.ts), so the three fixture suburbs must render as REAL
+  // links, not plain text — the inverse of the pre-Plan-5 assertion here.
+  const suburbLinks = await preview.$$eval('a', (as) =>
+    as.map((a) => ({ text: a.textContent ?? '', href: a.getAttribute('href') ?? '' })),
+  )
+  check(
+    'suburbs render linked (hasSuburbPages true) with /stubville/-prefixed hrefs',
+    previewText.includes(SUBURBS[0]) &&
+      SUBURBS.every((s) =>
+        suburbLinks.some(
+          (l) => l.text.includes(s) && (l.href === `/${KEY}` || l.href.startsWith(`/${KEY}/`)),
+        ),
+      ),
+    suburbLinks
+      .filter((l) => SUBURBS.some((s) => l.text.includes(s)))
+      .map((l) => `${l.text}→${l.href}`)
+      .join(' | '),
+  )
+  await shot(preview, 'preview-front')
+
+  // One fixture suburb page itself, not just the link to it: fixture slugs
+  // come straight from tests/fixtures/stub-pipeline.json's
+  // research.structure.suburbs (the SAME canned data StubModelClient serves),
+  // so this doesn't depend on the front page's own rendering of the link.
+  const suburb = SUBURBS_STRUCT[0]
+  const suburbRes = await preview.goto(`${BASE}/${KEY}/${suburb.slug}`, { waitUntil: 'networkidle' })
+  check(
+    `suburb page /${KEY}/${suburb.slug} responds 200`,
+    suburbRes?.status() === 200,
+    `status ${suburbRes?.status()}`,
+  )
+  const h1Text = (await preview.locator('h1').first().textContent())?.trim() ?? ''
+  check(
+    `suburb page H1 contains "${suburb.name}"`,
+    h1Text.includes(suburb.name),
+    h1Text,
+  )
+  const otherServicesHrefs = await preview.$$eval(
+    'a',
+    (as, name) =>
+      as
+        .map((a) => ({ text: a.textContent ?? '', href: a.getAttribute('href') ?? '' }))
+        .filter((l) => l.text.includes(name)),
+    suburb.name,
+  )
+  check(
+    'suburb page "Other Services" links are /stubville/-prefixed',
+    otherServicesHrefs.length === 2 &&
+      otherServicesHrefs.every((l) => l.href.startsWith(`/${KEY}/`)),
+    otherServicesHrefs.map((l) => `${l.text}→${l.href}`).join(' | '),
+  )
+  await shot(preview, 'preview-suburb')
+  await preview.close()
+
+  /* 6. Publish ───────────────────────────────────────────────────────────── */
+  await page.bringToFront()
+  await page.click('button:has-text("Publish")')
+  /*
+   * Two different renderings can legitimately be on screen a moment after
+   * publish, and which one wins is a race: PublishBox swaps itself for the
+   * "Live. Manual step: attach the domain…" success panel, and the
+   * router.refresh() it fires immediately after re-renders the server
+   * component, whose isLive branch replaces PublishBox entirely with the
+   * "Live with no domain mapped yet." panel. Waiting for either is the only
+   * assertion that is not a coin flip — both mean published.
+   */
+  await page.waitForFunction(
+    () =>
+      document.body.innerText.includes('Manual step: attach the domain') ||
+      document.body.innerText.includes('Live with no domain mapped yet'),
+    null,
+    { timeout: 60_000 },
+  )
+  const published = await text(page)
+  check(
+    'publish with no domain reaches the live state',
+    /Manual step: attach the domain|Live with no domain mapped yet/.test(published),
+    published.includes('Manual step') ? 'success panel' : 'refreshed published panel',
+  )
+  const doc = JSON.parse(fs.readFileSync(CITY_DOC, 'utf-8'))
+  check('published document status is live', doc.status === 'live', `status=${doc.status}`)
+  check('publish with no domain left _domains.json untouched', fs.readFileSync(DOMAINS_JSON).equals(domainsBefore))
+  check('publish retired the draft sidecar', !fs.existsSync(SIDECAR))
+  check('publish retired the progress log', !fs.existsSync(PROGRESS))
+  await shot(page, 'published')
+
+  /* 7. Dashboard again ───────────────────────────────────────────────────── */
+  await page.goto(`${BASE}${ADMIN}`, { waitUntil: 'networkidle' })
+  const stubRow = await rowText(KEY)
+  check('dashboard shows Stubville LIVE', stubRow.includes(CITY) && stubRow.includes('LIVE'), stubRow)
+  const mplsAfter = await rowText('minneapolis')
+  check('Minneapolis is still LIVE after the run', mplsAfter.includes('LIVE'), mplsAfter)
+  await shot(page, 'dashboard-after')
+} catch (err) {
+  check('run completed without throwing', false, err instanceof Error ? err.message : String(err))
+} finally {
+  if (browser) await browser.close()
+
+  if (KEEP) {
+    note('--keep: leaving content/ as the run left it (Stubville is still on disk)')
+  } else {
+    // PROGRESS is normally already gone by publish, but an aborted run (a
+    // failed check throws nothing — check() just logs — so this only misses
+    // it on an uncaught exception before publish) can leave it behind.
+    for (const file of [CITY_DOC, SIDECAR, PROGRESS]) fs.rmSync(file, { force: true })
+    fs.writeFileSync(CITIES_JSON, citiesBefore)
+    fs.writeFileSync(DOMAINS_JSON, domainsBefore)
+    const clean =
+      !fs.existsSync(CITY_DOC) &&
+      !fs.existsSync(SIDECAR) &&
+      !fs.existsSync(PROGRESS) &&
+      fs.readFileSync(CITIES_JSON).equals(citiesBefore) &&
+      fs.readFileSync(DOMAINS_JSON).equals(domainsBefore)
+    check('cleanup restored content/ byte-for-byte', clean)
+  }
+}
+
+const failed = results.filter((r) => !r.ok)
+console.log('\n──────── summary ────────')
+for (const r of results) console.log(`${r.ok ? 'PASS' : 'FAIL'}  ${r.name}`)
+console.log(`${results.length - failed.length}/${results.length} checks passed`)
+console.log(`screenshots: ${OUT}`)
+process.exit(failed.length === 0 ? 0 : 1)

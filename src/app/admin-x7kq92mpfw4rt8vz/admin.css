@@ -1,0 +1,48 @@
+/*
+ * Admin-only stylesheet. Imported by the admin layout, so Next ships it with
+ * the admin routes and nowhere else — the public site's CSS is untouched.
+ *
+ * WHY IT HAS TO EXIST AT ALL: globals.css drives the whole clone off a
+ * viewport-stepped root font-size (62.5% = 10px on desktop) so the reference
+ * site's rem values land on the right pixels. Every Tailwind rem utility rides
+ * that ladder, which would render this internal tool at 62.5% scale —
+ * `text-sm` at 8.75px. rem always resolves against the root, so no wrapper
+ * element can opt out; the root itself has to be reset for these pages.
+ *
+ * The `:has()` selector scopes the reset to pages that actually render the
+ * admin shell. It also makes the rule inert if this file were ever loaded on a
+ * site page, and its (0,2,0) specificity beats globals.css's plain `html`
+ * selectors (0,0,1) regardless of stylesheet order — including the ones inside
+ * the ladder's media queries, so the reset holds at every breakpoint.
+ */
+:root:has([data-admin-root]) {
+  font-size: 100%;
+}
+
+/*
+ * The site body is Poppins via next/font; an internal tool has no reason to
+ * pay for a webfont or to look like the product. Set on the shell rather than
+ * on body so nothing here can leak.
+ */
+[data-admin-root] {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  line-height: 1.5;
+}
+
+/*
+ * Marks the newest line in a running skill card's activity feed (generate/
+ * [key]/stage-runner.tsx) so the operator's eye lands on what just happened.
+ */
+@keyframes admin-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+[data-admin-root] .admin-pulse {
+  animation: admin-pulse 1.4s ease-in-out infinite;
+}
