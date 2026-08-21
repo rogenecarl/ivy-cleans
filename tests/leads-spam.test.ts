@@ -1,6 +1,6 @@
 // tests/leads-spam.test.ts
 import { describe, expect, it } from 'vitest'
-import { RATE_LIMIT, hashIp, spamVerdict } from '../src/leads/spam'
+import { RATE_LIMIT, hashIp, honeypotFilled, overRateLimit } from '../src/leads/spam'
 
 describe('hashIp', () => {
   it('is stable for the same ip and salt', () => {
@@ -32,60 +32,38 @@ describe('hashIp', () => {
   })
 })
 
-describe('spamVerdict', () => {
-  it('accepts an empty honeypot under the limit', () => {
-    expect(spamVerdict({ honeypotValue: '', recentCount: 0 })).toEqual({ accept: true })
+describe('honeypotFilled', () => {
+  it('accepts an empty honeypot', () => {
+    expect(honeypotFilled('')).toBe(false)
   })
 
   it('accepts a missing honeypot field', () => {
-    expect(spamVerdict({ honeypotValue: null, recentCount: 0 })).toEqual({ accept: true })
+    expect(honeypotFilled(null)).toBe(false)
   })
 
   it('rejects a filled honeypot', () => {
-    expect(spamVerdict({ honeypotValue: 'http://spam', recentCount: 0 })).toEqual({
-      accept: false,
-      reason: 'honeypot',
-    })
-  })
-
-  it('accepts at exactly one below the limit', () => {
-    expect(spamVerdict({ honeypotValue: '', recentCount: RATE_LIMIT - 1 })).toEqual({
-      accept: true,
-    })
-  })
-
-  it('rejects at the limit', () => {
-    expect(spamVerdict({ honeypotValue: '', recentCount: RATE_LIMIT })).toEqual({
-      accept: false,
-      reason: 'rate-limit',
-    })
-  })
-
-  it('checks the honeypot before the rate limit', () => {
-    expect(spamVerdict({ honeypotValue: 'x', recentCount: 999 })).toEqual({
-      accept: false,
-      reason: 'honeypot',
-    })
+    expect(honeypotFilled('http://spam')).toBe(true)
   })
 
   it('rejects a single space in the honeypot', () => {
-    expect(spamVerdict({ honeypotValue: ' ', recentCount: 0 })).toEqual({
-      accept: false,
-      reason: 'honeypot',
-    })
+    expect(honeypotFilled(' ')).toBe(true)
   })
 
   it('rejects a tab in the honeypot', () => {
-    expect(spamVerdict({ honeypotValue: '\t', recentCount: 0 })).toEqual({
-      accept: false,
-      reason: 'honeypot',
-    })
+    expect(honeypotFilled('\t')).toBe(true)
   })
 
   it('rejects a newline in the honeypot', () => {
-    expect(spamVerdict({ honeypotValue: '\n', recentCount: 0 })).toEqual({
-      accept: false,
-      reason: 'honeypot',
-    })
+    expect(honeypotFilled('\n')).toBe(true)
+  })
+})
+
+describe('overRateLimit', () => {
+  it('accepts at exactly one below the limit', () => {
+    expect(overRateLimit(RATE_LIMIT - 1)).toBe(false)
+  })
+
+  it('rejects at the limit', () => {
+    expect(overRateLimit(RATE_LIMIT)).toBe(true)
   })
 })
