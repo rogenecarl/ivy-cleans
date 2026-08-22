@@ -16,8 +16,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ADMIN_BASE } from '../base'
+import { ADMIN_BASE, ADMIN_SITES } from '../base'
 import { EmptyState, ReadinessChips, StatusChip } from '../ui'
+import { filterSites, parseSiteQuery, siteStatusCounts, sortProblemsFirst } from './list-logic'
+import { SiteStatusChips } from './status-chips'
+import { SiteSearch } from './site-search'
 
 /*
  * Dashboard. Reads the store directly (server component) rather than calling
@@ -41,7 +44,12 @@ function primaryLink(row: CityRow): { href: string; label: string } {
   return { href: `${ADMIN_BASE}/review/${row.key}`, label: 'Review' }
 }
 
-export default async function AdminDashboard() {
+export default async function SitesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const query = parseSiteQuery(await searchParams)
   const rows = await listCities()
 
   /*
@@ -81,13 +89,61 @@ export default async function AdminDashboard() {
 
   const domains = domainsJson as DomainsIndex
 
+  /*
+   * Each row's derived facts, computed ONCE. The desktop table and the mobile
+   * cards below used to each recompute domain, lead counts and readiness from
+   * scratch, which is two places for the same rule to drift apart -- and the
+   * sort needs the readiness result anyway, before either renders.
+   */
+  const viewRows = rows.map((row) => {
+    const domain = domainFor(row.key, domains)
+    // null, not a zeroed-out fallback, when the store read failed -- computing
+    // either from empty counts/settings would render real-looking numbers and
+    // chips that are actually fabricated.
+    const cityCounts = leadsUnavailable
+      ? null
+      : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
+    const readiness =
+      leadsUnavailable || cityCounts === null
+        ? null
+        : siteReadiness({
+            isLive: row.status === 'live',
+            domain,
+            notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
+            counts: cityCounts,
+          })
+    return {
+      row,
+      domain,
+      cityCounts,
+      readiness,
+      primary: primaryLink(row),
+      previewable: row.status === 'live' || row.status === 'draft',
+      // What sorts this row up the page. A site in `error` counts as a
+      // problem in its own right even when readiness is unavailable, which is
+      // exactly when it matters most.
+      problemCount: (readiness?.problems.length ?? 0) + (row.status === 'error' ? 1 : 0),
+    }
+  })
+
+  const statusCounts = siteStatusCounts(rows)
+  const visible = sortProblemsFirst(
+    filterSites(
+      viewRows.map((v) => ({ ...v, key: v.row.key, city: v.row.city, status: v.row.status })),
+      query,
+    ),
+  )
+  const filtersActive = query.status !== null || query.q !== ''
+
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[1.4rem] font-semibold tracking-tight">Sites</h1>
           <p className="mt-1 text-[0.85rem] text-muted-foreground">
-            {rows.length} {rows.length === 1 ? 'site' : 'sites'} in the manager.
+            {filtersActive
+              ? `${visible.length} of ${rows.length} ${rows.length === 1 ? 'site' : 'sites'} shown.`
+              : `${rows.length} ${rows.length === 1 ? 'site' : 'sites'} in the manager.`}
           </p>
         </div>
         <Button asChild size="lg" className="min-h-11 sm:min-h-9">
@@ -107,21 +163,44 @@ export default async function AdminDashboard() {
         </Alert>
       )}
 
-      {rows.length === 0 ? (
-        <EmptyState
-          icon={Building2}
-          title="No sites yet"
-          description="Start the pipeline for a new city and it will show up here."
-          action={
-            <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-              <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
-            </Button>
-          }
-        />
+      {/* Status doubles as the filter, mirroring the Leads screen's chips. */}
+      <div className="mb-4">
+        <SiteStatusChips query={query} counts={statusCounts} total={rows.length} />
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <h2 className="text-[0.95rem] font-semibold">All sites</h2>
+          <SiteSearch query={query} />
+        </div>
+
+      {visible.length === 0 ? (
+        <div className="p-6">
+          <EmptyState
+            icon={Building2}
+            title={filtersActive ? 'No sites match these filters' : 'No sites yet'}
+            description={
+              filtersActive
+                ? 'Try a different status, or clear the search.'
+                : 'Start the pipeline for a new city and it will show up here.'
+            }
+            action={
+              filtersActive ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={ADMIN_SITES}>Clear filters</Link>
+                </Button>
+              ) : (
+                <Button asChild size="lg" className="min-h-11 sm:min-h-9">
+                  <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
+                </Button>
+              )
+            }
+          />
+        </div>
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden overflow-hidden rounded-lg border border-border md:block">
+          <div className="hidden md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -134,25 +213,7 @@ export default async function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => {
-                  const primary = primaryLink(row)
-                  const previewable = row.status === 'live' || row.status === 'draft'
-                  const domain = domainFor(row.key, domains)
-                  // null, not a zeroed-out fallback, when the store read failed --
-                  // computing either from empty counts/settings would render
-                  // real-looking numbers and chips that are actually fabricated.
-                  const cityCounts = leadsUnavailable
-                    ? null
-                    : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
-                  const readiness =
-                    leadsUnavailable || cityCounts === null
-                      ? null
-                      : siteReadiness({
-                          isLive: row.status === 'live',
-                          domain,
-                          notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
-                          counts: cityCounts,
-                        })
+                {visible.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
                   return (
                     <TableRow key={row.key}>
                       <TableCell>
@@ -249,23 +310,8 @@ export default async function AdminDashboard() {
           </div>
 
           {/* Mobile cards */}
-          <div className="flex flex-col gap-3 md:hidden">
-            {rows.map((row) => {
-              const primary = primaryLink(row)
-              const previewable = row.status === 'live' || row.status === 'draft'
-              const domain = domainFor(row.key, domains)
-              const cityCounts = leadsUnavailable
-                ? null
-                : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
-              const readiness =
-                leadsUnavailable || cityCounts === null
-                  ? null
-                  : siteReadiness({
-                      isLive: row.status === 'live',
-                      domain,
-                      notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
-                      counts: cityCounts,
-                    })
+          <div className="flex flex-col gap-3 p-4 md:hidden">
+            {visible.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
               return (
                 <div key={row.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
@@ -333,6 +379,7 @@ export default async function AdminDashboard() {
           </div>
         </>
       )}
+      </div>
 
       <p className="mt-4 text-[0.8rem] text-muted-foreground">
         Preview opens the city at its internal <code>/&lt;key&gt;</code> path. That unguessable
