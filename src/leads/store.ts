@@ -14,6 +14,7 @@ import { DB_DISABLE_HAPPY_EYEBALLS } from './env'
 import type {
   EmailStatus,
   LeadCounts,
+  LeadDashboardStats,
   LeadInput,
   LeadQuery,
   LeadRecord,
@@ -305,4 +306,72 @@ export async function upsertSiteSettings(cityKey: string, notifyEmails: string[]
     create: { cityKey, notifyEmails },
     update: { notifyEmails },
   })
+}
+
+/**
+ * Every figure the dashboard shows, in one round trip's worth of counts.
+ *
+ * `now` is a PARAMETER, not `new Date()` read in here, so the week and month
+ * boundaries are decided by the caller and the function is testable against a
+ * fixed clock. A server component passes its own render time.
+ *
+ * All of it excludes test rows. A preview submission is not a customer, and
+ * letting one inflate "booked this month" would make the dashboard lie in the
+ * one direction nobody would think to check.
+ *
+ * Counts rather than findMany+filter throughout: see LeadDashboardStats for
+ * why deriving these from listLeads() would silently go wrong past 200 rows.
+ */
+export async function leadDashboardStats(now: Date): Promise<LeadDashboardStats> {
+  const day = 24 * 60 * 60 * 1000
+  const weekAgo = new Date(now.getTime() - 7 * day)
+  const twoWeeksAgo = new Date(now.getTime() - 14 * day)
+  const monthAgo = new Date(now.getTime() - 30 * day)
+  const real = { isTest: false as const }
+
+  const [waiting, oldest, emailFailed, newThisWeek, newLastWeek, bookedLast30, booked, lost, cityRows] =
+    await Promise.all([
+      prisma.lead.count({ where: { ...real, status: 'new' } }),
+      prisma.lead.findFirst({
+        where: { ...real, status: 'new' },
+        orderBy: { submittedAt: 'asc' },
+        select: { submittedAt: true },
+      }),
+      prisma.lead.count({ where: { ...real, emailStatus: 'failed' } }),
+      prisma.lead.count({ where: { ...real, submittedAt: { gte: weekAgo } } }),
+      // The week BEFORE last: a half-open range, so a lead exactly on the
+      // boundary is counted once rather than in both weeks.
+      prisma.lead.count({
+        where: { ...real, submittedAt: { gte: twoWeeksAgo, lt: weekAgo } },
+      }),
+      /*
+       * Keyed off updatedAt, not submittedAt: "booked in the last 30 days"
+       * is about when the BOOKING happened, and a lead that arrived in
+       * January and booked today belongs in today's figure. updatedAt is an
+       * approximation of that moment -- it moves on any later edit too --
+       * and is the closest the current schema can get without a dedicated
+       * bookedAt column.
+       */
+      prisma.lead.count({
+        where: { ...real, status: 'booked', updatedAt: { gte: monthAgo } },
+      }),
+      prisma.lead.count({ where: { ...real, status: 'booked' } }),
+      prisma.lead.count({ where: { ...real, status: 'lost' } }),
+      prisma.lead.groupBy({ by: ['cityKey'], where: real, _count: { _all: true } }),
+    ])
+
+  const byCity: Record<string, number> = {}
+  for (const row of cityRows) byCity[row.cityKey] = row._count._all
+
+  return {
+    waiting,
+    oldestWaitingAt: oldest?.submittedAt ?? null,
+    emailFailed,
+    newThisWeek,
+    newLastWeek,
+    bookedLast30,
+    booked,
+    lost,
+    byCity,
+  }
 }

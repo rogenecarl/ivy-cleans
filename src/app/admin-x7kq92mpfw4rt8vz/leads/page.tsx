@@ -136,7 +136,12 @@ export default async function LeadsPage({
         * directly beneath them the moment a filter was applied. */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatPill icon={FileText} label="Shown" value={leads.length} />
-        <StatPill icon={CircleDashed} label="Need action" value={unworked} emphasis={unworked > 0} />
+        <StatPill
+          icon={CircleDashed}
+          label="Need action"
+          value={unworked}
+          tone={unworked > 0 ? 'alarm' : 'good'}
+        />
         <StatPill icon={Inbox} label="New" value={countOf('new')} />
         <StatPill icon={PhoneCall} label="Contacted" value={countOf('contacted')} />
         <StatPill icon={CalendarCheck} label="Booked" value={countOf('booked')} />

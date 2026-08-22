@@ -150,43 +150,70 @@ export function EmptyState({
 }
 
 /**
- * One headline number, for the row of counts above a table.
+ * One headline number, with an optional line of context under it.
  *
- * `emphasis` exists because "3 leads need action" and "3 leads lost" are not
- * equally interesting at a glance -- the operator's eye should land on the
- * work still to do. Server-safe like everything else in this file.
+ * `hint` is not decoration. "3 waiting" and "3 waiting, oldest 4 hr" lead to
+ * different actions, and a rate without its denominator ("57%") invites a
+ * confidence that "4 of 7 decided" correctly withholds. Every figure that can
+ * mislead on its own carries the thing that stops it.
+ *
+ * `tone` is what makes the alarm row readable at a glance: an alarm tile is
+ * only coloured when the number is actually non-zero, so a healthy dashboard
+ * is uniformly quiet and any colour at all means something needs attention.
+ * Never colour a zero -- an always-red tile is one nobody reads.
  */
 export function StatPill({
   icon: Icon,
   label,
   value,
-  emphasis,
+  hint,
+  tone = 'default',
 }: {
   icon: LucideIcon
   label: string
-  value: number
-  emphasis?: boolean
+  /** A string, not just a number, so a tile can show "—" for "no data yet"
+   * instead of a 0 that would read as a real measurement. */
+  value: number | string
+  hint?: string
+  tone?: 'default' | 'alarm' | 'good'
 }) {
+  const alarm = tone === 'alarm'
+  const good = tone === 'good'
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-3">
-      <span
-        aria-hidden="true"
-        className={
-          emphasis
-            ? 'flex size-9 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-700'
-            : 'flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground'
-        }
-      >
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-[0.75rem] font-medium text-muted-foreground">
-          {label}
+    <div
+      className={
+        alarm
+          ? 'rounded-lg border border-destructive/40 bg-destructive/5 px-3.5 py-3'
+          : 'rounded-lg border border-border bg-card px-3.5 py-3'
+      }
+    >
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className={
+            alarm
+              ? 'flex size-9 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive'
+              : good
+                ? 'flex size-9 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700'
+                : 'flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground'
+          }
+        >
+          <Icon className="size-4" />
         </span>
-        <span className="block text-[1.25rem] leading-tight font-semibold tabular-nums">
-          {value}
-        </span>
-      </span>
+        <div className="min-w-0">
+          <p className="truncate text-[0.75rem] font-medium text-muted-foreground">{label}</p>
+          <p
+            className={
+              alarm
+                ? 'text-[1.25rem] leading-tight font-semibold text-destructive tabular-nums'
+                : 'text-[1.25rem] leading-tight font-semibold tabular-nums'
+            }
+          >
+            {value}
+          </p>
+        </div>
+      </div>
+      {hint && <p className="mt-1.5 truncate text-[0.75rem] text-muted-foreground">{hint}</p>}
     </div>
   )
 }
