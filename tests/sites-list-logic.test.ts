@@ -14,6 +14,7 @@ import {
   siteQueryToSearch,
   siteStatusCounts,
   sortProblemsFirst,
+  visibleStatuses,
 } from '@/app/admin-x7kq92mpfw4rt8vz/sites/list-logic'
 
 const SITES = [
@@ -120,5 +121,46 @@ describe('sortProblemsFirst', () => {
     const input = [{ city: 'Zulu', problemCount: 0 }, { city: 'Alpha', problemCount: 1 }]
     sortProblemsFirst(input)
     expect(input.map((s) => s.city)).toEqual(['Zulu', 'Alpha'])
+  })
+})
+
+describe('visibleStatuses', () => {
+  const healthy = { live: 3, draft: 1, 'draft-unfinalized': 0, generating: 0, error: 0 }
+
+  it('hides the three exception states when nothing is in them', () => {
+    // On a healthy system these sit at zero permanently; three chips that
+    // always read "0" are decoration.
+    expect(visibleStatuses(healthy, null)).toEqual(['live', 'draft'])
+  })
+
+  it('always shows Live and Draft, even at zero', () => {
+    // A zero here is real information: "nothing is published yet".
+    expect(visibleStatuses({ ...healthy, live: 0, draft: 0 }, null)).toEqual(['live', 'draft'])
+  })
+
+  it('surfaces an exception state the moment it has something in it', () => {
+    expect(visibleStatuses({ ...healthy, error: 1 }, null)).toEqual(['live', 'draft', 'error'])
+    expect(visibleStatuses({ ...healthy, generating: 2 }, null)).toEqual([
+      'live',
+      'draft',
+      'generating',
+    ])
+  })
+
+  it('keeps a SELECTED status visible at zero, so the filter can be undone', () => {
+    // Hiding it would strand the operator on a filtered view with no chip
+    // showing what the filter is or how to clear it.
+    expect(visibleStatuses(healthy, 'error')).toEqual(['live', 'draft', 'error'])
+  })
+
+  it('preserves pipeline order rather than the order things appeared', () => {
+    const all = { live: 1, draft: 1, 'draft-unfinalized': 1, generating: 1, error: 1 }
+    expect(visibleStatuses(all, null)).toEqual([
+      'live',
+      'draft',
+      'draft-unfinalized',
+      'generating',
+      'error',
+    ])
   })
 })

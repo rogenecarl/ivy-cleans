@@ -1,14 +1,16 @@
 import Link from 'next/link'
 import type { CityStatus } from '@/pipeline/admin-logic'
 import { cn } from '@/lib/utils'
-import { SITE_STATUSES, siteFilterHref, type SiteQuery } from './list-logic'
+import { siteFilterHref, visibleStatuses, type SiteQuery } from './list-logic'
 
 /*
  * Site status as the primary filter, mirroring the Leads screen's pipeline
  * chips so the two lists are learnable as one thing.
  *
- * Every status renders, zeros included: a missing "Error" chip would read as
- * "errors are not a thing here" rather than "no site is in error".
+ * Only the statuses worth showing render -- see visibleStatuses() in
+ * list-logic.ts. Live and Draft are always there; Generating, Needs finalize
+ * and Error appear only when they have something in them, because on a
+ * healthy system all three sit at zero forever.
  *
  * Server-safe -- plain links, no hooks.
  */
@@ -73,7 +75,7 @@ export function SiteStatusChips({
         count={total}
         active={query.status === null}
       />
-      {SITE_STATUSES.map((status) => (
+      {visibleStatuses(counts, query.status).map((status) => (
         <Chip
           key={status}
           href={siteFilterHref(query, 'status', status)}

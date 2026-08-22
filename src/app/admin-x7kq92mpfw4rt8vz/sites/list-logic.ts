@@ -131,3 +131,31 @@ export function sortProblemsFirst<T extends { city: string; problemCount: number
     (a, b) => b.problemCount - a.problemCount || a.city.localeCompare(b.city),
   )
 }
+
+/**
+ * Which status chips to render.
+ *
+ * `live` and `draft` are the steady states every install has, so they always
+ * show -- a zero there is real information ("nothing is published yet").
+ *
+ * The other three are not a workflow anyone tracks. `generating` exists for
+ * about two minutes while a city is being built; `draft-unfinalized` and
+ * `error` are recovery states. On a healthy system all three sit at zero
+ * permanently, and three chips that always read "0" are decoration. They
+ * appear only when they have something in them -- the same rule the
+ * dashboard's alarm tiles follow, so a chip showing up at all means
+ * something happened.
+ *
+ * A status that is CURRENTLY SELECTED always shows, even at zero. Hiding it
+ * would strand the operator on a filtered view with no chip to show what the
+ * filter is or to click back out of it.
+ */
+export function visibleStatuses(
+  counts: Record<CityStatus, number>,
+  active: CityStatus | null,
+): CityStatus[] {
+  const alwaysShown: CityStatus[] = ['live', 'draft']
+  return SITE_STATUSES.filter(
+    (status) => alwaysShown.includes(status) || counts[status] > 0 || active === status,
+  )
+}
