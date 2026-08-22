@@ -82,8 +82,17 @@ describe.skipIf(!process.env.DATABASE_URL)('leads store', () => {
     expect(miami).toHaveLength(1)
     expect(miami[0].name).toBe('Dana Whitfield')
 
+    /*
+     * city: null scans the WHOLE table, so this assertion has to be narrowed
+     * to the rows this suite owns. It used to compare the unfiltered result
+     * directly against ['Marcus'], which only passed because the database
+     * happened to contain no other contact leads -- one real customer
+     * enquiry, or any seeded demo row, and it failed with nothing actually
+     * broken. The `ztest-` prefix is the same boundary afterAll cleans on.
+     */
     const contacts = await listLeads({ city: null, status: null, formType: 'contact', includeTest: false })
-    expect(contacts.map((l) => l.name)).toEqual(['Marcus'])
+    const ours = contacts.filter((l) => l.cityKey.startsWith('ztest-'))
+    expect(ours.map((l) => l.name)).toEqual(['Marcus'])
   })
 
   it('hides test rows unless asked for them', async () => {
