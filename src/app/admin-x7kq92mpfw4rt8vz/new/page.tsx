@@ -108,24 +108,19 @@ export default async function NewCityPage({
               <Label htmlFor="notes" className="mb-1.5">
                 Notes
               </Label>
-              {/* The placeholder carries the "what do I write here?" hint, as a
-                * worked example rather than an instruction -- it shows the shape
-                * of a good answer, and it stops the help text below repeating the
-                * label. What the help text keeps is the one thing the operator
-                * cannot find out any other way: that the hard limits in
-                * src/pipeline/stages.ts strip prices and numbers no matter what
-                * is typed here, so nobody expects a rate to appear (or fails to
-                * expect it). */}
+              {/* Placeholder only, by request -- no help text under this field.
+                * Worth knowing if you are changing it: the hard limits in
+                * src/pipeline/stages.ts strip prices, numbers, awards and
+                * guarantees from the generated copy no matter what is typed
+                * here (stages.ts:194 wraps these notes with an instruction that
+                * they cannot authorize anything those limits forbid). That is
+                * no longer stated in the UI, so an operator will not know it. */}
               <Textarea
                 id="notes"
                 name="notes"
                 rows={5}
-                placeholder="Humid summers, lots of 1920s bungalows, mostly move-out and rental turnovers"
+                placeholder="Additional Context for AI when generating a site"
               />
-              <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                Extra context for the AI. Prices, numbers, awards and guarantees never reach the
-                copy, whatever you write here.
-              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
