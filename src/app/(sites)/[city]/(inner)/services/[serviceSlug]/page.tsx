@@ -18,11 +18,11 @@ import WhyIvy from "@/components/move-out/WhyIvy";
 import Cost from "@/components/move-out/Cost";
 
 /*
- * The shared-template home for all seven services. Only two are registered
- * in src/data/services/registry.ts today (deep-cleaning as `template`,
- * move-in-move-out-cleaning as `bespoke`); the other five slugs 404 here
- * until they get registered — resolveService() below is what makes that
- * happen for free, since serviceBySlug() returns undefined for them.
+ * The shared-template home for all seven services. All seven are registered
+ * in src/data/services/registry.ts today (move-in-move-out-cleaning as
+ * `bespoke`, the other six as `template`), so every slug renders. An
+ * unregistered slug would 404 here for free — resolveService() below calls
+ * notFound() whenever serviceBySlug() returns undefined.
  *
  * This route runs ALONGSIDE the older [serviceSlug] catch-all, which still
  * owns every suburb slug but no longer renders /deep-cleaning-<city> or

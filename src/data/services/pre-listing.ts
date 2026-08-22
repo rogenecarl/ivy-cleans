@@ -29,6 +29,9 @@ export function preListingCleaningData(c: CityContent): ServiceContent {
 
     whatIs: {
       h2: "What is Real Estate & Pre-Listing Cleaning?",
+      // Break AFTER the ampersand, never before it and never inside a
+      // proper noun: "What is Real Estate & / Pre-Listing Cleaning?"
+      h2BreakAfter: 5,
       text: "Real estate and pre-listing cleaning is a detail-focused service that prepares a home for photos, showings, and open houses. Buyers form an impression within the first few minutes of a walk-through, so this service targets streak-free windows and mirrors, spotless kitchens and bathrooms, decluttered and wiped-down surfaces, and fresh-smelling, well-presented rooms — the details that photograph well and hold up under a buyer’s close look, timed around your agent’s listing and showing schedule.",
       image: "/images/deep-img1.jpg",
     },
@@ -62,7 +65,7 @@ export function preListingCleaningData(c: CityContent): ServiceContent {
         "Scrubbing and disinfecting bathrooms, including toilets, sinks, and showers",
         "Thorough cleaning of kitchen counters, cabinets, and appliances",
         "Vacuuming carpets and mopping hard floors throughout the home",
-        "Dusting baseboards, light fixtures, and ceiling fans",
+        "Dusting reachable ledges, shelves, and trim throughout the home",
         "Tidying and wiping down surfaces to support staging and photos",
       ],
       note: t(

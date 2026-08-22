@@ -29,6 +29,9 @@ export function postConstructionCleaningData(c: CityContent): ServiceContent {
 
     whatIs: {
       h2: "What is Post-Construction & Renovation Cleaning?",
+      // Break AFTER the ampersand, never before it and never inside a
+      // proper noun: "What is Post-Construction & / Renovation Cleaning?"
+      h2BreakAfter: 4,
       text: "Post-construction and renovation cleaning is a heavy-duty service for the aftermath of a build or remodel — the fine drywall dust, sawdust, and paint residue that a regular cleaning isn’t equipped to handle. It covers wiping dust from every surface, including window sills, vents, and light fixtures where it settles, scraping paint or adhesive overspray off floors and glass, vacuuming and mopping floors multiple times as dust continues to resettle, and clearing away loose trash and light packaging generated during the cleaning itself.",
       image: "/images/deep-img1.jpg",
     },
@@ -43,14 +46,14 @@ export function postConstructionCleaningData(c: CityContent): ServiceContent {
       ],
       listIntro: t("There are many benefits to post-construction cleaning your space in {city}, including:", c),
       items: [
-        "Removing fine drywall dust from surfaces, vents, and light fixtures",
+        "Removing fine drywall dust from surfaces, accessible vent covers, and light fixtures",
         "Clearing sawdust and fine dust from floors and corners",
         "Scraping paint, adhesive, or overspray off floors and windows",
         "Improving indoor air quality after a build or remodel",
         "Getting the space genuinely ready for move-in or occupancy",
       ],
       outro:
-        "At Ivy Cleans, we use eco-friendly cleaning products and techniques suited to construction dust and residue, so your newly built or renovated space is not only clean but also safe to move into right away.",
+        "At Ivy Cleans, we use eco-friendly cleaning products and techniques suited to construction dust and residue, so your newly built or renovated space is left clean, comfortable, and ready to enjoy.",
     },
 
     services: {
@@ -79,7 +82,7 @@ export function postConstructionCleaningData(c: CityContent): ServiceContent {
       h2: t("Why Choose Ivy Cleans for Post-Construction & Renovation Cleaning {city}?", c),
       paragraphs: [
         t(
-          "To be brief, Ivy Cleans offers the highest quality post-construction cleaning services in {city}. We take the time to do our work properly, effectively, and as thoroughly as a job site deserves. We pride ourselves in leaving no dust or residue behind for our customers.",
+          "To be brief, Ivy Cleans offers the highest quality post-construction cleaning services in {city}. We take the time to do our work properly, effectively, and as thoroughly as a job site deserves. We pride ourselves in working through a space pass after pass until the construction dust and residue our customers are left with have been cleared.",
           c
         ),
         t(

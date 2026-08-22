@@ -27,7 +27,13 @@ export default function WhatIs({
    * data string, which stays byte-verbatim. The live theme hides every <br>
    * below 768px, so the break is suppressed at mobile and the heading wraps
    * naturally there.
+   *
+   * The word count is data-driven (whatIs.h2BreakAfter) because 3 is a
+   * measurement of that ONE string: the other headings are longer and would
+   * break inside a proper noun or leave a line opening on a dangling "&".
+   * Deep cleaning supplies no value, so it keeps the live break at 3.
    */
+  const breakAfter = whatIs.h2BreakAfter ?? 3;
   const h2Words = whatIs.h2.split(" ");
   return (
     <section className="pt-0 pb-[2rem] md:py-[3rem] lg:py-[6rem]">
@@ -49,8 +55,8 @@ export default function WhatIs({
           <div className="w-full md:w-[50%] lg:w-[44.697%]">
             <div className="p-[10px] lg:ml-[4rem]">
               <h2 className="mb-[2rem] text-[2.8rem] leading-[1.2em] font-bold text-black md:text-[4rem] lg:mb-[3rem] lg:text-[4.5rem]">
-                {h2Words.slice(0, 3).join(" ")} <br className="max-md:hidden" />
-                {h2Words.slice(3).join(" ")}
+                {h2Words.slice(0, breakAfter).join(" ")} <br className="max-md:hidden" />
+                {h2Words.slice(breakAfter).join(" ")}
               </h2>
               <div className="flow-root mb-[-2rem] lg:mb-0">
                 <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">

@@ -47,10 +47,10 @@ export function siteData(c: CityContent): SiteData {
         { label: "Home", href: cityHref(c, "/home") },
         { label: "Cleaning Services", href: cityHref(c, "/cleaning-services") },
         /*
-         * The two per-city service pages. Their slugs are city-derived and are
-         * served by the single [serviceSlug] dynamic segment, so no route
-         * folder has to exist per city (the Plan-2 trap this comment used to
-         * record is resolved). The sibling trap — Header.tsx and
+         * The two service pages linked from the nav. Their slugs are the same
+         * for every city and are served by the services/[serviceSlug] route,
+         * under the city prefix cityHref() adds (the Plan-2 trap this comment
+         * used to record is resolved). The sibling trap — Header.tsx and
          * inner/InnerHeader.tsx matching these labels against hardcoded
          * "…Minneapolis" strings — is resolved too: both split site.nav by
          * index instead.

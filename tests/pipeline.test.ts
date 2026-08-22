@@ -437,6 +437,7 @@ describe('pipeline stages', () => {
           'contact',
           'faq',
           'home',
+          'services',
           'do-i-need-to-be-home-during-a-deep-cleaning-service',
           'deep-cleaning-ztest-stubville',
           'ztest-stubville-move-out-cleaning-services',

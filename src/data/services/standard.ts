@@ -79,7 +79,7 @@ export function standardCleaningData(c: CityContent): ServiceContent {
       h2: t("Why Choose Ivy Cleans for Standard Cleaning {city}?", c),
       paragraphs: [
         t(
-          "To be brief, Ivycleans offers the highest quality standard cleaning services in {city}. We take the time to do our work properly, effectively, and as conveniently as possible for the homeowner. We pride ourselves in our work and the results that we have for our customers. Our drive is in executing our knowledge of cleaning to best suit the needs of all of our clients on a recurring basis. That’s what differentiates us from the competition.",
+          "To be brief, Ivy Cleans offers the highest quality standard cleaning services in {city}. We take the time to do our work properly, effectively, and as conveniently as possible for the homeowner. We pride ourselves in our work and the results that we have for our customers. Our drive is in executing our knowledge of cleaning to best suit the needs of all of our clients on a recurring basis. That’s what differentiates us from the competition.",
           c
         ),
         t(

@@ -79,7 +79,8 @@ export default function ServicesList({
                   );
                   return (
                     <li key={item} className="mb-[1.5rem] last:mb-0">
-                      {i === servicesLinkedItemIndex ? (
+                      {i === servicesLinkedItemIndex &&
+                      servicesLinkHref !== "" ? (
                         <a
                           href={servicesLinkHref}
                           className="flex items-start gap-[1rem]"

@@ -29,6 +29,9 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
 
     whatIs: {
       h2: "What is Airbnb & Short-Term Rental Cleaning?",
+      // Break AFTER the ampersand, never before it and never inside a
+      // proper noun: "What is Airbnb & / Short-Term Rental Cleaning?"
+      h2BreakAfter: 4,
       text: "Airbnb and short-term rental cleaning is a turnover service built around the gap between one guest checking out and the next checking in. It goes beyond a standard tidy-up: beds are stripped and remade with fresh linens, bathrooms and kitchens are reset to a hotel-level standard, host-provided amenities like toiletries, coffee, and paper products are checked and restocked, and every room is inspected against a consistent checklist so the space looks exactly as advertised for the next guest.",
       image: "/images/deep-img1.jpg",
     },
@@ -45,7 +48,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
       items: [
         "Faster turnaround between checkout and the next check-in",
         "Consistent guest-ready presentation that supports strong reviews",
-        "Fresh linens and towels for every stay",
+        "Beds stripped and made up with the fresh linens and towels you stock",
         "Restocked host amenities like toiletries, coffee, and paper products",
         "A reliable partner who can work around your booking calendar",
       ],
@@ -58,7 +61,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
       image: "/images/deep-img2.jpg",
       listIntro: t("Our Airbnb and short-term rental turnover services in {city} include:", c),
       items: [
-        "Stripping beds and laundering or replacing linens and towels",
+        "Stripping beds and making them up with the clean linens and towels you provide",
         "Resetting and sanitizing kitchens, including dishes, counters, and appliances",
         "Scrubbing and disinfecting bathrooms, including toilets, sinks, and showers",
         "Restocking host-provided amenities and checking supply levels",
@@ -109,7 +112,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
         {
           title: "On-time",
           text: t(
-            "In addition, we are committed to hitting tight turnover windows and completing our cleaning services before your next guest checks in. We will work with you to build a schedule that matches your booking calendar in {city}.",
+            "In addition, we plan our turnover visits around your check-in and checkout times and keep you updated on when our cleaners will arrive. We will work with you to build a schedule that matches your booking calendar in {city}.",
             c
           ),
           icon: "/images/deep-icon3.png",
@@ -119,7 +122,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
         {
           title: "Results",
           text: t(
-            "At Ivy Cleans, we don’t consider a turnover done until it meets our guest-ready standard in {city}. We take pride in the quality of our work and will always strive to protect your reviews. If you are not satisfied with our services, we will work with you to make it right.",
+            "At Ivy Cleans, we don’t consider a turnover done until it meets our guest-ready standard in {city}. We take pride in the quality of our work and hold every visit to the same guest-ready standard. If you are not satisfied with our services, we will work with you to make it right.",
             c
           ),
           icon: "/images/deep-icon4.png",

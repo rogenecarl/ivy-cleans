@@ -385,7 +385,9 @@ export function normalizeSlug(raw: string): string {
  * src/app/(sites)/[city]/(front)/ and .../(inner)/ — every static leaf
  * except the [serviceSlug] catch-all itself:
  *   (front)/book-now
- *   (inner)/blog, book, cleaning-services, contact, faq, home,
+ *   (inner)/blog, book, cleaning-services, contact, faq, home, services
+ *           (the parent segment of services/[serviceSlug], which has no
+ *            page.tsx of its own, so /services itself 404s),
  *           do-i-need-to-be-home-during-a-deep-cleaning-service
  *             (the blog post's own literal route segment)
  */
@@ -399,6 +401,7 @@ export function reservedSlugs(cityName: string): Set<string> {
     'contact',
     'faq',
     'home',
+    'services',
     'do-i-need-to-be-home-during-a-deep-cleaning-service',
     `deep-cleaning-${slug}`,
     `${slug}-move-out-cleaning-services`,

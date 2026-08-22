@@ -14,27 +14,28 @@ import WorkInAction from "@/components/suburb/WorkInAction";
 import SuburbClosing from "@/components/suburb/Closing";
 
 /*
- * This dynamic segment now has THREE legal value classes, all computed from
- * the city document — anything else still 404s, and it must never become a
- * catch-all that swallows typos:
+ * This dynamic segment RENDERS exactly one class of value, and recognises
+ * two more only to redirect them — anything else still 404s, and it must
+ * never become a catch-all that swallows typos:
  *
- *   1. /deep-cleaning-<citySlug>              (kind "deep")
- *   2. /<citySlug>-move-out-cleaning-services  (kind "move")
- *   3. any stored suburb slug, c.research.suburbs[].slug (kind "suburb")
+ *   1. any stored suburb slug, c.research.suburbs[].slug — rendered here
+ *   2. /deep-cleaning-<citySlug>              — 308 to /services/deep-cleaning
+ *   3. /<citySlug>-move-out-cleaning-services — 308 to
+ *      /services/move-in-move-out-cleaning
  *
- * The first two carry the city name IN THE URL; they used to be two literal
- * route folders, but a folder name cannot be interpolated, so per city they
- * collapse onto this one dynamic segment. Suburb slugs are looked up by exact
- * match against c.research.suburbs — never derived, since the live site's
- * suburb URL patterns vary (house-cleaning-*, cleaning-services-*,
- * cleaning-service-*, *-cleaning-services, all four appear in the fixtures).
- * The literal sibling routes (blog, book, contact, faq, home,
- * cleaning-services, the blog post) still win because Next matches static
- * segments before dynamic ones.
+ * Cases 2 and 3 carry the city name IN THE URL; they used to render here,
+ * and are kept as permanent redirects because those URLs are indexed (see
+ * resolveService below). Suburb slugs are looked up by exact match against
+ * c.research.suburbs — never derived, since the live site's suburb URL
+ * patterns vary (house-cleaning-*, cleaning-services-*, cleaning-service-*,
+ * *-cleaning-services, all four appear in the fixtures). The literal sibling
+ * routes (blog, book, contact, faq, home, cleaning-services, services, the
+ * blog post) still win because Next matches static segments before dynamic
+ * ones.
  *
- * The nav/body links that point here are built from the SAME templates
- * (`/deep-cleaning-{citySlug}` in src/data/site.ts and
- * src/components/home/HouseCleaning.tsx) or from stored suburb slugs
+ * No nav or body link points at cases 2 and 3 any more: src/data/site.ts and
+ * src/components/home/HouseCleaning.tsx now link to /services/<slug>. The
+ * only links that still land here are suburb links built from stored slugs
  * (src/data/areas.ts, ServiceArea.tsx/Locations.tsx), so slugs and hrefs
  * cannot drift.
  */
