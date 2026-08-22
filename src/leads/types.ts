@@ -95,3 +95,7 @@ export type LeadDashboardStats = {
   /** Non-test lead count per cityKey. */
   byCity: Record<string, number>
 }
+
+/** One count per pipeline stage. Every stage is always present, so a stage
+ * with no leads renders as "0" rather than vanishing from the row. */
+export type LeadStatusCounts = Record<LeadStatus, number>

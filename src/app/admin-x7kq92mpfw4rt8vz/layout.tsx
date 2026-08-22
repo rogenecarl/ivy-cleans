@@ -77,7 +77,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <span className="hidden text-left sm:block">
                 <span className="block text-[0.8rem] leading-tight font-medium">Site Manager</span>
                 <span className="block text-[0.7rem] leading-tight text-muted-foreground">
-                  Internal, no sign-in
+                  Internal
                 </span>
               </span>
             </div>

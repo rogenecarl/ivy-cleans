@@ -14,6 +14,7 @@ import { Prisma, PrismaClient, type Lead as PrismaLead } from '@/generated/prism
 import { DB_DISABLE_HAPPY_EYEBALLS } from './env'
 import type {
   EmailStatus,
+  LeadStatusCounts,
   LeadCounts,
   LeadDashboardStats,
   LeadInput,
@@ -219,6 +220,35 @@ export async function listLeads(query: LeadQuery): Promise<LeadRecord[]> {
     take: 200,
   })
   return rows.map(toRecord)
+}
+
+/**
+ * How many leads sit at each pipeline stage, for the status filter chips.
+ *
+ * DELIBERATELY IGNORES query.status. The chips are the control that SETS
+ * that filter, so counting with it applied would zero every chip except the
+ * selected one the moment you clicked -- the row would stop describing the
+ * pipeline and start describing itself. Every other filter (city, form, test
+ * rows) IS applied, because those genuinely narrow which leads the chips
+ * should be counting.
+ *
+ * Every stage is present in the result, including the ones with no leads:
+ * a missing key would render as a gap in the pipeline rather than a zero,
+ * and "0 quoted" is information.
+ */
+export async function leadStatusCounts(query: LeadQuery): Promise<LeadStatusCounts> {
+  const rows = await prisma.lead.groupBy({
+    by: ['status'],
+    where: {
+      ...(query.city ? { cityKey: query.city } : {}),
+      ...(query.formType ? { formType: query.formType } : {}),
+      ...(query.includeTest ? {} : { isTest: false }),
+    },
+    _count: { _all: true },
+  })
+  const counts: LeadStatusCounts = { new: 0, contacted: 0, quoted: 0, booked: 0, lost: 0 }
+  for (const row of rows) counts[row.status] = row._count._all
+  return counts
 }
 
 /**

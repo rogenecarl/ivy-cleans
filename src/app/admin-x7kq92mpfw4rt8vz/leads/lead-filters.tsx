@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LEAD_STATUSES, type FormType, type LeadQuery } from '@/leads/types'
+import type { FormType, LeadQuery } from '@/leads/types'
 import { filterHref } from './logic'
 
 /*
@@ -13,6 +13,11 @@ import { filterHref } from './logic'
  * into a navigation, through the SAME `filterHref` the old link-based filter
  * row used and tests/leads-admin-ui.test.ts already covers, so "Miami,
  * contacted" stays bookmarkable and the URL shape does not change.
+ *
+ * The Status select used to live here too. It is gone: the status chips
+ * above the table (leads/status-chips.tsx) set the same URL parameter
+ * through the same filterHref, and carry the per-stage counts a dropdown
+ * cannot show. Two controls for one filter is one too many.
  *
  * Radix's Select.Item forbids an empty-string value (it's reserved to mean
  * "no selection"), so "All" is represented by the ALL sentinel below and
@@ -50,13 +55,6 @@ export function LeadFilters({
             ? [...cities.map((c) => ({ value: c.key, label: c.city })), { value: query.city, label: query.city }]
             : cities.map((c) => ({ value: c.key, label: c.city }))
         }
-      />
-      <FilterSelect
-        label="Status"
-        value={query.status ?? ALL}
-        onValueChange={(v) => go('status', v)}
-        options={LEAD_STATUSES.map((s) => ({ value: s, label: s }))}
-        capitalize
       />
       <FilterSelect
         label="Form"

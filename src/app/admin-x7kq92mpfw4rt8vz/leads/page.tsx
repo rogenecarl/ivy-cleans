@@ -1,22 +1,14 @@
 import Link from 'next/link'
-import {
-  CalendarCheck,
-  CircleDashed,
-  FileText,
-  Inbox,
-  PhoneCall,
-  TriangleAlert,
-  XCircle,
-} from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import { listCities } from '@/pipeline/admin-logic'
 import { parseLeadQuery } from '@/leads/filters'
-import { countTestLeads, listLeads } from '@/leads/store'
-import type { LeadRecord } from '@/leads/types'
+import { countTestLeads, leadStatusCounts, listLeads } from '@/leads/store'
+import type { LeadRecord, LeadStatusCounts } from '@/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { StatPill } from '../ui'
 import { buildCityLookup, cityDisplayName, filterHref } from './logic'
 import { LeadFilters } from './lead-filters'
 import { LeadsTable, type LeadRow } from './leads-table'
+import { StatusChips } from './status-chips'
 
 /*
  * force-dynamic for the same reason the Sites screen uses it: the list changes
@@ -53,6 +45,7 @@ export default async function LeadsPage({
    */
   let leads: LeadRecord[] = []
   let testCount = 0
+  let statusCounts: LeadStatusCounts = { new: 0, contacted: 0, quoted: 0, booked: 0, lost: 0 }
   let leadsError = false
   try {
     /*
@@ -63,9 +56,14 @@ export default async function LeadsPage({
      * no hint that anything was being withheld. The count and the toggle
      * below exist so that can never be silent again.
      */
-    const [rows, hidden] = await Promise.all([listLeads(query), countTestLeads(query)])
+    const [rows, hidden, byStatus] = await Promise.all([
+      listLeads(query),
+      countTestLeads(query),
+      leadStatusCounts(query),
+    ])
     leads = rows
     testCount = hidden
+    statusCounts = byStatus
   } catch (err) {
     leadsError = true
     // Loud on purpose, no lead contents: this catch wraps only the two store
@@ -94,7 +92,6 @@ export default async function LeadsPage({
 
   const unworked = leads.filter((l) => l.status !== 'booked' && l.status !== 'lost').length
   const filtersActive = query.city !== null || query.status !== null || query.formType !== null
-  const countOf = (status: LeadRecord['status']) => leads.filter((l) => l.status === status).length
 
   /*
    * The view-model the client table renders. Both time strings are built
@@ -131,21 +128,11 @@ export default async function LeadsPage({
         </p>
       </div>
 
-      {/* Counts describe what the current filters return, not the whole
-        * database -- otherwise the numbers would contradict the table
-        * directly beneath them the moment a filter was applied. */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatPill icon={FileText} label="Shown" value={leads.length} />
-        <StatPill
-          icon={CircleDashed}
-          label="Need action"
-          value={unworked}
-          tone={unworked > 0 ? 'alarm' : 'good'}
-        />
-        <StatPill icon={Inbox} label="New" value={countOf('new')} />
-        <StatPill icon={PhoneCall} label="Contacted" value={countOf('contacted')} />
-        <StatPill icon={CalendarCheck} label="Booked" value={countOf('booked')} />
-        <StatPill icon={XCircle} label="Lost" value={countOf('lost')} />
+      {/* The pipeline doubles as the status filter -- see status-chips.tsx
+        * for why these replaced a row of read-only tiles (and why "Quoted",
+        * which the tiles omitted entirely, is back). */}
+      <div className="mb-4">
+        <StatusChips query={query} counts={statusCounts} />
       </div>
 
       <LeadsTable
