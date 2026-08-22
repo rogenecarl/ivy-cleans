@@ -108,12 +108,23 @@ export default async function NewCityPage({
               <Label htmlFor="notes" className="mb-1.5">
                 Notes
               </Label>
-              <Textarea id="notes" name="notes" rows={5} placeholder="Additional context for the AI" />
+              {/* The placeholder carries the "what do I write here?" hint, as a
+                * worked example rather than an instruction -- it shows the shape
+                * of a good answer, and it stops the help text below repeating the
+                * label. What the help text keeps is the one thing the operator
+                * cannot find out any other way: that the hard limits in
+                * src/pipeline/stages.ts strip prices and numbers no matter what
+                * is typed here, so nobody expects a rate to appear (or fails to
+                * expect it). */}
+              <Textarea
+                id="notes"
+                name="notes"
+                rows={5}
+                placeholder="Humid summers, lots of 1920s bungalows, mostly move-out and rental turnovers"
+              />
               <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                Additional context for the AI. This is the only field it reads, and it shapes both the
-                research and the copy: mention the local climate, the housing mix, and the jobs this
-                branch does most. It never overrides the rules: no prices, numbers, awards or guarantees
-                reach the copy, whatever is written here.
+                Extra context for the AI. Prices, numbers, awards and guarantees never reach the
+                copy, whatever you write here.
               </p>
             </div>
 
