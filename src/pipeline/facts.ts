@@ -9,6 +9,42 @@
  * form input, the same way every time.
  */
 
+/*
+ * Full name back to code, built from STATE_NAMES so the two can never fall
+ * out of step. Keyed on a normalised form (lowercased, whitespace collapsed)
+ * so "florida", "FLORIDA" and " Florida " all land on the same entry.
+ */
+const CODE_BY_NAME: Record<string, string> = {}
+
+/** Lowercase, collapse internal runs of whitespace, trim. "  new   MEXICO "
+ * and "New Mexico" have to reach the same key. */
+function normalizeStateInput(raw: string): string {
+  return raw.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+/**
+ * Accepts either form the operator might reasonably type -- "FL" or
+ * "Florida" -- and returns the two-letter code, or null if it is neither.
+ *
+ * WHY BOTH INPUTS BUT ONE STORED VALUE. Everything downstream (the {ST} and
+ * {stateName} tokens, content/<city>.json, the validator) deals only in the
+ * code; widening what is ACCEPTED costs nothing there, while storing whatever
+ * was typed would give two spellings of one state and let the two tokens
+ * disagree between pages.
+ *
+ * Deliberately NOT fuzzy. "Fla.", "Flor" and misspellings are rejected rather
+ * than guessed at: this value ends up in published copy on a customer-facing
+ * site, and a wrong guess is far worse than an error message the operator can
+ * act on immediately.
+ */
+export function resolveStateCode(raw: string): string | null {
+  const trimmed = raw.trim()
+  if (trimmed === '') return null
+  const upper = trimmed.toUpperCase()
+  if (STATE_NAMES[upper]) return upper
+  return CODE_BY_NAME[normalizeStateInput(trimmed)] ?? null
+}
+
 const STATE_NAMES: Record<string, string> = {
   AL: 'Alabama',
   AK: 'Alaska',
@@ -63,6 +99,10 @@ const STATE_NAMES: Record<string, string> = {
   WY: 'Wyoming',
 }
 
+for (const [code, name] of Object.entries(STATE_NAMES)) {
+  CODE_BY_NAME[normalizeStateInput(name)] = code
+}
+
 export interface DeriveFactsInput {
   /** Display name; leading/trailing whitespace is trimmed here. */
   city: string
@@ -105,11 +145,14 @@ export function deriveFacts(input: DeriveFactsInput): Facts {
     )
   }
 
-  const state = input.state.toUpperCase()
-  const stateName = STATE_NAMES[state]
-  if (!stateName) {
-    throw new Error(`deriveFacts: unknown state code ${JSON.stringify(state)}`)
+  const state = resolveStateCode(input.state)
+  if (state === null) {
+    throw new Error(
+      `deriveFacts: unrecognised state ${JSON.stringify(input.state)} -- ` +
+        'expected a two-letter code (FL) or a full state name (Florida)',
+    )
   }
+  const stateName = STATE_NAMES[state]
 
   const facts: Facts = {
     city,

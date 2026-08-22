@@ -207,7 +207,10 @@ describe('createDraftFromFields', () => {
       phone: '6125550142',
     })
     expect(badState.ok).toBe(false)
-    expect(badState.ok === false && badState.error).toMatch(/unknown state code/)
+    // Names the bad value AND both accepted forms: the operator can fix it
+    // from the message without going to look up what the field wants.
+    expect(badState.ok === false && badState.error).toMatch(/unrecognised state/)
+    expect(badState.ok === false && badState.error).toMatch(/two-letter code.*full state name/)
 
     // Nothing was written by either failure.
     await expect(loadDraft(KEY)).rejects.toThrow(/unknown draft/)

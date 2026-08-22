@@ -63,17 +63,21 @@ export default async function NewCityPage({
                 <Label htmlFor="state" className="mb-1.5">
                   State <span className="text-destructive">*</span>
                 </Label>
+                {/* No pattern/length constraint: the field takes "FL" or
+                  * "Florida" and deriveFacts() resolves either to the code.
+                  * A browser-level pattern would reject the full name before
+                  * the server ever saw it. */}
                 <Input
                   id="state"
                   name="state"
                   required
-                  maxLength={2}
-                  minLength={2}
-                  pattern="[A-Za-z]{2}"
+                  maxLength={40}
                   className="min-h-11 sm:min-h-9"
                   placeholder="FL"
                 />
-                <p className="mt-1 text-[0.75rem] text-muted-foreground">Two-letter code.</p>
+                <p className="mt-1 text-[0.75rem] text-muted-foreground">
+                  Two-letter code or full name. FL or Florida.
+                </p>
               </div>
               <div>
                 <Label htmlFor="phone" className="mb-1.5">
