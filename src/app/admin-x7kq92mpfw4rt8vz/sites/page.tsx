@@ -147,7 +147,7 @@ export default async function SitesPage({
           </p>
         </div>
         <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-          <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
+          <Link href={`${ADMIN_BASE}/new`}>Create Site</Link>
         </Button>
       </div>
 
@@ -191,7 +191,7 @@ export default async function SitesPage({
                 </Button>
               ) : (
                 <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-                  <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
+                  <Link href={`${ADMIN_BASE}/new`}>Create Site</Link>
                 </Button>
               )
             }

@@ -332,7 +332,7 @@ export default async function AdminDashboard() {
           <QuickAction
             href={`${ADMIN_BASE}/new`}
             icon={<Plus className="size-4" />}
-            title="Add a city"
+            title="Create a site"
             description="Generate a new city site, review the copy, then publish it."
           />
         </div>

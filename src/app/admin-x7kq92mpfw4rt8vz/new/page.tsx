@@ -37,7 +37,7 @@ export default async function NewCityPage({
           <ChevronLeft className="size-4" aria-hidden="true" />
           Sites
         </Link>
-        <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">New city</h1>
+        <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">Create site</h1>
         <p className="mt-1 text-[0.85rem] text-muted-foreground">
           The phone number and state name are derived in code and never written by the AI.
         </p>
