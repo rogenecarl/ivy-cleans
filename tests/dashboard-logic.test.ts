@@ -2,38 +2,20 @@
  * The dashboard's numbers, as a test.
  *
  * These exist because every function here can be wrong in a way that still
- * renders perfectly: a win rate over the wrong denominator, an age that
- * rounds a two-day-old lead up to "3 d", a top city that flips between two
- * equal cities on consecutive renders. None of that throws, none of it looks
+ * renders perfectly: an alarm that fails to fire, an age that rounds a
+ * two-day-old lead up to "3 d", a top city that flips between two equal
+ * cities on consecutive renders. None of that throws, none of it looks
  * broken, and all of it would be quoted back as fact.
  */
 import { describe, expect, it } from 'vitest'
 import {
+  activeAlarms,
   describeAge,
   describeTrend,
   sitesWithNoInbox,
   topCity,
   trendDirection,
-  winRate,
 } from '@/app/admin-x7kq92mpfw4rt8vz/dashboard-logic'
-
-describe('winRate', () => {
-  it('divides by DECIDED leads, not by every lead ever received', () => {
-    // 4 booked, 3 lost, and any number still in the pipeline. The rate must
-    // not move when an undecided lead arrives.
-    expect(winRate(4, 3)).toEqual({ pct: 57, decided: 7 })
-  })
-
-  it('is null rather than 0% when nothing has been decided', () => {
-    // 0% would read as "we lose everything"; the truth is "we do not know".
-    expect(winRate(0, 0)).toBeNull()
-  })
-
-  it('reports 100% and 0% honestly once there is evidence', () => {
-    expect(winRate(3, 0)).toEqual({ pct: 100, decided: 3 })
-    expect(winRate(0, 2)).toEqual({ pct: 0, decided: 2 })
-  })
-})
 
 describe('describeAge', () => {
   const now = new Date('2026-08-22T12:00:00Z')
@@ -129,5 +111,61 @@ describe('sitesWithNoInbox', () => {
       miami: { notifyEmails: ['abdi@example.com'] },
     })
     expect(result).toEqual([])
+  })
+})
+
+describe('activeAlarms', () => {
+  const now = new Date('2026-08-22T12:00:00Z')
+  const clear = { waiting: 0, oldestWaitingAt: null, emailFailed: 0, noInbox: [] }
+
+  it('is empty when every check passes, so the page can show one all-clear line', () => {
+    expect(activeAlarms(clear, now)).toEqual([])
+  })
+
+  it('reports ONLY the failing check, never the passing ones', () => {
+    const alarms = activeAlarms({ ...clear, emailFailed: 2 }, now)
+    expect(alarms).toHaveLength(1)
+    expect(alarms[0].key).toBe('email')
+  })
+
+  it('carries the age of the oldest waiting lead, which is the actionable part', () => {
+    const alarms = activeAlarms(
+      {
+        ...clear,
+        waiting: 3,
+        oldestWaitingAt: new Date('2026-08-20T12:00:00Z'),
+      },
+      now,
+    )
+    expect(alarms[0].value).toBe(3)
+    expect(alarms[0].hint).toBe('oldest 2 d')
+    expect(alarms[0].label).toBe('Leads waiting for a reply')
+  })
+
+  it('says "Lead" not "Leads" for exactly one', () => {
+    const alarms = activeAlarms({ ...clear, waiting: 1, oldestWaitingAt: now }, now)
+    expect(alarms[0].label).toBe('Lead waiting for a reply')
+  })
+
+  it('names the cities that cannot notify anyone', () => {
+    const alarms = activeAlarms(
+      { ...clear, noInbox: [{ key: 'miami', city: 'Miami' }, { key: 'mpls', city: 'Minneapolis' }] },
+      now,
+    )
+    expect(alarms[0].value).toBe(2)
+    expect(alarms[0].hint).toBe('Miami, Minneapolis')
+  })
+
+  it('orders by urgency: a waiting customer before a config problem', () => {
+    const alarms = activeAlarms(
+      {
+        waiting: 1,
+        oldestWaitingAt: now,
+        emailFailed: 1,
+        noInbox: [{ key: 'miami', city: 'Miami' }],
+      },
+      now,
+    )
+    expect(alarms.map((a) => a.key)).toEqual(['waiting', 'email', 'inbox'])
   })
 })

@@ -84,9 +84,14 @@ export type LeadDashboardStats = {
   newThisWeek: number
   newLastWeek: number
   bookedLast30: number
-  /** All-time terminal outcomes, for the win rate and its denominator. */
+  /** All-time bookings, for the 30-day figure's context line. */
   booked: number
-  lost: number
+  /** All-time split by form. A booking request (bedrooms, bathrooms, an
+   * address) signals far more intent than a general enquiry, and the ratio
+   * is readable at any volume -- unlike a win rate, which needs dozens of
+   * decided leads before it stops swinging on a single outcome. */
+  bookings: number
+  enquiries: number
   /** Non-test lead count per cityKey. */
   byCity: Record<string, number>
 }

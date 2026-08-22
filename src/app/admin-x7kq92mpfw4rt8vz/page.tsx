@@ -7,8 +7,9 @@ import {
   Inbox,
   MailWarning,
   MapPin,
+  CheckCircle2,
+  ClipboardList,
   Plus,
-  Target,
   TrendingDown,
   TrendingUp,
   TriangleAlert,
@@ -21,12 +22,11 @@ import { ADMIN_BASE, ADMIN_LEADS, ADMIN_SITES } from './base'
 import { EmptyState, LeadStatusChip, StatPill } from './ui'
 import { buildCityLookup, cityDisplayName, filterHref } from './leads/logic'
 import {
-  describeAge,
+  activeAlarms,
   describeTrend,
   sitesWithNoInbox,
   topCity,
   trendDirection,
-  winRate,
 } from './dashboard-logic'
 
 /*
@@ -49,6 +49,10 @@ import {
  * the operator moves a lead.
  */
 export const dynamic = 'force-dynamic'
+
+/** Which icon each alarm gets. A lookup, not a branch in the JSX, so adding
+ * an alarm in dashboard-logic.ts fails to compile until it has one. */
+const ALARM_ICON = { waiting: Clock, email: MailWarning, inbox: MapPin } as const
 
 const RECENT_LIMIT = 6
 
@@ -109,7 +113,17 @@ export default async function AdminDashboard() {
   }
 
   const noInbox = leadsUnavailable ? [] : sitesWithNoInbox(cities, settings)
-  const rate = stats ? winRate(stats.booked, stats.lost) : null
+  const alarms = stats
+    ? activeAlarms(
+        {
+          waiting: stats.waiting,
+          oldestWaitingAt: stats.oldestWaitingAt,
+          emailFailed: stats.emailFailed,
+          noInbox,
+        },
+        now,
+      )
+    : []
   const top = stats ? topCity(stats.byCity) : null
   const live = cities.filter((c) => c.status === 'live').length
 
@@ -137,54 +151,63 @@ export default async function AdminDashboard() {
         stats && (
           <>
             <section className="mb-8">
-              <h2 className="mb-3 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
-                Needs attention
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {/* Straight through to the leads that need answering, already
-                  * filtered -- the tile states a problem, so it should also
-                  * be the way to start fixing it. */}
-                <Link
-                  href={filterHref(EMPTY_QUERY, 'status', 'new')}
-                  className="rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                >
-                  <StatPill
-                    icon={Clock}
-                    label="Waiting for a reply"
-                    value={stats.waiting}
-                    tone={stats.waiting > 0 ? 'alarm' : 'good'}
-                    hint={
-                      stats.oldestWaitingAt
-                        ? `oldest ${describeAge(stats.oldestWaitingAt, now)}`
-                        : 'everyone has been answered'
-                    }
+              {/*
+                * All three checks pass -> ONE line, not three tiles reading
+                * "0". It still names each check, because an empty space
+                * cannot tell an operator "all clear" apart from "that check
+                * stopped running", but a sentence can.
+                */}
+              {alarms.length === 0 ? (
+                <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
+                  <CheckCircle2
+                    className="mt-0.5 size-4 shrink-0 text-emerald-600"
+                    aria-hidden="true"
                   />
-                </Link>
-                <StatPill
-                  icon={MailWarning}
-                  label="Notifications failed"
-                  value={stats.emailFailed}
-                  tone={stats.emailFailed > 0 ? 'alarm' : 'good'}
-                  hint={
-                    stats.emailFailed > 0
-                      ? 'a lead arrived and nobody was emailed'
-                      : 'all delivered'
-                  }
-                />
-                <Link href={ADMIN_SITES} className="rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                  <StatPill
-                    icon={MapPin}
-                    label="Live sites with no inbox"
-                    value={noInbox.length}
-                    tone={noInbox.length > 0 ? 'alarm' : 'good'}
-                    hint={
-                      noInbox.length > 0
-                        ? noInbox.map((s) => s.city).join(', ')
-                        : 'every live site notifies someone'
-                    }
-                  />
-                </Link>
-              </div>
+                  <p className="text-[0.85rem] text-emerald-900">
+                    <strong className="font-semibold">All clear.</strong> Nothing waiting for a
+                    reply, every notification delivered, and every live site notifies someone.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h2 className="mb-3 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
+                    Needs attention
+                  </h2>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {alarms.map((alarm) => {
+                      const tile = (
+                        <StatPill
+                          icon={ALARM_ICON[alarm.key]}
+                          label={alarm.label}
+                          value={alarm.value}
+                          tone="alarm"
+                          hint={alarm.hint}
+                        />
+                      )
+                      // Two of the three have somewhere to go and fix it; the
+                      // failed-notification one does not, so it stays inert
+                      // rather than linking somewhere that cannot help.
+                      const href =
+                        alarm.key === 'waiting'
+                          ? filterHref(EMPTY_QUERY, 'status', 'new')
+                          : alarm.key === 'inbox'
+                            ? ADMIN_SITES
+                            : null
+                      return href ? (
+                        <Link
+                          key={alarm.key}
+                          href={href}
+                          className="rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        >
+                          {tile}
+                        </Link>
+                      ) : (
+                        <div key={alarm.key}>{tile}</div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
             </section>
 
             <section className="mb-8">
@@ -208,17 +231,20 @@ export default async function AdminDashboard() {
                   value={stats.bookedLast30}
                   hint={`${stats.booked} booked all time`}
                 />
+                {/*
+                  * Replaced the win rate here. A rate needs dozens of decided
+                  * leads before it stops swinging on a single outcome, and
+                  * rendered "—" until then -- a tile spending space to say
+                  * nothing. This split is readable from the very first lead
+                  * and says something actionable: a booking request carries
+                  * bedrooms, bathrooms and an address, so it is far closer to
+                  * a sale than a general enquiry.
+                  */}
                 <StatPill
-                  icon={Target}
-                  label="Win rate"
-                  // A dash, not "0%": with nothing decided yet there is no
-                  // rate to report, and 0% would read as "we lose everything".
-                  value={rate ? `${rate.pct}%` : '—'}
-                  hint={
-                    rate
-                      ? `${stats.booked} of ${rate.decided} decided`
-                      : 'no leads decided yet'
-                  }
+                  icon={ClipboardList}
+                  label="Booking requests"
+                  value={stats.bookings}
+                  hint={stats.enquiries === 1 ? '1 enquiry' : `${stats.enquiries} enquiries`}
                 />
                 <StatPill
                   icon={MapPin}

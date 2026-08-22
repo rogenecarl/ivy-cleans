@@ -346,7 +346,7 @@ export async function leadDashboardStats(now: Date): Promise<LeadDashboardStats>
   const monthAgo = new Date(now.getTime() - 30 * day)
   const real = { isTest: false as const }
 
-  const [waiting, oldest, emailFailed, newThisWeek, newLastWeek, bookedLast30, booked, lost, cityRows] =
+  const [waiting, oldest, emailFailed, newThisWeek, newLastWeek, bookedLast30, booked, bookings, enquiries, cityRows] =
     await Promise.all([
       prisma.lead.count({ where: { ...real, status: 'new' } }),
       prisma.lead.findFirst({
@@ -373,7 +373,8 @@ export async function leadDashboardStats(now: Date): Promise<LeadDashboardStats>
         where: { ...real, status: 'booked', updatedAt: { gte: monthAgo } },
       }),
       prisma.lead.count({ where: { ...real, status: 'booked' } }),
-      prisma.lead.count({ where: { ...real, status: 'lost' } }),
+      prisma.lead.count({ where: { ...real, formType: 'booking' } }),
+      prisma.lead.count({ where: { ...real, formType: 'contact' } }),
       prisma.lead.groupBy({ by: ['cityKey'], where: real, _count: { _all: true } }),
     ])
 
@@ -388,7 +389,8 @@ export async function leadDashboardStats(now: Date): Promise<LeadDashboardStats>
     newLastWeek,
     bookedLast30,
     booked,
-    lost,
+    bookings,
+    enquiries,
     byCity,
   }
 }

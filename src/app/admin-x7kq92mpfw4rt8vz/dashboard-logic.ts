@@ -3,28 +3,11 @@
  * The dashboard's presentation decisions, as pure functions.
  *
  * Split out of page.tsx for the same reason leads/logic.ts is: these are the
- * parts that can be wrong in a way nobody notices -- a win rate that divides
- * by the wrong denominator, an age that rounds a four-day-old lead to "0d" --
- * and they are only testable at all with the framework out of scope.
+ * parts that can be wrong in a way nobody notices -- an age that rounds a
+ * four-day-old lead down to "0 d", an alarm that fails to fire, a top-city
+ * tile that flickers between two tied cities -- and they are only testable
+ * at all with the framework out of scope.
  */
-
-/**
- * A win rate, with the denominator it was computed from.
- *
- * DECIDED leads only (booked + lost), never the whole pipeline: dividing by
- * every lead ever received would drag the rate down with leads that simply
- * have not been worked yet, and would fall every time a new enquiry arrived --
- * a number that drops when business improves is worse than no number.
- *
- * Returns null when nothing has been decided yet. The caller renders a dash
- * rather than "0%", because zero-of-zero is not a nought-percent win rate,
- * it is an absence of evidence.
- */
-export function winRate(booked: number, lost: number): { pct: number; decided: number } | null {
-  const decided = booked + lost
-  if (decided === 0) return null
-  return { pct: Math.round((booked / decided) * 100), decided }
-}
 
 /**
  * How long a lead has been waiting, in the shortest form that is still
@@ -96,4 +79,66 @@ export function sitesWithNoInbox(
     .filter((c) => c.status === 'live')
     .filter((c) => (notifyEmailsByCity[c.key]?.notifyEmails.length ?? 0) === 0)
     .map((c) => ({ key: c.key, city: c.city }))
+}
+
+/** One thing that is actually wrong right now. */
+export type Alarm = {
+  key: 'waiting' | 'email' | 'inbox'
+  label: string
+  value: number
+  hint: string
+}
+
+/**
+ * Only the checks that are FAILING, never the ones that pass.
+ *
+ * The dashboard used to render all three as permanent tiles, so a healthy day
+ * spent a third of the screen saying "0, 0, 0". Returning just the failures
+ * lets the page collapse the healthy case to a single line while still
+ * naming every check by name there -- which is the property that matters: an
+ * empty space cannot distinguish "all clear" from "that check is not running
+ * any more", but a line that says what was checked can.
+ *
+ * Order is fixed and deliberate: leads waiting on a human first (a customer
+ * is sitting there), then notifications that failed (a lead arrived and
+ * nobody knows), then sites that can never notify anyone (the same failure,
+ * permanently, until someone configures it).
+ */
+export function activeAlarms(
+  args: {
+    waiting: number
+    oldestWaitingAt: Date | null
+    emailFailed: number
+    noInbox: { key: string; city: string }[]
+  },
+  now: Date,
+): Alarm[] {
+  const alarms: Alarm[] = []
+  if (args.waiting > 0) {
+    alarms.push({
+      key: 'waiting',
+      label: args.waiting === 1 ? 'Lead waiting for a reply' : 'Leads waiting for a reply',
+      value: args.waiting,
+      // The age is the point. "3 waiting" is a queue; "3 waiting, oldest 2 d"
+      // is a problem, and only the second one gets acted on.
+      hint: args.oldestWaitingAt ? `oldest ${describeAge(args.oldestWaitingAt, now)}` : '',
+    })
+  }
+  if (args.emailFailed > 0) {
+    alarms.push({
+      key: 'email',
+      label: 'Notifications failed',
+      value: args.emailFailed,
+      hint: 'a lead arrived and nobody was emailed',
+    })
+  }
+  if (args.noInbox.length > 0) {
+    alarms.push({
+      key: 'inbox',
+      label: 'Live sites with no inbox',
+      value: args.noInbox.length,
+      hint: args.noInbox.map((s) => s.city).join(', '),
+    })
+  }
+  return alarms
 }
