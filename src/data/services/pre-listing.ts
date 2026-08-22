@@ -32,7 +32,7 @@ export function preListingCleaningData(c: CityContent): ServiceContent {
       // Break AFTER the ampersand, never before it and never inside a
       // proper noun: "What is Real Estate & / Pre-Listing Cleaning?"
       h2BreakAfter: 5,
-      text: "Real estate and pre-listing cleaning is a detail-focused service that prepares a home for photos, showings, and open houses. Buyers form an impression within the first few minutes of a walk-through, so this service targets streak-free windows and mirrors, spotless kitchens and bathrooms, decluttered and wiped-down surfaces, and fresh-smelling, well-presented rooms — the details that photograph well and hold up under a buyer’s close look, timed around your agent’s listing and showing schedule.",
+      text: "Real estate and pre listing cleaning is a detailed service that prepares a home for photos, showings, and open houses. Buyers form an impression within the first few minutes of a walk through, so this service targets streak free windows and mirrors, spotless kitchens and bathrooms, decluttered and wiped down surfaces, and fresh smelling, well presented rooms. These are the details that photograph well and hold up under a buyer’s close look, timed around your agent’s listing and showing schedule.",
       image: "/images/deep-img1.jpg",
     },
 
@@ -41,7 +41,7 @@ export function preListingCleaningData(c: CityContent): ServiceContent {
     benefits: {
       h2: t("Benefits of Real Estate & Pre-Listing Cleaning {city}", c),
       intro: [
-        "Pre-listing cleaning is timed around a deadline most cleaning services don’t have to think about: your listing photos and first showing. Every surface has to hold up not just to a walk-through, but to a camera lens.",
+        "Pre listing cleaning is timed around a deadline most cleaning services do not have to think about, which is your listing photos and first showing. Every surface has to hold up not just to a walk through, but to a camera lens.",
         "The benefit of pre-listing cleaning is that it removes one more variable from a stressful process. Ivy Cleans works around your agent’s timeline so the home is ready exactly when the listing goes live.",
       ],
       listIntro: t("There are many benefits to real estate and pre-listing cleaning in {city}, including:", c),

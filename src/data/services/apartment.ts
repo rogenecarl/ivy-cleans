@@ -32,7 +32,7 @@ export function apartmentCleaningData(c: CityContent): ServiceContent {
       // Break AFTER the ampersand, never before it and never inside a
       // proper noun: "What is Apartment & / Condo Cleaning?"
       h2BreakAfter: 4,
-      text: "Apartment and condo cleaning is a cleaning service scaled to the way people actually live in multi-unit buildings — smaller square footage, in-unit laundry closets, compact kitchens, and shared hallways or elevators to move through. It covers the same thorough cleaning of kitchens, bathrooms, floors, and living spaces as a house cleaning, adjusted for building access windows, HOA or property-management guidelines, and the quieter, low-odor approach that shared HVAC systems and close neighbors often call for.",
+      text: "Apartment and condo cleaning is a cleaning service scaled to the way people actually live in multi unit buildings, with smaller square footage, in unit laundry closets, compact kitchens, and shared hallways or elevators to move through. It covers the same thorough cleaning of kitchens, bathrooms, floors, and living spaces as a house cleaning, adjusted for building access windows, HOA or property management guidelines, and the quieter, low odor approach that shared HVAC systems and close neighbors often call for.",
       image: "/images/deep-img1.jpg",
     },
 

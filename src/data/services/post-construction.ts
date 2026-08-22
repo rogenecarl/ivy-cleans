@@ -32,7 +32,7 @@ export function postConstructionCleaningData(c: CityContent): ServiceContent {
       // Break AFTER the ampersand, never before it and never inside a
       // proper noun: "What is Post-Construction & / Renovation Cleaning?"
       h2BreakAfter: 4,
-      text: "Post-construction and renovation cleaning is a heavy-duty service for the aftermath of a build or remodel — the fine drywall dust, sawdust, and paint residue that a regular cleaning isn’t equipped to handle. It covers wiping dust from every surface, including window sills, vents, and light fixtures where it settles, scraping paint or adhesive overspray off floors and glass, vacuuming and mopping floors multiple times as dust continues to resettle, and clearing away loose trash and light packaging generated during the cleaning itself.",
+      text: "Post construction and renovation cleaning is a heavy duty service for the aftermath of a build or remodel, made for the fine drywall dust, sawdust, and paint residue that a regular cleaning is not equipped to handle. It covers wiping dust from every surface, including window sills, vents, and light fixtures where it settles, scraping paint or adhesive overspray off floors and glass, vacuuming and mopping floors multiple times as dust continues to resettle, and clearing away loose trash and light packaging generated during the cleaning itself.",
       image: "/images/deep-img1.jpg",
     },
 

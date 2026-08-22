@@ -29,7 +29,7 @@ export function standardCleaningData(c: CityContent): ServiceContent {
 
     whatIs: {
       h2: "What is Standard Cleaning?",
-      text: "Standard cleaning is our recurring maintenance service — the regular upkeep that keeps a home looking its best between deeper cleans. Instead of the intensive, top-to-bottom scope of a deep clean, standard cleaning focuses on the everyday spaces that get used the most: kitchens, bathrooms, living areas, and bedrooms. It’s built around a repeatable checklist so every visit delivers the same consistent, dependable results, whether it’s your first appointment or your fiftieth.",
+      text: "Standard cleaning is our recurring maintenance service, the regular upkeep that keeps a home looking its best between deeper cleans. Instead of the wider scope of a deep clean, standard cleaning focuses on the everyday spaces that get used the most, including kitchens, bathrooms, living areas, and bedrooms. It follows a repeatable checklist, so every visit brings the same dependable results, whether it is your first appointment or your fiftieth.",
       image: "/images/deep-img1.jpg",
     },
 

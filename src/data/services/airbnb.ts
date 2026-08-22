@@ -32,7 +32,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
       // Break AFTER the ampersand, never before it and never inside a
       // proper noun: "What is Airbnb & / Short-Term Rental Cleaning?"
       h2BreakAfter: 4,
-      text: "Airbnb and short-term rental cleaning is a turnover service built around the gap between one guest checking out and the next checking in. It goes beyond a standard tidy-up: beds are stripped and remade with fresh linens, bathrooms and kitchens are reset to a hotel-level standard, host-provided amenities like toiletries, coffee, and paper products are checked and restocked, and every room is inspected against a consistent checklist so the space looks exactly as advertised for the next guest.",
+      text: "Airbnb and short term rental cleaning is a turnover service built around the gap between one guest checking out and the next checking in. It goes beyond a standard tidy up. Beds are stripped and remade with fresh linens, bathrooms and kitchens are reset to a hotel-level standard, host-provided amenities like toiletries, coffee, and paper products are checked and restocked, and every room is inspected against a consistent checklist so the space looks exactly as advertised for the next guest.",
       image: "/images/deep-img1.jpg",
     },
 
@@ -41,7 +41,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
     benefits: {
       h2: t("Benefits of Airbnb & Short-Term Rental Cleaning {city}", c),
       intro: [
-        "Turnover cleaning runs on a different clock than a typical house cleaning — often just a few hours between checkout and the next check-in. Every visit has to be fast, consistent, and thorough enough to hold up to guest reviews.",
+        "Turnover cleaning runs on a different clock than a typical house cleaning, often just a few hours between one guest leaving and the next arriving. Every visit has to be quick, consistent, and thorough enough to hold up to guest reviews.",
         "The benefit of a dedicated turnover service is reliability. Ivy Cleans works from a repeatable checklist for every stay, so your listing meets the same guest-ready standard whether it’s a first booking or your hundredth.",
       ],
       listIntro: t("There are many benefits to Airbnb and short-term rental cleaning in {city}, including:", c),
