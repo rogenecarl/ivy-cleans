@@ -6,6 +6,7 @@ import type { LeadRecord } from '@/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ADMIN_BASE } from '../../base'
 import { LeadStatusChip, Panel, Pill } from '../../ui'
+import { LeadSubmission } from '../lead-submission'
 import { NotesForm } from './notes-form'
 import { StatusSelect } from './status-select'
 
@@ -19,16 +20,6 @@ import { StatusSelect } from './status-select'
  * customer PII that must never end up in a page title, a URL, or a log line.
  */
 export const dynamic = 'force-dynamic'
-
-/** A payload row whose label reads as a phone number gets a tel: link
- * instead of plain text, so a lead is one tap to dial on a phone -- covers
- * "Phone Number" (booking and contact forms both use that label; see
- * src/leads/schema.ts) and anything else with "phone" in its label. */
-function contactHref(label: string, value: string): string | null {
-  if (/phone/i.test(label)) return `tel:${value.replace(/[^\d+]/g, '')}`
-  if (/email/i.test(label)) return `mailto:${value}`
-  return null
-}
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -97,33 +88,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <Panel title="Submitted">
-        <dl className="text-[0.9rem]">
-          {Object.entries(lead.payload)
-            .filter(([, value]) => value.trim() !== '')
-            .map(([label, value]) => {
-              const href = contactHref(label, value)
-              return (
-                <div
-                  key={label}
-                  className="flex flex-col gap-1 border-b border-border py-1.5 last:border-b-0 sm:flex-row sm:gap-3"
-                >
-                  <dt className="text-[0.8rem] text-muted-foreground sm:min-w-[16rem]">{label}</dt>
-                  <dd>
-                    {href ? (
-                      <a
-                        href={href}
-                        className="cursor-pointer text-primary underline-offset-2 hover:underline"
-                      >
-                        {value}
-                      </a>
-                    ) : (
-                      value
-                    )}
-                  </dd>
-                </div>
-              )
-            })}
-        </dl>
+        <LeadSubmission lead={lead} />
       </Panel>
 
       <Panel title="Status">

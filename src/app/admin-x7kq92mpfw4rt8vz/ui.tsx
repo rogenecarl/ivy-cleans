@@ -148,3 +148,45 @@ export function EmptyState({
     </div>
   )
 }
+
+/**
+ * One headline number, for the row of counts above a table.
+ *
+ * `emphasis` exists because "3 leads need action" and "3 leads lost" are not
+ * equally interesting at a glance -- the operator's eye should land on the
+ * work still to do. Server-safe like everything else in this file.
+ */
+export function StatPill({
+  icon: Icon,
+  label,
+  value,
+  emphasis,
+}: {
+  icon: LucideIcon
+  label: string
+  value: number
+  emphasis?: boolean
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3.5 py-3">
+      <span
+        aria-hidden="true"
+        className={
+          emphasis
+            ? 'flex size-9 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-700'
+            : 'flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground'
+        }
+      >
+        <Icon className="size-4" />
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-[0.75rem] font-medium text-muted-foreground">
+          {label}
+        </span>
+        <span className="block text-[1.25rem] leading-tight font-semibold tabular-nums">
+          {value}
+        </span>
+      </span>
+    </div>
+  )
+}

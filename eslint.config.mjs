@@ -31,6 +31,9 @@ const eslintConfig = defineConfig([
      * trip-scheduler/.next's minified vendor chunks and OOMs.
      */
     "trip-scheduler/**",
+    // Reference copy of the operator's other admin, kept beside this one to
+    // model the Leads UI against. Gitignored, and not ours to lint.
+    "peaktransport/**",
   ]),
 ]);
 

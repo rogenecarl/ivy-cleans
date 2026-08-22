@@ -69,3 +69,4 @@ scripts/.snapshots/
 # Sibling project checked out inside this repo. It has its own .git and its
 # own history; it must never be committed here.
 /trip-scheduler/
+/peaktransport/
