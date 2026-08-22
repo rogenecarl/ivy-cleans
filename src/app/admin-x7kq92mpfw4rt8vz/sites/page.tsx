@@ -1,5 +1,12 @@
 import Link from 'next/link'
-import { Building2, ExternalLink, MoreHorizontal, TriangleAlert } from 'lucide-react'
+import {
+  Building2,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  MoreHorizontal,
+  TriangleAlert,
+} from 'lucide-react'
 import domainsJson from '../../../../content/_domains.json'
 import { listCities, type CityRow } from '@/pipeline/admin-logic'
 import { STAGE_IDS } from '@/pipeline/stages'
@@ -18,7 +25,14 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE, ADMIN_SITES } from '../base'
 import { EmptyState, ReadinessMarker, StatusChip } from '../ui'
-import { filterSites, parseSiteQuery, siteStatusCounts, sortProblemsFirst } from './list-logic'
+import {
+  filterSites,
+  paginate,
+  parseSiteQuery,
+  siteFilterHref,
+  siteStatusCounts,
+  sortProblemsFirst,
+} from './list-logic'
 import { SiteStatusChips } from './status-chips'
 import { SiteSearch } from './site-search'
 
@@ -134,6 +148,7 @@ export default async function SitesPage({
     ),
   )
   const filtersActive = query.status !== null || query.q !== ''
+  const paged = paginate(visible, query.page)
 
   return (
     <>
@@ -212,7 +227,7 @@ export default async function SitesPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visible.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
+                {paged.items.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
                   return (
                     <TableRow key={row.key}>
                       <TableCell>
@@ -306,7 +321,7 @@ export default async function SitesPage({
 
           {/* Mobile cards */}
           <div className="flex flex-col gap-3 p-4 md:hidden">
-            {visible.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
+            {paged.items.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
               return (
                 <div key={row.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
@@ -368,6 +383,49 @@ export default async function SitesPage({
                 </div>
               )
             })}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-6 py-3">
+            <p className="text-[0.8rem] text-muted-foreground">
+              Showing {paged.from}&ndash;{paged.to} of {paged.total}
+            </p>
+            {paged.pageCount > 1 && (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild={paged.page > 1} disabled={paged.page <= 1}>
+                  {paged.page > 1 ? (
+                    <Link href={siteFilterHref(query, 'page', String(paged.page - 1))}>
+                      <ChevronLeft className="size-4" aria-hidden="true" />
+                      Previous
+                    </Link>
+                  ) : (
+                    <span>
+                      <ChevronLeft className="size-4" aria-hidden="true" />
+                      Previous
+                    </span>
+                  )}
+                </Button>
+                <span className="text-[0.8rem] text-muted-foreground">
+                  Page {paged.page} of {paged.pageCount}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild={paged.page < paged.pageCount}
+                  disabled={paged.page >= paged.pageCount}
+                >
+                  {paged.page < paged.pageCount ? (
+                    <Link href={siteFilterHref(query, 'page', String(paged.page + 1))}>
+                      Next
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <span>
+                      Next
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </span>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </>
       )}

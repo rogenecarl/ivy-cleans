@@ -26,7 +26,12 @@ export type SiteQuery = {
   status: CityStatus | null
   /** Free-text match over city name, url key and domain. '' means no search. */
   q: string
+  /** 1-based. Always at least 1; see parseSiteQuery. */
+  page: number
 }
+
+/** Rows per page, matching the Leads table and peaktransport's. */
+export const SITES_PAGE_SIZE = 50
 
 function firstParam(value: string | string[] | undefined): string | null {
   if (Array.isArray(value)) return value[0] ?? null
@@ -45,7 +50,15 @@ export function parseSiteQuery(params: Record<string, string | string[] | undefi
   const rawStatus = firstParam(params.status)
   const status = SITE_STATUSES.find((s) => s === rawStatus) ?? null
   const q = (firstParam(params.q) ?? '').trim()
-  return { status, q }
+  /*
+   * Anything that is not a positive whole number becomes page 1 rather than
+   * NaN or 0. A NaN page silently slices to an empty array, which renders as
+   * "no sites match" -- a hand-mangled URL should show the first page, not
+   * claim the list is empty.
+   */
+  const rawPage = Number(firstParam(params.page) ?? '1')
+  const page = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage : 1
+  return { status, q, page }
 }
 
 /** Serialises a SiteQuery back to a query string, omitting empty values so a
@@ -54,6 +67,8 @@ export function siteQueryToSearch(query: SiteQuery): string {
   const params = new URLSearchParams()
   if (query.status) params.set('status', query.status)
   if (query.q !== '') params.set('q', query.q)
+  // Page 1 is the default, so it stays out of the URL entirely.
+  if (query.page > 1) params.set('page', String(query.page))
   return params.toString()
 }
 
@@ -61,14 +76,58 @@ export function siteQueryToSearch(query: SiteQuery): string {
  * contract as the Leads screen's filterHref. */
 export function siteFilterHref(
   query: SiteQuery,
-  key: 'status' | 'q',
+  key: 'status' | 'q' | 'page',
   value: string | null,
 ): string {
   const next: SiteQuery = { ...query }
-  if (key === 'status') next.status = (SITE_STATUSES.find((s) => s === value) ?? null) as CityStatus | null
-  else next.q = value ?? ''
+  if (key === 'page') {
+    const parsed = Number(value ?? '1')
+    next.page = Number.isInteger(parsed) && parsed >= 1 ? parsed : 1
+  } else {
+    /*
+     * CHANGING A FILTER RESETS TO PAGE 1. Without this, narrowing from 200
+     * sites to 3 while on page 4 lands on an empty page that reads as "no
+     * sites match these filters" -- the filter looks broken when it worked
+     * perfectly.
+     */
+    next.page = 1
+    if (key === 'status') {
+      next.status = (SITE_STATUSES.find((s) => s === value) ?? null) as CityStatus | null
+    } else {
+      next.q = value ?? ''
+    }
+  }
   const search = siteQueryToSearch(next)
   return `${ADMIN_SITES}${search ? `?${search}` : ''}`
+}
+
+/**
+ * One page of rows, plus the numbers the footer prints.
+ *
+ * `page` is CLAMPED to the available range rather than trusted: rows can
+ * disappear between the URL being built and the page rendering (a site
+ * published, a filter applied), and a page number past the end would slice to
+ * nothing and read as an empty list.
+ */
+export function paginate<T>(
+  rows: T[],
+  page: number,
+  pageSize: number = SITES_PAGE_SIZE,
+): { items: T[]; page: number; pageCount: number; from: number; to: number; total: number } {
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize))
+  const current = Math.min(Math.max(1, page), pageCount)
+  const start = (current - 1) * pageSize
+  const items = rows.slice(start, start + pageSize)
+  return {
+    items,
+    page: current,
+    pageCount,
+    // 1-based and inclusive, to read as "Showing 1-50 of 1041". An empty list
+    // reports 0-0 rather than 1-0.
+    from: items.length === 0 ? 0 : start + 1,
+    to: start + items.length,
+    total: rows.length,
+  }
 }
 
 /** The minimum a row needs for filtering, so this module never imports the
