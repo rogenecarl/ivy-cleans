@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { LucideIcon } from 'lucide-react'
+import { TriangleAlert, type LucideIcon } from 'lucide-react'
 import type { CityStatus } from '@/pipeline/admin-logic'
 import type { LeadStatus } from '@/leads/types'
 import type { Readiness, ReadinessProblem } from '@/leads/readiness'
@@ -92,25 +92,47 @@ const PROBLEM_LABEL: Record<ReadinessProblem, string> = {
   'email-failures': 'EMAIL FAILURES',
 }
 
-/** Launch-readiness for a single Sites row: one green chip when everything
- * checks out, or one red chip per unmet condition when it does not. */
-export function ReadinessChips({ readiness }: { readiness: Readiness }) {
-  if (readiness.ready) {
-    return (
-      <Badge variant="success" className={CHIP_CLASS}>
-        READY
-      </Badge>
-    )
-  }
+/** Human wording for a readiness problem, shared by the marker below and by
+ * anything that needs to name one in prose. */
+export function readinessProblemLabel(problem: ReadinessProblem): string {
+  return PROBLEM_LABEL[problem]
+}
+
+/**
+ * The inline "something is wrong with this site" marker.
+ *
+ * Replaced a whole Config column of READY/NO INBOX chips. That column spent a
+ * column's width to say "READY" on every row, and said it WRONGLY on drafts --
+ * siteReadiness() exempts an unlaunched city from the domain and inbox checks,
+ * so a draft with nothing configured scored zero problems and rendered READY,
+ * which reads as "ready to go live" when it means "nothing has been checked
+ * yet". NO DOMAIN also duplicated the Domain column two cells to its left.
+ *
+ * What was worth keeping is the signal itself, because the list sorts sites
+ * with problems to the top -- without a visible marker that ordering looks
+ * arbitrary. Renders nothing at all when there is nothing wrong, so a healthy
+ * table is completely quiet.
+ */
+export function ReadinessMarker({ readiness }: { readiness: Readiness | null }) {
+  if (readiness === null || readiness.problems.length === 0) return null
+  const names = readiness.problems.map(PROBLEM_LABEL_TITLE).join(' · ')
   return (
-    <span className="flex flex-wrap gap-1">
-      {readiness.problems.map((problem) => (
-        <Badge key={problem} variant="danger" className={CHIP_CLASS}>
-          {PROBLEM_LABEL[problem]}
-        </Badge>
-      ))}
+    <span
+      className="ml-2 inline-flex items-center gap-1 align-middle text-[0.7rem] font-semibold text-destructive"
+      title={names}
+    >
+      <TriangleAlert className="size-3.5" aria-hidden="true" />
+      <span className="sr-only">Problem: </span>
+      {readiness.problems.map((p) => PROBLEM_LABEL[p]).join(' · ')}
     </span>
   )
+}
+
+/** Sentence-case wording for the title attribute, where SHOUTING reads badly. */
+function PROBLEM_LABEL_TITLE(problem: ReadinessProblem): string {
+  if (problem === 'no-domain') return 'No domain attached'
+  if (problem === 'no-inbox') return 'No notification inbox configured, so leads reach nobody'
+  return 'Some notification emails failed to send'
 }
 
 /**

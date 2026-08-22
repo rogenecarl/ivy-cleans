@@ -19,7 +19,7 @@ const badgeVariants = cva(
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
         // Pastel status variants, added for the admin's chip components
-        // (StatusChip, LeadStatusChip, ReadinessChips) — same "light fill,
+        // (StatusChip, LeadStatusChip) — same "light fill,
         // dark text, matching border" look those chips used before shadcn.
         success: "border-green-600/30 bg-green-50 text-green-700",
         warning: "border-amber-600/30 bg-amber-50 text-amber-700",

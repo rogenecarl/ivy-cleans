@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE, ADMIN_SITES } from '../base'
-import { EmptyState, ReadinessChips, StatusChip } from '../ui'
+import { EmptyState, ReadinessMarker, StatusChip } from '../ui'
 import { filterSites, parseSiteQuery, siteStatusCounts, sortProblemsFirst } from './list-logic'
 import { SiteStatusChips } from './status-chips'
 import { SiteSearch } from './site-search'
@@ -208,7 +208,6 @@ export default async function SitesPage({
                   <TableHead>Status</TableHead>
                   <TableHead>Domain</TableHead>
                   <TableHead>Leads</TableHead>
-                  <TableHead>Config</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -219,6 +218,9 @@ export default async function SitesPage({
                       <TableCell>
                         <span className="font-medium">{row.city}</span>
                         <span className="ml-2 text-[0.75rem] text-muted-foreground">/{row.key}</span>
+                        {/* Why this row sorted to the top. Renders nothing when
+                          * the site is healthy. */}
+                        <ReadinessMarker readiness={readiness} />
                         {row.error && (
                           <span className="ml-2 text-[0.75rem] text-destructive">{row.error}</span>
                         )}
@@ -254,13 +256,6 @@ export default async function SitesPage({
                           </>
                         ) : (
                           <span className="text-muted-foreground">unavailable</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {readiness ? (
-                          <ReadinessChips readiness={readiness} />
-                        ) : (
-                          <span className="text-[0.75rem] text-muted-foreground">not available</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -316,7 +311,10 @@ export default async function SitesPage({
                 <div key={row.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium">{row.city}</p>
+                      <p className="font-medium">
+                        {row.city}
+                        <ReadinessMarker readiness={readiness} />
+                      </p>
                       <p className="text-[0.75rem] text-muted-foreground">/{row.key}</p>
                     </div>
                     <StatusChip status={row.status} />
@@ -351,12 +349,6 @@ export default async function SitesPage({
                       )}
                     </div>
                   </div>
-                  {readiness && (
-                    <div>
-                      <p className="mb-1 text-[0.7rem] text-muted-foreground uppercase">Readiness</p>
-                      <ReadinessChips readiness={readiness} />
-                    </div>
-                  )}
                   <div className="flex flex-wrap gap-2">
                     {previewable && (
                       <Button asChild variant="outline" size="sm" className="min-h-11">
