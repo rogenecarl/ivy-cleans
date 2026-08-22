@@ -60,24 +60,28 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <AdminNav />
 
             {/*
-             * peaktransport puts a signed-in user and a sign-out here. This
-             * console has NO authentication at all -- the unguessable URL is
-             * the only access control (see resolve-rewrite.ts) -- so rendering
-             * a user identity or a Sign Out control would be pure decoration
-             * claiming a security property that does not exist. This chip says
-             * what is actually true instead.
+             * Matches peaktransport's header chip, by request.
+             *
+             * NOTE FOR WHOEVER READS THIS NEXT: "Admin / Administrator" is a
+             * LABEL, not an account. This console has no authentication at
+             * all -- the unguessable URL is the only access control (see
+             * resolve-rewrite.ts) -- so there is no user to be signed in as
+             * and nothing here reflects a session. Deliberately static for
+             * that reason: peaktransport's version drops a menu with Settings
+             * and Sign Out, and a Sign Out that ends no session would be
+             * worse than none at all.
              */}
             <div className="ml-auto flex shrink-0 items-center gap-2.5">
               <span
                 aria-hidden="true"
                 className="flex size-8 items-center justify-center rounded-full bg-muted text-[0.7rem] font-semibold text-muted-foreground ring-2 ring-border"
               >
-                IC
+                A
               </span>
               <span className="hidden text-left sm:block">
-                <span className="block text-[0.8rem] leading-tight font-medium">Site Manager</span>
+                <span className="block text-[0.8rem] leading-tight font-medium">Admin</span>
                 <span className="block text-[0.7rem] leading-tight text-muted-foreground">
-                  Internal
+                  Administrator
                 </span>
               </span>
             </div>
