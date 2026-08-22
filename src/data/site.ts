@@ -1,6 +1,6 @@
 // src/data/site.ts
 import type { CityContent } from '../content/types'
-import { cityHref, t } from '../content/interpolate'
+import { cityHref } from '../content/interpolate'
 import { allServices } from './services/registry'
 
 export type SiteData = {
@@ -68,11 +68,12 @@ export function siteData(c: CityContent): SiteData {
        * Built from the service registry rather than written out here, so the
        * menu cannot drift from the pages that actually exist: every slug is
        * one the services/[serviceSlug] route serves, in the client's own
-       * ordering. `navLabel` carries the two live-matched wordings
-       * ("Deep Cleaning {city}"); the rest use their display name as-is.
+       * ordering. Labels are the service names as the client gave them, with
+       * no city in any of them -- the city is already in the domain, the page
+       * heading and the copy.
        */
       serviceNav: allServices().map((s) => ({
-        label: s.navLabel === undefined ? s.name : t(s.navLabel, c),
+        label: s.name,
         href: cityHref(c, `/services/${s.slug}`),
       })),
       socials: [

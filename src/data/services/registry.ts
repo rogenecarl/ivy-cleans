@@ -34,14 +34,17 @@ export const SERVICE_SLUGS = [
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number]
 
 /*
- * `navLabel` exists because two of these services predate the /services/<slug>
- * URLs and their menu wording is matched byte-for-byte to the live WordPress
- * site ("Deep Cleaning Minneapolis", not "Deep Cleaning"). It is an
- * interpolation TEMPLATE -- it may contain {city} and friends -- and when it
- * is absent the plain `name` is used verbatim. Do not "tidy" the two that set
- * it; changing them changes a live header.
+ * `name` is the menu label for every service, with NO city in it.
+ *
+ * Two of these used to carry one -- the nav read "Deep Cleaning Minneapolis"
+ * and "Minneapolis Move Out Cleaning Services", matching the live WordPress
+ * header byte-for-byte, while the other five read as plain names. Five one way
+ * and two the other looked like an oversight in a seven-item menu, so the
+ * whole list now uses the client's own service names. The PAGES still say the
+ * city where it belongs (see the h1 in data/deep-cleaning.ts) -- this is the
+ * menu only.
  */
-type ServiceEntryBase = { slug: ServiceSlug; name: string; navLabel?: string }
+type ServiceEntryBase = { slug: ServiceSlug; name: string }
 
 export type ServiceEntry =
   | (ServiceEntryBase & { kind: 'template'; content: (c: CityContent) => ServiceContent })
@@ -52,14 +55,12 @@ const ENTRIES: ServiceEntry[] = [
   {
     slug: 'deep-cleaning',
     name: 'Deep Cleaning',
-    navLabel: 'Deep Cleaning {city}',
     kind: 'template',
     content: deepCleaningData,
   },
   {
     slug: 'move-in-move-out-cleaning',
     name: 'Move In / Move Out Cleaning',
-    navLabel: '{city} Move Out Cleaning Services',
     kind: 'bespoke',
   },
   { slug: 'apartment-cleaning', name: 'Apartment & Condo Cleaning', kind: 'template', content: apartmentCleaningData },

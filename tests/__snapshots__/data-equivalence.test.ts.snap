@@ -666,11 +666,11 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
       },
       {
         "href": "/services/deep-cleaning",
-        "label": "Deep Cleaning Minneapolis",
+        "label": "Deep Cleaning",
       },
       {
         "href": "/services/move-in-move-out-cleaning",
-        "label": "Minneapolis Move Out Cleaning Services",
+        "label": "Move In / Move Out Cleaning",
       },
       {
         "href": "/services/apartment-cleaning",
