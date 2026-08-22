@@ -23,7 +23,9 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      /* Tinted header strip, matching peaktransport's tables: it separates the
+       * column names from the data without needing a heavier rule. */
+      className={cn("[&_tr]:border-b [&_tr]:bg-muted/50", className)}
       {...props}
     />
   )
@@ -70,7 +72,11 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        /* px-6 py-3 and small uppercase labels, matching peaktransport's admin
+         * tables. shadcn's default (h-10 px-2, foreground-coloured, same size
+         * as the data) crowds the columns and gives the header the same
+         * visual weight as the rows it labels. */
+        "px-6 py-3 text-left align-middle text-xs font-medium tracking-wider whitespace-nowrap text-muted-foreground uppercase [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
       {...props}
@@ -83,7 +89,10 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        /* px-6 py-3.5, matching peaktransport. shadcn's p-2 is 8px on every
+         * side, which reads as cramped once a row carries an avatar and two
+         * lines of text. */
+        "px-6 py-3.5 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
       {...props}

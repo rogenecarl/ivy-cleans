@@ -169,7 +169,7 @@ export default async function SitesPage({
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
           <h2 className="text-[0.95rem] font-semibold">All sites</h2>
           <SiteSearch query={query} />
         </div>

@@ -261,7 +261,7 @@ export default async function AdminDashboard() {
       {!leadsUnavailable && (
         <section className="mb-8">
           <div className="overflow-hidden rounded-lg border border-border bg-card">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
               <div>
                 <h2 className="text-[0.95rem] font-semibold">Recent leads</h2>
                 <p className="text-[0.8rem] text-muted-foreground">
@@ -291,7 +291,7 @@ export default async function AdminDashboard() {
                   <li key={lead.id}>
                     <Link
                       href={`${ADMIN_LEADS}/${lead.id}`}
-                      className="flex cursor-pointer items-center gap-3 px-4 py-3 outline-none hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                      className="flex cursor-pointer items-center gap-3 px-6 py-3 outline-none hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     >
                       <span
                         aria-hidden="true"
