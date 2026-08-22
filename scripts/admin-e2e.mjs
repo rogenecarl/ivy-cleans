@@ -248,7 +248,7 @@ try {
   page.on('dialog', (dialog) => void dialog.accept())
 
   /* 1. Dashboard ─────────────────────────────────────────────────────────── */
-  await page.goto(`${BASE}${ADMIN}`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}${ADMIN}/sites`, { waitUntil: 'networkidle' })
   const dash = await text(page)
   check('dashboard renders the Site Manager shell', dash.includes('Ivy Cleans: Site Manager'))
   const rowText = async (key) =>
@@ -558,7 +558,7 @@ try {
   await shot(page, 'published')
 
   /* 7. Dashboard again ───────────────────────────────────────────────────── */
-  await page.goto(`${BASE}${ADMIN}`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}${ADMIN}/sites`, { waitUntil: 'networkidle' })
   const stubRow = await rowText(KEY)
   check('dashboard shows Stubville LIVE', stubRow.includes(CITY) && stubRow.includes('LIVE'), stubRow)
   const mplsAfter = await rowText('minneapolis')
@@ -651,7 +651,14 @@ try {
        * at 1440x900 above, so this only ever sees the desktop <table>, never
        * the parallel md:hidden mobile-card markup.
        */
-      const leadLink = page.locator('a', { hasText: LEAD_NAME }).first()
+      /*
+       * The lead's name is now a <button> that opens a sheet, not an <a>
+       * that navigates -- the list is a master-detail so an operator can
+       * read a submission without losing their place. Scoped to `table` so
+       * this can only ever match the desktop row, never the parallel
+       * md:hidden mobile card carrying the same name.
+       */
+      const leadLink = page.locator('table button', { hasText: LEAD_NAME }).first()
       check('submitted lead is present in the dashboard list', (await leadLink.count()) > 0)
       const leadRow = page.locator('tr', { hasText: LEAD_NAME }).first()
       const leadRowText = (await leadRow.textContent())?.replace(/\s+/g, ' ').trim() ?? ''
@@ -674,6 +681,26 @@ try {
       await shot(page, 'leads-list')
 
       await leadLink.click()
+      const sheet = page.getByRole('dialog')
+      await sheet.waitFor({ state: 'visible', timeout: 15_000 })
+      const sheetText = (await sheet.textContent())?.replace(/\s+/g, ' ').trim() ?? ''
+      check('clicking a lead opens the submission sheet', sheetText.includes(LEAD_NAME))
+      /*
+       * The whole point of the sheet: the operator sees the QUESTIONS, not
+       * just the answers. "How Can We Help?" is a contact-form field that
+       * this submission left blank, so its presence also proves unanswered
+       * questions are still rendered rather than silently dropped.
+       */
+      check(
+        'the sheet shows the contact form’s questions',
+        sheetText.includes('How Can We Help?'),
+        sheetText.slice(0, 200),
+      )
+      await shot(page, 'leads-sheet')
+
+      // The full page still exists -- it is what the notification email
+      // deep-links to -- and the sheet offers a way through to it.
+      await sheet.getByRole('link', { name: /Open as a full page/i }).click()
       await page.waitForURL(`**${ADMIN}/leads/*`)
       const detailBefore = await text(page)
       check('lead detail page opens for the submitted lead', detailBefore.includes(LEAD_NAME))

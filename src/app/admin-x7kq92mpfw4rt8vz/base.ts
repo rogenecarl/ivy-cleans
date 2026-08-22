@@ -12,3 +12,10 @@
  * export async functions, so a plain string constant cannot live there.
  */
 export const ADMIN_BASE = '/admin-x7kq92mpfw4rt8vz'
+
+/** The Sites (cities) list. Was the admin root until the Dashboard took that
+ * slot; every "back to cities" link points here, not at ADMIN_BASE. */
+export const ADMIN_SITES = `${ADMIN_BASE}/sites`
+
+/** The Leads list. */
+export const ADMIN_LEADS = `${ADMIN_BASE}/leads`

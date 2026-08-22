@@ -1,343 +1,254 @@
 import Link from 'next/link'
-import { Building2, ExternalLink, MoreHorizontal, TriangleAlert } from 'lucide-react'
-import domainsJson from '../../../content/_domains.json'
-import { listCities, type CityRow } from '@/pipeline/admin-logic'
-import { STAGE_IDS } from '@/pipeline/stages'
-import { leadQueryToSearch } from '@/leads/filters'
-import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
-import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
-import type { LeadCounts, SiteSettingsRecord } from '@/leads/types'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ADMIN_BASE } from './base'
-import { EmptyState, ReadinessChips, StatusChip } from './ui'
+  ArrowRight,
+  Building2,
+  CalendarCheck,
+  CircleDashed,
+  Globe2,
+  Inbox,
+  PhoneCall,
+  Plus,
+  TriangleAlert,
+} from 'lucide-react'
+import { listCities } from '@/pipeline/admin-logic'
+import { listLeads } from '@/leads/store'
+import type { LeadRecord } from '@/leads/types'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ADMIN_BASE, ADMIN_LEADS, ADMIN_SITES } from './base'
+import { EmptyState, LeadStatusChip, StatPill } from './ui'
+import { buildCityLookup, cityDisplayName } from './leads/logic'
 
 /*
- * Dashboard. Reads the store directly (server component) rather than calling
- * listCitiesAction — an action is an RPC endpoint for the browser; on the
- * server the same work is a plain function call.
+ * The console's landing screen, laid out after peaktransport's admin
+ * dashboard: grouped counts, then a recent-activity list with a "View all",
+ * then the two things an operator actually comes here to start.
  *
- * force-dynamic because the whole list comes off disk and changes whenever the
- * operator does anything: a cached dashboard would show a city as GENERATING
- * after it went live.
+ * It owns no data of its own -- everything here is a summary of the Sites and
+ * Leads screens, which remain the places to actually work. Deliberately so: a
+ * dashboard that grows its own editing controls becomes a third place where
+ * the same bug has to be fixed.
+ *
+ * force-dynamic for the same reason the other two screens use it: these counts
+ * change whenever a customer submits or the operator does anything, and a
+ * cached dashboard would show a city as GENERATING after it went live.
  */
 export const dynamic = 'force-dynamic'
 
-/** Where the primary action for each row leads. */
-function primaryLink(row: CityRow): { href: string; label: string } {
-  if (row.status === 'generating') {
-    return { href: `${ADMIN_BASE}/generate/${row.key}`, label: 'Resume' }
-  }
-  if (row.status === 'draft-unfinalized') {
-    return { href: `${ADMIN_BASE}/generate/${row.key}`, label: 'Finish' }
-  }
-  return { href: `${ADMIN_BASE}/review/${row.key}`, label: 'Review' }
+/** How many leads the recent list shows before deferring to the Leads screen. */
+const RECENT_LIMIT = 6
+
+function initials(name: string | null): string {
+  if (!name) return '—'
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '—'
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
 }
 
 export default async function AdminDashboard() {
-  const rows = await listCities()
+  const cities = await listCities()
+  const cityLookup = buildCityLookup(cities)
 
   /*
-   * Lead data is an ENHANCEMENT to this screen, not a prerequisite for it.
-   * The cities table -- reading from disk/Blob via listCities() above -- has
-   * nothing to do with the leads database and must keep working even when
-   * Postgres is unreachable (a Neon outage, or a fresh clone with no
-   * DATABASE_URL provisioned yet). Scoped to exactly these two store calls,
-   * not the JSX below: a genuine rendering bug must still throw, not get
+   * Lead data is an ENHANCEMENT to this screen, not a prerequisite. The city
+   * counts come off disk/Blob via listCities() above and have nothing to do
+   * with Postgres, so they must keep working through a Neon outage or on a
+   * fresh clone with no DATABASE_URL. Scoped to exactly this call, not the
+   * JSX below: a genuine rendering bug must still throw rather than get
    * swallowed into a friendly banner.
-   *
-   * On failure: counts/settingsByCity stay empty and `leadsUnavailable`
-   * flips true, which suppresses the leads column and the readiness chips
-   * entirely below (see the row-rendering code) rather than computing them
-   * from empty data -- an empty read would otherwise report 0 leads and
-   * flag every live city as having no inbox, which is a lie, not a
-   * degradation.
    */
-  let counts: Record<string, LeadCounts> = {}
-  let settingsByCity: Record<string, SiteSettingsRecord> = {}
+  let leads: LeadRecord[] = []
   let leadsUnavailable = false
   try {
-    // One query for every row's settings, not one query per row (was N+1).
-    ;[counts, settingsByCity] = await Promise.all([
-      leadCountsByCity(),
-      getSiteSettingsMany(rows.map((row) => row.key)),
-    ])
+    leads = await listLeads({ city: null, status: null, formType: null, includeTest: false })
   } catch (err) {
     leadsUnavailable = true
-    // Loud on purpose: an operator sees the banner below, but only the logs
-    // say WHY. Never log lead contents here -- this catch only ever wraps
-    // the two aggregate/settings queries above, neither of which returns
-    // anything resembling a lead's PII, so the caught error itself is safe
-    // to log in full.
-    console.error('AdminDashboard: lead data unavailable (leadCountsByCity/getSiteSettingsMany failed):', err)
+    // Loud on purpose, and safe to log in full: this catch wraps only the
+    // listLeads call, so whatever it caught is a connection/query failure,
+    // never a row's PII.
+    console.error('AdminDashboard: listLeads failed -- lead summary unavailable:', err)
   }
 
-  const domains = domainsJson as DomainsIndex
+  const countOf = (status: LeadRecord['status']) => leads.filter((l) => l.status === status).length
+  const unworked = leads.filter((l) => l.status !== 'booked' && l.status !== 'lost').length
+  const live = cities.filter((c) => c.status === 'live').length
+  const drafts = cities.filter((c) => c.status !== 'live').length
+  const recent = leads.slice(0, RECENT_LIMIT)
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[1.4rem] font-semibold tracking-tight">Sites</h1>
-          <p className="mt-1 text-[0.85rem] text-muted-foreground">
-            {rows.length} {rows.length === 1 ? 'site' : 'sites'} in the manager.
-          </p>
-        </div>
-        <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-          <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
-        </Button>
+      <div className="mb-8">
+        <h1 className="text-[1.5rem] font-semibold tracking-tight">Admin Dashboard</h1>
+        <p className="mt-1 max-w-2xl text-[0.9rem] text-muted-foreground">
+          Every city site and every lead they bring in, in one place. Add a city, review what the
+          generator wrote, and work the booking and contact enquiries as they arrive.
+        </p>
       </div>
 
-      {leadsUnavailable && (
-        <Alert className="mb-4 border-amber-600/30 bg-amber-50 text-amber-900">
-          <TriangleAlert className="size-4 text-amber-700" aria-hidden="true" />
-          <AlertTitle>Lead data is unavailable</AlertTitle>
-          <AlertDescription className="text-amber-800">
-            Lead counts and readiness chips are not shown below. This is different from zero
-            leads: it means the leads store could not be reached. The sites table and every
-            action on it are unaffected.
-          </AlertDescription>
-        </Alert>
+      <section className="mb-8">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
+            City sites
+          </h2>
+          <Link
+            href={ADMIN_SITES}
+            className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-sm text-[0.85rem] font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9"
+          >
+            View all
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          <StatPill icon={Building2} label="Total sites" value={cities.length} />
+          <StatPill icon={Globe2} label="Live" value={live} />
+          <StatPill icon={CircleDashed} label="Not live yet" value={drafts} />
+        </div>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
+          Leads
+        </h2>
+        {leadsUnavailable ? (
+          <Alert variant="destructive">
+            <TriangleAlert className="size-4" aria-hidden="true" />
+            <AlertTitle>Lead data is unavailable.</AlertTitle>
+            <AlertDescription>
+              The leads store could not be reached, so no lead counts can be shown. The city sites
+              above are unaffected. Check the database connection and reload.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <StatPill icon={Inbox} label="Total leads" value={leads.length} />
+            <StatPill
+              icon={CircleDashed}
+              label="Need action"
+              value={unworked}
+              emphasis={unworked > 0}
+            />
+            <StatPill icon={Inbox} label="New" value={countOf('new')} />
+            <StatPill icon={PhoneCall} label="Contacted" value={countOf('contacted')} />
+            <StatPill icon={CalendarCheck} label="Booked" value={countOf('booked')} />
+          </div>
+        )}
+      </section>
+
+      {!leadsUnavailable && (
+        <section className="mb-8">
+          <div className="overflow-hidden rounded-lg border border-border bg-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+              <div>
+                <h2 className="text-[0.95rem] font-semibold">Recent leads</h2>
+                <p className="text-[0.8rem] text-muted-foreground">
+                  The latest booking and contact submissions across every city.
+                </p>
+              </div>
+              <Link
+                href={ADMIN_LEADS}
+                className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-sm text-[0.85rem] font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9"
+              >
+                View all
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            {recent.length === 0 ? (
+              <div className="p-6">
+                <EmptyState
+                  icon={Inbox}
+                  title="No leads yet"
+                  description="Submissions from every city’s booking and contact forms will show up here."
+                />
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {recent.map((lead) => (
+                  <li key={lead.id}>
+                    <Link
+                      href={`${ADMIN_LEADS}/${lead.id}`}
+                      className="flex cursor-pointer items-center gap-3 px-4 py-3 outline-none hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-[0.7rem] font-semibold text-muted-foreground"
+                      >
+                        {initials(lead.name)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[0.9rem] font-medium">
+                          {lead.name ?? 'No name given'}
+                        </span>
+                        <span className="block truncate text-[0.75rem] text-muted-foreground">
+                          {lead.email ?? lead.phone ?? 'No contact info'} ·{' '}
+                          {cityDisplayName(cityLookup, lead.cityKey)}
+                        </span>
+                      </span>
+                      <LeadStatusChip status={lead.status} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
       )}
 
-      {rows.length === 0 ? (
-        <EmptyState
-          icon={Building2}
-          title="No sites yet"
-          description="Start the pipeline for a new city and it will show up here."
-          action={
-            <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-              <Link href={`${ADMIN_BASE}/new`}>+ New Site</Link>
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          {/* Desktop table */}
-          <div className="hidden overflow-hidden rounded-lg border border-border md:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>City</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Domain</TableHead>
-                  <TableHead>Leads</TableHead>
-                  <TableHead>Config</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => {
-                  const primary = primaryLink(row)
-                  const previewable = row.status === 'live' || row.status === 'draft'
-                  const domain = domainFor(row.key, domains)
-                  // null, not a zeroed-out fallback, when the store read failed --
-                  // computing either from empty counts/settings would render
-                  // real-looking numbers and chips that are actually fabricated.
-                  const cityCounts = leadsUnavailable
-                    ? null
-                    : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
-                  const readiness =
-                    leadsUnavailable || cityCounts === null
-                      ? null
-                      : siteReadiness({
-                          isLive: row.status === 'live',
-                          domain,
-                          notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
-                          counts: cityCounts,
-                        })
-                  return (
-                    <TableRow key={row.key}>
-                      <TableCell>
-                        <span className="font-medium">{row.city}</span>
-                        <span className="ml-2 text-[0.75rem] text-muted-foreground">/{row.key}</span>
-                        {row.error && (
-                          <span className="ml-2 text-[0.75rem] text-destructive">{row.error}</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <StatusChip status={row.status} />
-                        {row.status === 'generating' && (
-                          <span className="ml-2 text-[0.75rem] text-muted-foreground">
-                            {row.doneCount ?? 0}/{STAGE_IDS.length} stages
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-[0.8rem]">
-                        {domain ?? <span className="text-muted-foreground">not attached</span>}
-                      </TableCell>
-                      <TableCell>
-                        {cityCounts ? (
-                          <>
-                            <Link
-                              href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
-                                city: row.key,
-                                status: null,
-                                formType: null,
-                                includeTest: false,
-                              })}`}
-                              className="cursor-pointer font-medium hover:underline"
-                            >
-                              {cityCounts.unworked}
-                            </Link>
-                            <span className="ml-1 text-[0.75rem] text-muted-foreground">
-                              / {cityCounts.total}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">unavailable</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {readiness ? (
-                          <ReadinessChips readiness={readiness} />
-                        ) : (
-                          <span className="text-[0.75rem] text-muted-foreground">not available</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {/*
-                          * One menu rather than three buttons per row. Five rows
-                          * of three put fifteen equally-weighted controls on
-                          * screen, which reads as noise and makes the row itself
-                          * hard to scan. The mobile cards below deliberately keep
-                          * the three buttons: there is room, they are already
-                          * thumb-sized, and collapsing them into one small target
-                          * would make touch worse rather than better.
-                          */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="min-h-8 cursor-pointer"
-                              aria-label={`Actions for ${row.city}`}
-                            >
-                              <MoreHorizontal className="size-4" aria-hidden="true" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {previewable && (
-                              <DropdownMenuItem asChild>
-                                <a href={`/${row.key}`} target="_blank" rel="noreferrer">
-                                  <ExternalLink className="size-3.5" aria-hidden="true" />
-                                  Preview
-                                </a>
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem asChild>
-                              <Link href={primary.href}>{primary.label}</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href={`${ADMIN_BASE}/sites/${row.key}`}>Settings</Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="flex flex-col gap-3 md:hidden">
-            {rows.map((row) => {
-              const primary = primaryLink(row)
-              const previewable = row.status === 'live' || row.status === 'draft'
-              const domain = domainFor(row.key, domains)
-              const cityCounts = leadsUnavailable
-                ? null
-                : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
-              const readiness =
-                leadsUnavailable || cityCounts === null
-                  ? null
-                  : siteReadiness({
-                      isLive: row.status === 'live',
-                      domain,
-                      notifyEmails: settingsByCity[row.key]?.notifyEmails ?? [],
-                      counts: cityCounts,
-                    })
-              return (
-                <div key={row.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-medium">{row.city}</p>
-                      <p className="text-[0.75rem] text-muted-foreground">/{row.key}</p>
-                    </div>
-                    <StatusChip status={row.status} />
-                  </div>
-                  {row.error && <p className="text-[0.8rem] text-destructive">{row.error}</p>}
-                  {row.status === 'generating' && (
-                    <p className="text-[0.8rem] text-muted-foreground">
-                      {row.doneCount ?? 0}/{STAGE_IDS.length} stages done
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-2 text-[0.8rem]">
-                    <div>
-                      <p className="text-[0.7rem] text-muted-foreground uppercase">Domain</p>
-                      <p>{domain ?? <span className="text-muted-foreground">not attached</span>}</p>
-                    </div>
-                    <div>
-                      <p className="text-[0.7rem] text-muted-foreground uppercase">Leads</p>
-                      {cityCounts ? (
-                        <Link
-                          href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
-                            city: row.key,
-                            status: null,
-                            formType: null,
-                            includeTest: false,
-                          })}`}
-                          className="cursor-pointer font-medium hover:underline"
-                        >
-                          {cityCounts.unworked} / {cityCounts.total}
-                        </Link>
-                      ) : (
-                        <span className="text-muted-foreground">unavailable</span>
-                      )}
-                    </div>
-                  </div>
-                  {readiness && (
-                    <div>
-                      <p className="mb-1 text-[0.7rem] text-muted-foreground uppercase">Readiness</p>
-                      <ReadinessChips readiness={readiness} />
-                    </div>
-                  )}
-                  <div className="flex flex-wrap gap-2">
-                    {previewable && (
-                      <Button asChild variant="outline" size="sm" className="min-h-11">
-                        <a href={`/${row.key}`} target="_blank" rel="noreferrer">
-                          Preview
-                          <ExternalLink className="size-3.5" aria-hidden="true" />
-                        </a>
-                      </Button>
-                    )}
-                    <Button asChild variant="outline" size="sm" className="min-h-11">
-                      <Link href={primary.href}>{primary.label}</Link>
-                    </Button>
-                    <Button asChild variant="outline" size="sm" className="min-h-11">
-                      <Link href={`${ADMIN_BASE}/sites/${row.key}`}>Settings</Link>
-                    </Button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
-
-      <p className="mt-4 text-[0.8rem] text-muted-foreground">
-        Preview opens the city at its internal <code>/&lt;key&gt;</code> path. That unguessable
-        URL is the preview, no login required. A LIVE city also answers on its own domain.
-      </p>
+      <section>
+        <h2 className="mb-3 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
+          Quick actions
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <QuickAction
+            href={ADMIN_LEADS}
+            title="Work the leads"
+            description="Read what each customer asked for, set a status, and keep notes."
+          />
+          <QuickAction
+            href={`${ADMIN_BASE}/new`}
+            title="Add a city"
+            description="Generate a new city site, review the copy, then publish it."
+            icon
+          />
+        </div>
+      </section>
     </>
+  )
+}
+
+function QuickAction({
+  href,
+  title,
+  description,
+  icon,
+}: {
+  href: string
+  title: string
+  description: string
+  icon?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+    >
+      <span
+        aria-hidden="true"
+        className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"
+      >
+        {icon ? <Plus className="size-4" /> : <Inbox className="size-4" />}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[0.9rem] font-medium">{title}</span>
+        <span className="block text-[0.8rem] text-muted-foreground">{description}</span>
+      </span>
+      <ArrowRight
+        className="ml-auto size-4 shrink-0 self-center text-muted-foreground transition-transform group-hover:translate-x-0.5"
+        aria-hidden="true"
+      />
+    </Link>
   )
 }

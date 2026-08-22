@@ -3,7 +3,7 @@ import { ChevronLeft, TriangleAlert } from 'lucide-react'
 import { getSiteSettings } from '@/leads/store'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
-import { ADMIN_BASE } from '../../base'
+import { ADMIN_SITES } from '../../base'
 import { ErrorText, Panel } from '../../ui'
 import { SettingsForm } from './settings-form'
 
@@ -57,7 +57,7 @@ export default async function SiteSettingsPage({
   return (
     <>
       <Link
-        href={ADMIN_BASE}
+        href={ADMIN_SITES}
         className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
       >
         <ChevronLeft className="size-4" aria-hidden="true" />
@@ -94,7 +94,7 @@ export default async function SiteSettingsPage({
       </Panel>
 
       <Link
-        href={ADMIN_BASE}
+        href={ADMIN_SITES}
         className="inline-flex min-h-11 cursor-pointer items-center rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
       >
         Back to sites

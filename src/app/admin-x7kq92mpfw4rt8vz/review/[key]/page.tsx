@@ -5,7 +5,7 @@ import { getCity } from '@/content/store'
 import { errorMessage } from '@/pipeline/admin-logic'
 import { STAGES } from '@/pipeline/stages'
 import { Button } from '@/components/ui/button'
-import { ADMIN_BASE } from '../../base'
+import { ADMIN_BASE, ADMIN_SITES } from '../../base'
 import { ErrorText, Panel, StatusChip } from '../../ui'
 import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
@@ -42,7 +42,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
             <Link href={`${ADMIN_BASE}/generate/${key}`}>Open progress</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
-            <Link href={ADMIN_BASE}>Back to cities</Link>
+            <Link href={ADMIN_SITES}>Back to cities</Link>
           </Button>
         </div>
       </>
@@ -64,7 +64,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
     <>
       <div className="mb-6">
         <Link
-          href={ADMIN_BASE}
+          href={ADMIN_SITES}
           className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
         >
           <ChevronLeft className="size-4" aria-hidden="true" />

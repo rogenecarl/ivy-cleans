@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { createDraftAction } from '../actions'
-import { ADMIN_BASE } from '../base'
+import { ADMIN_SITES } from '../base'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -31,7 +31,7 @@ export default async function NewCityPage({
     <>
       <div className="mb-6">
         <Link
-          href={ADMIN_BASE}
+          href={ADMIN_SITES}
           className="inline-flex min-h-11 cursor-pointer items-center gap-1 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
@@ -122,7 +122,7 @@ export default async function NewCityPage({
                 Create &amp; generate
               </Button>
               <Button asChild variant="outline" size="lg" className="min-h-11 sm:min-h-9">
-                <Link href={ADMIN_BASE}>Cancel</Link>
+                <Link href={ADMIN_SITES}>Cancel</Link>
               </Button>
             </div>
           </form>

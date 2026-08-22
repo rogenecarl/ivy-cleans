@@ -122,9 +122,15 @@ async function main() {
     process.exit(1)
   }
 
+  /*
+   * A generous connect budget: a one-off CLI can afford to wait for a slow
+   * first connection where a request handler cannot (the app's pool caps at
+   * 30s). This does NOT rescue a blocked network -- a host with no route
+   * fails in under a second with ETIMEDOUT regardless of what is set here.
+   */
   const client = new pg.Client({
     connectionString: process.env.DATABASE_URL,
-    connectionTimeoutMillis: 30000,
+    connectionTimeoutMillis: 120000,
   })
   await client.connect()
   try {
