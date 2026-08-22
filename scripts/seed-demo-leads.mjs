@@ -26,6 +26,8 @@
  * exactly them and nothing else.
  */
 import { readFileSync } from 'node:fs'
+import { setDefaultResultOrder } from 'node:dns'
+import { setDefaultAutoSelectFamily } from 'node:net'
 import pg from 'pg'
 
 /** The marker every seeded row carries, and the ONLY thing --clean matches
@@ -113,6 +115,42 @@ function verifyLabels() {
   }
 }
 
+/*
+ * Connects, and on a connection failure retries once with Node's Happy
+ * Eyeballs address race turned off and IPv4 preferred.
+ *
+ * WHY THE RETRY EXISTS. On a machine with no IPv6 route, `pg` connecting to a
+ * dual-stack host by NAME fails with ETIMEDOUT even though the host is
+ * perfectly reachable -- Node races the AAAA address and stalls on it.
+ * Measured against this project's own Neon pooler: a raw TCP connect to one
+ * of its resolved IPv4 addresses succeeded in 259ms while `pg` by hostname
+ * timed out; with these two calls, the same connection succeeded in 1.9s.
+ *
+ * Applied on the RETRY rather than up front so a correctly dual-stacked
+ * machine keeps the address race, which is the better behaviour there and the
+ * whole point of RFC 8305. src/leads/env.ts has the app-side equivalent,
+ * behind DB_DISABLE_HAPPY_EYEBALLS.
+ */
+async function connect() {
+  const open = async () => {
+    const c = new pg.Client({
+      connectionString: process.env.DATABASE_URL,
+      connectionTimeoutMillis: 120000,
+    })
+    await c.connect()
+    return c
+  }
+  try {
+    return await open()
+  } catch (err) {
+    console.error(`First connection attempt failed (${err.code ?? err.message}).`)
+    console.error('Retrying with IPv4 preferred and address racing disabled...')
+    setDefaultAutoSelectFamily(false)
+    setDefaultResultOrder('ipv4first')
+    return open()
+  }
+}
+
 async function main() {
   const clean = process.argv.includes('--clean')
   if (!clean) verifyLabels()
@@ -128,11 +166,7 @@ async function main() {
    * 30s). This does NOT rescue a blocked network -- a host with no route
    * fails in under a second with ETIMEDOUT regardless of what is set here.
    */
-  const client = new pg.Client({
-    connectionString: process.env.DATABASE_URL,
-    connectionTimeoutMillis: 120000,
-  })
-  await client.connect()
+  const client = await connect()
   try {
     if (clean) {
       const { rowCount } = await client.query('delete from "Lead" where "ipHash" = $1', [MARKER])

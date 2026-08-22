@@ -6,6 +6,7 @@
  * choice stays reversible: swapping Prisma out touches this file and
  * prisma/schema.prisma, not the actions, the screens, or their tests.
  */
+import { setDefaultResultOrder } from 'node:dns'
 import { setDefaultAutoSelectFamily } from 'node:net'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
@@ -37,7 +38,23 @@ import type {
  * src/leads/env.ts for the full explanation and example.env for when to
  * set it.
  */
-if (DB_DISABLE_HAPPY_EYEBALLS) setDefaultAutoSelectFamily(false)
+if (DB_DISABLE_HAPPY_EYEBALLS) {
+  setDefaultAutoSelectFamily(false)
+  /*
+   * BOTH calls, not just the first. Disabling the address race alone leaves
+   * Node trying the resolver's order, which for a dual-stack host puts the
+   * AAAA record first -- so on a machine with no IPv6 route every connection
+   * still stalls on an unreachable IPv6 address before it ever reaches IPv4,
+   * and the flag appears to do nothing.
+   *
+   * MEASURED, not theorised: against this project's own Neon pooler from a
+   * sandbox with no IPv6 route, `pg` connecting by hostname failed with
+   * ETIMEDOUT while a raw TCP connect to one of that host's resolved IPv4
+   * addresses succeeded in 259ms. Adding this line took the same connection
+   * from failing to succeeding in 1.9s.
+   */
+  setDefaultResultOrder('ipv4first')
+}
 
 /*
  * Prisma 7 has no built-in engine for driver-adapter clients (schema.prisma's
