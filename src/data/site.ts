@@ -1,6 +1,7 @@
 // src/data/site.ts
 import type { CityContent } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
+import { allServices } from './services/registry'
 
 export type SiteData = {
   site: {
@@ -11,6 +12,7 @@ export type SiteData = {
     googleMapsUrl: string;
     writeReviewUrl: string;
     nav: { label: string; href: string }[];
+    serviceNav: { label: string; href: string }[];
     socials: { label: string; href: string; icon: string }[];
   };
   innerSite: {
@@ -43,30 +45,36 @@ export function siteData(c: CityContent): SiteData {
       googleMapsUrl: "https://maps.google.com/?cid=6546505722522773891",
       writeReviewUrl:
         "https://search.google.com/local/writereview?placeid=ChIJT35locmWcKMRgykID0Xc2Vo",
+      /*
+       * TOP-LEVEL items only. The individual service pages are NOT in here —
+       * they live in `serviceNav` below and hang off the "Cleaning Services"
+       * item as its dropdown.
+       *
+       * They used to sit at indices 2 and 3, and both headers sliced them out
+       * by literal index (`[site.nav[2], site.nav[3]]`). That coupling meant
+       * reordering this array silently rendered the wrong menu, and it capped
+       * the dropdown at exactly two entries no matter how many services
+       * existed — which is why five of the seven service pages shipped
+       * unreachable. Keep the two lists separate.
+       */
       nav: [
         { label: "Home", href: cityHref(c, "/home") },
         { label: "Cleaning Services", href: cityHref(c, "/cleaning-services") },
-        /*
-         * The two service pages linked from the nav. Their slugs are the same
-         * for every city and are served by the services/[serviceSlug] route,
-         * under the city prefix cityHref() adds (the Plan-2 trap this comment
-         * used to record is resolved). The sibling trap — Header.tsx and
-         * inner/InnerHeader.tsx matching these labels against hardcoded
-         * "…Minneapolis" strings — is resolved too: both split site.nav by
-         * index instead.
-         */
-        {
-          label: t("Deep Cleaning {city}", c),
-          href: cityHref(c, "/services/deep-cleaning"),
-        },
-        {
-          label: t("{city} Move Out Cleaning Services", c),
-          href: cityHref(c, "/services/move-in-move-out-cleaning"),
-        },
         { label: "Blog", href: cityHref(c, "/blog") },
         { label: "Contact", href: cityHref(c, "/contact") },
         { label: "FAQ", href: cityHref(c, "/faq") },
       ],
+      /*
+       * Built from the service registry rather than written out here, so the
+       * menu cannot drift from the pages that actually exist: every slug is
+       * one the services/[serviceSlug] route serves, in the client's own
+       * ordering. `navLabel` carries the two live-matched wordings
+       * ("Deep Cleaning {city}"); the rest use their display name as-is.
+       */
+      serviceNav: allServices().map((s) => ({
+        label: s.navLabel === undefined ? s.name : t(s.navLabel, c),
+        href: cityHref(c, `/services/${s.slug}`),
+      })),
       socials: [
         { label: "Facebook", href: "https://www.facebook.com/ivy.cleans1/", icon: "/icons/facebook.svg" },
         { label: "Twitter", href: "https://twitter.com/Ivycleans", icon: "/icons/x.svg" },

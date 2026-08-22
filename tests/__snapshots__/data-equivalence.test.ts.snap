@@ -645,14 +645,6 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
         "label": "Cleaning Services",
       },
       {
-        "href": "/services/deep-cleaning",
-        "label": "Deep Cleaning Minneapolis",
-      },
-      {
-        "href": "/services/move-in-move-out-cleaning",
-        "label": "Minneapolis Move Out Cleaning Services",
-      },
-      {
         "href": "/blog",
         "label": "Blog",
       },
@@ -667,6 +659,36 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
     ],
     "phone": "612-424-0391",
     "phoneHref": "tel:6124240391",
+    "serviceNav": [
+      {
+        "href": "/services/standard-cleaning",
+        "label": "Standard Cleaning",
+      },
+      {
+        "href": "/services/deep-cleaning",
+        "label": "Deep Cleaning Minneapolis",
+      },
+      {
+        "href": "/services/move-in-move-out-cleaning",
+        "label": "Minneapolis Move Out Cleaning Services",
+      },
+      {
+        "href": "/services/apartment-cleaning",
+        "label": "Apartment & Condo Cleaning",
+      },
+      {
+        "href": "/services/airbnb-cleaning",
+        "label": "Airbnb & Short-Term Rental Cleaning",
+      },
+      {
+        "href": "/services/post-construction-cleaning",
+        "label": "Post-Construction & Renovation Cleaning",
+      },
+      {
+        "href": "/services/pre-listing-cleaning",
+        "label": "Real Estate & Pre-Listing Cleaning",
+      },
+    ],
     "socials": [
       {
         "href": "https://www.facebook.com/ivy.cleans1/",

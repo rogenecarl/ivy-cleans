@@ -63,10 +63,27 @@ export default function InnerHeader({
         : p;
   const pathname = stripCity(rawPathname);
   const isActive = (href: string) => pathname === stripCity(href);
-  // nav[2]/nav[3] are the per-city service pages — index-based, label text is
-  // city-dependent (see src/data/site.ts).
-  const dropdown = [site.nav[2], site.nav[3]];
-  const topLevel = site.nav.filter((_, i) => i !== 2 && i !== 3);
+  /*
+   * The services dropdown comes from site.serviceNav, which the registry
+   * builds — NOT from slicing site.nav by index, which capped this menu at
+   * two entries and left five service pages unreachable.
+   */
+  const dropdown = site.serviceNav;
+  const topLevel = site.nav;
+  /*
+   * The mobile menu is one flat list, so the services are spliced in directly
+   * after "Cleaning Services" — the position they occupied when they lived in
+   * site.nav, so the running order is unchanged.
+   */
+  const servicesIndex = site.nav.findIndex((n) => n.label === "Cleaning Services");
+  const mobileNav =
+    servicesIndex === -1
+      ? [...site.nav, ...site.serviceNav]
+      : [
+          ...site.nav.slice(0, servicesIndex + 1),
+          ...site.serviceNav,
+          ...site.nav.slice(servicesIndex + 1),
+        ];
 
   return (
     // live: section padding 1.4rem 0 on top of the column's own 10px (.ec) =>
@@ -151,7 +168,7 @@ export default function InnerHeader({
       </div>
       {open && (
         <nav className="bg-[#C5ECEC] md:hidden">
-          {site.nav.map((item) => (
+          {mobileNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}

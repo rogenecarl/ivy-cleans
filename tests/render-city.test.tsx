@@ -15,6 +15,7 @@
  * These are server components with no client-only hooks, so
  * renderToStaticMarkup in plain node is enough — no jsdom, no Next runtime.
  */
+import { SERVICE_SLUGS } from '@/data/services/registry'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import ServiceArea from '@/components/ServiceArea'
@@ -149,6 +150,10 @@ describe('cityHref-built navigation', () => {
     const { site, innerSite } = siteData(testville)
     expect(site.nav[0].href).toBe('/testville/home')
     expect(site.nav.every((n) => n.href.startsWith('/testville/'))).toBe(true)
+    // the services dropdown must stay inside the draft city's preview tree too
+    expect(site.serviceNav.every((n) => n.href.startsWith('/testville/services/'))).toBe(
+      true,
+    )
     expect(site.bookingUrl).toBe('/testville/book-now')
     expect(innerSite.bookUrl).toBe('/testville/book')
     expect(areasData(testville).areas[0].href).toBe(
@@ -159,7 +164,9 @@ describe('cityHref-built navigation', () => {
   it('leaves a live city’s nav on its public paths', () => {
     const { site, innerSite } = siteData(minneapolis)
     expect(site.nav[0].href).toBe('/home')
-    expect(site.nav[2].href).toBe('/services/deep-cleaning')
+    expect(site.serviceNav.map((n) => n.href)).toEqual(
+      SERVICE_SLUGS.map((slug) => `/services/${slug}`),
+    )
     expect(site.bookingUrl).toBe('/book-now')
     expect(innerSite.bookUrl).toBe('/book')
     expect(areasData(minneapolis).areas[0].href).toBe('/house-cleaning-apple-valley')

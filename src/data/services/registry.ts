@@ -33,14 +33,35 @@ export const SERVICE_SLUGS = [
 
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number]
 
+/*
+ * `navLabel` exists because two of these services predate the /services/<slug>
+ * URLs and their menu wording is matched byte-for-byte to the live WordPress
+ * site ("Deep Cleaning Minneapolis", not "Deep Cleaning"). It is an
+ * interpolation TEMPLATE -- it may contain {city} and friends -- and when it
+ * is absent the plain `name` is used verbatim. Do not "tidy" the two that set
+ * it; changing them changes a live header.
+ */
+type ServiceEntryBase = { slug: ServiceSlug; name: string; navLabel?: string }
+
 export type ServiceEntry =
-  | { slug: ServiceSlug; name: string; kind: 'template'; content: (c: CityContent) => ServiceContent }
-  | { slug: ServiceSlug; name: string; kind: 'bespoke' }
+  | (ServiceEntryBase & { kind: 'template'; content: (c: CityContent) => ServiceContent })
+  | (ServiceEntryBase & { kind: 'bespoke' })
 
 const ENTRIES: ServiceEntry[] = [
   { slug: 'standard-cleaning', name: 'Standard Cleaning', kind: 'template', content: standardCleaningData },
-  { slug: 'deep-cleaning', name: 'Deep Cleaning', kind: 'template', content: deepCleaningData },
-  { slug: 'move-in-move-out-cleaning', name: 'Move In / Move Out Cleaning', kind: 'bespoke' },
+  {
+    slug: 'deep-cleaning',
+    name: 'Deep Cleaning',
+    navLabel: 'Deep Cleaning {city}',
+    kind: 'template',
+    content: deepCleaningData,
+  },
+  {
+    slug: 'move-in-move-out-cleaning',
+    name: 'Move In / Move Out Cleaning',
+    navLabel: '{city} Move Out Cleaning Services',
+    kind: 'bespoke',
+  },
   { slug: 'apartment-cleaning', name: 'Apartment & Condo Cleaning', kind: 'template', content: apartmentCleaningData },
   { slug: 'airbnb-cleaning', name: 'Airbnb & Short-Term Rental Cleaning', kind: 'template', content: airbnbCleaningData },
   {
@@ -59,4 +80,16 @@ const ENTRIES: ServiceEntry[] = [
 
 export function serviceBySlug(slug: string): ServiceEntry | undefined {
   return ENTRIES.find((e) => e.slug === slug)
+}
+
+/*
+ * Every service, in SERVICE_SLUGS order (which is the client's own ordering).
+ *
+ * This is what the header dropdown is built from, so the menu and the pages
+ * cannot drift apart: a service added here appears in the nav automatically,
+ * and one that is removed cannot leave a dead link behind. Returns a copy so a
+ * caller cannot mutate the registry.
+ */
+export function allServices(): ServiceEntry[] {
+  return [...ENTRIES]
 }
