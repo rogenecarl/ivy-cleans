@@ -70,3 +70,11 @@ scripts/.snapshots/
 # own history; it must never be committed here.
 /trip-scheduler/
 /peaktransport/
+# Agent-harness docs. CLAUDE.md is a one-line pointer at AGENTS.md, which
+# stays tracked and holds the actual instructions; docs/superpowers/ is the
+# specs/plans/live-site captures the fidelity work reads from. Both stay on
+# disk, they just don't belong in the published repo. Ignoring the reference
+# dumps also keeps their raw `class` attributes out of Tailwind's content
+# scan, the same reason /fidelity-*/ is ignored above.
+/CLAUDE.md
+/docs/superpowers/
