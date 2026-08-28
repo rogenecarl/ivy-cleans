@@ -17,7 +17,7 @@
  * enforcement is src/lib/auth-server.ts calling it against a server-verified
  * session, and every server action calling that. See the spec.
  */
-import { ADMIN_DASHBOARD, ADMIN_LEADS, ADMIN_LOGIN, ADMIN_SITES } from './admin-routes'
+import { ADMIN_BASE, ADMIN_DASHBOARD, ADMIN_LEADS, ADMIN_LOGIN, ADMIN_SITES } from './admin-routes'
 
 export type Role = 'admin' | 'manager'
 
@@ -51,10 +51,16 @@ const SECTIONS: readonly { href: string; label: string; roles: readonly Role[] }
   { href: '/admin/review', label: '', roles: ['admin'] },
 ] as const
 
-/** True when `pathname` is `href` itself or something beneath it. Guards
- * against the prefix collision that would make "/admin/sitesX" look like it
- * lives under "/admin/sites". */
-function isUnder(pathname: string, href: string): boolean {
+/**
+ * True when `pathname` is `href` itself or something beneath it.
+ *
+ * Guards against the prefix collision that would make "/admin/sitesX" look
+ * like it lives under "/admin/sites". EXPORTED because Task 11's
+ * resolve-admin.ts and proxy.ts need exactly this test too — three
+ * hand-rolled `x === h || x.startsWith(h + '/')` chains is three chances to
+ * get the boundary wrong in a security predicate.
+ */
+export function isUnder(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
@@ -77,7 +83,7 @@ export function navTabsFor(role: Role): readonly NavTab[] {
 export function canAccess(role: Role, pathname: string): boolean {
   if (role === 'admin') return true
   // Login and the /admin redirect stub are reachable by anyone signed in.
-  if (pathname === ADMIN_LOGIN || pathname === '/admin') return true
+  if (pathname === ADMIN_LOGIN || pathname === ADMIN_BASE) return true
   const section = SECTIONS.find((s) => isUnder(pathname, s.href))
   return section ? section.roles.includes(role) : false
 }
@@ -98,7 +104,7 @@ export function canAccess(role: Role, pathname: string): boolean {
 export function safeNext(next: string | null | undefined, role: Role): string {
   if (!next) return ADMIN_DASHBOARD
   if (next.startsWith('//')) return ADMIN_DASHBOARD
-  if (next !== '/admin' && !next.startsWith('/admin/')) return ADMIN_DASHBOARD
+  if (!isUnder(next, ADMIN_BASE)) return ADMIN_DASHBOARD
   if (isUnder(next, ADMIN_LOGIN)) return ADMIN_DASHBOARD
   if (!canAccess(role, next)) return ADMIN_DASHBOARD
   return next
