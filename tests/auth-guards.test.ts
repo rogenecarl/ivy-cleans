@@ -30,19 +30,84 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 const setLeadStatus = vi.fn()
 const setLeadNotes = vi.fn()
 const upsertSiteSettings = vi.fn()
+/*
+ * The read paths the eight console pages call, mocked here too (not just the
+ * three write paths above) so the page-guard tests below can assert the
+ * store was never READ for a refused caller -- the PII-screen equivalent of
+ * "the store was never called" for the action tests.
+ */
+const leadDashboardStats = vi.fn()
+const listLeads = vi.fn()
+const getSiteSettingsMany = vi.fn()
+const countTestLeads = vi.fn()
+const leadStatusCounts = vi.fn()
+const getLead = vi.fn()
+const leadCountsByCity = vi.fn()
+const getSiteSettings = vi.fn()
 vi.mock('@/leads/store', async () => {
   const actual = await vi.importActual<typeof import('@/leads/store')>('@/leads/store')
-  return { ...actual, setLeadStatus, setLeadNotes, upsertSiteSettings }
+  return {
+    ...actual,
+    setLeadStatus,
+    setLeadNotes,
+    upsertSiteSettings,
+    leadDashboardStats,
+    listLeads,
+    getSiteSettingsMany,
+    countTestLeads,
+    leadStatusCounts,
+    getLead,
+    leadCountsByCity,
+    getSiteSettings,
+  }
 })
 
-const publishLogic = vi.fn()
-const finalizeLogic = vi.fn()
+// loadDraft/getCity back the generate and review screens -- both admin-only.
+const loadDraft = vi.fn()
+vi.mock('@/content/drafts', async () => {
+  const actual = await vi.importActual<typeof import('@/content/drafts')>('@/content/drafts')
+  return { ...actual, loadDraft }
+})
+
+const getCity = vi.fn()
+vi.mock('@/content/store', async () => {
+  const actual = await vi.importActual<typeof import('@/content/store')>('@/content/store')
+  return { ...actual, getCity }
+})
+
+/*
+ * All eight admin-logic functions actions.ts calls, mocked and asserted
+ * not-called below -- not just the three (publishLogic/finalizeLogic/
+ * createDraftFromFields) an earlier version of this suite covered. Leaving
+ * runStageLogic/regenerateLogic/updateSuburbsLogic/getProgressLogic/
+ * listCities real would mean their tests pass on `rejects.toThrow(REDIRECTED)`
+ * alone -- exactly the "it threw" standard this suite's own header rejects --
+ * and would run real pipeline code against the filesystem the moment a guard
+ * is ever removed.
+ */
 const createDraftFromFields = vi.fn()
+const runStageLogic = vi.fn()
+const regenerateLogic = vi.fn()
+const finalizeLogic = vi.fn()
+const updateSuburbsLogic = vi.fn()
+const publishLogic = vi.fn()
+const listCities = vi.fn(async () => [])
+const getProgressLogic = vi.fn()
 vi.mock('@/pipeline/admin-logic', async () => {
   const actual = await vi.importActual<typeof import('@/pipeline/admin-logic')>(
     '@/pipeline/admin-logic',
   )
-  return { ...actual, publishLogic, finalizeLogic, createDraftFromFields, listCities: vi.fn(async () => []) }
+  return {
+    ...actual,
+    createDraftFromFields,
+    runStageLogic,
+    regenerateLogic,
+    finalizeLogic,
+    updateSuburbsLogic,
+    publishLogic,
+    listCities,
+    getProgressLogic,
+  }
 })
 
 // The guard module itself is mocked: these tests are about whether each
@@ -71,6 +136,20 @@ function asManager() {
   })
 }
 
+/*
+ * A params/searchParams stand-in that REJECTS if ever awaited, with its
+ * rejection pre-handled so an unawaited poison doesn't print as an unhandled
+ * rejection. Passed to a page in place of the real Promise so that if the
+ * guard is not the page's first statement -- if `await params` or
+ * `await searchParams` runs before it -- the test fails on THIS rejection,
+ * not on REDIRECTED, which pins the guard's position, not just its presence.
+ */
+function poison(label: string): Promise<never> {
+  const p = Promise.reject(new Error(`${label} was awaited before the guard ran`))
+  p.catch(() => {})
+  return p
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -92,21 +171,39 @@ describe('admin-only pipeline actions', () => {
     ['getProgressAction', (m) => m.getProgressAction('miami')],
   ]
 
+  /*
+   * Asserted against every one of the eight, on every case -- not just the
+   * function the case under test would have called. A guard removed from
+   * ANY export must fail SOME case's "no work happened" assertion; asserting
+   * only the matching mock would still catch a missing guard (the wrong
+   * mock gets called), but asserting all eight is what keeps this list
+   * honest as a literal enumeration rather than an implicit one.
+   */
+  function expectNoAdminLogicCalls() {
+    expect(createDraftFromFields).not.toHaveBeenCalled()
+    expect(runStageLogic).not.toHaveBeenCalled()
+    expect(regenerateLogic).not.toHaveBeenCalled()
+    expect(finalizeLogic).not.toHaveBeenCalled()
+    expect(updateSuburbsLogic).not.toHaveBeenCalled()
+    expect(publishLogic).not.toHaveBeenCalled()
+    expect(listCities).not.toHaveBeenCalled()
+    expect(getProgressLogic).not.toHaveBeenCalled()
+  }
+
   for (const [name, call] of cases) {
     it(`${name} refuses a manager and does no work`, async () => {
       asManager()
       const mod = await import('@/app/admin/(console)/actions')
       await expect(call(mod)).rejects.toThrow(REDIRECTED)
       expect(requireAdmin).toHaveBeenCalled()
-      expect(publishLogic).not.toHaveBeenCalled()
-      expect(finalizeLogic).not.toHaveBeenCalled()
-      expect(createDraftFromFields).not.toHaveBeenCalled()
+      expectNoAdminLogicCalls()
     })
 
-    it(`${name} refuses a signed-out caller`, async () => {
+    it(`${name} refuses a signed-out caller and does no work`, async () => {
       signedOut()
       const mod = await import('@/app/admin/(console)/actions')
       await expect(call(mod)).rejects.toThrow(REDIRECTED)
+      expectNoAdminLogicCalls()
     })
   }
 })
@@ -145,5 +242,122 @@ describe('lead actions', () => {
     await mod.setStatusAction('lead-1', 'booked')
     expect(requireSession).toHaveBeenCalled()
     expect(setLeadStatus).toHaveBeenCalledWith('lead-1', 'booked')
+  })
+})
+
+describe('console page guards', () => {
+  /*
+   * Every one of the eight (console) pages, listed literally like the
+   * actions above, for the same reason: an added page without an added case
+   * here is a visible gap in review, not a silent one.
+   *
+   * Dashboard/Leads/lead-detail take requireSession() -- both roles reach
+   * them, so the only "wrong caller" is signed-out. Sites/sites-settings/
+   * new/generate/review take requireAdmin() -- a manager is the realistic
+   * wrong caller (they are signed in, just not authorized), so those get
+   * both a manager case and a signed-out case, matching the split the
+   * action tests above already use.
+   */
+
+  it('dashboard/page.tsx requires a session and reads nothing when refused', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/dashboard/page')
+    await expect(mod.default()).rejects.toThrow(REDIRECTED)
+    expect(leadDashboardStats).not.toHaveBeenCalled()
+    expect(listLeads).not.toHaveBeenCalled()
+    expect(getSiteSettingsMany).not.toHaveBeenCalled()
+    expect(listCities).not.toHaveBeenCalled()
+  })
+
+  it('leads/page.tsx requires a session and reads no leads when refused', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/leads/page')
+    await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
+    expect(listLeads).not.toHaveBeenCalled()
+    expect(countTestLeads).not.toHaveBeenCalled()
+    expect(leadStatusCounts).not.toHaveBeenCalled()
+    expect(listCities).not.toHaveBeenCalled()
+  })
+
+  it("leads/[id]/page.tsx requires a session and never reads the lead when refused", async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/leads/[id]/page')
+    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    expect(getLead).not.toHaveBeenCalled()
+  })
+
+  it('sites/page.tsx refuses a manager and reads nothing', async () => {
+    asManager()
+    const mod = await import('@/app/admin/(console)/sites/page')
+    await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
+    expect(listCities).not.toHaveBeenCalled()
+    expect(leadCountsByCity).not.toHaveBeenCalled()
+    expect(getSiteSettingsMany).not.toHaveBeenCalled()
+  })
+
+  it('sites/page.tsx refuses a signed-out caller', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/sites/page')
+    await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
+  })
+
+  it("sites/[key]/page.tsx refuses a manager and never reads that city's settings", async () => {
+    asManager()
+    const mod = await import('@/app/admin/(console)/sites/[key]/page')
+    await expect(
+      mod.default({ params: poison('params'), searchParams: poison('searchParams') }),
+    ).rejects.toThrow(REDIRECTED)
+    expect(getSiteSettings).not.toHaveBeenCalled()
+  })
+
+  it('sites/[key]/page.tsx refuses a signed-out caller', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/sites/[key]/page')
+    await expect(
+      mod.default({ params: poison('params'), searchParams: poison('searchParams') }),
+    ).rejects.toThrow(REDIRECTED)
+    expect(getSiteSettings).not.toHaveBeenCalled()
+  })
+
+  it('new/page.tsx refuses a manager before its searchParams are ever read', async () => {
+    asManager()
+    const mod = await import('@/app/admin/(console)/new/page')
+    await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
+  })
+
+  it('new/page.tsx refuses a signed-out caller', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/new/page')
+    await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
+  })
+
+  it('generate/[key]/page.tsx refuses a manager and never loads the draft', async () => {
+    asManager()
+    const mod = await import('@/app/admin/(console)/generate/[key]/page')
+    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    expect(loadDraft).not.toHaveBeenCalled()
+  })
+
+  it('generate/[key]/page.tsx refuses a signed-out caller', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/generate/[key]/page')
+    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    expect(loadDraft).not.toHaveBeenCalled()
+  })
+
+  it('review/[key]/page.tsx refuses a manager and never reads the city document', async () => {
+    asManager()
+    const mod = await import('@/app/admin/(console)/review/[key]/page')
+    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    expect(getCity).not.toHaveBeenCalled()
+    expect(loadDraft).not.toHaveBeenCalled()
+  })
+
+  it('review/[key]/page.tsx refuses a signed-out caller', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/review/[key]/page')
+    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    expect(getCity).not.toHaveBeenCalled()
+    expect(loadDraft).not.toHaveBeenCalled()
   })
 })

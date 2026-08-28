@@ -21,13 +21,14 @@ import { LEAD_STATUSES, type LeadStatus } from '@/leads/types'
 import { ADMIN_BASE } from '@/lib/admin-routes'
 import { requireSession } from '@/lib/auth-server'
 
-/** Notes are operator free text, not a customer-controlled field, but they still arrive over an unauthenticated POST -- bound so one malicious request cannot grow a row without limit. */
+/** Notes are operator free text, not a customer-controlled field, but they still arrive over a POST that any signed-in caller can hit directly -- an authenticated bound is not the same thing as a trusted body, so the length is still capped here to stop one malicious request from growing a row without limit. */
 const MAX_NOTES_LENGTH = 5000
 
 /*
  * Both actions below can be POSTed with an id for a lead that does not (or
- * no longer does) exist -- these are unauthenticated endpoints reachable by
- * anyone who can POST, so a wrong or stale id is not exotic. Prisma's
+ * no longer does) exist -- these are authenticated but still untrusted RPC
+ * endpoints, reachable by any signed-in caller who can POST with no page
+ * ever rendered, so a wrong or stale id is not exotic. Prisma's
  * .update() throws PrismaClientKnownRequestError P2025 for that, which
  * store.ts translates into LeadNotFoundError so this file never has to
  * import Prisma itself (store.ts is the only module that does).

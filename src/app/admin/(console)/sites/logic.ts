@@ -13,10 +13,12 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
- * Bounds on the raw submission. This is an unauthenticated POST target
- * reachable by anyone who can send a request, not just the operator through
- * the form -- the same threat model lead-actions.ts states for MAX_NOTES_LENGTH.
- * MAX_RAW_LENGTH caps the body a hostile client could force this action to
+ * Bounds on the raw submission. saveNotifyEmailsAction (site-actions.ts) is
+ * authenticated (requireAdmin()) but still an untrusted RPC boundary: any
+ * signed-in admin caller can hit it directly with no page ever rendered, so
+ * a POST cannot be assumed to have come from the operator through the form
+ * -- the same threat model lead-actions.ts states for MAX_NOTES_LENGTH.
+ * MAX_RAW_LENGTH caps the body a hostile caller could force this action to
  * split and regex-test; MAX_ENTRIES caps how many rows one submission can
  * register. A city's notification list is a handful of human inboxes -- 50 is
  * generous headroom over any real one, small enough that pushing past it
