@@ -32,7 +32,10 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 ## Console access
 
 The operator console lives at `/admin` and sits behind a session — there is
-no signup route. Create an account with `scripts/seed-user.mjs`:
+no signup page, and the self-service `/api/auth/sign-up/email` endpoint
+better-auth would otherwise expose is disabled (`disableSignUp: true` in
+`src/lib/auth.ts`). Create an account with `scripts/seed-user.mjs`, the only
+way an account comes into existence:
 
 ```bash
 SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs \

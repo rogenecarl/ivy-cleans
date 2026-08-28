@@ -23,6 +23,7 @@ import { toNextJsHandler } from 'better-auth/next-js'
 import { getSessionCookie, getCookieCache } from 'better-auth/cookies'
 import { hashPassword } from 'better-auth/crypto'
 import { APIError } from 'better-auth/api'
+import { auth } from '@/lib/auth'
 
 describe('better-auth API surface', () => {
   it('exports everything src/lib/auth*.ts and src/proxy.ts import', () => {
@@ -43,6 +44,25 @@ describe('better-auth API surface', () => {
     // able to verify. Hand-rolling the hash is the most likely way to produce
     // an account that exists but cannot sign in, so it uses better-auth's own.
     expect(typeof hashPassword).toBe('function')
+  })
+})
+
+describe('email/password signup', () => {
+  it('is disabled on the auth instance', () => {
+    /*
+     * better-auth mounts POST /api/auth/sign-up/email automatically the
+     * moment emailAndPassword.enabled is true -- nothing in this app's UI
+     * has to link to it. disableSignUp is the ONLY thing that refuses it
+     * (sign-up.mjs's handler checks exactly this flag); `role.input: false`
+     * elsewhere in src/lib/auth.ts stops privilege escalation, not account
+     * creation, so it cannot substitute for this. Asserted on `auth.options`
+     * itself (the literal object src/lib/auth.ts passes to betterAuth(),
+     * exposed back on the returned instance) rather than by re-reading the
+     * source file, so this fails the moment the config value actually
+     * changes -- deleting the line, or someone "helpfully" flipping it back
+     * to false -- not just when the text disappears.
+     */
+    expect(auth.options.emailAndPassword?.disableSignUp).toBe(true)
   })
 })
 

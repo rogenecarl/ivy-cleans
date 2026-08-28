@@ -33,7 +33,7 @@
  *
  *   The admin/manager RBAC plan: this script now signs in before its first
  *   navigation (the console sits behind a login wall) and, after the admin
- *   case finishes, drives THREE things no unit test can:
+ *   case finishes, drives FOUR things no unit test can:
  *     - sign-out (built in Task 9, wired into the identity chip in Task 12,
  *       correct by inspection in two reviews, and never once actually
  *       executed, because both tasks were barred from creating the seeded
@@ -43,7 +43,14 @@
  *       resolveAdminRedirect as a pure function; only a real browser holding
  *       a real cookie proves the redirect actually fires);
  *     - the RBAC split in a fresh context signed in as a manager: no Sites
- *       tab in the nav, and /admin/sites bounces to /admin/dashboard.
+ *       tab in the nav, and /admin/sites bounces to /admin/dashboard;
+ *     - that POST /api/auth/sign-up/email — mounted by better-auth
+ *       automatically the moment emailAndPassword is enabled, whether or not
+ *       anything in the UI links to it — is actually refused against the
+ *       real running server, and that a refused attempt creates no `user`
+ *       row. tests/better-auth-api.test.ts asserts the `disableSignUp`
+ *       config is set; this is the only thing that proves the config does
+ *       anything.
  *   tests/access.test.ts covers the role matrix exhaustively and
  *   tests/auth-guards.test.ts covers that every action calls a guard;
  *   neither one opens a browser.
@@ -366,7 +373,13 @@ try {
   const errText = await text(page)
   check(
     `invalid state "${BAD_STATE}" is rejected with the reason on screen`,
-    errText.includes('unknown state code') && errText.includes(BAD_STATE),
+    // Matches src/pipeline/facts.ts's actual wording ("unrecognised state"),
+    // not the "unknown state code" this used to check for. That string went
+    // stale when the State field's error message was reworded to accept
+    // "FL" or "Florida" ("the State field takes FL or Florida"); the
+    // validation itself was always correct, only this assertion's literal
+    // was wrong.
+    errText.includes('unrecognised state') && errText.includes(BAD_STATE),
     errText.slice(errText.indexOf('deriveFacts'), errText.indexOf('deriveFacts') + 60),
   )
   check(
@@ -875,7 +888,62 @@ try {
     page.url(),
   )
 
-  /* 10. Manager RBAC split ───────────────────────────────────────────────── */
+  /* 10. Signup is refused ────────────────────────────────────────────────── */
+  /*
+   * better-auth mounts POST /api/auth/sign-up/email automatically whenever
+   * emailAndPassword is enabled -- nothing in this app's UI has to link to
+   * it for it to exist. `disableSignUp: true` in src/lib/auth.ts is the
+   * ONLY thing that refuses it (tests/better-auth-api.test.ts asserts the
+   * config is set; this proves the config actually does something against
+   * the real running server). Plain fetch(), not Playwright -- this is an
+   * anonymous API call, no browser session involved. Uses its own throwaway
+   * address rather than E2E_EMAIL/E2E_MANAGER_EMAIL so a bug in this case
+   * can never collide with either seeded account.
+   *
+   * The explicit Origin header matters: without it, better-auth's CSRF
+   * origin check rejects the request first with 403
+   * MISSING_OR_NULL_ORIGIN -- Node's fetch(), unlike a browser or curl,
+   * sends no Origin header of its own. A real browser submitting this form
+   * always carries one matching its own origin, so setting it to BASE is
+   * the correct way to reach the check this case actually means to probe
+   * (disableSignUp), not an artifact of curl's laxer defaults.
+   */
+  const SIGNUP_PROBE_EMAIL = `e2e-signup-probe-${Date.now()}@example.invalid`
+  const signupRes = await fetch(`${BASE}/api/auth/sign-up/email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: BASE },
+    body: JSON.stringify({ email: SIGNUP_PROBE_EMAIL, password: 'probe-password-123', name: 'Signup Probe' }),
+  })
+  const signupBody = await signupRes.json().catch(() => null)
+  check(
+    'anonymous sign-up is refused with EMAIL_PASSWORD_SIGN_UP_DISABLED',
+    signupRes.status === 400 && signupBody?.code === 'EMAIL_PASSWORD_SIGN_UP_DISABLED',
+    `status ${signupRes.status}, body ${JSON.stringify(signupBody)}`,
+  )
+  if (process.env.DATABASE_URL) {
+    const { Client } = require('pg')
+    const signupDb = new Client({ connectionString: process.env.DATABASE_URL })
+    await signupDb.connect()
+    try {
+      const { rows } = await signupDb.query('SELECT COUNT(*)::int AS count FROM "user" WHERE email = $1', [
+        SIGNUP_PROBE_EMAIL,
+      ])
+      check('refused sign-up created no user row', rows[0].count === 0, `count=${rows[0].count}`)
+      // Defense in depth: delete unconditionally in case the refusal above
+      // ever regresses and a row DOES get created -- never leave a fixture
+      // account behind even in that failure case.
+      await signupDb.query('DELETE FROM "user" WHERE email = $1', [SIGNUP_PROBE_EMAIL])
+    } finally {
+      await signupDb.end()
+    }
+  } else {
+    skip(
+      'refused sign-up created no user row',
+      'DATABASE_URL is not set in this process, so the no-row-created half of the signup-refusal case cannot be verified (the refusal itself was still checked above).',
+    )
+  }
+
+  /* 11. Manager RBAC split ───────────────────────────────────────────────── */
   /*
    * The unit tests cover the policy (tests/access.test.ts) and that each
    * action calls a guard (tests/auth-guards.test.ts); only this proves a

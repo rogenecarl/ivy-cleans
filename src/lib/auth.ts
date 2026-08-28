@@ -20,15 +20,17 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    /*
-     * No self-service signup: accounts come from scripts/seed-user.mjs. This
-     * does not disable the /sign-up/email endpoint on its own — better-auth
-     * exposes it whenever emailAndPassword is enabled — which is why
-     * `user.additionalFields.role.input` is false below. Worst case someone
-     * POSTs a signup and gets a `manager` account with no password they can
-     * use to reach anything; they cannot mint themselves an admin.
-     */
     minPasswordLength: 12,
+    /*
+     * THE DOOR. Mounting better-auth's handler exposes /sign-up/email
+     * whenever emailAndPassword is enabled, and sign-up.mjs:145 refuses only
+     * when this is set. Without it an anonymous POST creates a `manager`
+     * account with an attacker-chosen password — and a manager reaches
+     * /admin/leads, which holds real customer names, emails and addresses.
+     * `input: false` on `role` below stops privilege escalation; it does not
+     * stop account creation. Accounts come from scripts/seed-user.mjs only.
+     */
+    disableSignUp: true,
   },
 
   user: {
@@ -38,10 +40,12 @@ export const auth = betterAuth({
         required: false,
         defaultValue: 'manager',
         /*
-         * THE IMPORTANT LINE. `input: false` means role can never be set
-         * through a request body. Without it, the signup endpoint would
-         * accept `{"role":"admin"}` and the whole RBAC split would be
-         * decorative.
+         * `input: false` means role can never be set through a request
+         * body — the second layer, in case disableSignUp above is ever
+         * removed or bypassed. Without it, a signup would accept
+         * `{"role":"admin"}` and the whole RBAC split would be decorative.
+         * It does NOT, on its own, stop account creation; disableSignUp
+         * above is what does that.
          */
         input: false,
       },

@@ -81,6 +81,14 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
    * it would silently do nothing.
    */
   const role = (result.user as { role?: unknown } | undefined)?.role
-  if (!isRole(role)) return { error: CREDENTIALS_REJECTED }
+  if (!isRole(role)) {
+    // Mirrors auth-server.ts's getServerUser(): an authenticated user whose
+    // role isn't one of the two known values means the database and
+    // src/lib/access.ts disagree, which is worth a trace, not a silent
+    // rejection -- this path used to go through getServerUser() and log
+    // there; it no longer does, so it logs here instead.
+    console.error('signInAction: signed-in user has an unrecognised role; refusing')
+    return { error: CREDENTIALS_REJECTED }
+  }
   redirect(safeNext(next, role))
 }

@@ -16,5 +16,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
   console section there, not in the nav and not in the proxy. Every server
   action under `(console)/` must start with `requireAdmin()` or
   `requireSession()`: a layout guard does not run for an action POST.
-- Operator accounts come from `scripts/seed-user.mjs`. There is no signup
-  route and adding one is a decision, not a convenience.
+- Operator accounts come from `scripts/seed-user.mjs` only. better-auth
+  exposes `/api/auth/sign-up/email` by default whenever `emailAndPassword` is
+  enabled — `disableSignUp: true` in `src/lib/auth.ts` is what actually
+  refuses it. Removing that line reopens anonymous account creation (as
+  `manager`, since `role.input` is `false`) even though nothing else in the
+  UI links to a signup page. Adding a signup flow is a decision, not a
+  convenience.
