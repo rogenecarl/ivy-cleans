@@ -40,7 +40,19 @@ export function resolveAdminRedirect(
     return isLogin ? null : `${ADMIN_LOGIN}?next=${encodeURIComponent(bare)}`
   }
 
-  if (isLogin) return ADMIN_DASHBOARD
+  // Deliberately does NOT bounce a signed-in operator off the login page.
+  // `session` here is a cookie whose presence was checked but never
+  // verified (getSessionCookie does no signature or expiry check — see
+  // proxy.ts) and a cached role that can be up to five minutes stale. A
+  // stale-but-present cookie is exactly what both of this app's session
+  // teardown paths produce — a revoked operator's browser until the cache
+  // window elapses, or every operator at once after a BETTER_AUTH_SECRET
+  // rotation — and redirecting away from /admin/login on nothing but that
+  // guess would trap them in a loop with no way back to the form that could
+  // recover them. src/app/admin/login/page.tsx already does this bounce
+  // correctly, from a server-verified session, and this branch's cost is
+  // one extra render for a legitimately signed-in operator who visits
+  // /admin/login. Do not re-add this as an optimisation.
 
   const role = session.role
   if (!isRole(role)) return null

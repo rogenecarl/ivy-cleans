@@ -115,6 +115,32 @@ describe('proxy — console branch, wired end to end', () => {
     expect(res?.headers.get('x-middleware-rewrite')).toContain('/minneapolis/home')
   })
 
+  it('does not 500 when getCookieCache throws on a malformed session_data cookie', async () => {
+    // BLOCKER 2 of the final review: getCookieCache THROWS (rather than
+    // returning null) on a non-base64 session_data cookie, or when
+    // BETTER_AUTH_SECRET is missing from the runtime. An unhandled throw
+    // here would fail this whole request with an unhandled rejection/500 —
+    // for EVERY /admin path, including /admin/login, the only way back.
+    // Proven here by actually rejecting the mock and asserting proxy()
+    // still resolves, treating the cache as unreadable (passes through,
+    // exactly as an absent cache does).
+    getSessionCookie.mockReturnValue('garbage!!!')
+    getCookieCache.mockRejectedValue(new Error('Invalid Base64 character'))
+
+    await expect(
+      proxy(request('http://localhost:3100/admin/sites', 'localhost:3100')),
+    ).resolves.toBeUndefined()
+  })
+
+  it('does not 500 /admin/login itself on the same malformed cookie', async () => {
+    getSessionCookie.mockReturnValue('garbage!!!')
+    getCookieCache.mockRejectedValue(new Error('Invalid Base64 character'))
+
+    await expect(
+      proxy(request('http://localhost:3100/admin/login', 'localhost:3100')),
+    ).resolves.toBeUndefined()
+  })
+
   it('never engages the admin branch on a mapped customer host — falls through to the rewrite', async () => {
     // This is the regression: before the host gate, this request reached
     // resolveAdminRedirect and rendered a login box on a customer's own

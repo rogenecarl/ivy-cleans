@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { navTabsFor, type Role } from '@/lib/access'
+import { isUnder, navTabsFor, type Role } from '@/lib/access'
 
 /*
  * The header's section tabs, laid out like peaktransport's AdminHeader: pill
@@ -29,11 +29,12 @@ import { navTabsFor, type Role } from '@/lib/access'
  * Nothing here keys off tab ORDER -- an earlier version of this nav sliced
  * site.nav by literal index and rendered the wrong menu whenever the array
  * was reordered. Adding a section to SECTIONS in src/lib/access.ts is safe.
+ *
+ * Matching uses access.ts's isUnder rather than a fourth hand-rolled
+ * `pathname === href || pathname.startsWith(href + '/')` -- see that file's
+ * comment on isUnder for why three independent copies of this boundary test
+ * is already one too many.
  */
-function isActive(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(`${href}/`)
-}
-
 export function AdminNav({ role }: { role: Role }) {
   const pathname = usePathname()
   const tabs = navTabsFor(role)
@@ -41,7 +42,7 @@ export function AdminNav({ role }: { role: Role }) {
   return (
     <nav aria-label="Admin sections" className="flex items-center gap-1">
       {tabs.map((tab) => {
-        const active = isActive(pathname, tab.href)
+        const active = isUnder(pathname, tab.href)
         return (
           <Link
             key={tab.href}

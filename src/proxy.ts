@@ -43,7 +43,21 @@ export async function proxy(req: NextRequest) {
    */
   if (!isMappedHost(host) && isUnder(pathname, ADMIN_BASE)) {
     const hasSession = !!getSessionCookie(req);
-    const cached = hasSession ? await getCookieCache(req) : null;
+    let cached = null;
+    if (hasSession) {
+      try {
+        cached = await getCookieCache(req);
+      } catch {
+        // A malformed or undecryptable session_data cookie (non-base64
+        // content, or BETTER_AUTH_SECRET missing from this runtime) makes
+        // getCookieCache THROW rather than return null. An unhandled throw
+        // here 500s every /admin path, including /admin/login -- the only
+        // way back -- with no in-band recovery. Treated as "no cached
+        // role", which resolveAdminRedirect already handles by passing
+        // the request through to the server-side guard.
+        cached = null;
+      }
+    }
     const target = resolveAdminRedirect(
       pathname,
       hasSession ? { role: cached?.user?.role } : null,

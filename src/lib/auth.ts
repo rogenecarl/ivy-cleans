@@ -9,6 +9,19 @@
  *     script only".
  *   the signup / forget-password / reset-password rate limit rules — those
  *     limit endpoints that do not exist here.
+ *
+ * NO CLIENT-SIDE authClient / createAuthClient() ANYWHERE IN THIS APP,
+ * deliberately, and if one is ever added it must not be given a `baseURL`.
+ * Passing one short-circuits better-auth's own resolution
+ * (client/config.mjs:24 — `getBaseURL(options?.baseURL, ...)` returns
+ * immediately on any truthy value), so an env var that is unset in
+ * production would silently pin the client to whatever the fallback literal
+ * says. Left unset, the chain ends at the relative "/api/auth", which is
+ * same-origin and correct: this console is served from the same host as its
+ * own API route. One fewer variable to misconfigure, and no way for it to
+ * be wrong. (This reasoning used to live on src/lib/auth-client.ts, deleted
+ * as dead code — nothing in src/, tests/ or scripts/ ever imported it; sign-
+ * in is a server action and sign-out is src/app/admin/sign-out-action.ts.)
  */
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'

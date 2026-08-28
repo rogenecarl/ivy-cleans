@@ -88,6 +88,13 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
     // rejection -- this path used to go through getServerUser() and log
     // there; it no longer does, so it logs here instead.
     console.error('signInAction: signed-in user has an unrecognised role; refusing')
+    // signInEmail above already set a live session cookie for this browser
+    // before this check ran -- rejecting the sign-in without clearing it
+    // would leave a cookie the server can never treat as authorized but
+    // that still passes the proxy's presence check, which is exactly the
+    // stale-cookie condition resolve-admin.ts's login branch has to assume
+    // can happen. Sign it back out so this path cannot seed that state.
+    await auth.api.signOut({ headers: headersList })
     return { error: CREDENTIALS_REJECTED }
   }
   redirect(safeNext(next, role))

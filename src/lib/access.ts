@@ -46,9 +46,9 @@ const SECTIONS: readonly { href: string; label: string; roles: readonly Role[] }
   // Pipeline screens. Not tabs — reached from Sites — but they are real
   // paths a manager must not be able to type in, so they belong in the
   // matrix. The empty label is what keeps them out of the nav.
-  { href: '/admin/new', label: '', roles: ['admin'] },
-  { href: '/admin/generate', label: '', roles: ['admin'] },
-  { href: '/admin/review', label: '', roles: ['admin'] },
+  { href: `${ADMIN_BASE}/new`, label: '', roles: ['admin'] },
+  { href: `${ADMIN_BASE}/generate`, label: '', roles: ['admin'] },
+  { href: `${ADMIN_BASE}/review`, label: '', roles: ['admin'] },
 ] as const
 
 /**

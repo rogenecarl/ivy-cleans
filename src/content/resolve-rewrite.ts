@@ -107,9 +107,13 @@ export function resolveRewrite(
      *
      * Once that guard is in place, reaching this path only ever gets you a
      * login form, and this host rule becomes the SECOND layer: it keeps the
-     * console, and the fact that one exists, off customer-branded domains.
+     * console UI, and the fact that a /admin PAGE exists, off customer-
+     * branded domains. It does not hide the auth API: the proxy's own
+     * matcher below excludes /api, so GET https://<customer-domain>/api/
+     * auth/... still reaches the route handler regardless of this rule —
+     * that surface is guarded by better-auth's own logic, not by this file.
      * Either way, do not hoist this check above the host lookup — that would
-     * put the console on every customer's domain.
+     * put the console PAGE on every customer's domain.
      */
     if (first === "admin") return null;
     if (first && cities.includes(first)) return null;

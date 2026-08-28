@@ -11,15 +11,18 @@
  *     --email you@example.com --name 'Your Name' --role admin
  *
  * SEED_PASSWORD is the preferred way to pass the password: a `--password`
- * CLI argument lands in your shell history and is visible to any other local
- * process via `ps aux` for the life of the run. `--password` still works as
- * a fallback (SEED_PASSWORD wins if both are given), but since this script
- * exists specifically for the owner to create their own real production
- * login, prefer the environment variable. If you do use `--password`, a
- * leading space before the command keeps it out of history in shells
- * configured with `HISTCONTROL=ignorespace` (bash) or `HIST_IGNORE_SPACE`
- * (zsh) — but that depends on shell configuration, whereas SEED_PASSWORD
- * does not.
+ * CLI argument is visible in full, to any other local process, via `ps aux`
+ * for the life of the run — an environment variable is not part of the argv
+ * `ps aux` shows, so SEED_PASSWORD avoids that exposure and `--password`
+ * does not. `--password` still works as a fallback (SEED_PASSWORD wins if
+ * both are given), but since this script exists specifically for the owner
+ * to create their own real production login, prefer the environment
+ * variable. If you do use `--password`, a leading space before the command
+ * keeps it out of shell history in shells configured with
+ * `HISTCONTROL=ignorespace` (bash) or `HIST_IGNORE_SPACE` (zsh) — that only
+ * helps with history, though, not the `ps aux` exposure above: typing
+ * `SEED_PASSWORD='...' node ...` at an interactive prompt lands in shell
+ * history exactly the same way `--password '...'` would.
  *
  * Re-running for an existing email updates the role and the password rather
  * than failing, which is also how a password gets changed — there is no

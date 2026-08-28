@@ -153,8 +153,16 @@ describe('resolveAdminRedirect', () => {
     expect(resolveAdminRedirect('/admin/login?next=%2Fadmin', null)).toBeNull()
   })
 
-  it('sends a signed-in operator away from the login page', () => {
-    expect(resolveAdminRedirect('/admin/login', { role: 'manager' })).toBe('/admin/dashboard')
+  it('does NOT bounce a signed-in operator off the login page', () => {
+    // BLOCKER 1 of the final review: getSessionCookie is a presence check,
+    // not a verification -- a stale cookie (post-revocation, or after a
+    // BETTER_AUTH_SECRET rotation) makes `session` here look signed-in when
+    // the server would refuse it. Bouncing on that guess turns /admin/login
+    // and /admin/dashboard into a redirect loop with no way back to the one
+    // page that could recover the operator. src/app/admin/login/page.tsx
+    // does this bounce instead, from a server-verified session.
+    expect(resolveAdminRedirect('/admin/login', { role: 'manager' })).toBeNull()
+    expect(resolveAdminRedirect('/admin/login', { role: 'admin' })).toBeNull()
   })
 
   it('bounces a manager off an admin-only path', () => {
@@ -178,5 +186,15 @@ describe('resolveAdminRedirect', () => {
     // and knows the truth, so pass it on rather than redirect on a guess.
     expect(resolveAdminRedirect('/admin/sites', { role: undefined })).toBeNull()
     expect(resolveAdminRedirect('/admin/sites', { role: 'nonsense' })).toBeNull()
+  })
+
+  it('never loops a stale-cookie visit to the login page back to itself', () => {
+    // The exact shape of BLOCKER 1: `session` truthy (a cookie is present)
+    // but its role unreadable is what a stale/unverifiable cookie looks like
+    // to this optimistic layer. If this ever returned '/admin/dashboard'
+    // again, and the dashboard's server-side guard then rejected the same
+    // unverifiable cookie and redirected back to /admin/login, the pair
+    // would loop forever with no page left that could break it.
+    expect(resolveAdminRedirect('/admin/login', { role: undefined })).toBeNull()
   })
 })
