@@ -1,7 +1,16 @@
 // src/lib/auth-rate-limit.ts
 /*
- * Sliding-window limiter for the sign-in server action, after
+ * FIXED-window limiter for the sign-in server action, after
  * peaktransport/src/lib/auth-rate-limit.ts.
+ *
+ * Fixed, not sliding, and the difference is worth stating because the naive
+ * reading overstates the protection: a window opens on the first request and
+ * every hit until `resetAt` shares one bucket. So an attacker who spends the
+ * budget just before `resetAt` and again just after gets up to 2x maxRequests
+ * — 10 sign-in attempts — in a span far shorter than the nominal 300s. A true
+ * sliding window (weighting the previous bucket by overlap, or keeping a
+ * timestamp log) would close that. Not worth it here: this is the second of
+ * two limiters and the burst is bounded and small.
  *
  * IN-MEMORY, and therefore per-instance: it resets on restart, and a second
  * Vercel instance keeps its own counter. It is a speed bump on top of
@@ -23,8 +32,8 @@ type RateLimitRecord = {
 const store = new Map<string, RateLimitRecord>()
 
 /** Bounded so a flood of distinct identifiers cannot grow the map without
- * limit. Well above any real operator count; if it is ever hit, the sweep
- * below has already removed everything expired. */
+ * limit. Well above any real operator count; if it is ever hit, the eviction
+ * in checkRateLimit below makes room. */
 const MAX_TRACKED = 10_000
 
 type RateLimitConfig = {
@@ -60,7 +69,28 @@ export function checkRateLimit(config: RateLimitConfig): RateLimitResult {
   const storeKey = `${key}:${identifier}`
   const now = Date.now()
 
-  if (store.size >= MAX_TRACKED) sweep(now)
+  if (store.size >= MAX_TRACKED) {
+    sweep(now)
+    /*
+     * sweep() only removes EXPIRED records, so on its own it does not bound
+     * anything: a distributed credential-stuffing wave — precisely the threat
+     * this file exists to blunt — fills the map with LIVE entries that sweep
+     * cannot touch, and it grows without limit. Evict the record closest to
+     * expiring instead. Losing one counter early lets a single attacker get a
+     * few extra attempts; unbounded growth costs the whole process.
+     */
+    if (store.size >= MAX_TRACKED) {
+      let oldestKey: string | null = null
+      let oldestAt = Infinity
+      for (const [k, r] of store) {
+        if (r.resetAt < oldestAt) {
+          oldestAt = r.resetAt
+          oldestKey = k
+        }
+      }
+      if (oldestKey !== null) store.delete(oldestKey)
+    }
+  }
 
   const record = store.get(storeKey)
 
