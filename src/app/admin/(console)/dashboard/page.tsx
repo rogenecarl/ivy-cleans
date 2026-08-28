@@ -171,10 +171,12 @@ export default async function AdminDashboard() {
           <>
             <section className="mb-8">
               {/*
-                * All three checks pass -> ONE line, not three tiles reading
-                * "0". It still names each check, because an empty space
-                * cannot tell an operator "all clear" apart from "that check
-                * stopped running", but a sentence can.
+                * Every check this role runs passes -> ONE line, not one tile
+                * per check reading "0". Still names each check that ran,
+                * because an empty space cannot tell an operator "all clear"
+                * apart from "that check stopped running", but a sentence can
+                * -- which is why the sentence below must never name a check
+                * a manager's render never evaluated (see noInbox above).
                 */}
               {alarms.length === 0 ? (
                 <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
@@ -183,8 +185,10 @@ export default async function AdminDashboard() {
                     aria-hidden="true"
                   />
                   <p className="text-[0.85rem] text-emerald-900">
-                    <strong className="font-semibold">All clear.</strong> Nothing waiting for a
-                    reply, every notification delivered, and every live site notifies someone.
+                    <strong className="font-semibold">All clear.</strong>{' '}
+                    {isAdmin
+                      ? 'Nothing waiting for a reply, every notification delivered, and every live site notifies someone.'
+                      : 'Nothing waiting for a reply and every notification delivered.'}
                   </p>
                 </div>
               ) : (
