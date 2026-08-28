@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { resolveRewrite, type DomainsIndex } from '../src/content/resolve-rewrite'
+import { resolveAdminRedirect } from '../src/content/resolve-admin'
 
 /*
  * Pure tests over the proxy's rewrite decision (src/proxy.ts is a thin
@@ -121,5 +122,50 @@ describe('resolveRewrite — internal and static paths pass through', () => {
     '/sitemap.xml',
   ])('%s -> null', (pathname) => {
     expect(resolveRewrite(DEFAULT_HOST, pathname)).toBeNull()
+  })
+})
+
+describe('resolveAdminRedirect', () => {
+  it('leaves non-admin paths alone', () => {
+    expect(resolveAdminRedirect('/home', null)).toBeNull()
+    expect(resolveAdminRedirect('/minneapolis/contact', null)).toBeNull()
+  })
+
+  it('sends a signed-out visitor to login with where they were going', () => {
+    expect(resolveAdminRedirect('/admin/leads', null)).toBe('/admin/login?next=%2Fadmin%2Fleads')
+    expect(resolveAdminRedirect('/admin', null)).toBe('/admin/login?next=%2Fadmin')
+  })
+
+  it('never gates the login page itself', () => {
+    // The redirect loop this whole route-group split exists to prevent.
+    expect(resolveAdminRedirect('/admin/login', null)).toBeNull()
+    expect(resolveAdminRedirect('/admin/login?next=%2Fadmin', null)).toBeNull()
+  })
+
+  it('sends a signed-in operator away from the login page', () => {
+    expect(resolveAdminRedirect('/admin/login', { role: 'manager' })).toBe('/admin/dashboard')
+  })
+
+  it('bounces a manager off an admin-only path', () => {
+    expect(resolveAdminRedirect('/admin/sites', { role: 'manager' })).toBe('/admin/dashboard')
+    expect(resolveAdminRedirect('/admin/new', { role: 'manager' })).toBe('/admin/dashboard')
+  })
+
+  it('lets a manager through to their own sections', () => {
+    expect(resolveAdminRedirect('/admin/leads/abc', { role: 'manager' })).toBeNull()
+    expect(resolveAdminRedirect('/admin/dashboard', { role: 'manager' })).toBeNull()
+  })
+
+  it('lets an admin through everywhere', () => {
+    expect(resolveAdminRedirect('/admin/sites/miami', { role: 'admin' })).toBeNull()
+  })
+
+  it('passes an authenticated session with an unreadable role through', () => {
+    // The cookie cache can be absent or stale — a cookie exists but the role
+    // is not in it. Guessing "manager" here would bounce an admin off Sites
+    // on a cold navigation. The page's own server-side guard is one hop away
+    // and knows the truth, so pass it on rather than redirect on a guess.
+    expect(resolveAdminRedirect('/admin/sites', { role: undefined })).toBeNull()
+    expect(resolveAdminRedirect('/admin/sites', { role: 'nonsense' })).toBeNull()
   })
 })

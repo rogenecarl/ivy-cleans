@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getSessionCookie, getCookieCache } from "better-auth/cookies";
 import { resolveRewrite } from "@/content/resolve-rewrite";
+import { resolveAdminRedirect } from "@/content/resolve-admin";
+import { isUnder } from "@/lib/access";
+import { ADMIN_BASE } from "@/lib/admin-routes";
 
 /*
  * Host -> city rewrite. This is what makes ONE deployment serve every city:
@@ -16,8 +20,30 @@ import { resolveRewrite } from "@/content/resolve-rewrite";
  * mechanism, current name. All the decision logic is in the pure, unit-
  * tested resolveRewrite() — keep this adapter trivial.
  */
-export function proxy(req: NextRequest) {
-  const target = resolveRewrite(req.headers.get("host") ?? "", req.nextUrl.pathname);
+export async function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  /*
+   * Console paths first. They are never city-rewritten, and doing the auth
+   * hop here keeps resolveRewrite's contract unchanged.
+   *
+   * getSessionCookie is a presence check on a signed cookie, and
+   * getCookieCache reads the role better-auth cached in it. Both are
+   * client-held; see resolve-admin.ts for why that is acceptable here and
+   * nowhere else.
+   */
+  if (isUnder(pathname, ADMIN_BASE)) {
+    const hasSession = !!getSessionCookie(req);
+    const cached = hasSession ? await getCookieCache(req) : null;
+    const target = resolveAdminRedirect(
+      pathname,
+      hasSession ? { role: cached?.user?.role } : null,
+    );
+    if (target) return NextResponse.redirect(new URL(target, req.url));
+    return;
+  }
+
+  const target = resolveRewrite(req.headers.get("host") ?? "", pathname);
   if (target === null) return;
   const url = req.nextUrl.clone();
   url.pathname = target;
