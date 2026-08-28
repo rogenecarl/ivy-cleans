@@ -8,13 +8,17 @@
  * broken, and all of it would be quoted back as fact.
  */
 import { describe, expect, it } from 'vitest'
+import { canAccess } from '@/lib/access'
 import {
   activeAlarms,
+  type Alarm,
   describeAge,
   describeTrend,
+  quickActionsFor,
   sitesWithNoInbox,
   topCity,
   trendDirection,
+  visibleAlarms,
 } from '@/app/admin/dashboard-logic'
 
 describe('describeAge', () => {
@@ -167,5 +171,50 @@ describe('activeAlarms', () => {
       now,
     )
     expect(alarms.map((a) => a.key)).toEqual(['waiting', 'email', 'inbox'])
+  })
+})
+
+describe('visibleAlarms', () => {
+  const waiting: Alarm = { key: 'waiting', label: 'Leads waiting', value: 3, hint: '' }
+  const email: Alarm = { key: 'email', label: 'Notifications failed', value: 1, hint: '' }
+  const inbox: Alarm = { key: 'inbox', label: 'Live sites with no inbox', value: 2, hint: '' }
+
+  it('shows an admin everything', () => {
+    expect(visibleAlarms([waiting, email, inbox], 'admin')).toEqual([waiting, email, inbox])
+  })
+
+  it('hides the site alarm from a manager', () => {
+    // The no-inbox alarm links to /admin/sites and is fixed there. A manager
+    // can do nothing about it, and an alarm nobody can act on trains people
+    // to ignore the panel.
+    expect(visibleAlarms([waiting, email, inbox], 'manager')).toEqual([waiting, email])
+  })
+
+  it('keeps the ordering it was given', () => {
+    expect(visibleAlarms([email, waiting], 'manager')).toEqual([email, waiting])
+  })
+
+  it('returns empty for a manager whose only alarm is the site one', () => {
+    // Which makes the page render its "All clear" line — correct for a
+    // manager, whose checks really are all clear.
+    expect(visibleAlarms([inbox], 'manager')).toEqual([])
+  })
+})
+
+describe('quickActionsFor', () => {
+  it('offers an admin both actions, leads first', () => {
+    expect(quickActionsFor('admin').map((a) => a.key)).toEqual(['leads', 'new-site'])
+  })
+
+  it('offers a manager only the leads action', () => {
+    expect(quickActionsFor('manager').map((a) => a.key)).toEqual(['leads'])
+  })
+
+  it('never offers an action the role cannot reach', () => {
+    for (const role of ['admin', 'manager'] as const) {
+      for (const action of quickActionsFor(role)) {
+        expect(canAccess(role, action.href)).toBe(true)
+      }
+    }
   })
 })

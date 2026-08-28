@@ -8,6 +8,8 @@
  * tile that flickers between two tied cities -- and they are only testable
  * at all with the framework out of scope.
  */
+import type { Role } from '@/lib/access'
+import { ADMIN_BASE, ADMIN_LEADS } from '@/lib/admin-routes'
 
 /**
  * How long a lead has been waiting, in the shortest form that is still
@@ -141,4 +143,52 @@ export function activeAlarms(
     })
   }
   return alarms
+}
+
+/**
+ * Drops the alarms a role cannot act on.
+ *
+ * Only the `inbox` alarm is affected: it counts live sites with no
+ * notification address, links to /admin/sites, and is fixed there — none of
+ * which a manager can reach. The two lead alarms are every operator's job.
+ *
+ * A filter rather than a branch in the JSX so it is covered by this file's
+ * tests; the page has none of its own.
+ */
+export function visibleAlarms(alarms: Alarm[], role: Role): Alarm[] {
+  if (role === 'admin') return alarms
+  return alarms.filter((a) => a.key !== 'inbox')
+}
+
+/** A tile in the dashboard's "Quick actions" row. */
+export type QuickAction = {
+  key: 'leads' | 'new-site'
+  href: string
+  title: string
+  description: string
+}
+
+/**
+ * The quick actions this role can actually perform. Same reasoning as
+ * visibleAlarms: creating a city site is admin-only, so a manager is not
+ * shown a tile that would bounce them.
+ */
+export function quickActionsFor(role: Role): QuickAction[] {
+  const actions: QuickAction[] = [
+    {
+      key: 'leads',
+      href: ADMIN_LEADS,
+      title: 'Work the leads',
+      description: 'Read what each customer asked for, set a status, and keep notes.',
+    },
+  ]
+  if (role === 'admin') {
+    actions.push({
+      key: 'new-site',
+      href: `${ADMIN_BASE}/new`,
+      title: 'Create a site',
+      description: 'Generate a new city site, review the copy, then publish it.',
+    })
+  }
+  return actions
 }

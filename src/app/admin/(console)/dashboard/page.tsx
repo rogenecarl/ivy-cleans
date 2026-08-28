@@ -18,15 +18,17 @@ import { listCities } from '@/pipeline/admin-logic'
 import { getSiteSettingsMany, leadDashboardStats, listLeads } from '@/leads/store'
 import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ADMIN_BASE, ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
+import { ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
 import { EmptyState, LeadStatusChip, StatPill } from '../../ui'
 import { buildCityLookup, cityDisplayName, filterHref } from '../leads/logic'
 import {
   activeAlarms,
   describeTrend,
+  quickActionsFor,
   sitesWithNoInbox,
   topCity,
   trendDirection,
+  visibleAlarms,
 } from '../../dashboard-logic'
 import { requireSession } from '@/lib/auth-server'
 
@@ -80,7 +82,8 @@ export default async function AdminDashboard() {
    * docs: layouts don't re-render on a soft navigation (Partial Rendering),
    * so a session revoked mid-visit would otherwise keep this page working.
    */
-  await requireSession()
+  const { role } = await requireSession()
+  const isAdmin = role === 'admin'
 
   /*
    * One clock for the whole render. Calling new Date() inside each helper
@@ -104,6 +107,8 @@ export default async function AdminDashboard() {
    * settings is in here too because the no-inbox alarm is a LEAD-side fact:
    * with it unavailable we must show nothing rather than compute the alarm
    * from an empty map, which would flag every live city as having no inbox.
+   * A manager cannot reach /admin/sites, where that alarm links, so the
+   * fetch is skipped for them rather than run and then thrown away.
    */
   let stats: LeadDashboardStats | null = null
   let recent: LeadRecord[] = []
@@ -113,7 +118,7 @@ export default async function AdminDashboard() {
     ;[stats, recent, settings] = await Promise.all([
       leadDashboardStats(now),
       listLeads({ city: null, status: null, formType: null, includeTest: false }),
-      getSiteSettingsMany(cities.map((c) => c.key)),
+      isAdmin ? getSiteSettingsMany(cities.map((c) => c.key)) : Promise.resolve({}),
     ])
   } catch (err) {
     leadsUnavailable = true
@@ -122,16 +127,19 @@ export default async function AdminDashboard() {
     console.error('AdminDashboard: lead data unavailable:', err)
   }
 
-  const noInbox = leadsUnavailable ? [] : sitesWithNoInbox(cities, settings)
+  const noInbox = leadsUnavailable || !isAdmin ? [] : sitesWithNoInbox(cities, settings)
   const alarms = stats
-    ? activeAlarms(
-        {
-          waiting: stats.waiting,
-          oldestWaitingAt: stats.oldestWaitingAt,
-          emailFailed: stats.emailFailed,
-          noInbox,
-        },
-        now,
+    ? visibleAlarms(
+        activeAlarms(
+          {
+            waiting: stats.waiting,
+            oldestWaitingAt: stats.oldestWaitingAt,
+            emailFailed: stats.emailFailed,
+            noInbox,
+          },
+          now,
+        ),
+        role,
       )
     : []
   const top = stats ? topCity(stats.byCity) : null
@@ -142,8 +150,9 @@ export default async function AdminDashboard() {
       <div className="mb-8">
         <h1 className="text-[1.5rem] font-semibold tracking-tight">Admin Dashboard</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-muted-foreground">
-          {live === 1 ? '1 live city site' : `${live} live city sites`} and every lead they bring
-          in. Anything needing a reply shows up first.
+          {isAdmin
+            ? `${live === 1 ? '1 live city site' : `${live} live city sites`} and every lead they bring in. Anything needing a reply shows up first.`
+            : 'Every lead across all city sites. Anything needing a reply shows up first.'}
         </p>
       </div>
 
@@ -333,18 +342,15 @@ export default async function AdminDashboard() {
           Quick actions
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <QuickAction
-            href={ADMIN_LEADS}
-            icon={<Inbox className="size-4" />}
-            title="Work the leads"
-            description="Read what each customer asked for, set a status, and keep notes."
-          />
-          <QuickAction
-            href={`${ADMIN_BASE}/new`}
-            icon={<Plus className="size-4" />}
-            title="Create a site"
-            description="Generate a new city site, review the copy, then publish it."
-          />
+          {quickActionsFor(role).map((action) => (
+            <QuickAction
+              key={action.key}
+              href={action.href}
+              icon={action.key === 'leads' ? <Inbox className="size-4" /> : <Plus className="size-4" />}
+              title={action.title}
+              description={action.description}
+            />
+          ))}
         </div>
       </section>
     </>
