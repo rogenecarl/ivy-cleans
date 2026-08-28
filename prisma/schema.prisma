@@ -55,3 +55,83 @@ model SiteSettings {
   notifyEmails String[] @default([])
   updatedAt    DateTime @updatedAt
 }
+
+/// Console operators. Two roles only, and lowercase to match FormType,
+/// LeadStatus and EmailStatus above.
+enum UserRole {
+  admin
+  manager
+}
+
+/// better-auth's user table. `role` is the only field this project added;
+/// everything else is better-auth's required shape.
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  /// Defaults to the RESTRICTED role on purpose. Accounts are meant to come
+  /// from scripts/seed-user.mjs, which sets the role explicitly; anything
+  /// that creates a row by another route gets the least privilege rather
+  /// than the most.
+  role          UserRole  @default(manager)
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  /// For expired-session cleanup.
+  @@index([expiresAt])
+  @@map("session")
+}
+
+/// Credentials. For email+password this holds the scrypt hash in `password`;
+/// the OAuth columns stay null because no social provider is configured.
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@index([expiresAt])
+  @@map("verification")
+}

@@ -43,3 +43,13 @@ describe('better-auth API surface', () => {
     expect(typeof hashPassword).toBe('function')
   })
 })
+
+describe('generated Prisma client', () => {
+  it('exposes the two operator roles', async () => {
+    // Guards the schema against a rename: src/lib/access.ts hard-codes these
+    // two strings, and a mismatch between the enum and the policy would show
+    // up as every operator being denied everything.
+    const { UserRole } = await import('@/generated/prisma/client')
+    expect(Object.values(UserRole).sort()).toEqual(['admin', 'manager'])
+  })
+})
