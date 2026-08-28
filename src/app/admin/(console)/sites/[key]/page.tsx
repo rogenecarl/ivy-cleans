@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { ADMIN_SITES } from '@/lib/admin-routes'
 import { ErrorText, Panel } from '../../../ui'
 import { SettingsForm } from './settings-form'
+import { requireAdmin } from '@/lib/auth-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,14 @@ export default async function SiteSettingsPage({
   params: Promise<{ key: string }>
   searchParams: Promise<{ error?: string }>
 }) {
+  /*
+   * Own guard, in addition to the layout's — this is an admin-only screen
+   * per src/lib/access.ts, and it holds a form that WRITES a city's
+   * notification inbox list, so a demoted-mid-visit manager must not keep
+   * reaching it through a soft navigation.
+   */
+  await requireAdmin()
+
   const { key } = await params
   const { error } = await searchParams
 

@@ -35,6 +35,7 @@ import {
 } from './list-logic'
 import { SiteStatusChips } from './status-chips'
 import { SiteSearch } from './site-search'
+import { requireAdmin } from '@/lib/auth-server'
 
 /*
  * Dashboard. Reads the store directly (server component) rather than calling
@@ -63,6 +64,14 @@ export default async function SitesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  /*
+   * Own guard, in addition to the layout's — Sites and everything reached
+   * from it (new/generate/review) is admin-only per src/lib/access.ts, and a
+   * manager who is demoted mid-visit must not keep this screen working
+   * through a soft navigation the layout does not re-render for.
+   */
+  await requireAdmin()
+
   const query = parseSiteQuery(await searchParams)
   const rows = await listCities()
 

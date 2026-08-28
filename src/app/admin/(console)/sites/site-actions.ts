@@ -4,14 +4,14 @@
  * it belongs to the runtime-domain-map plan, which is where the host index
  * moves out of content/_domains.json.
  *
- * NOTE: there is no auth on this admin, by explicit decision of the repo
- * owner. This action is as reachable as the page, whether or not the caller
- * ever loaded the settings screen -- the same "treat every action as an
- * untrusted entry point" warning lead-actions.ts documents for its own
- * mutations. Every input is validated (see ./logic.ts) so a malformed or
- * hostile POST cannot write junk or wipe a city's inbox list. When auth is
- * added, the check belongs at the very top, before any other work -- marked
- * below with an "AUTH GOES HERE" comment, matching lead-actions.ts.
+ * This action is as reachable as the page, whether or not the caller ever
+ * loaded the settings screen -- the Next docs' "treat every action as an
+ * untrusted entry point" warning, the same one lead-actions.ts documents for
+ * its own mutations. Two things follow, and BOTH are needed: every input is
+ * validated (see ./logic.ts) so a malformed or hostile POST cannot write junk
+ * or wipe a city's inbox list, and this function starts with a guard from
+ * src/lib/auth-server.ts. The (console) layout's guard does NOT cover this --
+ * a layout does not run for an action POST.
  *
  * Addresses themselves are never written to a log or included in the
  * redirect -- only a count -- so this path does not leak submitted PII into
@@ -22,10 +22,11 @@ import { revalidatePath } from 'next/cache'
 import { listCities } from '@/pipeline/admin-logic'
 import { upsertSiteSettings } from '@/leads/store'
 import { ADMIN_BASE } from '@/lib/admin-routes'
+import { requireAdmin } from '@/lib/auth-server'
 import { parseNotifyEmails } from './logic'
 
 export async function saveNotifyEmailsAction(cityKey: string, formData: FormData): Promise<void> {
-  // AUTH GOES HERE, before anything below reads or writes.
+  await requireAdmin()
 
   /*
    * `cityKey` is a bound argument, which round-trips through the client and

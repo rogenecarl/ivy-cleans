@@ -9,6 +9,7 @@ import { buildCityLookup, cityDisplayName, filterHref } from './logic'
 import { LeadFilters } from './lead-filters'
 import { LeadsTable, type LeadRow } from './leads-table'
 import { StatusChips } from './status-chips'
+import { requireSession } from '@/lib/auth-server'
 
 /*
  * force-dynamic for the same reason the Sites screen uses it: the list changes
@@ -31,6 +32,14 @@ export default async function LeadsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  /*
+   * Own guard, in addition to the layout's — this screen reads real customer
+   * PII, so a session revoked mid-visit must not keep serving it through a
+   * soft navigation the layout does not re-render for. React.cache on
+   * getServerSession means this shares the layout's lookup for the request.
+   */
+  await requireSession()
+
   const params = await searchParams
   const query = parseLeadQuery(params)
   const cities = await listCities()

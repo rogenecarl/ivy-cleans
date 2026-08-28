@@ -10,6 +10,7 @@ import { ErrorText, Panel, StatusChip } from '../../../ui'
 import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
+import { requireAdmin } from '@/lib/auth-server'
 
 /*
  * Review + publish. The heavy lifting is the preview link: the generated site
@@ -23,6 +24,13 @@ import SuburbsEditor from './suburbs-editor'
 export const dynamic = 'force-dynamic'
 
 export default async function ReviewPage({ params }: { params: Promise<{ key: string }> }) {
+  /*
+   * Own guard, in addition to the layout's — review and publish are
+   * admin-only per src/lib/access.ts, and a manager must not be able to
+   * reach this through a soft navigation the layout does not re-render for.
+   */
+  await requireAdmin()
+
   const { key } = await params
 
   let doc

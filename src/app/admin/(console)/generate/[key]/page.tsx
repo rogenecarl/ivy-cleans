@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
 import { ErrorText } from '../../../ui'
 import StageRunner from './stage-runner'
+import { requireAdmin } from '@/lib/auth-server'
 
 /*
  * Progress screen. The server half does one thing — read the draft sidecar so
@@ -17,6 +18,13 @@ import StageRunner from './stage-runner'
 export const dynamic = 'force-dynamic'
 
 export default async function GeneratePage({ params }: { params: Promise<{ key: string }> }) {
+  /*
+   * Own guard, in addition to the layout's — the pipeline screens are
+   * admin-only per src/lib/access.ts, and a manager must not be able to
+   * reach this through a soft navigation the layout does not re-render for.
+   */
+  await requireAdmin()
+
   const { key } = await params
 
   let draft

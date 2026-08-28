@@ -15,10 +15,21 @@
  * the /<cityKey> preview prefix, so there is no single path to invalidate.
  * The admin is used a handful of times a day — a full-tree revalidation costs
  * nothing here and cannot leave a stale published page behind.
+ *
+ * These actions are as reachable as the pages, whether or not the caller ever
+ * loaded the Sites screen -- the Next docs' "treat every action as an
+ * untrusted entry point" warning. Two things follow, and BOTH are needed:
+ * every input is validated here, and every function starts with a guard from
+ * src/lib/auth-server.ts. The (console) layout's guard does NOT cover these
+ * -- a layout does not run for an action POST. Every export here is
+ * admin-only, including the two read-only ones (listCitiesAction,
+ * getProgressAction): they leak which cities exist and how generation is
+ * progressing, which is not a manager's business.
  */
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { requireAdmin } from '@/lib/auth-server'
 import {
   createDraftFromFields,
   finalizeLogic,
@@ -51,6 +62,7 @@ function field(form: FormData, name: string): string {
  * throw would silently do nothing.
  */
 export async function createDraftAction(formData: FormData): Promise<void> {
+  await requireAdmin()
   const result = await createDraftFromFields({
     city: field(formData, 'city'),
     state: field(formData, 'state'),
@@ -66,11 +78,13 @@ export async function createDraftAction(formData: FormData): Promise<void> {
 }
 
 export async function runStageAction(key: string, stage: string): Promise<ActionResult> {
+  await requireAdmin()
   if (!isStageId(stage)) return { ok: false, error: `unknown stage "${stage}"` }
   return runStageLogic(key, stage)
 }
 
 export async function regenerateAction(key: string, stage: string): Promise<ActionResult> {
+  await requireAdmin()
   if (!isStageId(stage)) return { ok: false, error: `unknown stage "${stage}"` }
   const result = await regenerateLogic(key, stage)
   if (result.ok) revalidatePath('/', 'layout')
@@ -78,6 +92,7 @@ export async function regenerateAction(key: string, stage: string): Promise<Acti
 }
 
 export async function finalizeAction(key: string): Promise<ActionResult> {
+  await requireAdmin()
   const result = await finalizeLogic(key)
   // A finalize writes content/<key>.json for the first time — the preview
   // link on the review screen is only correct once the tree is revalidated.
@@ -86,22 +101,26 @@ export async function finalizeAction(key: string): Promise<ActionResult> {
 }
 
 export async function updateSuburbsAction(key: string, suburbs: Suburb[]): Promise<ActionResult> {
+  await requireAdmin()
   const result = await updateSuburbsLogic(key, suburbs)
   if (result.ok) revalidatePath('/', 'layout')
   return result
 }
 
 export async function publishAction(key: string, domain?: string): Promise<ActionResult> {
+  await requireAdmin()
   const result = await publishLogic(key, domain)
   if (result.ok) revalidatePath('/', 'layout')
   return result
 }
 
 export async function listCitiesAction(): Promise<CityRow[]> {
+  await requireAdmin()
   return listCities()
 }
 
 /** Read-only poll for the live activity feed — no revalidatePath, nothing changed. */
 export async function getProgressAction(key: string): Promise<ProgressSnapshot> {
+  await requireAdmin()
   return getProgressLogic(key)
 }

@@ -28,6 +28,7 @@ import {
   topCity,
   trendDirection,
 } from '../../dashboard-logic'
+import { requireSession } from '@/lib/auth-server'
 
 /*
  * The console's landing screen, in two tiers.
@@ -72,6 +73,15 @@ function initials(name: string | null): string {
 }
 
 export default async function AdminDashboard() {
+  /*
+   * Own guard, in addition to the layout's. React.cache on getServerSession
+   * means this costs no extra round trip when the layout already ran one for
+   * the same render — see src/lib/auth-server.ts. Needed anyway per the Next
+   * docs: layouts don't re-render on a soft navigation (Partial Rendering),
+   * so a session revoked mid-visit would otherwise keep this page working.
+   */
+  await requireSession()
+
   /*
    * One clock for the whole render. Calling new Date() inside each helper
    * would let the "oldest waiting" age and the week boundaries disagree by a

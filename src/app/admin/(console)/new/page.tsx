@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorText } from '../../ui'
+import { requireAdmin } from '@/lib/auth-server'
 
 /*
  * New-city form. A plain server-rendered <form action={serverAction}> — no
@@ -25,6 +26,13 @@ export default async function NewCityPage({
 }: {
   searchParams: Promise<{ error?: string }>
 }) {
+  /*
+   * Own guard, in addition to the layout's — creating a city is admin-only
+   * per src/lib/access.ts, and a manager must not be able to reach this form
+   * through a soft navigation the layout does not re-render for.
+   */
+  await requireAdmin()
+
   const { error } = await searchParams
 
   return (

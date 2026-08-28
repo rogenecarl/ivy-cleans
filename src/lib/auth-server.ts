@@ -15,6 +15,7 @@
  * and returns a redirect to the caller — including a caller that POSTed the
  * action id directly with no page involved, which is the case that matters.
  */
+import { cache } from 'react'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { auth } from './auth'
@@ -28,10 +29,18 @@ export type AdminUser = {
   role: Role
 }
 
-/** The raw session, server-verified. Returns null when signed out. */
-export async function getServerSession() {
+/**
+ * The raw session, server-verified. Returns null when signed out.
+ *
+ * Wrapped in React.cache so that within a single render every caller — the
+ * layout's requireSession() and a page's own requireSession()/requireAdmin()
+ * — shares one lookup instead of each issuing its own round trip. The cache
+ * is per-request (React's server-render cache, scoped to the request), not a
+ * global: it never leaks a session across requests.
+ */
+export const getServerSession = cache(async () => {
   return auth.api.getSession({ headers: await headers() })
-}
+})
 
 /**
  * The signed-in operator, or null.

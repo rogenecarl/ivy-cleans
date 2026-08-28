@@ -8,18 +8,18 @@
  * revalidatePath re-renders inside the same response, so the screen updates
  * without a follow-up fetch.
  *
- * NOTE: there is no auth on this admin, by explicit decision of the repo
- * owner. These actions are as reachable as the pages, whether or not the
- * caller ever loaded the detail screen -- the same "treat every action as an
- * untrusted entry point" warning the Next docs give. Every input is validated
- * here so a malformed or hostile POST cannot write junk. When auth is added,
- * the check belongs at the very top of each function below, before any other
- * work -- each one is marked with an "AUTH GOES HERE" comment.
+ * These actions are as reachable as the pages, whether or not the caller ever
+ * loaded the detail screen -- the Next docs' "treat every action as an
+ * untrusted entry point" warning. Two things follow, and BOTH are needed:
+ * every input is validated here, and every function starts with a guard from
+ * src/lib/auth-server.ts. The (console) layout's guard does NOT cover these
+ * -- a layout does not run for an action POST.
  */
 import { revalidatePath } from 'next/cache'
 import { LeadNotFoundError, setLeadNotes, setLeadStatus } from '@/leads/store'
 import { LEAD_STATUSES, type LeadStatus } from '@/leads/types'
 import { ADMIN_BASE } from '@/lib/admin-routes'
+import { requireSession } from '@/lib/auth-server'
 
 /** Notes are operator free text, not a customer-controlled field, but they still arrive over an unauthenticated POST -- bound so one malicious request cannot grow a row without limit. */
 const MAX_NOTES_LENGTH = 5000
@@ -41,7 +41,7 @@ const MAX_NOTES_LENGTH = 5000
  * needed. Any OTHER error is a genuine server fault and is left to throw.
  */
 export async function setStatusAction(id: string, status: LeadStatus): Promise<void> {
-  // AUTH GOES HERE, before anything below reads or writes.
+  await requireSession()
   if (!LEAD_STATUSES.includes(status)) {
     throw new Error(`unknown status "${status}"`)
   }
@@ -55,7 +55,7 @@ export async function setStatusAction(id: string, status: LeadStatus): Promise<v
 }
 
 export async function saveNotesAction(id: string, formData: FormData): Promise<void> {
-  // AUTH GOES HERE, before anything below reads or writes.
+  await requireSession()
   const raw = formData.get('notes')
   // A present-but-empty field is a legitimate "clear the notes" action; a
   // field that is absent entirely (or the wrong FormData type, e.g. a File)

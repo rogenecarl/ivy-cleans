@@ -9,6 +9,7 @@ import { LeadStatusChip, Panel, Pill } from '../../../ui'
 import { LeadSubmission } from '../lead-submission'
 import { NotesForm } from './notes-form'
 import { StatusSelect } from './status-select'
+import { requireSession } from '@/lib/auth-server'
 
 /*
  * force-dynamic for the same reason the list uses it: a status change or a
@@ -22,6 +23,14 @@ import { StatusSelect } from './status-select'
 export const dynamic = 'force-dynamic'
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  /*
+   * Own guard, in addition to the layout's — this screen renders one lead's
+   * name, contact details and notes in full, the single most PII-dense
+   * screen in the console. React.cache on getServerSession means this shares
+   * the layout's lookup for the request rather than issuing a second one.
+   */
+  await requireSession()
+
   const { id } = await params
 
   /*
