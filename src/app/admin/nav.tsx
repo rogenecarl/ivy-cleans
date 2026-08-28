@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { ADMIN_DASHBOARD, ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
+import { navTabsFor, type Role } from '@/lib/access'
 
 /*
  * The header's section tabs, laid out like peaktransport's AdminHeader: pill
@@ -14,13 +14,12 @@ import { ADMIN_DASHBOARD, ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
  * layout.tsx on purpose: the layout stays a server component so it can keep
  * `export const metadata` (a client component cannot carry it), and this is the
  * only piece that needs the hook.
+ *
+ * The tab list itself is NOT filtering anything security-relevant -- it is
+ * just deciding what to draw. Hiding a tab here does not stop a manager from
+ * typing the URL; that is src/lib/access.ts's canAccess(), enforced server-side
+ * in src/lib/auth-server.ts and every server action. See src/lib/access.ts.
  */
-
-const TABS = [
-  { href: ADMIN_DASHBOARD, label: 'Dashboard' },
-  { href: ADMIN_LEADS, label: 'Leads' },
-  { href: ADMIN_SITES, label: 'Sites' },
-] as const
 
 /*
  * Every tab now matches by the same rule, because every tab now has its own
@@ -29,18 +28,19 @@ const TABS = [
  *
  * Nothing here keys off tab ORDER -- an earlier version of this nav sliced
  * site.nav by literal index and rendered the wrong menu whenever the array
- * was reordered. Adding a tab to TABS is safe.
+ * was reordered. Adding a section to SECTIONS in src/lib/access.ts is safe.
  */
 function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function AdminNav() {
+export function AdminNav({ role }: { role: Role }) {
   const pathname = usePathname()
+  const tabs = navTabsFor(role)
 
   return (
     <nav aria-label="Admin sections" className="flex items-center gap-1">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const active = isActive(pathname, tab.href)
         return (
           <Link

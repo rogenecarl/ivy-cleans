@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ADMIN_DASHBOARD } from '@/lib/admin-routes'
 import { AdminNav } from '../nav'
+import { IdentityChip } from '../identity-chip'
 import { Toaster } from '@/components/ui/sonner'
 import { requireSession } from '@/lib/auth-server'
 
@@ -48,29 +49,9 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
               />
             </Link>
 
-            <AdminNav />
+            <AdminNav role={user.role} />
 
-            {/*
-             * Matches peaktransport's header chip, by request. Task 9 wires
-             * this to the real session (name + role); peaktransport's version
-             * drops a menu with Settings and Sign Out off the same chip, and
-             * this console's own <Link>/form for that lands in Task 12, which
-             * is also where AdminNav starts taking `role` to filter tabs.
-             */}
-            <div className="ml-auto flex shrink-0 items-center gap-2.5">
-              <span
-                aria-hidden="true"
-                className="flex size-8 items-center justify-center rounded-full bg-muted text-[0.7rem] font-semibold text-muted-foreground ring-2 ring-border"
-              >
-                {user.name.charAt(0).toUpperCase()}
-              </span>
-              <span className="hidden text-left sm:block">
-                <span className="block text-[0.8rem] leading-tight font-medium">{user.name}</span>
-                <span className="block text-[0.7rem] leading-tight text-muted-foreground capitalize">
-                  {user.role}
-                </span>
-              </span>
-            </div>
+            <IdentityChip user={user} />
           </div>
         </div>
       </header>
