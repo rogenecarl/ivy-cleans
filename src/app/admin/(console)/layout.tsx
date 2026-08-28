@@ -18,7 +18,9 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
   /*
    * Every console page is behind this. It is NOT, however, what protects the
    * server actions those pages call — a layout does not run for an action
-   * POST. Each action carries its own guard; see src/lib/auth-server.ts.
+   * POST. Each action gets its own guard in the next task; today they are
+   * still open, see the AUTH GOES HERE markers in site-actions.ts and
+   * lead-actions.ts.
    */
   const user = await requireSession()
 

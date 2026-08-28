@@ -105,10 +105,21 @@ describe('checkRateLimit', () => {
      * the real sign-in window (300s, resetAt = 300_000), which is a very
      * long way from expiring at t=0. "soon" is therefore unambiguously the
      * single soonest-to-expire record in the whole map, tie or no tie.
+     *
+     * "soon" is seeded in the MIDDLE of the fill (i === 5000), not first.
+     * Seeding it first would make it simultaneously the soonest-expiring
+     * record AND the first key in Map iteration order, so a naive FIFO
+     * eviction (delete the first key ever inserted) would pass every
+     * assertion below without actually doing a min-scan over resetAt. Only a
+     * genuine "soonest resetAt wins" comparison, the thing that was rewritten
+     * on reasoning alone in Task 6, picks "soon" out of the middle of the map.
      */
-    checkRateLimit({ key: 'sign-in', identifier: 'soon', windowSeconds: 1, maxRequests: 5 })
-    for (let i = 1; i < MAX_TRACKED; i++) {
-      checkRateLimit({ key: 'sign-in', identifier: `id-${i}`, windowSeconds: 300, maxRequests: 5 })
+    for (let i = 0; i < MAX_TRACKED; i++) {
+      if (i === 5000) {
+        checkRateLimit({ key: 'sign-in', identifier: 'soon', windowSeconds: 1, maxRequests: 5 })
+      } else {
+        checkRateLimit({ key: 'sign-in', identifier: `id-${i}`, windowSeconds: 300, maxRequests: 5 })
+      }
     }
     expect(rateLimitTrackedCount()).toBe(MAX_TRACKED)
 
