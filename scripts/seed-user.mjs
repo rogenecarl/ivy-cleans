@@ -7,8 +7,19 @@
  * the population is two people and a signup endpoint on a production console
  * is a liability that buys nothing.
  *
- *   node --env-file=.env scripts/seed-user.mjs \
- *     --email you@example.com --name 'Your Name' --role admin --password '...'
+ *   SEED_PASSWORD='...' node --env-file=.env scripts/seed-user.mjs \
+ *     --email you@example.com --name 'Your Name' --role admin
+ *
+ * SEED_PASSWORD is the preferred way to pass the password: a `--password`
+ * CLI argument lands in your shell history and is visible to any other local
+ * process via `ps aux` for the life of the run. `--password` still works as
+ * a fallback (SEED_PASSWORD wins if both are given), but since this script
+ * exists specifically for the owner to create their own real production
+ * login, prefer the environment variable. If you do use `--password`, a
+ * leading space before the command keeps it out of history in shells
+ * configured with `HISTCONTROL=ignorespace` (bash) or `HIST_IGNORE_SPACE`
+ * (zsh) — but that depends on shell configuration, whereas SEED_PASSWORD
+ * does not.
  *
  * Re-running for an existing email updates the role and the password rather
  * than failing, which is also how a password gets changed — there is no
@@ -22,8 +33,19 @@
  *
  * WHY PLAIN pg AND NOT PRISMA: matches scripts/seed-demo-leads.mjs, and keeps
  * the script runnable without a `prisma generate` having happened first.
+ *
+ * WHY THE TWO WRITES ARE WRAPPED IN A TRANSACTION: `user` and `account` are
+ * separate round trips. Without BEGIN/COMMIT, a failure between them on a
+ * new email would leave a `user` row with no matching `account` row — an
+ * account that exists and can never sign in, exactly what the hashPassword
+ * comment above warns about, except now for a partial-write reason instead
+ * of a wrong-hash one. Wrapping both writes means a failure anywhere in
+ * between rolls back cleanly, and re-running is then a normal retry rather
+ * than a manual cleanup.
  */
 import { randomUUID } from 'node:crypto'
+import { setDefaultResultOrder } from 'node:dns'
+import { setDefaultAutoSelectFamily } from 'node:net'
 import { Client } from 'pg'
 import { hashPassword } from 'better-auth/crypto'
 // Derived, never hardcoded. For email+password this returns 'local:credential',
@@ -49,7 +71,8 @@ function fail(message) {
 const email = (arg('--email') ?? '').trim().toLowerCase()
 const name = (arg('--name') ?? '').trim()
 const role = (arg('--role') ?? '').trim()
-const password = arg('--password') ?? ''
+// SEED_PASSWORD takes priority over --password; see the header comment.
+const password = process.env.SEED_PASSWORD ?? arg('--password') ?? ''
 
 if (!process.env.DATABASE_URL) {
   fail('DATABASE_URL is not set. Run with: node --env-file=.env scripts/seed-user.mjs ...')
@@ -64,61 +87,132 @@ if (password.length < MIN_PASSWORD_LENGTH) {
   fail(`--password must be at least ${MIN_PASSWORD_LENGTH} characters`)
 }
 
-const client = new Client({ connectionString: process.env.DATABASE_URL })
-await client.connect()
-
-try {
-  const hash = await hashPassword(password)
-  const now = new Date()
-
-  const existing = await client.query('SELECT id FROM "user" WHERE email = $1', [email])
-  let userId
-
-  if (existing.rowCount > 0) {
-    userId = existing.rows[0].id
-    await client.query(
-      'UPDATE "user" SET name = $2, role = $3, "updatedAt" = $4 WHERE id = $1',
-      [userId, name, role, now],
-    )
-    console.log(`seed-user: updated existing account (role=${role})`)
-  } else {
-    userId = randomUUID()
-    await client.query(
-      `INSERT INTO "user" (id, name, email, role, "emailVerified", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, true, $5, $5)`,
-      [userId, name, email, role, now],
-    )
-    console.log(`seed-user: created account (role=${role})`)
+/*
+ * Connects, and on a connection failure retries once with Node's Happy
+ * Eyeballs address race turned off and IPv4 preferred.
+ *
+ * WHY THE RETRY EXISTS. On a machine with no IPv6 route, `pg` connecting to a
+ * dual-stack host by NAME fails with ETIMEDOUT even though the host is
+ * perfectly reachable -- Node races the AAAA address and stalls on it. See
+ * scripts/seed-demo-leads.mjs, where this same retry is measured against
+ * this project's own Neon pooler.
+ *
+ * Applied on the RETRY rather than up front so a correctly dual-stacked
+ * machine keeps the address race, which is the better behaviour there and
+ * the whole point of RFC 8305.
+ */
+async function connect() {
+  const open = async () => {
+    const c = new Client({
+      connectionString: process.env.DATABASE_URL,
+      connectionTimeoutMillis: 120000,
+    })
+    await c.connect()
+    return c
   }
-
-  /*
-   * The credential row. providerId 'credential' and accountId = the user id
-   * is the shape better-auth's email+password provider looks for; anything
-   * else and signInEmail reports "invalid email or password" for an account
-   * that plainly exists.
-   */
-  const account = await client.query(
-    `SELECT id FROM account WHERE "userId" = $1 AND "providerId" = 'credential'`,
-    [userId],
-  )
-  if (account.rowCount > 0) {
-    await client.query('UPDATE account SET password = $2, "updatedAt" = $3 WHERE id = $1', [
-      account.rows[0].id,
-      hash,
-      now,
-    ])
-    console.log('seed-user: password updated')
-  } else {
-    await client.query(
-      `INSERT INTO account (id, "accountId", issuer, "providerId", "userId", password, "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, 'credential', $2, $4, $5, $5)`,
-      [randomUUID(), userId, createLocalAccountIssuer('credential'), hash, now],
-    )
-    console.log('seed-user: password set')
+  try {
+    return await open()
+  } catch (err) {
+    console.error(`First connection attempt failed (${err.code ?? err.message}).`)
+    console.error('Retrying with IPv4 preferred and address racing disabled...')
+    setDefaultAutoSelectFamily(false)
+    setDefaultResultOrder('ipv4first')
+    return open()
   }
-
-  // Never log the address itself — the same rule site-actions.ts follows.
-  console.log('seed-user: done. Sign in at /admin/login.')
-} finally {
-  await client.end()
 }
+
+async function main() {
+  const client = await connect()
+  try {
+    const hash = await hashPassword(password)
+    const now = new Date()
+
+    await client.query('BEGIN')
+    try {
+      const existing = await client.query('SELECT id FROM "user" WHERE email = $1', [email])
+      let userId
+
+      if (existing.rowCount > 0) {
+        userId = existing.rows[0].id
+        await client.query(
+          'UPDATE "user" SET name = $2, role = $3::"UserRole", "updatedAt" = $4 WHERE id = $1',
+          [userId, name, role, now],
+        )
+        console.log(`seed-user: updated existing account (role=${role})`)
+      } else {
+        userId = randomUUID()
+        await client.query(
+          `INSERT INTO "user" (id, name, email, role, "emailVerified", "createdAt", "updatedAt")
+           VALUES ($1, $2, $3, $4::"UserRole", true, $5, $5)`,
+          [userId, name, email, role, now],
+        )
+        console.log(`seed-user: created account (role=${role})`)
+      }
+
+      /*
+       * The credential row. providerId 'credential' and accountId = the user
+       * id is the shape better-auth's email+password provider looks for;
+       * anything else and signInEmail reports "invalid email or password"
+       * for an account that plainly exists.
+       */
+      const account = await client.query(
+        `SELECT id FROM account WHERE "userId" = $1 AND "providerId" = 'credential'`,
+        [userId],
+      )
+      if (account.rowCount > 0) {
+        await client.query('UPDATE account SET password = $2, "updatedAt" = $3 WHERE id = $1', [
+          account.rows[0].id,
+          hash,
+          now,
+        ])
+        console.log('seed-user: password updated')
+      } else {
+        await client.query(
+          `INSERT INTO account (id, "accountId", issuer, "providerId", "userId", password, "createdAt", "updatedAt")
+           VALUES ($1, $2, $3, 'credential', $2, $4, $5, $5)`,
+          [randomUUID(), userId, createLocalAccountIssuer('credential'), hash, now],
+        )
+        console.log('seed-user: password set')
+      }
+
+      await client.query('COMMIT')
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {})
+      throw err
+    }
+
+    // Never log the address itself — the same rule site-actions.ts follows.
+    console.log('seed-user: done. Sign in at /admin/login.')
+  } finally {
+    await client.end()
+  }
+}
+
+main().catch((err) => {
+  /*
+   * An AggregateError from `pg` prints as an EMPTY message -- every real
+   * cause is hidden in `err.errors`, one entry per address tried. Unwrapped,
+   * a failure to reach the database reads as "seed-user: failed:" and
+   * nothing else, which says nothing about whether the credential is wrong,
+   * the host is down, or the network has no route. This matters more here
+   * than in most scripts: the repo owner runs this by hand, once, against
+   * production, to create their own account, and this error message is the
+   * entire interface they get if it fails.
+   */
+  console.error('seed-user: failed:', err.message || err.code || err.name || err)
+  if (Array.isArray(err.errors)) {
+    for (const sub of err.errors) console.error(`  - ${sub.code}: ${sub.message}`)
+    const v6 = err.errors.filter((e) => e.code === 'ENETUNREACH').length
+    const v4 = err.errors.filter((e) => e.code === 'ETIMEDOUT').length
+    if (v6 > 0 && v4 === 0) {
+      console.error(
+        '\nEvery IPv6 address was unreachable, and the automatic IPv4-only retry above did not help either.',
+      )
+      console.error('This machine likely has no IPv6 route to the database host.')
+    } else if (v4 > 0) {
+      console.error('\nThe database host is not reachable from this machine at all.')
+      console.error('Check the network/firewall and that the Neon project is not suspended.')
+    }
+  }
+  process.exit(1)
+})
