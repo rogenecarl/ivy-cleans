@@ -105,6 +105,14 @@ model Session {
 /// the OAuth columns stay null because no social provider is configured.
 model Account {
   id                    String    @id
+  /// better-auth 1.7 scopes account identity by issuer — a breaking change
+  /// from the 1.4-era schema peaktransport uses, which is where this model was
+  /// copied from. For email+password the value is `local:credential`, built by
+  /// createLocalAccountIssuer('credential'). REQUIRED, not optional: sign-up
+  /// writes it unconditionally and sign-in matches on it, so without this
+  /// column account creation throws "Unknown argument `issuer`" and a
+  /// hand-seeded row can never be found.
+  issuer                String
   accountId             String
   providerId            String
   userId                String
@@ -120,6 +128,9 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId])
+  /// better-auth 1.7 declares this unique index itself; omitting it lets two
+  /// rows claim the same identity at the same issuer.
+  @@unique([issuer, accountId])
   @@map("account")
 }
 

@@ -14,6 +14,8 @@
  * holds after `pnpm update`.
  */
 import { describe, expect, it } from 'vitest'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
@@ -51,5 +53,43 @@ describe('generated Prisma client', () => {
     // up as every operator being denied everything.
     const { UserRole } = await import('@/generated/prisma/client')
     expect(Object.values(UserRole).sort()).toEqual(['admin', 'manager'])
+  })
+})
+
+describe('better-auth required columns', () => {
+  it('are all present in the matching Prisma model', async () => {
+    // Pins a bug class, not one bug: better-auth 1.7 added a required
+    // `issuer` column to `account` (a breaking change from the 1.4-era
+    // schema this project's models were originally copied from), and that
+    // slipped past a version-pin test, a plan review and a task brief before
+    // being caught. Rather than re-asserting `issuer` by name, this walks
+    // every field better-auth's own schema builder marks `required: true` for
+    // user/session/account/verification and checks each one has a matching
+    // column in prisma/schema.prisma, so a future better-auth version adding
+    // another required column fails loudly here instead of surfacing as an
+    // inexplicable sign-up/sign-in failure at runtime.
+    const { getAuthTables } = await import('better-auth/db')
+    const tables = getAuthTables({})
+    const schema = await readFile(path.join(process.cwd(), 'prisma/schema.prisma'), 'utf-8')
+
+    for (const tableKey of ['user', 'session', 'account', 'verification'] as const) {
+      const modelName = tableKey[0].toUpperCase() + tableKey.slice(1)
+      const modelMatch = schema.match(new RegExp(`model ${modelName} \\{([\\s\\S]*?)\\n\\}`))
+      expect(modelMatch, `model ${modelName} not found in prisma/schema.prisma`).toBeTruthy()
+      const modelBody = modelMatch![1]
+
+      const requiredFields = Object.entries(tables[tableKey].fields)
+        .filter(([, field]) => field.required)
+        .map(([name]) => name)
+      // Sanity check on the check itself: if better-auth ever reports zero
+      // required fields for a table, this test would trivially pass without
+      // proving anything.
+      expect(requiredFields.length).toBeGreaterThan(0)
+
+      for (const field of requiredFields) {
+        const hasColumn = new RegExp(`^\\s*${field}\\s`, 'm').test(modelBody)
+        expect(hasColumn, `${modelName}.${field} is required by better-auth but missing from prisma/schema.prisma`).toBe(true)
+      }
+    }
   })
 })
