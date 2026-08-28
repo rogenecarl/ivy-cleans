@@ -4,17 +4,24 @@ import Link from 'next/link'
 import { ADMIN_DASHBOARD } from '@/lib/admin-routes'
 import { AdminNav } from '../nav'
 import { Toaster } from '@/components/ui/sonner'
+import { requireSession } from '@/lib/auth-server'
 
 /*
  * The signed-in console's shell. Everything under this layout requires a
- * session; /admin/login deliberately sits outside it. Task 9 adds the
- * requireSession() call at the top of this component.
+ * session; /admin/login deliberately sits outside it.
  *
- * Stays a server component (no 'use client') so it can call the async guard.
- * The only piece that needs the current path to light up the active tab is
- * split into the small client component `AdminNav`.
+ * Async so it can call the guard below. The only piece that needs the current
+ * path to light up the active tab is split into the small client component
+ * `AdminNav`.
  */
-export default function ConsoleLayout({ children }: { children: ReactNode }) {
+export default async function ConsoleLayout({ children }: { children: ReactNode }) {
+  /*
+   * Every console page is behind this. It is NOT, however, what protects the
+   * server actions those pages call — a layout does not run for an action
+   * POST. Each action carries its own guard; see src/lib/auth-server.ts.
+   */
+  const user = await requireSession()
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-md">
@@ -40,28 +47,23 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
             <AdminNav />
 
             {/*
-             * Matches peaktransport's header chip, by request.
-             *
-             * NOTE FOR WHOEVER READS THIS NEXT: "Admin / Administrator" is a
-             * LABEL, not an account. This console has no authentication at
-             * all -- the unguessable URL is the only access control (see
-             * resolve-rewrite.ts) -- so there is no user to be signed in as
-             * and nothing here reflects a session. Deliberately static for
-             * that reason: peaktransport's version drops a menu with Settings
-             * and Sign Out, and a Sign Out that ends no session would be
-             * worse than none at all.
+             * Matches peaktransport's header chip, by request. Task 9 wires
+             * this to the real session (name + role); peaktransport's version
+             * drops a menu with Settings and Sign Out off the same chip, and
+             * this console's own <Link>/form for that lands in Task 12, which
+             * is also where AdminNav starts taking `role` to filter tabs.
              */}
             <div className="ml-auto flex shrink-0 items-center gap-2.5">
               <span
                 aria-hidden="true"
                 className="flex size-8 items-center justify-center rounded-full bg-muted text-[0.7rem] font-semibold text-muted-foreground ring-2 ring-border"
               >
-                A
+                {user.name.charAt(0).toUpperCase()}
               </span>
               <span className="hidden text-left sm:block">
-                <span className="block text-[0.8rem] leading-tight font-medium">Admin</span>
-                <span className="block text-[0.7rem] leading-tight text-muted-foreground">
-                  Administrator
+                <span className="block text-[0.8rem] leading-tight font-medium">{user.name}</span>
+                <span className="block text-[0.7rem] leading-tight text-muted-foreground capitalize">
+                  {user.role}
                 </span>
               </span>
             </div>

@@ -33,8 +33,9 @@ const store = new Map<string, RateLimitRecord>()
 
 /** Bounded so a flood of distinct identifiers cannot grow the map without
  * limit. Well above any real operator count; if it is ever hit, the eviction
- * in checkRateLimit below makes room. */
-const MAX_TRACKED = 10_000
+ * in checkRateLimit below makes room. Exported so tests/auth-rate-limit.test.ts
+ * can drive the eviction path directly instead of hardcoding 10_000. */
+export const MAX_TRACKED = 10_000
 
 type RateLimitConfig = {
   /** What is being limited, e.g. "sign-in". */
@@ -50,6 +51,17 @@ export type RateLimitResult = {
   remaining: number
   resetAt: number
   retryAfterSeconds?: number
+}
+
+/**
+ * The number of identifiers currently tracked. Exported only so
+ * tests/auth-rate-limit.test.ts can assert the MAX_TRACKED bound actually
+ * holds, rather than inferring it from checkRateLimit's return value alone —
+ * that return value says nothing about how many OTHER entries are still in
+ * the map.
+ */
+export function rateLimitTrackedCount(): number {
+  return store.size
 }
 
 /** Drops expired records. Called on write, which is the only time the map

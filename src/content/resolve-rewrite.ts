@@ -78,12 +78,6 @@ export function resolveRewrite(
      *
      * That reach is only acceptable once the console requires a session.
      *
-     * TRANSITIONAL, and it matters: this branch removes the unguessable
-     * segment BEFORE it adds authentication. Between those two commits the
-     * console is reachable, guessable and completely unguarded — strictly
-     * worse than it was. Do not deploy from the middle of that range. This
-     * paragraph is deleted by the commit that lands src/lib/auth-server.ts.
-     *
      * Once that guard is in place, reaching this path only ever gets you a
      * login form, and this host rule becomes the SECOND layer: it keeps the
      * console, and the fact that one exists, off customer-branded domains.
