@@ -76,12 +76,19 @@ export function resolveRewrite(
      * unrecognized Host header, and a customer domain attached in Vercel but
      * not yet registered here by publish.
      *
-     * That is fine now, and was not before: the console requires a session
-     * (src/lib/auth-server.ts), so reaching it only ever gets you a login
-     * form. This host rule is the SECOND layer — it keeps the console, and
-     * the fact that one exists, off customer-branded domains. Do not hoist it
-     * above the host lookup; that would put a login box on every customer's
-     * domain.
+     * That reach is only acceptable once the console requires a session.
+     *
+     * TRANSITIONAL, and it matters: this branch removes the unguessable
+     * segment BEFORE it adds authentication. Between those two commits the
+     * console is reachable, guessable and completely unguarded — strictly
+     * worse than it was. Do not deploy from the middle of that range. This
+     * paragraph is deleted by the commit that lands src/lib/auth-server.ts.
+     *
+     * Once that guard is in place, reaching this path only ever gets you a
+     * login form, and this host rule becomes the SECOND layer: it keeps the
+     * console, and the fact that one exists, off customer-branded domains.
+     * Either way, do not hoist this check above the host lookup — that would
+     * put the console on every customer's domain.
      */
     if (first === "admin") return null;
     if (first && cities.includes(first)) return null;
