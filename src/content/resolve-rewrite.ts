@@ -21,6 +21,20 @@ import cityKeys from "../../content/_cities.json";
 export type DomainsIndex = { default: string; hosts: Record<string, string> };
 
 /**
+ * Strips a port and case-folds a `Host` header down to the bare hostname
+ * used as the key into `_domains.hosts` everywhere in this file.
+ *
+ * Extracted rather than left as two copies of `toLowerCase().split(':')[0]`
+ * in `resolveRewrite` and `isMappedHost`: the Task 11 regression was a
+ * host-scoping gap, and two independently-editable copies of this expression
+ * is exactly how that class of bug comes back (an IPv6-bracket fix or a
+ * different case-fold applied to one and not the other).
+ */
+function normalizeHost(host: string): string {
+  return host.toLowerCase().split(":")[0];
+}
+
+/**
  * Is this host one of the customer domains in _domains.hosts?
  *
  * Exported for src/proxy.ts, which must apply the same host scoping to the
@@ -31,7 +45,7 @@ export function isMappedHost(
   host: string,
   domains: DomainsIndex = domainsJson as DomainsIndex,
 ): boolean {
-  return Boolean(domains.hosts[host.toLowerCase().split(":")[0]]);
+  return Boolean(domains.hosts[normalizeHost(host)]);
 }
 
 /*
@@ -66,8 +80,7 @@ export function resolveRewrite(
 ): string | null {
   if (INTERNAL.test(pathname)) return null;
 
-  const normalizedHost = host.toLowerCase().split(":")[0];
-  const mapped = domains.hosts[normalizedHost];
+  const mapped = domains.hosts[normalizeHost(host)];
 
   if (!mapped) {
     const first = pathname.split("/")[1];

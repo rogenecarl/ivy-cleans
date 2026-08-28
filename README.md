@@ -29,6 +29,32 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Console access
+
+The operator console lives at `/admin` and sits behind a session — there is
+no signup route. Create an account with `scripts/seed-user.mjs`:
+
+```bash
+SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs \
+  --email you@example.com --name 'Your Name' --role admin
+```
+
+Two roles:
+
+- **admin** — everything: Dashboard, Leads, Sites, and the city generation
+  pipeline (new/generate/review).
+- **manager** — Dashboard and Leads only; Sites and the generation pipeline
+  are not in the nav and are refused server-side if navigated to directly.
+
+`src/lib/access.ts` is the single place the role matrix lives.
+
+Two env vars the console needs: `BETTER_AUTH_SECRET` (signs session cookies —
+random, keep it stable, changing it signs every operator out) and
+`BETTER_AUTH_URL` (the console's own origin). See `.env.local.example`.
+
+For the reasoning behind the role split and the guard placement, see
+`docs/superpowers/specs/2026-08-28-admin-auth-rbac-design.md`.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

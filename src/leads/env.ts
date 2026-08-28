@@ -56,7 +56,7 @@ export const LEADS_DASHBOARD_ORIGIN = read('LEADS_DASHBOARD_ORIGIN')
 
 /**
  * Opt-in only. When `'1'`, disables Node's Happy Eyeballs (RFC 8305) address
- * racing process-wide before store.ts opens its `pg` Pool.
+ * racing process-wide before src/lib/db.ts opens its `pg` Pool.
  *
  * Defaults OFF on purpose: racing addresses is the correct behaviour
  * anywhere IPv6 actually works (including Vercel's dual-stack functions) --

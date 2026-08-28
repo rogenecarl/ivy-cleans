@@ -13,8 +13,7 @@ import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { APIError } from 'better-auth/api'
 import { auth } from '@/lib/auth'
-import { getServerUser } from '@/lib/auth-server'
-import { safeNext } from '@/lib/access'
+import { isRole, safeNext } from '@/lib/access'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/auth-rate-limit'
 import { clientIp } from '@/leads/client-ip'
 
@@ -44,8 +43,9 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
     return { error: `Too many attempts. Try again in ${limit.retryAfterSeconds} seconds.` }
   }
 
+  let result: Awaited<ReturnType<typeof auth.api.signInEmail>>
   try {
-    await auth.api.signInEmail({ body: { email, password }, headers: headersList })
+    result = await auth.api.signInEmail({ body: { email, password }, headers: headersList })
   } catch (err) {
     if (isRedirectError(err)) throw err
     /*
@@ -59,12 +59,28 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
   }
 
   /*
-   * Re-read the session rather than trusting signInEmail's return: the role
-   * decides where they land, and getServerUser() is the one function that
-   * validates it against src/lib/access.ts. redirect() throws, so it sits
-   * outside the try/catch above — swallowing it would silently do nothing.
+   * Validate the role from signInEmail's OWN response — found by
+   * scripts/admin-e2e.mjs, in a real browser, to be the only correct choice
+   * here, not a style preference.
+   *
+   * This used to re-read the session with getServerUser(), which calls
+   * headers() -- the INCOMING request's headers, snapshotted before this
+   * action ran. better-auth's nextCookies() plugin applies the new session
+   * cookie by calling Next's cookies().set() (the request-scoped, mutable
+   * cookie jar); headers() is a separate, read-only view of the original
+   * request and never reflects a same-request cookies() mutation. So
+   * immediately after a successful sign-in, getServerUser() read the
+   * pre-sign-in headers, found no session, and this action reported "Wrong
+   * email or password" to an operator who had typed the correct one --
+   * while the correct cookie was already on its way to their browser. (The
+   * NEXT request -- a reload, or hitting the redirect target below --
+   * legitimately carries it, since by then the browser has sent it back;
+   * that is exactly why no unit test caught this and why it took a real
+   * two-step request lifecycle, in a real browser, to surface it.)
+   * redirect() throws, so it sits outside the try/catch above -- swallowing
+   * it would silently do nothing.
    */
-  const user = await getServerUser()
-  if (!user) return { error: CREDENTIALS_REJECTED }
-  redirect(safeNext(next, user.role))
+  const role = (result.user as { role?: unknown } | undefined)?.role
+  if (!isRole(role)) return { error: CREDENTIALS_REJECTED }
+  redirect(safeNext(next, role))
 }

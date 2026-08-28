@@ -128,17 +128,19 @@ async function main() {
     const now = new Date()
 
     await client.query('BEGIN')
+    let userWasExisting
+    let accountWasExisting
     try {
       const existing = await client.query('SELECT id FROM "user" WHERE email = $1', [email])
       let userId
 
-      if (existing.rowCount > 0) {
+      userWasExisting = existing.rowCount > 0
+      if (userWasExisting) {
         userId = existing.rows[0].id
         await client.query(
           'UPDATE "user" SET name = $2, role = $3::"UserRole", "updatedAt" = $4 WHERE id = $1',
           [userId, name, role, now],
         )
-        console.log(`seed-user: updated existing account (role=${role})`)
       } else {
         userId = randomUUID()
         await client.query(
@@ -146,7 +148,6 @@ async function main() {
            VALUES ($1, $2, $3, $4::"UserRole", true, $5, $5)`,
           [userId, name, email, role, now],
         )
-        console.log(`seed-user: created account (role=${role})`)
       }
 
       /*
@@ -159,20 +160,19 @@ async function main() {
         `SELECT id FROM account WHERE "userId" = $1 AND "providerId" = 'credential'`,
         [userId],
       )
-      if (account.rowCount > 0) {
+      accountWasExisting = account.rowCount > 0
+      if (accountWasExisting) {
         await client.query('UPDATE account SET password = $2, "updatedAt" = $3 WHERE id = $1', [
           account.rows[0].id,
           hash,
           now,
         ])
-        console.log('seed-user: password updated')
       } else {
         await client.query(
           `INSERT INTO account (id, "accountId", issuer, "providerId", "userId", password, "createdAt", "updatedAt")
            VALUES ($1, $2, $3, 'credential', $2, $4, $5, $5)`,
           [randomUUID(), userId, createLocalAccountIssuer('credential'), hash, now],
         )
-        console.log('seed-user: password set')
       }
 
       await client.query('COMMIT')
@@ -181,6 +181,16 @@ async function main() {
       throw err
     }
 
+    /*
+     * Logged only after COMMIT: before the transaction each write
+     * auto-committed individually, so a line printed here meant the row was
+     * already persisted. Now that both writes are one transaction, printing
+     * before COMMIT would let a later rollback turn a "success" line into a
+     * lie the operator has already read and acted on. This script's output
+     * is the whole interface for the person running it.
+     */
+    console.log(`seed-user: ${userWasExisting ? 'updated existing' : 'created'} account (role=${role})`)
+    console.log(`seed-user: password ${accountWasExisting ? 'updated' : 'set'}`)
     // Never log the address itself — the same rule site-actions.ts follows.
     console.log('seed-user: done. Sign in at /admin/login.')
   } finally {

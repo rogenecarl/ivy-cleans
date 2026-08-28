@@ -11,3 +11,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Site font is Poppins (via `next/font`); the kit's Raleway appears only where the reference CSS says so.
 - Apostrophes in JSX copy must render U+2019: use `&rsquo;` or a literal ’ (straight `'` fails lint and mismatches the live copy).
 - All user-visible copy lives in `src/data/*.ts`, byte-verbatim from `docs/superpowers/reference/ivycleans-live/*content-dump*.txt` (typos included). Never paraphrase.
+- The operator console lives at `/admin` (`src/app/admin/`) and requires a
+  session. `src/lib/access.ts` is the ONLY place the role matrix lives — add a
+  console section there, not in the nav and not in the proxy. Every server
+  action under `(console)/` must start with `requireAdmin()` or
+  `requireSession()`: a layout guard does not run for an action POST.
+- Operator accounts come from `scripts/seed-user.mjs`. There is no signup
+  route and adding one is a decision, not a convenience.

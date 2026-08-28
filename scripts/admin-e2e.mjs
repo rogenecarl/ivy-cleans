@@ -31,6 +31,29 @@
  *   database (tests/leads-store.test.ts). See that case below for exactly
  *   what it does and does not prove.
  *
+ *   The admin/manager RBAC plan: this script now signs in before its first
+ *   navigation (the console sits behind a login wall) and, after the admin
+ *   case finishes, drives THREE things no unit test can:
+ *     - sign-out (built in Task 9, wired into the identity chip in Task 12,
+ *       correct by inspection in two reviews, and never once actually
+ *       executed, because both tasks were barred from creating the seeded
+ *       account it needs) — click Sign out, land on /admin/login, confirm
+ *       /admin/dashboard no longer opens in that browser context;
+ *     - the proxy adapter end to end (tests/middleware.test.ts covers
+ *       resolveAdminRedirect as a pure function; only a real browser holding
+ *       a real cookie proves the redirect actually fires);
+ *     - the RBAC split in a fresh context signed in as a manager: no Sites
+ *       tab in the nav, and /admin/sites bounces to /admin/dashboard.
+ *   tests/access.test.ts covers the role matrix exhaustively and
+ *   tests/auth-guards.test.ts covers that every action calls a guard;
+ *   neither one opens a browser.
+ *
+ * REQUIRED ENV: E2E_EMAIL / E2E_PASSWORD (an admin account) and
+ * E2E_MANAGER_EMAIL / E2E_MANAGER_PASSWORD (a manager account), both seeded
+ * with scripts/seed-user.mjs. The script fails fast with a clear message if
+ * any of the four is unset, rather than surfacing as an opaque Playwright
+ * fill() error partway through the run.
+ *
  * REQUIRED SERVER MODE: `next dev`, NOT `next start`.
  *
  *     fuser -k 3100/tcp; STUB_MODEL=1 STUB_EMAIL=1 pnpm dev --port 3100
@@ -138,6 +161,41 @@ const KEEP = process.argv.includes('--keep')
 const BASE = arg('--base', 'http://localhost:3100').replace(/\/$/, '')
 const OUT = arg('--out', path.join(os.tmpdir(), 'ivy-admin-e2e'))
 
+/*
+ * Sign-in credentials for the two seeded operator accounts this run needs
+ * (see signIn() below and the manager case further down). Checked here,
+ * before anything is launched, so a missing var fails fast with a clear
+ * message instead of surfacing as an opaque Playwright fill(undefined)
+ * error deep into the run. Never hardcoded -- create the accounts with
+ * scripts/seed-user.mjs.
+ */
+const E2E_EMAIL = process.env.E2E_EMAIL
+const E2E_PASSWORD = process.env.E2E_PASSWORD
+const E2E_MANAGER_EMAIL = process.env.E2E_MANAGER_EMAIL
+const E2E_MANAGER_PASSWORD = process.env.E2E_MANAGER_PASSWORD
+const missingEnv = Object.entries({
+  E2E_EMAIL,
+  E2E_PASSWORD,
+  E2E_MANAGER_EMAIL,
+  E2E_MANAGER_PASSWORD,
+})
+  .filter(([, v]) => !v)
+  .map(([k]) => k)
+if (missingEnv.length > 0) {
+  console.error(`admin-e2e: missing required env var(s): ${missingEnv.join(', ')}.`)
+  console.error('Seed both operator accounts first, e.g.:')
+  console.error(
+    "  SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs --email e2e-admin@example.invalid --name 'E2E Admin' --role admin",
+  )
+  console.error(
+    "  SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs --email e2e-manager@example.invalid --name 'E2E Manager' --role manager",
+  )
+  console.error(
+    'then re-run with E2E_EMAIL/E2E_PASSWORD/E2E_MANAGER_EMAIL/E2E_MANAGER_PASSWORD set.',
+  )
+  process.exit(2)
+}
+
 const ADMIN = '/admin'
 const KEY = 'stubville'
 const CITY = 'Stubville'
@@ -213,6 +271,25 @@ async function clickText(page, selector, label) {
   await el.click()
 }
 
+/*
+ * Sign in once; the session cookie then rides on every navigation in this
+ * context. Added when the console gained authentication — before that this
+ * script went straight to /admin/sites.
+ *
+ * Needs an operator account to exist. Create one with:
+ *   node --env-file=.env scripts/seed-user.mjs \
+ *     --email e2e-admin@example.invalid --name 'E2E Admin' --role admin --password "$E2E_PASSWORD"
+ */
+async function signIn(page, email, password) {
+  await page.goto(`${BASE}${ADMIN}/login`, { waitUntil: 'networkidle' })
+  await page.fill('input[name="email"]', email)
+  await page.fill('input[name="password"]', password)
+  await Promise.all([
+    page.waitForURL(`${BASE}${ADMIN}/dashboard`, { timeout: 15000 }),
+    page.click('button[type="submit"]'),
+  ])
+}
+
 /* ── run ──────────────────────────────────────────────────────────────────── */
 
 fs.mkdirSync(OUT, { recursive: true })
@@ -246,6 +323,9 @@ try {
   // the flow opens a dialog, so a blanket accept is safe and keeps the handler
   // registered for the whole run.
   page.on('dialog', (dialog) => void dialog.accept())
+
+  await signIn(page, E2E_EMAIL, E2E_PASSWORD)
+  check('sign-in lands on the dashboard', page.url() === `${BASE}${ADMIN}/dashboard`)
 
   /* 1. Dashboard ─────────────────────────────────────────────────────────── */
   await page.goto(`${BASE}${ADMIN}/sites`, { waitUntil: 'networkidle' })
@@ -766,6 +846,49 @@ try {
       await leadsDb.end()
     }
   }
+
+  /* 9. Sign-out ──────────────────────────────────────────────────────────── */
+  /*
+   * Built in Task 9, wired into the identity chip in Task 12, correct by
+   * inspection in two reviews, and never once actually executed -- both
+   * tasks were barred from creating the seeded account this needs. Reuses
+   * `page`, which by this point has done everything above as the signed-in
+   * admin, so a failure here cannot be blamed on a fresh, differently-primed
+   * context.
+   *
+   * `header button` is unambiguous: layout.tsx's header renders exactly one
+   * button-shaped element, the identity chip's DropdownMenuTrigger (the logo
+   * is a Link, the nav is all <a>s).
+   */
+  await page.goto(`${BASE}${ADMIN}/dashboard`, { waitUntil: 'networkidle' })
+  await page.click('header button')
+  await page.click('button:has-text("Sign out")')
+  await page.waitForURL(`${BASE}${ADMIN}/login`, { timeout: 15000 })
+  check('sign out lands on /admin/login', page.url() === `${BASE}${ADMIN}/login`)
+  await page.goto(`${BASE}${ADMIN}/dashboard`, { waitUntil: 'networkidle' })
+  // Bounced back to login by the proxy's optimistic redirect (no session
+  // cookie -> resolveAdminRedirect appends ?next=), not the bare login URL
+  // signIn() waits for -- startsWith, not equality, is the correct check.
+  check(
+    'signed-out context can no longer open /admin/dashboard',
+    page.url().startsWith(`${BASE}${ADMIN}/login`),
+    page.url(),
+  )
+
+  /* 10. Manager RBAC split ───────────────────────────────────────────────── */
+  /*
+   * The unit tests cover the policy (tests/access.test.ts) and that each
+   * action calls a guard (tests/auth-guards.test.ts); only this proves a
+   * real browser holding a real manager session cannot open Sites.
+   */
+  const managerCtx = await browser.newContext()
+  const manager = await managerCtx.newPage()
+  await signIn(manager, E2E_MANAGER_EMAIL, E2E_MANAGER_PASSWORD)
+  check('manager sign-in lands on the dashboard', manager.url() === `${BASE}${ADMIN}/dashboard`)
+  check('manager sees no Sites tab', (await manager.locator('nav a', { hasText: 'Sites' }).count()) === 0)
+  await manager.goto(`${BASE}${ADMIN}/sites`, { waitUntil: 'networkidle' })
+  check('manager is bounced off /admin/sites', manager.url() === `${BASE}${ADMIN}/dashboard`)
+  await managerCtx.close()
 } catch (err) {
   check('run completed without throwing', false, err instanceof Error ? err.message : String(err))
 } finally {
