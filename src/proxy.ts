@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie, getCookieCache } from "better-auth/cookies";
-import { resolveRewrite } from "@/content/resolve-rewrite";
+import { isMappedHost, resolveRewrite } from "@/content/resolve-rewrite";
 import { resolveAdminRedirect } from "@/content/resolve-admin";
 import { isUnder } from "@/lib/access";
 import { ADMIN_BASE } from "@/lib/admin-routes";
@@ -22,17 +22,26 @@ import { ADMIN_BASE } from "@/lib/admin-routes";
  */
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const host = req.headers.get("host") ?? "";
 
   /*
-   * Console paths first. They are never city-rewritten, and doing the auth
-   * hop here keeps resolveRewrite's contract unchanged.
+   * Console paths, on the operator's own host only. The host test is not
+   * incidental: it is the same scoping resolveRewrite applies to its own
+   * admin passthrough, and hoisting this branch above it without the test
+   * would put a login box on every customer's branded domain — exactly what
+   * resolve-rewrite.ts's case-3 comment warns against. On a mapped host we
+   * fall through to the rewrite, which turns /admin into /<city>/admin and
+   * 404s, as it did before this branch existed.
+   *
+   * They are never city-rewritten either way, so doing the auth hop here
+   * keeps resolveRewrite's contract unchanged.
    *
    * getSessionCookie is a presence check on a signed cookie, and
    * getCookieCache reads the role better-auth cached in it. Both are
    * client-held; see resolve-admin.ts for why that is acceptable here and
    * nowhere else.
    */
-  if (isUnder(pathname, ADMIN_BASE)) {
+  if (!isMappedHost(host) && isUnder(pathname, ADMIN_BASE)) {
     const hasSession = !!getSessionCookie(req);
     const cached = hasSession ? await getCookieCache(req) : null;
     const target = resolveAdminRedirect(
@@ -43,7 +52,7 @@ export async function proxy(req: NextRequest) {
     return;
   }
 
-  const target = resolveRewrite(req.headers.get("host") ?? "", pathname);
+  const target = resolveRewrite(host, pathname);
   if (target === null) return;
   const url = req.nextUrl.clone();
   url.pathname = target;

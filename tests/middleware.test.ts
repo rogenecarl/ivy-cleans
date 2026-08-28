@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveRewrite, type DomainsIndex } from '../src/content/resolve-rewrite'
+import { isMappedHost, resolveRewrite, type DomainsIndex } from '../src/content/resolve-rewrite'
 import { resolveAdminRedirect } from '../src/content/resolve-admin'
 
 /*
@@ -106,6 +106,17 @@ describe('resolveRewrite — mapped host', () => {
     expect(resolveRewrite('miamicleans.com', '/admin/login', domains, cities)).toBe(
       '/miami/admin/login',
     )
+  })
+
+  it('isMappedHost distinguishes a customer domain from everything else', () => {
+    // src/proxy.ts gates its own admin branch on this — see resolve-admin
+    // wiring in proxy.ts and the "regression" note on the proxy suite below.
+    // Case-3 above is what happens once this predicate says "mapped".
+    expect(isMappedHost('miamicleans.com', domains)).toBe(true)
+    expect(isMappedHost('MiamiCleans.com', domains)).toBe(true)
+    expect(isMappedHost('miamicleans.com:443', domains)).toBe(true)
+    expect(isMappedHost('random.example', domains)).toBe(false)
+    expect(isMappedHost('localhost:3100', domains)).toBe(false)
   })
 })
 

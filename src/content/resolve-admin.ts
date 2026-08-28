@@ -25,6 +25,10 @@ export function resolveAdminRedirect(
   pathname: string,
   session: OptimisticSession,
 ): string | null {
+  // req.nextUrl.pathname never carries a query string, so this split is dead
+  // defensiveness in production — it exists only so this pure function's own
+  // tests (tests/middleware.test.ts) can pass a "?next=..." literal without a
+  // NextUrl to strip it for them.
   const bare = pathname.split('?')[0]
   if (!isUnder(bare, ADMIN_BASE)) return null
 

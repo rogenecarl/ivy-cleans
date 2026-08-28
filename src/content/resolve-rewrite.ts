@@ -20,6 +20,20 @@ import cityKeys from "../../content/_cities.json";
 
 export type DomainsIndex = { default: string; hosts: Record<string, string> };
 
+/**
+ * Is this host one of the customer domains in _domains.hosts?
+ *
+ * Exported for src/proxy.ts, which must apply the same host scoping to the
+ * console branch that case 3 below applies to the rewrite — see the comment
+ * on that branch for why the console must not appear on a customer domain.
+ */
+export function isMappedHost(
+  host: string,
+  domains: DomainsIndex = domainsJson as DomainsIndex,
+): boolean {
+  return Boolean(domains.hosts[host.toLowerCase().split(":")[0]]);
+}
+
 /*
  * Paths that must never be rewritten into a city tree: Next internals, the
  * public/ asset folders, route handlers, and anything with a file extension
