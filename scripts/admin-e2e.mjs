@@ -138,7 +138,7 @@ const KEEP = process.argv.includes('--keep')
 const BASE = arg('--base', 'http://localhost:3100').replace(/\/$/, '')
 const OUT = arg('--out', path.join(os.tmpdir(), 'ivy-admin-e2e'))
 
-const ADMIN = '/admin-x7kq92mpfw4rt8vz'
+const ADMIN = '/admin'
 const KEY = 'stubville'
 const CITY = 'Stubville'
 // The plan's "TS" is deliberately kept as the FIRST submission: it is not a
@@ -515,7 +515,7 @@ try {
   await page.bringToFront()
   /*
    * Stage 3: publish's confirmation moved from window.confirm() to a shadcn
-   * AlertDialog (src/app/admin-x7kq92mpfw4rt8vz/review/[key]/publish-box.tsx)
+   * AlertDialog (src/app/admin/(console)/review/[key]/publish-box.tsx)
    * so the operator sees exactly what publishing will do instead of a
    * generic "are you sure". That means clicking the "Publish" button now
    * only OPENS the dialog; the click below that used to fire the publish
@@ -644,7 +644,7 @@ try {
       await page.goto(`${BASE}${ADMIN}/leads`, { waitUntil: 'networkidle' })
       /*
        * Stage 2: the list row is no longer one giant <a> wrapping the whole
-       * row (src/app/admin-x7kq92mpfw4rt8vz/leads/page.tsx) -- only the
+       * row (src/app/admin/(console)/leads/page.tsx) -- only the
        * lead's name is a link now, so the assertions below split into "the
        * link" (what gets clicked) and "the row" (what carries the city
        * pill next to that link, asserted separately). The viewport is fixed
@@ -666,7 +666,7 @@ try {
        * "Minneapolis", not "MINNEAPOLIS". This assertion was wrong from the
        * day it was written and nobody saw it, because this case has only ever
        * taken its skip path. The list's pill renders cityDisplayName()
-       * (src/app/admin-x7kq92mpfw4rt8vz/leads/logic.ts), which returns the
+       * (src/app/admin/(console)/leads/logic.ts), which returns the
        * city's DISPLAY NAME for a city that exists; the uppercased key is only
        * the fallback for a lead whose city has since been deleted. The lead
        * DETAIL screen is the one that uppercases (lead.cityKey.toUpperCase()).
@@ -715,7 +715,7 @@ try {
 
       /*
        * Stage 2: the five status buttons collapsed into one shadcn Select
-       * (src/app/admin-x7kq92mpfw4rt8vz/leads/[id]/status-select.tsx). Its
+       * (src/app/admin/(console)/leads/[id]/status-select.tsx). Its
        * trigger is a Radix button labelled "Lead status"; picking an option
        * calls the same setStatusAction directly (wrapped in useTransition,
        * not a <form> submit), so this assertion moved from clicking a

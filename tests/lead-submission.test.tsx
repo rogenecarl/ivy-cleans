@@ -15,7 +15,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { LeadSubmission, leadHeadline } from '@/app/admin-x7kq92mpfw4rt8vz/leads/lead-submission'
+import { LeadSubmission, leadHeadline } from '@/app/admin/(console)/leads/lead-submission'
 import { BOOKING_FIELDS, CONTACT_FIELDS } from '@/leads/schema'
 import type { LeadRecord } from '@/leads/types'
 

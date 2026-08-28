@@ -38,8 +38,8 @@ const INTERNAL = /^\/(_next|images|icons|favicon|icon|api)\b|\.\w+$/;
  *  2. host mapped in _domains.hosts   -> /<mappedCity><path>   (that tenant)
  *  3. otherwise (default host)        -> /<default><path>, UNLESS the first
  *     segment is already a known city key, which is the internal preview URL
- *     (/testville/home) and must not be double-prefixed, or starts with
- *     `admin-`, which is the operator console living outside the city tree.
+ *     (/testville/home) and must not be double-prefixed, or is exactly
+ *     `admin`, which is the operator console living outside the city tree.
  *
  * Case 3's guard is why `cities` is needed at all: without it the preview
  * paths would become /minneapolis/testville/home and 404.
@@ -58,32 +58,32 @@ export function resolveRewrite(
   if (!mapped) {
     const first = pathname.split("/")[1];
     /*
-     * The admin lives OUTSIDE the (sites)/[city] tree at
-     * /admin-x7kq92mpfw4rt8vz (an unguessable literal folder name), so it must
-     * reach its own route rather than be rewritten into a city. The rule is
-     * the prefix, not the exact segment: an unknown `/admin-*` path passes
-     * through and 404s naturally, which is strictly better than prefixing it
-     * into a tenant and 404ing there.
+     * The admin lives OUTSIDE the (sites)/[city] tree at /admin, so it must
+     * reach its own route rather than be rewritten into a city.
      *
      * WHY THIS SITS INSIDE THE `!mapped` (default-host) BRANCH, deliberately:
      * a MAPPED production host is a customer's own domain, and the admin must
      * not be reachable on it. Left in this branch, a request for
-     * miamicleans.com/admin-x7kq92mpfw4rt8vz still takes the rewrite below and
-     * becomes /miami/admin-x7kq92mpfw4rt8vz — which matches no route in the
-     * city tree ([serviceSlug] only accepts the two computed service slugs)
-     * and 404s. Hoisting this check above the host lookup would have opened
-     * the admin on every customer domain.
+     * miamicleans.com/admin still takes the rewrite below and becomes
+     * /miami/admin — which matches no route in the city tree ([serviceSlug]
+     * only accepts the two computed service slugs) and 404s. Hoisting this
+     * check above the host lookup would have opened the admin on every
+     * customer domain.
      *
      * The reach of that guarantee, stated precisely: hosts listed in
-     * _domains.hosts deny the admin by construction. Every OTHER host takes
+     * _domains.hosts deny the console by construction. Every OTHER host takes
      * this branch and DOES reach it — the raw *.vercel.app deploy URL, any
-     * unrecognized Host header, and a customer domain that has been attached
-     * in Vercel but not yet registered here by publish. This is not
-     * authentication and was never meant to be: on the default branch the
-     * unguessable path is the actual access control, and adding real auth is
-     * the fix if that ever stops being enough.
+     * unrecognized Host header, and a customer domain attached in Vercel but
+     * not yet registered here by publish.
+     *
+     * That is fine now, and was not before: the console requires a session
+     * (src/lib/auth-server.ts), so reaching it only ever gets you a login
+     * form. This host rule is the SECOND layer — it keeps the console, and
+     * the fact that one exists, off customer-branded domains. Do not hoist it
+     * above the host lookup; that would put a login box on every customer's
+     * domain.
      */
-    if (first && first.startsWith("admin-")) return null;
+    if (first === "admin") return null;
     if (first && cities.includes(first)) return null;
   }
 

@@ -2,7 +2,7 @@
 /*
  * The admin's behaviour, tested where it actually lives.
  *
- * src/app/admin-x7kq92mpfw4rt8vz/actions.ts carries the 'use server'
+ * src/app/admin/(console)/actions.ts carries the 'use server'
  * directive, which makes it a set of Next RPC endpoints rather than an
  * importable module — vitest cannot call it without standing up the framework.
  * So every decision the admin makes lives in src/pipeline/admin-logic.ts and

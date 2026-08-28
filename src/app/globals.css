@@ -18,7 +18,7 @@
  *     admin wrapper, so the variables must be global to reach them.
  *   - The `@layer base` resets (`* { border-color }`, `body { background }`)
  *     are NOT here — they live under `[data-admin-root]` in
- *     src/app/admin-x7kq92mpfw4rt8vz/admin.css instead, so only the admin
+ *     src/app/admin/admin.css instead, so only the admin
  *     shell is repainted.
  *   - `@custom-variant dark` is scoped to a `.dark` ancestor class, which
  *     this stage never adds (no dark mode toggle yet) — so `dark:` utilities
@@ -119,7 +119,7 @@
   --breakpoint-*: initial;
   /*
    * Stage 3 of the admin's shadcn redesign added `sm:` back. The public site
-   * never uses it (grep confirms zero `sm:` classes outside admin-x7kq92mpfw4rt8vz
+   * never uses it (grep confirms zero `sm:` classes outside admin
    * and the shadcn primitives under components/ui, which nothing else imports),
    * so this is a no-op for every public route — Tailwind only emits a
    * breakpoint's media query for utility classes actually found in scanned

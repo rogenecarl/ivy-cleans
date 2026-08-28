@@ -1,12 +1,12 @@
 // tests/sites-admin-ui.test.ts
 /*
  * Pure decisions behind the per-city settings screen, tested where they
- * live: src/app/admin-x7kq92mpfw4rt8vz/sites/logic.ts. site-actions.ts (a
+ * live: src/app/admin/(console)/sites/logic.ts. site-actions.ts (a
  * 'use server' file) defers to this module for parsing and validation, the
  * same split tests/leads-admin-ui.test.ts exercises for the Leads screen.
  */
 import { describe, expect, it } from 'vitest'
-import { MAX_ENTRIES, MAX_RAW_LENGTH, parseNotifyEmails } from '../src/app/admin-x7kq92mpfw4rt8vz/sites/logic'
+import { MAX_ENTRIES, MAX_RAW_LENGTH, parseNotifyEmails } from '../src/app/admin/(console)/sites/logic'
 
 describe('parseNotifyEmails', () => {
   it('accepts a list of valid addresses', () => {

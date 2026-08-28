@@ -15,7 +15,7 @@ import {
   sitesWithNoInbox,
   topCity,
   trendDirection,
-} from '@/app/admin-x7kq92mpfw4rt8vz/dashboard-logic'
+} from '@/app/admin/dashboard-logic'
 
 describe('describeAge', () => {
   const now = new Date('2026-08-22T12:00:00Z')

@@ -16,7 +16,7 @@ import {
   paginate,
   sortProblemsFirst,
   visibleStatuses,
-} from '@/app/admin-x7kq92mpfw4rt8vz/sites/list-logic'
+} from '@/app/admin/(console)/sites/list-logic'
 
 const SITES = [
   { key: 'minneapolis', city: 'Minneapolis', status: 'live' as const, domain: 'ivycleans.com' },

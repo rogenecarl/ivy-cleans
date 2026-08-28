@@ -1,15 +1,15 @@
 // tests/leads-admin-ui.test.ts
 /*
  * Pure decisions behind the Leads admin screen, tested where they live:
- * src/app/admin-x7kq92mpfw4rt8vz/leads/logic.ts. This is the module the
+ * src/app/admin/(console)/leads/logic.ts. This is the module the
  * page's server component defers to for filter-link building and the
  * city-key-to-display-name lookup, so it can be exercised directly without
  * standing up Next.
  */
 import { describe, expect, it } from 'vitest'
 import { parseLeadQuery } from '../src/leads/filters'
-import { buildCityLookup, cityDisplayName, filterHref } from '../src/app/admin-x7kq92mpfw4rt8vz/leads/logic'
-import { ADMIN_BASE } from '../src/app/admin-x7kq92mpfw4rt8vz/base'
+import { buildCityLookup, cityDisplayName, filterHref } from '../src/app/admin/(console)/leads/logic'
+import { ADMIN_BASE } from '../src/lib/admin-routes'
 
 describe('filterHref', () => {
   it('changing one filter preserves the others', () => {

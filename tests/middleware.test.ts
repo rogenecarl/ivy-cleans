@@ -39,15 +39,24 @@ describe('resolveRewrite — default host (no _domains.hosts entry)', () => {
     expect(resolveRewrite(DEFAULT_HOST, '/testville/deep-cleaning-testville')).toBeNull()
   })
 
-  it('passes the admin console through — and any /admin-* path', () => {
-    // The admin route folder is a literal, unguessable segment outside the
-    // (sites)/[city] tree; rewriting it into a city would make it unreachable.
-    expect(resolveRewrite(DEFAULT_HOST, '/admin-x7kq92mpfw4rt8vz')).toBeNull()
-    expect(resolveRewrite(DEFAULT_HOST, '/admin-x7kq92mpfw4rt8vz/new')).toBeNull()
-    expect(resolveRewrite(DEFAULT_HOST, '/admin-x7kq92mpfw4rt8vz/generate/miami')).toBeNull()
-    // The rule is the `admin-` PREFIX, not the exact segment: an unknown one
-    // passes through and 404s on its own, which beats 404ing inside a tenant.
-    expect(resolveRewrite(DEFAULT_HOST, '/admin-fake')).toBeNull()
+  it('passes the admin console through on the default host', () => {
+    // The console lives outside the (sites)/[city] tree; rewriting it into a
+    // city would make it unreachable. The segment is now the plain, guessable
+    // "admin" — sessions are the access control, not the URL.
+    expect(resolveRewrite(DEFAULT_HOST, '/admin')).toBeNull()
+    expect(resolveRewrite(DEFAULT_HOST, '/admin/dashboard')).toBeNull()
+    expect(resolveRewrite(DEFAULT_HOST, '/admin/login')).toBeNull()
+    expect(resolveRewrite(DEFAULT_HOST, '/admin/generate/miami')).toBeNull()
+  })
+
+  it('no longer passes through arbitrary /admin-* paths', () => {
+    // The old rule was the `admin-` PREFIX, because the real segment was an
+    // unguessable literal. With a fixed segment the prefix rule is dead
+    // surface: /admin-anything is just a page path in the default tenant.
+    expect(resolveRewrite(DEFAULT_HOST, '/admin-fake')).toBe('/minneapolis/admin-fake')
+    expect(resolveRewrite(DEFAULT_HOST, '/admin-x7kq92mpfw4rt8vz')).toBe(
+      '/minneapolis/admin-x7kq92mpfw4rt8vz',
+    )
   })
 
   it('ignores the port and the host casing', () => {
@@ -87,15 +96,14 @@ describe('resolveRewrite — mapped host', () => {
   })
 
   it('does NOT expose the admin on a customer domain', () => {
-    // The /admin-* passthrough lives inside the default-host branch on
-    // purpose. On a mapped tenant host the path still gets city-prefixed, so
-    // it lands on a route that does not exist in the city tree and 404s —
-    // the admin is reachable on the operator's default host only.
-    expect(resolveRewrite('miamicleans.com', '/admin-x7kq92mpfw4rt8vz', domains, cities)).toBe(
-      '/miami/admin-x7kq92mpfw4rt8vz',
-    )
-    expect(resolveRewrite('miamicleans.com', '/admin-x7kq92mpfw4rt8vz/new', domains, cities)).toBe(
-      '/miami/admin-x7kq92mpfw4rt8vz/new',
+    // The /admin passthrough lives inside the default-host branch on purpose.
+    // On a mapped tenant host the path still gets city-prefixed, so it lands
+    // on a route that does not exist in the city tree and 404s — the console
+    // is reachable on the operator's default host only. This is the second
+    // layer; sessions are the first.
+    expect(resolveRewrite('miamicleans.com', '/admin', domains, cities)).toBe('/miami/admin')
+    expect(resolveRewrite('miamicleans.com', '/admin/login', domains, cities)).toBe(
+      '/miami/admin/login',
     )
   })
 })

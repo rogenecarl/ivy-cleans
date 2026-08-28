@@ -31,7 +31,7 @@ import {
 } from '@/leads/store'
 import { submitLead, type SubmitPorts, type SubmitResult } from '@/leads/submit'
 import type { FormType } from '@/leads/types'
-import { ADMIN_BASE } from '@/app/admin-x7kq92mpfw4rt8vz/base'
+import { ADMIN_BASE } from '@/lib/admin-routes'
 
 export async function submitLeadAction(
   formType: FormType,
