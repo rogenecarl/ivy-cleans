@@ -21,7 +21,9 @@ import {
   FrontSectionsSchema,
   HomeProseSchema,
   ResearchSchema,
+  type Condition,
   type ResearchOutput,
+  type Suburb,
 } from './schemas'
 import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
@@ -486,6 +488,85 @@ export function normalizeResearchSlugs(research: ResearchOutput, cityName: strin
     suburbs.push({ name: suburb.name, slug })
   }
   return { ...research, suburbs }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * 6 · NEW — the uniqueness gate
+ *
+ * Research returns 8 to 12 areas and, until now, every one of them became a
+ * page. Nothing asked whether there was enough to say about it.
+ *
+ * Minneapolis is the argument: Vadnais Heights ran 745 impressions and zero
+ * clicks across sixteen months, Richfield 934 and zero. Those pages were never
+ * going to earn anything, because there was nothing on them that was not on
+ * the other twenty-two. An area with no distinct local material produces a
+ * doorway page by construction, and no amount of prompt quality fixes it.
+ *
+ * Runs after normalizeResearchSlugs, in the same place and in the same
+ * spirit: deterministic, in code, before anything downstream can consume it.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+export type SuburbVerdict = 'build' | 'review' | 'skip'
+
+export interface ScoredSuburb {
+  suburb: Suburb
+  score: number
+  verdict: SuburbVerdict
+  reason: string
+}
+
+// A false 'skip' silently deletes a page that might have worked, so these
+// thresholds are set to require real, distinct material rather than to catch
+// every thin one: >= 8 (roughly named subdivisions plus housing character
+// plus a printable condition or two) builds outright; 4-7 is handed to the
+// operator instead of being dropped automatically, because the operator
+// knows things the research does not (search demand, a client relationship,
+// a listing they've seen); only < 4 — next to nothing researched — is cut
+// without a human ever seeing it.
+const BUILD_THRESHOLD = 8
+const REVIEW_THRESHOLD = 4
+
+/**
+ * Distinct, publishable local material. Only copySafe conditions count: a
+ * condition marked copySafe: false is flood risk, crime, or income data,
+ * collected to decide whether to work a market at all, never to print — it
+ * must not be able to earn an area a page it will never actually carry.
+ */
+export function scoreSuburb(suburb: Suburb): number {
+  const safeConditions = suburb.conditions.filter((c: Condition) => c.copySafe).length
+  const housing = suburb.housingCharacter.trim() === '' ? 0 : 2
+  return suburb.subdivisions.length + safeConditions + housing
+}
+
+export function scoreSuburbs(research: ResearchOutput): ScoredSuburb[] {
+  return research.suburbs.map((suburb) => {
+    const score = scoreSuburb(suburb)
+    const verdict: SuburbVerdict =
+      score >= BUILD_THRESHOLD ? 'build' : score >= REVIEW_THRESHOLD ? 'review' : 'skip'
+    const reason =
+      verdict === 'build'
+        ? `${suburb.subdivisions.length} subdivisions, ${suburb.conditions.filter((c) => c.copySafe).length} local conditions`
+        : verdict === 'review'
+          ? 'thin — enough for a page only if search demand justifies it'
+          : 'too little distinct local material; a page here would duplicate its siblings'
+    return { suburb, score, verdict, reason }
+  })
+}
+
+/**
+ * Drops 'skip' areas. 'review' areas are KEPT — surfaced to the operator with
+ * their score and reason so they get removed deliberately rather than by
+ * default. Returns the full scored list, skips included, because the caller
+ * needs the dropped names and reasons to tell the operator what happened;
+ * discarding them here would make that impossible upstream.
+ */
+export function applyUniquenessGate(research: ResearchOutput): {
+  research: ResearchOutput
+  scored: ScoredSuburb[]
+} {
+  const scored = scoreSuburbs(research)
+  const kept = scored.filter((s) => s.verdict !== 'skip').map((s) => s.suburb)
+  return { research: { ...research, suburbs: kept }, scored }
 }
 
 function requireResearch(draft: DraftDoc, key: string, stage: StageId): ResearchOutput {
