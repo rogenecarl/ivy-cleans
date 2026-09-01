@@ -406,6 +406,84 @@ describe('updateSuburbsLogic', () => {
   })
 })
 
+/*
+ * Regression coverage for the research-wipe bug (feature 9): the editor
+ * sends {name, slug} rows only, and updateSuburbsLogic used to spread that
+ * straight over research.suburbs, discarding subdivisions/housingCharacter/
+ * conditions on every save. These seed research.suburbs directly on the
+ * draft rather than going through runStageLogic('research') — the research
+ * stage's own schema validation is broken independently of this fix (Task
+ * 5/6 changed ResearchSchema but tests/fixtures/stub-pipeline.json was not
+ * updated to match, which is out of scope here; see the existing
+ * updateSuburbsLogic tests above, which now fail at that same
+ * runStageLogic('research') call for that unrelated reason).
+ */
+describe('updateSuburbsLogic — merge behaviour (feature 9 fix)', () => {
+  const KEY = 'ztest-editville'
+
+  const KATY_RESEARCH = {
+    suburbs: [
+      {
+        name: 'Katy',
+        slug: 'katy',
+        subdivisions: ['Cinco Ranch', 'Firethorne', 'Cross Creek Ranch'],
+        housingCharacter: 'Mostly 2000s-built single-family homes on large lots, heavy HOA presence.',
+        conditions: [
+          { condition: 'expansive clay soil', implication: 'seasonal foundation cracking', copySafe: true },
+        ],
+      },
+    ],
+    conditions: [],
+    zips: ['00001'],
+    keywords: ['house cleaning katy'],
+  }
+
+  beforeEach(async () => {
+    await freshDraft(KEY)
+    const draft = await loadDraft(KEY)
+    draft.research = KATY_RESEARCH
+    const { saveDraft } = await import('../src/content/drafts')
+    await saveDraft(KEY, draft)
+  })
+
+  it('keeps researched fields when an operator saves the suburbs editor', async () => {
+    expect(await updateSuburbsLogic(KEY, [{ name: 'Katy', slug: 'katy' }])).toEqual({ ok: true })
+
+    const after = await loadDraft(KEY)
+    expect(after.research!.suburbs[0].subdivisions).toEqual([
+      'Cinco Ranch',
+      'Firethorne',
+      'Cross Creek Ranch',
+    ])
+    expect(after.research!.suburbs[0].housingCharacter).toBe(KATY_RESEARCH.suburbs[0].housingCharacter)
+    expect(after.research!.suburbs[0].conditions).toEqual(KATY_RESEARCH.suburbs[0].conditions)
+  })
+
+  it('gives an operator-added row empty research instead of inheriting another area’s', async () => {
+    expect(
+      await updateSuburbsLogic(KEY, [
+        { name: 'Katy', slug: 'katy' },
+        { name: 'Fulshear', slug: 'fulshear' },
+      ]),
+    ).toEqual({ ok: true })
+
+    const after = await loadDraft(KEY)
+    expect(after.research!.suburbs[1].subdivisions).toEqual([])
+    expect(after.research!.suburbs[1].housingCharacter).toBe('')
+    expect(after.research!.suburbs[1].conditions).toEqual([])
+    // Katy itself must be untouched by Fulshear's addition.
+    expect(after.research!.suburbs[0].subdivisions).toEqual(KATY_RESEARCH.suburbs[0].subdivisions)
+  })
+
+  it('renaming an area without changing its slug keeps the old research (documented consequence)', async () => {
+    expect(await updateSuburbsLogic(KEY, [{ name: 'Cypress', slug: 'katy' }])).toEqual({ ok: true })
+
+    const after = await loadDraft(KEY)
+    expect(after.research!.suburbs[0].name).toBe('Cypress')
+    expect(after.research!.suburbs[0].subdivisions).toEqual(KATY_RESEARCH.suburbs[0].subdivisions)
+  })
+})
+
 describe('regenerateLogic', () => {
   const KEY = 'ztest-editville'
 

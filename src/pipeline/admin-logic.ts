@@ -37,6 +37,7 @@ import type { CityContent } from '../content/types'
 import { deriveFacts } from './facts'
 import { makeClient } from './model'
 import { readProgress, type ProgressEvent } from './progress'
+import type { Suburb } from './schemas'
 import { STAGE_IDS, normalizeSlug, regenerateStage, reservedSlugs, runStage, type StageId } from './stages'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
@@ -45,7 +46,14 @@ const CITIES_JSON = path.join(CONTENT_DIR, '_cities.json')
 export type ActionResult = { ok: true } | { ok: false; error: string }
 export type CreateResult = { ok: true; key: string } | { ok: false; error: string }
 
-export type Suburb = { name: string; slug: string }
+/**
+ * Shape of a row the suburbs editor sends back — name and slug only. This is
+ * NOT the researched `Suburb` (src/pipeline/schemas.ts): the editor never
+ * sees subdivisions/housingCharacter/conditions, so this type must not grow
+ * them. mergeSuburbRows below is what reconciles a row with the rich entity
+ * it corresponds to.
+ */
+export type SuburbRow = { name: string; slug: string }
 
 /** Dashboard row states. See listCities() for how each is decided. */
 export type CityStatus = 'live' | 'draft' | 'generating' | 'draft-unfinalized' | 'error'
@@ -197,9 +205,9 @@ export async function discardDraftLogic(key: string): Promise<ActionResult> {
  * an empty normalized slug, or a slug that duplicates an earlier row are
  * dropped — two area entries cannot share a URL.
  */
-export function normalizeSuburbs(rows: Suburb[]): Suburb[] {
+export function normalizeSuburbs(rows: SuburbRow[]): SuburbRow[] {
   const seen = new Set<string>()
-  const out: Suburb[] = []
+  const out: SuburbRow[] = []
   for (const row of rows) {
     const name = row.name.trim()
     // An empty slug field is a convenience, not an error: fall back to the
@@ -210,6 +218,35 @@ export function normalizeSuburbs(rows: Suburb[]): Suburb[] {
     out.push({ name, slug })
   }
   return out
+}
+
+/**
+ * Rows from the editor carry name and slug only; the researched fields live
+ * on the existing entries and must survive an edit. Slug is the stable
+ * identity, so match on it and copy the research across.
+ *
+ * A row whose slug matches nothing is one the operator ADDED by hand. It gets
+ * empty research fields, which is honest — nobody researched it — and the
+ * uniqueness gate scores it 0 and flags it in the review screen rather than
+ * letting an unresearched area quietly become a page.
+ *
+ * CONSEQUENCE, documented deliberately: renaming an area without changing its
+ * slug keeps the old research. Operators rename for spelling far more often
+ * than they repoint a row at a different place, so slug-as-identity is the
+ * right default — but the editor hint should say so.
+ */
+function mergeSuburbRows(rows: readonly SuburbRow[], existing: readonly Suburb[]): Suburb[] {
+  const bySlug = new Map(existing.map((s) => [s.slug, s]))
+  return rows.map((row) => {
+    const prior = bySlug.get(row.slug)
+    return {
+      name: row.name,
+      slug: row.slug,
+      subdivisions: prior?.subdivisions ?? [],
+      housingCharacter: prior?.housingCharacter ?? '',
+      conditions: prior?.conditions ?? [],
+    }
+  })
 }
 
 async function readCityDoc(key: string): Promise<CityContent | null> {
@@ -231,7 +268,7 @@ async function readCityDoc(key: string): Promise<CityContent | null> {
  * edit that touched only one of them would silently revert. Both are updated
  * when both exist, and it is not an error for only one to.
  */
-export async function updateSuburbsLogic(key: string, rows: Suburb[]): Promise<ActionResult> {
+export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promise<ActionResult> {
   try {
     const suburbs = normalizeSuburbs(rows)
     if (suburbs.length === 0) {
@@ -263,13 +300,13 @@ export async function updateSuburbsLogic(key: string, rows: Suburb[]): Promise<A
     let touched = false
 
     if (draft?.research) {
-      draft.research = { ...draft.research, suburbs }
+      draft.research = { ...draft.research, suburbs: mergeSuburbRows(suburbs, draft.research.suburbs) }
       await saveDraft(key, draft)
       touched = true
     }
 
     if (doc) {
-      doc.research = { ...doc.research, suburbs }
+      doc.research = { ...doc.research, suburbs: mergeSuburbRows(suburbs, doc.research.suburbs) }
       await writeFile(
         path.join(CONTENT_DIR, `${key}.json`),
         JSON.stringify(validateCityContent(doc), null, 2),

@@ -43,7 +43,7 @@ import {
   type ActionResult,
   type CityRow,
   type ProgressSnapshot,
-  type Suburb,
+  type SuburbRow,
 } from '@/pipeline/admin-logic'
 import { ADMIN_BASE } from '@/lib/admin-routes'
 
@@ -100,7 +100,7 @@ export async function finalizeAction(key: string): Promise<ActionResult> {
   return result
 }
 
-export async function updateSuburbsAction(key: string, suburbs: Suburb[]): Promise<ActionResult> {
+export async function updateSuburbsAction(key: string, suburbs: SuburbRow[]): Promise<ActionResult> {
   await requireAdmin()
   const result = await updateSuburbsLogic(key, suburbs)
   if (result.ok) revalidatePath('/', 'layout')
