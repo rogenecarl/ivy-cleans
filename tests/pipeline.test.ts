@@ -21,8 +21,9 @@ import { getCity, revalidateCity } from '../src/content/store'
 import { validateCityContent } from '../src/content/validate'
 import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '../src/pipeline/model'
 import { clearProgress, readProgress } from '../src/pipeline/progress'
+import * as stagesModule from '../src/pipeline/stages'
 import {
-  SLUG_PATTERNS,
+  SLUG_PATTERN,
   STAGES,
   stageSlots,
   suburbSlots,
@@ -912,6 +913,51 @@ describe('pipeline stages', () => {
       const prompt = buildResearchStructuringPrompt('findings text', facts, ['house cleaning katy tx'])
       expect(prompt).toMatch(/use exactly this list, unchanged/)
       expect(prompt).toContain('house cleaning katy tx')
+    })
+
+    it('instructs a bare <area> slug, no prefix or suffix', () => {
+      const prompt = buildResearchStructuringPrompt('findings', facts, [])
+      expect(prompt).toMatch(/Nothing else: no prefix, no suffix/)
+    })
+  })
+
+  // Task 20: the four rotated slug shapes ('house-cleaning-<area>', etc.)
+  // were dead code — nothing in stages.ts ever read SLUG_PATTERNS to build a
+  // slug, the model was only ever told about the rotation through the
+  // structuring prompt (asserted above). Minneapolis's stored slugs already
+  // exercise every one of the retired shapes below, so this only has to
+  // prove the constant collapsed and that normalizeResearchSlugs (which is
+  // the actual code path a slug goes through) never rewrites a slug's shape
+  // — only its characters — so Minneapolis's pages are untouched.
+  describe('SLUG_PATTERN', () => {
+    it('is a bare <area> placeholder, not the old four-pattern rotation', () => {
+      expect(SLUG_PATTERN).toBe('<area>')
+    })
+
+    it('no longer exports SLUG_PATTERNS', () => {
+      expect((stagesModule as Record<string, unknown>).SLUG_PATTERNS).toBeUndefined()
+    })
+
+    it('a newly structured city gets a bare <area> slug through normalizeResearchSlugs', () => {
+      // Simulates what a model following the new prompt returns: no prefix,
+      // no suffix, just the hyphenated area name.
+      const research: ResearchOutput = {
+        suburbs: [{ name: 'New Suburb', slug: 'new-suburb', subdivisions: [], housingCharacter: '', conditions: [] }],
+        conditions: [],
+        zips: [],
+        keywords: [],
+      }
+      const result = normalizeResearchSlugs(research, 'Ztest Stubville')
+      expect(result.suburbs[0].slug).toBe('new-suburb')
+    })
+
+    it("leaves Minneapolis's stored slugs untouched — they still carry the retired rotated forms", async () => {
+      const mpls = await getCity('minneapolis')
+      const slugs = mpls.research.suburbs.map((s) => s.slug)
+      expect(slugs.some((s) => s.startsWith('house-cleaning-'))).toBe(true)
+      expect(slugs.some((s) => s.startsWith('cleaning-services-'))).toBe(true)
+      expect(slugs.some((s) => s.startsWith('cleaning-service-'))).toBe(true)
+      expect(slugs.some((s) => s.endsWith('-cleaning-services') && !s.startsWith('cleaning-services-'))).toBe(true)
     })
   })
 

@@ -58,22 +58,16 @@ import { posts as recentPosts } from '../data/recent-posts'
 export { STAGES, STAGE_IDS, stageSlots, suburbSlots, type StageId }
 
 /**
- * The four URL-slug shapes the live Minneapolis site uses for its area pages
- * (see content/minneapolis.json → research.suburbs). New cities mix all four
- * so the generated slug set looks hand-built rather than templated. `<area>`
- * is the area name, lowercased and hyphenated.
- *
- * NOTE: the reference data itself is lopsided — 14 of Minneapolis's 24 slugs
- * (58%) use `cleaning-services-<area>`. The "no single pattern past half the
- * list" rule in the structuring prompt is therefore a deliberate improvement
- * on the reference, not a description of it.
+ * New cities get a bare `<area>` slug — the area name, lowercased and
+ * hyphenated. Minneapolis's live area pages rotate four URL shapes
+ * (content/minneapolis.json → research.suburbs), but Google evaluates the
+ * page, not the shape of its URL: rotating bought nothing and cost
+ * consistency, so new cities do not imitate it. Minneapolis keeps its stored
+ * slugs — they are indexed, and normalizeResearchSlugs/normalizeSlug only
+ * ever clean up characters, never rewrite a slug's shape, so this change
+ * affects nothing already on disk.
  */
-export const SLUG_PATTERNS = [
-  'house-cleaning-<area>',
-  'cleaning-services-<area>',
-  'cleaning-service-<area>',
-  '<area>-cleaning-services',
-] as const
+export const SLUG_PATTERN = '<area>' as const
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Shape examples — verbatim copies of the REAL Minneapolis copy from
