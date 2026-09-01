@@ -408,15 +408,16 @@ describe('pipeline stages', () => {
   describe('slug normalization', () => {
     /** Fixture variant whose structuring call returns hostile slugs. */
     function messyFixtures(): StubFixtures {
+      const blank = { subdivisions: [], housingCharacter: '', conditions: [] }
       const structured = {
         ...(fixtures.generated['research.structure'] as ResearchOutput),
         suburbs: [
-          { name: 'Weird Slug', slug: 'Weird Slug!' },
-          { name: 'Weird Slug Again', slug: 'weird--slug' },
-          { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow' },
-          { name: 'Mock Hollow Duplicate', slug: 'Cleaning-Services-Mock-Hollow' },
-          { name: 'Under Scored', slug: '  house_cleaning_under scored  ' },
-          { name: 'Punctuation Only', slug: '!!!' },
+          { name: 'Weird Slug', slug: 'Weird Slug!', ...blank },
+          { name: 'Weird Slug Again', slug: 'weird--slug', ...blank },
+          { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow', ...blank },
+          { name: 'Mock Hollow Duplicate', slug: 'Cleaning-Services-Mock-Hollow', ...blank },
+          { name: 'Under Scored', slug: '  house_cleaning_under scored  ', ...blank },
+          { name: 'Punctuation Only', slug: '!!!', ...blank },
         ],
       }
       return {
@@ -461,14 +462,20 @@ describe('pipeline stages', () => {
       const research: ResearchOutput = {
         ...fixtureResearch(),
         suburbs: [
-          { name: 'Contact Corner', slug: 'contact' },
-          { name: 'Deep Clean Heights', slug: 'deep-cleaning-ztest-stubville' },
-          { name: 'Real Suburb', slug: 'real-suburb' },
+          { name: 'Contact Corner', slug: 'contact', subdivisions: [], housingCharacter: '', conditions: [] },
+          {
+            name: 'Deep Clean Heights',
+            slug: 'deep-cleaning-ztest-stubville',
+            subdivisions: [],
+            housingCharacter: '',
+            conditions: [],
+          },
+          { name: 'Real Suburb', slug: 'real-suburb', subdivisions: [], housingCharacter: '', conditions: [] },
         ],
       }
 
       expect(normalizeResearchSlugs(research, 'Ztest Stubville').suburbs).toEqual([
-        { name: 'Real Suburb', slug: 'real-suburb' },
+        { name: 'Real Suburb', slug: 'real-suburb', subdivisions: [], housingCharacter: '', conditions: [] },
       ])
     })
 

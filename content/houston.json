@@ -17,51 +17,87 @@
     "suburbs": [
       {
         "name": "Katy",
-        "slug": "house-cleaning-katy"
+        "slug": "house-cleaning-katy",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "The Woodlands",
-        "slug": "cleaning-services-the-woodlands"
+        "slug": "cleaning-services-the-woodlands",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Sugar Land",
-        "slug": "cleaning-service-sugar-land"
+        "slug": "cleaning-service-sugar-land",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Cinco Ranch",
-        "slug": "cinco-ranch-cleaning-services"
+        "slug": "cinco-ranch-cleaning-services",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Missouri City",
-        "slug": "house-cleaning-missouri-city"
+        "slug": "house-cleaning-missouri-city",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Spring",
-        "slug": "cleaning-services-spring"
+        "slug": "cleaning-services-spring",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Pearland",
-        "slug": "cleaning-service-pearland"
+        "slug": "cleaning-service-pearland",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Pecan Grove",
-        "slug": "pecan-grove-cleaning-services"
+        "slug": "pecan-grove-cleaning-services",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Fulshear",
-        "slug": "house-cleaning-fulshear"
+        "slug": "house-cleaning-fulshear",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "The Heights",
-        "slug": "cleaning-services-the-heights"
+        "slug": "cleaning-services-the-heights",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "River Oaks",
-        "slug": "cleaning-service-river-oaks"
+        "slug": "cleaning-service-river-oaks",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Montrose",
-        "slug": "montrose-cleaning-services"
+        "slug": "montrose-cleaning-services",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       }
     ],
     "zips": [
@@ -93,23 +129,8 @@
       "77096",
       "77098"
     ],
-    "landmarks": [
-      "Space Center Houston",
-      "The Galleria",
-      "San Jacinto Monument",
-      "San Jacinto Battleground",
-      "NRG Stadium",
-      "Memorial Park",
-      "Sam Houston Park",
-      "Buffalo Bayou Park Cistern",
-      "Museum of Fine Arts",
-      "Houston Botanic Garden",
-      "Theater District",
-      "Hermann Park",
-      "Kemah Boardwalk",
-      "Daikin Park"
-    ],
-    "mapEmbedUrl": null
+    "mapEmbedUrl": null,
+    "conditions": []
   },
   "sections": {
     "services.heroParagraphs": [
@@ -131,8 +152,6 @@
     "services.cards.bathroom": "Bathroom cleaning is the task Houston homeowners dread most, and with good reason. Damp coastal air keeps showers from drying out, so mildew shadows the grout while hard water leaves chalky rings on faucets and glass doors. Our team scrubs tile, tubs, toilets, and fixtures down to the surface and disinfects as we go, handing back a bathroom that is sanitary, bright, and safe for everyone in the house.",
     "services.cards.window": "Window cleaning transforms a Houston home, whether it’s a bungalow with original wood sashes or a high-rise unit facing the skyline. Oak pollen, mud from summer thunderstorms, and the gray haze that hangs over the freeways build a film that dims every room behind the glass. Our window cleaners leave panes, frames, and sills clear and streak-free, so your home fills with the daylight you are paying for.",
     "services.cards.upholstery": "Upholstery holds onto Houston in ways you can smell before you see it. Humidity settles into sofa cushions and dining chairs, sunscreen and sweat transfer on hot afternoons, and pollen works deep into the weave each spring. Our upholstery cleaning draws out that trapped soil and odor with methods matched to the fabric, so your furniture looks refreshed, feels dry, and no longer carries the season indoors with it.",
-    "deep.whatIs": "Deep cleaning is a comprehensive service that reaches well past the tidying of a routine visit. We work through every surface, floor, carpet, and piece of furniture in your home, drawing out the dirt, dust, and allergens an ordinary clean leaves sitting in baseboards, grout, vents, and upholstery. Houston gives us plenty to find. Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds. The result is a healthier, more comfortable home for your family.",
-    "home.zipParagraph": "We offer home cleaning service in most or all of the following Houston ZIP Codes: 77002, 77003, 77004, 77005, 77006, 77007, 77008, 77009, 77019, 77023, 77024, 77025, 77027, 77035, 77036, 77055, 77056, 77057, 77063, 77070, 77077, 77079, 77080, 77084, 77095, 77096, and 77098.",
-    "home.landmarksParagraph": "Ivy cleans serves in almost all the area of Houston including Space Center Houston, The Galleria, San Jacinto Monument, San Jacinto Battleground, NRG Stadium, Memorial Park, Sam Houston Park, Buffalo Bayou Park Cistern, Museum of Fine Arts, Houston Botanic Garden, Theater District, Hermann Park, Kemah Boardwalk, Daikin Park and so on."
+    "deep.whatIs": "Deep cleaning is a comprehensive service that reaches well past the tidying of a routine visit. We work through every surface, floor, carpet, and piece of furniture in your home, drawing out the dirt, dust, and allergens an ordinary clean leaves sitting in baseboards, grout, vents, and upholstery. Houston gives us plenty to find. Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds. The result is a healthier, more comfortable home for your family."
   }
 }

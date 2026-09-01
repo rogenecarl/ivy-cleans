@@ -259,7 +259,7 @@ export async function finalizeDraft(key: string): Promise<void> {
     research: {
       suburbs: research.suburbs,
       zips: research.zips,
-      landmarks: research.landmarks,
+      conditions: research.conditions,
       mapEmbedUrl: null,
     },
     sections,

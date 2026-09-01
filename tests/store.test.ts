@@ -79,7 +79,7 @@ describe("registry key must match the city name", () => {
         phoneDisplay: "(555) 000-0000",
         hasSuburbPages: false,
         maps: { front: null, home: null, contact: null },
-        research: { suburbs: [], zips: [], landmarks: [], mapEmbedUrl: null },
+        research: { suburbs: [], zips: [], conditions: [], mapEmbedUrl: null },
         sections: {},
       }),
       "utf-8",

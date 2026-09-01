@@ -41,6 +41,7 @@
   "exclude": [
     "node_modules",
     "trip-scheduler",
-    "peaktransport"
+    "peaktransport",
+    "docs"
   ]
 }

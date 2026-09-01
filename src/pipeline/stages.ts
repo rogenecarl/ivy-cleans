@@ -40,7 +40,7 @@ import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
 
 export const STAGES = [
-  { id: 'research', label: 'Researching the city — suburbs, ZIP codes, landmarks' },
+  { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
   { id: 'front', label: 'Writing the front page — hero and services' },
   { id: 'deep', label: 'Writing the deep-cleaning page' },
 ] as const
@@ -550,7 +550,7 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       await appendProgress(key, {
         stage: 'research',
         kind: 'start',
-        label: `Searching the web for ${facts.city} suburbs, ZIP codes, and landmarks`,
+        label: `Searching the web for ${facts.city} suburbs, ZIP codes, and local conditions`,
       })
       const findings = await client.research(buildResearchPrompt(facts), MODEL_KEYS.research, (e) => {
         // Sync callback — cannot await. Task 1's per-key chain serializes these writes.
@@ -559,7 +559,7 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       await appendProgress(key, {
         stage: 'research',
         kind: 'found',
-        label: 'Collected findings — structuring into suburbs, ZIPs, landmarks',
+        label: 'Collected findings — structuring into suburbs, ZIPs, conditions',
       })
       const structured = await client.generate({
         schema: ResearchSchema,

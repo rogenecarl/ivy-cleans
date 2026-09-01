@@ -1,17 +1,46 @@
 {
   "_comment": "Canned model output for StubModelClient (src/pipeline/model.ts). Every test and every STUB_MODEL=1 run of the admin pipeline reads this file instead of calling Claude, so it must stay valid against src/pipeline/schemas.ts. The city is the fictional Stubville: obviously fake copy, so a stub run that accidentally reaches a real page is unmistakable. Keys match src/pipeline/stages.ts MODEL_KEYS.",
   "research": {
-    "research": "STUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Landmarks: Stub Tower, Fixture Park.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust."
+    "research": "STUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust."
   },
   "generated": {
     "research.structure": {
       "suburbs": [
-        { "name": "North Stubville", "slug": "house-cleaning-north-stubville" },
-        { "name": "Mock Hollow", "slug": "cleaning-services-mock-hollow" },
-        { "name": "Fixture Heights", "slug": "fixture-heights-cleaning-services" }
+        {
+          "name": "North Stubville",
+          "slug": "house-cleaning-north-stubville",
+          "subdivisions": ["Assertion Acres"],
+          "housingCharacter": "Mock bungalows from the fixture era, mostly one story, with small fenced yards.",
+          "conditions": []
+        },
+        {
+          "name": "Mock Hollow",
+          "slug": "cleaning-services-mock-hollow",
+          "subdivisions": ["Mock Hollow Commons"],
+          "housingCharacter": "Stub-frame duplexes built close together along the fixture line.",
+          "conditions": []
+        },
+        {
+          "name": "Fixture Heights",
+          "slug": "fixture-heights-cleaning-services",
+          "subdivisions": [],
+          "housingCharacter": "",
+          "conditions": []
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "Six months of test season followed by six months of assertions",
+          "implication": "Fixture dust settles on shelves and ledges for most of the year, so surfaces need regular dusting.",
+          "copySafe": true
+        },
+        {
+          "condition": "Internal QA note — placeholder parcel risk data",
+          "implication": "For operator scheduling judgement only; never for customer-facing copy.",
+          "copySafe": false
+        }
       ],
       "zips": ["00001", "00002"],
-      "landmarks": ["Stub Tower", "Fixture Park"],
       "keywords": [
         "cleaning services stubville",
         "house cleaning stubville",
@@ -41,10 +70,6 @@
         "window": "Window cleaning is hard to keep up with in Stubville, where fixture dust films the glass within days of a wash. Our professional window cleaners work on both sides of every pane, clearing the streaks and the grime along the frames, and the rooms behind them come back brighter than their owners remember.",
         "upholstery": "Upholstery cleaning is the service Stubville households forget until they look closely. Sofas and armchairs absorb the dust of a long indoor season, and no amount of vacuuming the floor reaches them. Our upholstery cleaning draws the dirt and allergens back out of the fabric, so the furniture you sit on every evening is as clean as the room around it."
       }
-    },
-    "home": {
-      "zipParagraph": "Our crews already run regular routes through Stubville ZIP codes 00001, and 00002, so booking a visit rarely needs more than a day's notice.",
-      "landmarksParagraph": "Ivy cleans serves in almost all the area of Stubville including Stub Tower, Fixture Park and so on."
     },
     "deep": {
       "whatIs": "Deep cleaning is a thorough service that goes well past a regular visit. It works through every surface, floor, carpet and piece of furniture in your home, lifting out the dirt, dust and allergens that ordinary cleaning passes over. In Stubville that matters more than most places: the mock bungalows and stub-frame duplexes here spend half the year sealed against the test season, and fixture dust settles into fabric and skirting the whole time. A deep clean resets all of it and gives you back a healthier, more comfortable home."

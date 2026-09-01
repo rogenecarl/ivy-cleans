@@ -18,19 +18,45 @@
     "suburbs": [
       {
         "name": "North Testburg",
-        "slug": "house-cleaning-north-testburg"
+        "slug": "house-cleaning-north-testburg",
+        "subdivisions": ["Fixture Ridge", "Stub Creek Estates"],
+        "housingCharacter": "FIXTURE COPY — mostly 1990s split-levels with attached garages and small fenced yards.",
+        "conditions": [
+          {
+            "condition": "FIXTURE CONDITION — clay soil tracked in after rain",
+            "implication": "FIXTURE IMPLICATION — floors need more frequent vacuuming near entryways.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Faketon",
-        "slug": "cleaning-services-faketon"
+        "slug": "cleaning-services-faketon",
+        "subdivisions": ["Placeholder Commons"],
+        "housingCharacter": "FIXTURE COPY — a mix of older bungalows and newer townhomes near the fixture line.",
+        "conditions": []
       },
       {
         "name": "Mockville",
-        "slug": "cleaning-service-mockville"
+        "slug": "cleaning-service-mockville",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       }
     ],
     "zips": [],
-    "landmarks": [],
+    "conditions": [
+      {
+        "condition": "FIXTURE CONDITION — six months of test-season pollen",
+        "implication": "FIXTURE IMPLICATION — window sills and blinds need dusting more often in spring.",
+        "copySafe": true
+      },
+      {
+        "condition": "FIXTURE CONDITION — internal QA note, flood-zone overlap by parcel",
+        "implication": "FIXTURE IMPLICATION — for operator scheduling judgement only, never for customer-facing copy.",
+        "copySafe": false
+      }
+    ],
     "mapEmbedUrl": null
   },
   "sections": {
@@ -53,8 +79,6 @@
     "services.cards.bathroom": "FIXTURE COPY — bathroom cleaning card text for Testville.",
     "services.cards.window": "FIXTURE COPY — window cleaning card text for Testville.",
     "services.cards.upholstery": "FIXTURE COPY — upholstery cleaning card text for Testville.",
-    "deep.whatIs": "FIXTURE COPY — what deep cleaning is, as written for Testville.",
-    "home.zipParagraph": "FIXTURE COPY — we offer home cleaning service in most or all of the following Testville ZIP Codes: 00001, 00002, 00003.",
-    "home.landmarksParagraph": "FIXTURE COPY — Ivy Cleans serves almost all of Testville including the Fixture Museum, Mock Park and the Placeholder Bridge."
+    "deep.whatIs": "FIXTURE COPY — what deep cleaning is, as written for Testville."
   }
 }

@@ -234,11 +234,11 @@ describe('stage run → finalize → publish', () => {
     expect((await freshDraft(KEY)).ok).toBe(true)
   })
 
-  it('runs all four stages through the stub client', async () => {
+  it('runs all three stages through the stub client', async () => {
     await runAllStages(KEY)
     const draft = await loadDraft(KEY)
-    expect(draft.done).toEqual(['research', 'front', 'home', 'deep'])
-    expect(Object.keys(draft.sections)).toHaveLength(10)
+    expect(draft.done).toEqual([...STAGE_IDS])
+    expect(Object.keys(draft.sections)).toHaveLength(8)
     expect(draft.research?.zips).toEqual(['00001', '00002'])
   })
 
@@ -264,7 +264,10 @@ describe('stage run → finalize → publish', () => {
     expect(doc.city).toBe('Ztest Adminville')
     expect(doc.status).toBe('draft')
     expect(doc.phone).toBe('612-555-0142')
-    expect(doc.research.landmarks).toEqual(['Stub Tower', 'Fixture Park'])
+    expect(doc.research.conditions.map((c) => c.condition)).toEqual([
+      'Six months of test season followed by six months of assertions',
+      'Internal QA note — placeholder parcel risk data',
+    ])
 
     const keys = JSON.parse(await readFile(CITIES_JSON, 'utf-8')) as string[]
     expect(keys).toContain(KEY)
@@ -344,8 +347,14 @@ describe('updateSuburbsLogic', () => {
 
     const draft = await loadDraft(KEY)
     expect(draft.research?.suburbs).toEqual([
-      { name: 'North Stubville', slug: 'house-cleaning-north-stubville' },
-      { name: 'New Area', slug: 'new-area' },
+      {
+        name: 'North Stubville',
+        slug: 'house-cleaning-north-stubville',
+        subdivisions: ['Assertion Acres'],
+        housingCharacter: 'Mock bungalows from the fixture era, mostly one story, with small fenced yards.',
+        conditions: [],
+      },
+      { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [] },
     ])
     // The rest of the research object is untouched.
     expect(draft.research?.zips).toEqual(['00001', '00002'])
@@ -361,8 +370,14 @@ describe('updateSuburbsLogic', () => {
     // is the copy the preview actually renders.
     const doc = await getCity(KEY)
     expect(doc.research.suburbs).toEqual([
-      { name: 'North Stubville', slug: 'house-cleaning-north-stubville' },
-      { name: 'New Area', slug: 'new-area' },
+      {
+        name: 'North Stubville',
+        slug: 'house-cleaning-north-stubville',
+        subdivisions: ['Assertion Acres'],
+        housingCharacter: 'Mock bungalows from the fixture era, mostly one story, with small fenced yards.',
+        conditions: [],
+      },
+      { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [] },
     ])
     // ...and the sidecar stayed in step, so a later regenerate/finalize does
     // not resurrect the old list.
@@ -402,7 +417,9 @@ describe('updateSuburbsLogic', () => {
     ).toEqual({ ok: true })
 
     const draft = await loadDraft(KEY)
-    expect(draft.research?.suburbs).toEqual([{ name: 'Contact', slug: 'contact-heights' }])
+    expect(draft.research?.suburbs).toEqual([
+      { name: 'Contact', slug: 'contact-heights', subdivisions: [], housingCharacter: '', conditions: [] },
+    ])
   })
 })
 
@@ -615,7 +632,7 @@ describe('listCities', () => {
     expect(row(await listCities(), KEY)).toMatchObject({
       status: 'draft-unfinalized',
       hasDraft: true,
-      doneCount: 4,
+      doneCount: 3,
     })
   })
 
@@ -626,7 +643,7 @@ describe('listCities', () => {
 
     const rows = await listCities()
     expect(rows.filter((r) => r.key === KEY)).toHaveLength(1)
-    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 4 })
+    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 3 })
   })
 
   it('shows a published city as LIVE with no sidecar left', async () => {

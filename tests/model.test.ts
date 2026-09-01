@@ -5,7 +5,6 @@ import { z } from 'zod'
 import {
   DeepSchema,
   FrontSectionsSchema,
-  HomeProseSchema,
   ResearchSchema,
 } from '../src/pipeline/schemas'
 import { AnthropicModelClient, StubModelClient, makeClient, type ResearchEvent } from '../src/pipeline/model'
@@ -21,9 +20,17 @@ const FIXTURE_PATH = path.join(process.cwd(), 'tests/fixtures/stub-pipeline.json
 
 describe('ResearchSchema', () => {
   const valid = {
-    suburbs: [{ name: 'Edina', slug: 'edina' }],
+    suburbs: [
+      {
+        name: 'Edina',
+        slug: 'edina',
+        subdivisions: ['Interlachen'],
+        housingCharacter: 'Mid-century ramblers and newer infill construction.',
+        conditions: [{ condition: 'Hard water', implication: 'Faucets need descaling.', copySafe: true }],
+      },
+    ],
+    conditions: [{ condition: 'Cold winters', implication: 'Salt tracked indoors.', copySafe: true }],
     zips: ['55401'],
-    landmarks: ['Lake Calhoun'],
     keywords: ['house cleaning minneapolis'],
   }
 
@@ -37,7 +44,10 @@ describe('ResearchSchema', () => {
 
   test('rejects an extra key inside a suburb object', () => {
     expect(() =>
-      ResearchSchema.parse({ ...valid, suburbs: [{ name: 'Edina', slug: 'edina', population: 100 }] })
+      ResearchSchema.parse({
+        ...valid,
+        suburbs: [{ ...valid.suburbs[0], population: 100 }],
+      })
     ).toThrow()
   })
 
@@ -46,7 +56,7 @@ describe('ResearchSchema', () => {
   })
 
   test('rejects a missing key', () => {
-    const missingKeywords = { suburbs: valid.suburbs, zips: valid.zips, landmarks: valid.landmarks }
+    const missingKeywords = { suburbs: valid.suburbs, zips: valid.zips, conditions: valid.conditions }
     expect(() => ResearchSchema.parse(missingKeywords)).toThrow()
   })
 })
@@ -90,26 +100,6 @@ describe('FrontSectionsSchema', () => {
       window: valid.cards.window,
     }
     expect(() => FrontSectionsSchema.parse({ ...valid, cards: missingUpholstery })).toThrow()
-  })
-})
-
-describe('HomeProseSchema', () => {
-  const valid = { zipParagraph: 'We serve 55401...', landmarksParagraph: 'Near Lake Calhoun...' }
-
-  test('accepts a valid example', () => {
-    expect(HomeProseSchema.parse(valid)).toEqual(valid)
-  })
-
-  test('rejects an extra key', () => {
-    expect(() => HomeProseSchema.parse({ ...valid, extra: 'nope' })).toThrow()
-  })
-
-  test('rejects a wrong-typed field', () => {
-    expect(() => HomeProseSchema.parse({ ...valid, zipParagraph: 123 })).toThrow()
-  })
-
-  test('rejects a missing key', () => {
-    expect(() => HomeProseSchema.parse({ zipParagraph: valid.zipParagraph })).toThrow()
   })
 })
 

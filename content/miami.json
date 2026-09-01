@@ -17,47 +17,80 @@
     "suburbs": [
       {
         "name": "Coconut Grove",
-        "slug": "house-cleaning-coconut-grove"
+        "slug": "house-cleaning-coconut-grove",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Brickell",
-        "slug": "cleaning-services-brickell"
+        "slug": "cleaning-services-brickell",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Coral Gables",
-        "slug": "cleaning-service-coral-gables"
+        "slug": "cleaning-service-coral-gables",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Miami Beach",
-        "slug": "miami-beach-cleaning-services"
+        "slug": "miami-beach-cleaning-services",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Key Biscayne",
-        "slug": "house-cleaning-key-biscayne"
+        "slug": "house-cleaning-key-biscayne",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Hialeah",
-        "slug": "cleaning-services-hialeah"
+        "slug": "cleaning-services-hialeah",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Doral",
-        "slug": "cleaning-service-doral"
+        "slug": "cleaning-service-doral",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Kendall",
-        "slug": "kendall-cleaning-services"
+        "slug": "kendall-cleaning-services",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "West Kendall",
-        "slug": "house-cleaning-west-kendall"
+        "slug": "house-cleaning-west-kendall",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "South Miami",
-        "slug": "cleaning-services-south-miami"
+        "slug": "cleaning-services-south-miami",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Homestead",
-        "slug": "cleaning-service-homestead"
+        "slug": "cleaning-service-homestead",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       }
     ],
     "zips": [
@@ -66,19 +99,8 @@
       "33133",
       "33186"
     ],
-    "landmarks": [
-      "Vizcaya Museum and Gardens",
-      "Bayfront Park",
-      "Fairchild Tropical Botanic Garden",
-      "Holocaust Memorial",
-      "Ocean Drive",
-      "Zoo Miami",
-      "Everglades National Park",
-      "Hialeah Park Casino",
-      "Amelia Earhart Park",
-      "Cape Florida Lighthouse"
-    ],
-    "mapEmbedUrl": null
+    "mapEmbedUrl": null,
+    "conditions": []
   },
   "sections": {
     "services.heroParagraphs": [
@@ -100,8 +122,6 @@
     "services.cards.bathroom": "Bathroom cleaning is one job no Miami home can postpone. With moisture in the air year-round and showers that never fully dry out, mildew takes hold in grout and along caulk lines while mineral deposits cloud glass doors and chrome. Our team scours every surface, treats the damp corners properly, and clears away germs, handing back a bathroom that is bright, sanitary, and safe for your family.",
     "services.cards.window": "Window cleaning transforms a home here more than almost anywhere, because so much of Miami is built to look outward at water, palms, and sky. Yet salt carried inland, wind-driven sand, and hard tropical rain leave glass hazy within weeks. Our professional window cleaners wash panes, frames, and sills until the streaks are gone, letting that famous light fill your rooms again.",
     "services.cards.upholstery": "Upholstery absorbs everything the Miami climate offers: humidity that lingers in cushions, sunscreen and salt water transferred from skin and swimsuits, and the faint mustiness that follows a rainy stretch. Sofas in condos and rental homes take heavy use as well. Our upholstery cleaning draws moisture, oils, and trapped odors out of the fabric, leaving your furniture fresher to sit on and better looking for longer.",
-    "deep.whatIs": "A deep clean is a thorough, top-to-bottom service that reaches well past the tidying of a routine visit. We work every surface, baseboard, floor, carpet, and piece of furniture, including the corners and undersides an ordinary cleaning passes over, lifting out the dirt, dust, and allergens that settle in and stay. In Miami that matters more than most places, because our humidity never truly lets up and salt air drifts in off the water, leaving a fine film on glass, tile, and fixtures while damp air encourages mildew in bathrooms, closets, and around air handlers. Removing all of it leaves your home healthier, fresher, and far more comfortable.",
-    "home.zipParagraph": "We offer home cleaning service in most or all of the following Miami ZIP Codes: 33012, 33125, 33133, and 33186.",
-    "home.landmarksParagraph": "Ivy cleans serves in almost all the area of Miami including Vizcaya Museum and Gardens, Bayfront Park, Fairchild Tropical Botanic Garden, Holocaust Memorial, Ocean Drive, Zoo Miami, Everglades National Park, Hialeah Park Casino, Amelia Earhart Park, Cape Florida Lighthouse and so on."
+    "deep.whatIs": "A deep clean is a thorough, top-to-bottom service that reaches well past the tidying of a routine visit. We work every surface, baseboard, floor, carpet, and piece of furniture, including the corners and undersides an ordinary cleaning passes over, lifting out the dirt, dust, and allergens that settle in and stay. In Miami that matters more than most places, because our humidity never truly lets up and salt air drifts in off the water, leaving a fine film on glass, tile, and fixtures while damp air encourages mildew in bathrooms, closets, and around air handlers. Removing all of it leaves your home healthier, fresher, and far more comfortable."
   }
 }

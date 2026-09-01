@@ -60,9 +60,17 @@ function progressPath(key: string): string {
 
 function fullResearch(): ResearchOutput {
   return {
-    suburbs: [{ name: 'North Ztest', slug: 'house-cleaning-north-ztest' }],
+    suburbs: [
+      {
+        name: 'North Ztest',
+        slug: 'house-cleaning-north-ztest',
+        subdivisions: [],
+        housingCharacter: '',
+        conditions: [],
+      },
+    ],
+    conditions: [],
     zips: ['00001', '00002'],
-    landmarks: ['Ztest Park'],
     keywords: ['cleaning services ztest'],
   }
 }
@@ -77,8 +85,6 @@ function fullSections(): Record<string, string | string[]> {
     'services.cards.window': 'Window copy.',
     'services.cards.upholstery': 'Upholstery copy.',
     'deep.whatIs': 'Deep cleaning is...',
-    'home.zipParagraph': 'We serve 00001, 00002.',
-    'home.landmarksParagraph': 'Near Ztest Park.',
   }
 }
 
@@ -188,7 +194,7 @@ describe('drafts store', () => {
         status: 'live',
         hasSuburbPages: false,
         maps: { front: null, home: null, contact: null },
-        research: { suburbs: [], zips: [], landmarks: [], mapEmbedUrl: null },
+        research: { suburbs: [], zips: [], conditions: [], mapEmbedUrl: null },
         sections: {},
       }
       await writeFile(cityPath(key), JSON.stringify(published), 'utf-8')
@@ -304,8 +310,6 @@ describe('drafts store', () => {
       expect(msg).toMatch(/services\.cards\.bathroom/)
       expect(msg).toMatch(/services\.cards\.window/)
       expect(msg).toMatch(/services\.cards\.upholstery/)
-      expect(msg).toMatch(/home\.zipParagraph/)
-      expect(msg).toMatch(/home\.landmarksParagraph/)
       // Slots that WERE provided must not be reported missing.
       expect(msg).not.toMatch(/services\.heroParagraphs/)
       expect(msg).not.toMatch(/deep\.whatIs/)

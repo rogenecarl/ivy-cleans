@@ -18,104 +18,202 @@
     "suburbs": [
       {
         "name": "Apple Valley",
-        "slug": "house-cleaning-apple-valley"
+        "slug": "house-cleaning-apple-valley",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Farmington",
-        "slug": "cleaning-services-farmington"
+        "slug": "cleaning-services-farmington",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Rosemount",
-        "slug": "cleaning-services-rosemount"
+        "slug": "cleaning-services-rosemount",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Lakeville",
-        "slug": "cleaning-services-lakeville"
+        "slug": "cleaning-services-lakeville",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Eagan",
-        "slug": "cleaning-services-eagan"
+        "slug": "cleaning-services-eagan",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Burnsville",
-        "slug": "cleaning-services-burnsville"
+        "slug": "cleaning-services-burnsville",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Bloomington",
-        "slug": "cleaning-services-bloomington"
+        "slug": "cleaning-services-bloomington",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Shakopee",
-        "slug": "cleaning-services-shakopee"
+        "slug": "cleaning-services-shakopee",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Eden Prairie",
-        "slug": "cleaning-services-eden-prairie"
+        "slug": "cleaning-services-eden-prairie",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Hopkins",
-        "slug": "cleaning-services-hopkins"
+        "slug": "cleaning-services-hopkins",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "St. Louis Park",
-        "slug": "cleaning-services-st-louis-park"
+        "slug": "cleaning-services-st-louis-park",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Edina",
-        "slug": "cleaning-services-edina"
+        "slug": "cleaning-services-edina",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Inver Grove",
-        "slug": "cleaning-services-inver-grove"
+        "slug": "cleaning-services-inver-grove",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Maple Grove",
-        "slug": "cleaning-services-maple-grove"
+        "slug": "cleaning-services-maple-grove",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Maplewood",
-        "slug": "cleaning-service-maplewood"
+        "slug": "cleaning-service-maplewood",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "St. Paul",
-        "slug": "cleaning-service-st-paul"
+        "slug": "cleaning-service-st-paul",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "New Brighton",
-        "slug": "cleaning-service-new-brighton"
+        "slug": "cleaning-service-new-brighton",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Plymouth",
-        "slug": "cleaning-service-plymouth-mn"
+        "slug": "cleaning-service-plymouth-mn",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Richfield",
-        "slug": "cleaning-service-richfield"
+        "slug": "cleaning-service-richfield",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Roseville",
-        "slug": "cleaning-services-roseville"
+        "slug": "cleaning-services-roseville",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Savage",
-        "slug": "cleaning-service-savage-mn"
+        "slug": "cleaning-service-savage-mn",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Wayzata",
-        "slug": "cleaning-service-wayzata"
+        "slug": "cleaning-service-wayzata",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Woodbury",
-        "slug": "cleaning-service-woodbury"
+        "slug": "cleaning-service-woodbury",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       },
       {
         "name": "Vadnais Heights",
-        "slug": "vadnais-heights-cleaning-services"
+        "slug": "vadnais-heights-cleaning-services",
+        "subdivisions": [],
+        "housingCharacter": "",
+        "conditions": []
       }
     ],
-    "zips": [],
-    "landmarks": [],
-    "mapEmbedUrl": "https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near"
+    "zips": [
+      "55401",
+      "55402",
+      "55403",
+      "55404",
+      "55405",
+      "55406",
+      "55407",
+      "55408",
+      "55409",
+      "55410",
+      "55411",
+      "55412",
+      "55413",
+      "55414",
+      "55415",
+      "55416",
+      "55417",
+      "55418",
+      "55419",
+      "55421",
+      "55423",
+      "55430",
+      "55450",
+      "55454",
+      "55455"
+    ],
+    "mapEmbedUrl": "https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near",
+    "conditions": []
   },
   "sections": {
     "services.heroParagraphs": [
@@ -137,8 +235,6 @@
     "services.cards.bathroom": "Bathroom cleaning is a task that many homeowners find daunting, but it is crucial for maintaining a clean and healthy home. In Minneapolis, where the weather can be unpredictable, maintaining a clean and hygienic bathroom is particularly important. Our bathroom cleaning services ensure that your bathroom is free from germs and bacteria, providing a safe and healthy environment for you and your family.",
     "services.cards.window": "Window cleaning is another essential service that is particularly important in Minneapolis. With its cold and snowy winters, it can be challenging to keep windows clean and clear. Our professional window cleaning services ensure that your windows are free from dirt, grime, and streaks, providing a clearer view and a brighter, more inviting living space.",
     "services.cards.upholstery": "Upholstery cleaning is a service that is often overlooked but is crucial for maintaining a clean and healthy home. Minneapolis residents spend a lot of time indoors during the winter months, and this can lead to a buildup of dirt and allergens on upholstered furniture. Our upholstery cleaning services ensure that your furniture is free from dust, dirt, and allergens, providing a more comfortable and healthy living environment.",
-    "deep.whatIs": "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.",
-    "home.zipParagraph": "We offer home cleaning service in most or all of the following Minneapolis ZIP Codes: 55401, 55402, 55403, 55404, 55405, 55406, 55407, 55408, 55409, 55410, 55411, 55412, 55413, 55414, 55415, 55416, 55417, 55418, 55419, 55421, 55423, 55430, 55450, 55454, and 55455.",
-    "home.landmarksParagraph": "Ivy cleans serves in almost all the area of Minneapolis including Mill City Museum, Walker Art Center, Stone Arch Bridge, Minneapolis Institute of Art, Target Field and so on."
+    "deep.whatIs": "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family."
   }
 }
