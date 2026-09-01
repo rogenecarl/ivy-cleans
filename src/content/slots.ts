@@ -27,10 +27,32 @@ export function sl(c: CityContent, id: string): string[] {
  * research with empty subdivisions/conditions and never ran the suburb
  * generation stage, so their `suburb.<slug>.*` slots don't exist at all.
  * Reading them with s() would throw on every one of those live pages.
+ *
+ * A blank or whitespace-only value is treated the same as absent (see
+ * isWrittenSlot below): SuburbCopySchema carries no min-length constraint,
+ * so a model can return `""` for a slot, and that string IS `typeof
+ * === 'string'`. Without this, src/data/suburb.ts would render an empty
+ * `<p>` on a live area page instead of falling back to the template.
  */
 export function sOpt(c: CityContent, id: string): string | undefined {
   const v = c.sections[id]
-  return typeof v === 'string' ? v : undefined
+  return isWrittenSlot(v) && typeof v === 'string' ? v : undefined
+}
+
+/**
+ * The one notion of "a slot holds real content" shared by the suburb
+ * generation loop (src/pipeline/stages.ts), finalizeDraft's missing-slot
+ * check (src/content/drafts.ts), and sOpt above. A string only counts if it
+ * has non-whitespace content — SuburbCopySchema has no min-length
+ * constraint (the structured-output API rejects that constraint on
+ * strings), so a model can return `""`, and `"" !== undefined` is true. An
+ * array slot (e.g. services.heroParagraphs) has no such failure mode from
+ * this pipeline, so any array — including an empty one, which is a
+ * legitimate answer for e.g. subdivisions — counts as written once present.
+ */
+export function isWrittenSlot(value: string | string[] | undefined): boolean {
+  if (typeof value === 'string') return value.trim() !== ''
+  return value !== undefined
 }
 
 /**

@@ -46,6 +46,7 @@ const ALL_TEST_KEYS = [
   'ztest-conflict-city',
   'ztest-finalizeme',
   'ztest-incomplete',
+  'ztest-blankslot',
   'ztest-publishme',
   'ztest-guardville',
   'ztest-republish',
@@ -421,6 +422,38 @@ describe('drafts store', () => {
       // Slots that WERE provided must not be reported missing.
       expect(msg).not.toMatch(/services\.heroParagraphs/)
       expect(msg).not.toMatch(/deep\.whatIs/)
+
+      // Nothing should have been published.
+      await expect(readFile(cityPath(key), 'utf-8')).rejects.toThrow()
+    })
+  })
+
+  describe('finalizeDraft refuses a blank suburb slot', () => {
+    const key = 'ztest-blankslot'
+
+    afterAll(async () => {
+      await rm(draftPath(key), { force: true })
+      await rm(cityPath(key), { force: true })
+      revalidateCity(key)
+    })
+
+    it('names the blank slot as missing rather than publishing an empty paragraph', async () => {
+      const facts = deriveFacts({ city: 'Ztest Blankslot', state: 'MN', phoneDigits: '6125550105' })
+      await createDraft(facts)
+
+      const doc: DraftDoc = await loadDraft(key)
+      doc.research = fullResearch()
+      doc.sections = {
+        ...fullSections(),
+        // A model returning "" for one suburb slot is `!== undefined` but
+        // not real copy — this must refuse, not publish a blank <p>.
+        'suburb.house-cleaning-north-ztest.intro': '   ',
+      }
+      await saveDraft(key, doc)
+
+      await expect(finalizeDraft(key)).rejects.toThrow(
+        /sections\.suburb\.house-cleaning-north-ztest\.intro/,
+      )
 
       // Nothing should have been published.
       await expect(readFile(cityPath(key), 'utf-8')).rejects.toThrow()

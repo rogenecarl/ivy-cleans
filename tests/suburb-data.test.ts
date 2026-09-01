@@ -168,6 +168,28 @@ describe('suburbData', () => {
       expect(data.benefits.paragraphs.join(' ')).not.toContain('vital aspects of health')
     })
 
+    const cityWithBlankSuburbCopy = {
+      ...miami,
+      sections: {
+        ...miami.sections,
+        // A model can return "" for a slot (SuburbCopySchema has no
+        // min-length constraint) — sOpt must treat that as absent, not as
+        // real copy, so the page renders the template instead of an empty
+        // paragraph.
+        [introSlot]: '',
+        [homesSlot]: '   ',
+        [localSlot]: 'Katy summers bring dust and pollen that settle fast on floors here.',
+      },
+    }
+
+    test('a blank ("" or whitespace-only) slot falls back to the template, not an empty paragraph', () => {
+      const data = suburbData(cityWithBlankSuburbCopy, katy)
+      expect(data.hero.paragraphs.join(' ')).toContain('exceptional house cleaning services')
+      expect(data.houseCleaning.paragraph).toContain('You’re in luck')
+      // A non-blank slot alongside blank ones still renders as generated.
+      expect(data.benefits.paragraphs).toEqual(['Katy summers bring dust and pollen that settle fast on floors here.'])
+    })
+
     test('with NO generated copy, all three fall back to the template and nothing throws (protects the 24 live Minneapolis pages)', () => {
       const savage = { name: 'Savage', slug: 'cleaning-service-savage-mn' }
       expect(() => suburbData(minneapolis, savage)).not.toThrow()

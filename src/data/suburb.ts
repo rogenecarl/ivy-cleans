@@ -87,11 +87,12 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
     houseCleaning: {
       heading: `House Cleaning ${name} ${c.state}`,
       paragraph:
-        homes ??
-        t(
-          `Do you live in ${name} {state}? You’re in luck our cleaning services span the entire {city} area. We have been providing the highest quality cleaning services for years. That being said if you want your home to be cleaner, more appealing, and tidy than ever, just give us a call and we can turn your house into a home because a clean home is a place where you can belong.`,
-          c,
-        ),
+        homes !== undefined
+          ? homes
+          : t(
+              `Do you live in ${name} {state}? You’re in luck our cleaning services span the entire {city} area. We have been providing the highest quality cleaning services for years. That being said if you want your home to be cleaner, more appealing, and tidy than ever, just give us a call and we can turn your house into a home because a clean home is a place where you can belong.`,
+              c,
+            ),
     },
 
     // dump lines 24-33. `local` (suburb.<slug>.local) is Task 16's generated
