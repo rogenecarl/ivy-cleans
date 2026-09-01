@@ -2,12 +2,21 @@
 /*
  * scripts/check-duplication.mjs
  *
- * Runs the similarity checks over every published city in content/*.json and
- * prints what collides. Same logic as src/content/similarity.ts, standalone so
- * it can be run today against what has already shipped:
+ * Runs the similarity checks over content/*.json and prints what collides.
+ * Same logic as src/content/similarity.ts, standalone so it can be run today
+ * against what has already shipped:
  *
  *   node scripts/check-duplication.mjs
- *   node scripts/check-duplication.mjs --run 40    # stricter verbatim floor
+ *   node scripts/check-duplication.mjs --run 40      # stricter verbatim floor
+ *   node scripts/check-duplication.mjs --drafts      # also check draft cities
+ *
+ * DEFAULT SCOPE IS LIVE CITIES ONLY (doc.status === 'live'). Drafts are not
+ * pages Google can see, so duplication between them is not the thing this
+ * check exists to catch — and on this branch, Houston and Miami are both
+ * still drafts that legitimately share pre-branch copy (5 findings): a
+ * check that is always red trains people to ignore it. Pass --drafts to
+ * include every city, draft or live, when that comparison IS what you want
+ * (e.g. right before publishing one of them).
  *
  * Exits 1 if anything is found, so it can sit in CI later.
  */
@@ -18,6 +27,7 @@ const CONTENT = path.join(process.cwd(), 'content')
 const MAX_RUN = Number(process.argv.includes('--run') ? process.argv[process.argv.indexOf('--run') + 1] : 60)
 const MAX_CROSS = 0.8
 const MAX_SIBLING = 0.75
+const INCLUDE_DRAFTS = process.argv.includes('--drafts')
 const EXEMPT_HERO_INDICES = new Set([3, 4])
 
 const normalize = (t) =>
@@ -88,10 +98,15 @@ const files = (await readdir(CONTENT)).filter((f) => f.endsWith('.json') && !f.s
 const cities = []
 for (const f of files) {
   const doc = JSON.parse(await readFile(path.join(CONTENT, f), 'utf-8'))
-  if (doc.sections) cities.push({ city: doc.city ?? f.replace('.json', ''), sections: doc.sections })
+  if (!doc.sections) continue
+  if (!INCLUDE_DRAFTS && doc.status !== 'live') continue
+  cities.push({ city: doc.city ?? f.replace('.json', ''), sections: doc.sections })
 }
 
-console.log(`Checking ${cities.length} cities: ${cities.map((c) => c.city).join(', ')}`)
+console.log(
+  `Checking ${cities.length} ${INCLUDE_DRAFTS ? '' : 'live '}cities: ${cities.map((c) => c.city).join(', ')}` +
+    (INCLUDE_DRAFTS ? '' : ' (pass --drafts to include draft cities too)'),
+)
 console.log(`Verbatim floor: ${MAX_RUN} chars · cross-city: ${MAX_CROSS} · sibling: ${MAX_SIBLING}\n`)
 
 let findings = 0
