@@ -409,6 +409,16 @@ describe('updateSuburbsLogic', () => {
 describe('regenerateLogic', () => {
   const KEY = 'ztest-editville'
 
+  // 'stage run → finalize → publish' above leaves ztest-adminville LIVE and
+  // never retires it — deliberately, listCities' own beforeEach re-wipes it
+  // before touching it again. Every STUB_MODEL city carries the identical
+  // canned "Stubville" copy (see stub-pipeline.json's header comment), so
+  // once publishCity refuses duplicate content, that leftover live sibling
+  // would make every publishLogic() call below collide with itself.
+  beforeEach(async () => {
+    await wipe('ztest-adminville')
+  })
+
   it('re-runs one stage and reports success through the result shape', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
