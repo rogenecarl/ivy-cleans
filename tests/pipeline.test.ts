@@ -273,6 +273,12 @@ describe('pipeline stages', () => {
     })
 
     it('finalizes into a valid CityContent that getCity resolves', async () => {
+      // RUNNABLE_STAGES (this describe's beforeAll) deliberately excludes
+      // 'suburb' — it predates Task 16. finalizeDraft now requires every
+      // surviving area's three slots (Task 18), so this test runs that
+      // stage itself, on a fresh client so it doesn't disturb the earlier
+      // "calls the model once per stage" assertion's call log.
+      await runStage(newClient(), KEY, 'suburb')
       await finalizeDraft(KEY)
 
       const raw = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
@@ -281,6 +287,10 @@ describe('pipeline stages', () => {
       expect(validated.status).toBe('draft')
       expect(validated.research.zips).toEqual(['00001', '00002'])
       expect(validated.sections['home.landmarksParagraph']).toBeUndefined()
+      // The gap Task 18 closes: generated area copy must reach the
+      // published document, not be silently dropped at finalize.
+      expect(validated.sections['suburb.house-cleaning-north-stubville.intro']).toBeTruthy()
+      expect(validated.sections['suburb.cleaning-services-mock-hollow.intro']).toBeTruthy()
 
       const cities = JSON.parse(await readFile(CITIES_JSON, 'utf-8')) as string[]
       expect(cities).toContain(KEY)

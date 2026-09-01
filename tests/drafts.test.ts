@@ -20,6 +20,7 @@ import {
   listDrafts,
   loadDraft,
   publishCity,
+  REQUIRED_SLOTS,
   saveDraft,
   type DraftDoc,
 } from '../src/content/drafts'
@@ -64,8 +65,8 @@ function fullResearch(): ResearchOutput {
       {
         name: 'North Ztest',
         slug: 'house-cleaning-north-ztest',
-        subdivisions: [],
-        housingCharacter: '',
+        subdivisions: ['Ztest Commons', 'Ztest Heights'],
+        housingCharacter: 'Mostly split-level ranch homes from the 1970s.',
         conditions: [],
       },
     ],
@@ -75,6 +76,10 @@ function fullResearch(): ResearchOutput {
   }
 }
 
+// Every finalizeDraft-based test below uses fullResearch() paired with
+// fullSections(): requiredSlotsFor(fullResearch()) is the static 8 PLUS the
+// three suburb.house-cleaning-north-ztest.* slots (Task 18), so this must
+// carry all of them or finalizeDraft's missing-slot check refuses the draft.
 function fullSections(): Record<string, string | string[]> {
   return {
     'services.heroParagraphs': ['Hero one.', 'Hero two.'],
@@ -85,6 +90,9 @@ function fullSections(): Record<string, string | string[]> {
     'services.cards.window': 'Window copy.',
     'services.cards.upholstery': 'Upholstery copy.',
     'deep.whatIs': 'Deep cleaning is...',
+    'suburb.house-cleaning-north-ztest.intro': 'North Ztest is a quiet area we clean often.',
+    'suburb.house-cleaning-north-ztest.homes': 'Homes in North Ztest are split-level ranches from the 1970s.',
+    'suburb.house-cleaning-north-ztest.local': 'Ztest winters mean salt and grit track in all season.',
   }
 }
 
@@ -239,12 +247,112 @@ describe('drafts store', () => {
       expect(validated.contactAddress).toBe('123 Ztest Ave')
       expect(validated.research.zips).toEqual(['00001', '00002'])
       expect(validated.sections['deep.whatIs']).toBe('Deep cleaning is...')
+      // The gap Task 18 closes: generated area copy must actually reach the
+      // published document instead of being silently dropped at finalize.
+      expect(validated.sections['suburb.house-cleaning-north-ztest.intro']).toBe(
+        'North Ztest is a quiet area we clean often.',
+      )
+      expect(validated.sections['suburb.house-cleaning-north-ztest.homes']).toBe(
+        'Homes in North Ztest are split-level ranches from the 1970s.',
+      )
+      expect(validated.sections['suburb.house-cleaning-north-ztest.local']).toBe(
+        'Ztest winters mean salt and grit track in all season.',
+      )
 
       const cities = JSON.parse(await readFile(CITIES_JSON, 'utf-8')) as string[]
       expect(cities).toContain(key)
 
       const resolved = await getCity(key)
       expect(resolved.city).toBe('Ztest Finalizeme')
+      // Round-trips through validateCityContent a second time via the store's
+      // own read path, not just the raw JSON this test parsed directly.
+      expect(resolved.sections['suburb.house-cleaning-north-ztest.homes']).toBe(
+        'Homes in North Ztest are split-level ranches from the 1970s.',
+      )
+    })
+
+    it('refuses to finalize when one area is missing its suburb slots, naming exactly that area', async () => {
+      const twoAreaKey = 'ztest-twoarea'
+      try {
+        const facts = deriveFacts({ city: 'Ztest Twoarea', state: 'MN', phoneDigits: '6125550198' })
+        await createDraft(facts)
+
+        const research: ResearchOutput = {
+          ...fullResearch(),
+          suburbs: [
+            ...fullResearch().suburbs,
+            {
+              name: 'South Ztest',
+              slug: 'cleaning-services-south-ztest',
+              subdivisions: ['Ztest Meadows'],
+              housingCharacter: 'Newer builds on wider lots.',
+              conditions: [],
+            },
+          ],
+        }
+        const doc = await loadDraft(twoAreaKey)
+        doc.research = research
+        // fullSections() carries the north-ztest suburb slots but nothing for
+        // south-ztest — the missing area.
+        doc.sections = fullSections()
+        doc.done = ['research', 'front', 'deep']
+        await saveDraft(twoAreaKey, doc)
+
+        let caught: Error | undefined
+        try {
+          await finalizeDraft(twoAreaKey)
+        } catch (e) {
+          caught = e as Error
+        }
+        expect(caught).toBeDefined()
+        const msg = caught!.message
+        expect(msg).toMatch(/suburb\.cleaning-services-south-ztest\.intro/)
+        expect(msg).toMatch(/suburb\.cleaning-services-south-ztest\.homes/)
+        expect(msg).toMatch(/suburb\.cleaning-services-south-ztest\.local/)
+        // The OTHER area's slots, which ARE present, must not be reported missing.
+        expect(msg).not.toMatch(/suburb\.house-cleaning-north-ztest/)
+
+        await expect(readFile(cityPath(twoAreaKey), 'utf-8')).rejects.toThrow()
+      } finally {
+        await rm(draftPath(twoAreaKey), { force: true })
+        await rm(cityPath(twoAreaKey), { force: true })
+        revalidateCity(twoAreaKey)
+      }
+    })
+
+    it('finalizes a city with no researched areas at all, degenerating to the static 8 slots', async () => {
+      const noAreasKey = 'ztest-noareas'
+      try {
+        const facts = deriveFacts({ city: 'Ztest Noareas', state: 'MN', phoneDigits: '6125550197' })
+        await createDraft(facts)
+
+        const doc = await loadDraft(noAreasKey)
+        doc.research = { ...fullResearch(), suburbs: [] }
+        doc.sections = {
+          'services.heroParagraphs': ['Hero one.'],
+          'services.serviceIntro': ['Intro one.'],
+          'services.cards.dusting': 'Dusting copy.',
+          'services.cards.vacuuming': 'Vacuuming copy.',
+          'services.cards.bathroom': 'Bathroom copy.',
+          'services.cards.window': 'Window copy.',
+          'services.cards.upholstery': 'Upholstery copy.',
+          'deep.whatIs': 'Deep cleaning is...',
+        }
+        doc.done = ['research', 'front', 'deep']
+        await saveDraft(noAreasKey, doc)
+
+        await finalizeDraft(noAreasKey)
+
+        const validated = validateCityContent(JSON.parse(await readFile(cityPath(noAreasKey), 'utf-8')))
+        expect(validated.research.suburbs).toEqual([])
+        expect(Object.keys(validated.sections).sort()).toEqual(
+          [...REQUIRED_SLOTS].sort(),
+        )
+      } finally {
+        await rm(draftPath(noAreasKey), { force: true })
+        await rm(cityPath(noAreasKey), { force: true })
+        revalidateCity(noAreasKey)
+      }
     })
 
     it('uses a placeholder address when facts.address is absent, and omits contactAddress', async () => {
@@ -659,16 +767,36 @@ describe('drafts store', () => {
    *
    * These touch real content/<key>.json files this suite does not otherwise
    * own, so each case snapshots and restores its city document byte-for-byte
-   * rather than leaving finalizeDraft's rewrite in place.
+   * rather than leaving finalizeDraft's rewrite in place. The draft sidecar
+   * (content/_drafts/<key>.json) is snapshotted and restored the same way,
+   * since Task 18 requires this test to mutate it (see below).
+   *
+   * Task 18: finalizeDraft now requires requiredSlotsFor(draft.research),
+   * which includes three suburb.<slug>.* slots per area in research.suburbs
+   * — and every area in these two hand-migrated drafts carries zero
+   * subdivisions (nothing was actually researched under the new brief). Had
+   * these drafts gone through the research stage under the current code,
+   * the uniqueness gate (Task 16, scoreSuburbs) would have given every one
+   * of them a 'skip' verdict and dropped it from research.suburbs outright
+   * — a zero-subdivision area can never honestly get an area page (see
+   * buildSuburbPrompt's own throw for exactly that case). So this test
+   * empties research.suburbs before finalizing, applying by hand the same
+   * verdict the gate would have reached, rather than leaving stale
+   * placeholder areas that Task 18 can now never let through.
    */
   describe('resuming the migrated houston/miami draft sidecars', () => {
     it.each(['houston', 'miami'] as const)(
       'loadDraft then finalizeDraft does not throw for the resumable %s draft',
       async (key) => {
         const before = await readFile(cityPath(key), 'utf-8')
+        const draftBefore = await readFile(draftPath(key), 'utf-8')
         try {
           const draft = await loadDraft(key)
           expect(draft.research).toBeDefined()
+          expect(draft.research!.suburbs.every((s) => s.subdivisions.length === 0)).toBe(true)
+
+          draft.research!.suburbs = []
+          await saveDraft(key, draft)
 
           await finalizeDraft(key)
 
@@ -684,6 +812,7 @@ describe('drafts store', () => {
           }
         } finally {
           await writeFile(cityPath(key), before, 'utf-8')
+          await writeFile(draftPath(key), draftBefore, 'utf-8')
           revalidateCity(key)
         }
       },

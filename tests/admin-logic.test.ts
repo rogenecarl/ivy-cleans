@@ -248,6 +248,16 @@ describe('stage run → finalize → publish', () => {
     expect(draft.research?.zips).toEqual(['00001', '00002'])
   })
 
+  // Task 18: finalizeLogic (below) now requires every surviving area's three
+  // suburb.<slug>.* slots, so the shared KEY draft the rest of this describe
+  // builds on needs the suburb stage run too, not just the three
+  // RUNNABLE_STAGE_IDS above.
+  it('runs the suburb stage too, completing every stage the pipeline defines', async () => {
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    const draft = await loadDraft(KEY)
+    expect(draft.done).toEqual(STAGE_IDS)
+  })
+
   it('is a no-op on a stage that already ran', async () => {
     const before = JSON.stringify(await loadDraft(KEY))
     expect(await runStageLogic(KEY, 'front')).toEqual({ ok: true })
@@ -375,6 +385,9 @@ describe('updateSuburbsLogic', () => {
 
   it('edits the published document too, so the preview renders the change', async () => {
     await runAllStages(KEY)
+    // Task 18: finalizeLogic now requires every surviving area's suburb
+    // slots, so the suburb stage has to run before finalize can succeed.
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     expect(await updateSuburbsLogic(KEY, EDITED)).toEqual({ ok: true })
@@ -571,6 +584,9 @@ describe('regenerateLogic', () => {
      */
     await freshDraft(KEY)
     await runAllStages(KEY)
+    // Task 18: finalizeLogic now requires every surviving area's suburb
+    // slots, so the suburb stage has to run before finalize can succeed.
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const sidecar = await loadDraft(KEY)
@@ -646,12 +662,10 @@ describe('listCities', () => {
   })
 
   // listCities' own logic (src/pipeline/admin-logic.ts) only flips to
-  // 'draft-unfinalized' once ALL of STAGE_IDS are done — and its comment has
-  // said "all four" since before the suburb stage existed, anticipating
-  // exactly this. Until Task 16 implements the suburb stage's generation,
-  // runAllStages tops out at three of the four ids, so a draft that has run
-  // every stage IT CAN run is still, correctly, 'generating': the suburb
-  // stage genuinely hasn't happened yet.
+  // 'draft-unfinalized' once ALL of STAGE_IDS are done. runAllStages here
+  // deliberately tops out at RUNNABLE_STAGE_IDS (research/front/deep, not
+  // suburb) so this test can exercise the genuinely-partial state: a draft
+  // that has run three of the four stages is still, correctly, 'generating'.
   it('labels a sidecar that ran every currently-implemented stage as still GENERATING (suburb pending)', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
@@ -666,16 +680,21 @@ describe('listCities', () => {
   it('merges the two sources once finalized: document status wins, sidecar flagged', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
+    // Task 18: finalizeLogic now requires every surviving area's suburb
+    // slots, so the suburb stage has to run before finalize can succeed —
+    // which also brings doneCount to 4, not 3.
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const rows = await listCities()
     expect(rows.filter((r) => r.key === KEY)).toHaveLength(1)
-    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 3 })
+    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 4 })
   })
 
   it('shows a published city as LIVE with no sidecar left', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
     expect(await publishLogic(KEY)).toEqual({ ok: true })
 
