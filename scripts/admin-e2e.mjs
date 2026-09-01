@@ -219,6 +219,15 @@ const PHONE_DIGITS = '5555550123'
 const PHONE_DISPLAY = '(555) 555-0123'
 const NOTES = 'Fixture city. Housing stock is mock bungalows and stub-frame duplexes.'
 const SUBURBS = ['North Stubville', 'Mock Hollow', 'Fixture Heights']
+// Fixture Heights carries zero subdivisions in the fixture (see
+// tests/fixtures/stub-pipeline.json) — scoreSuburbs (src/pipeline/stages.ts)
+// treats zero subdivisions as a structural disqualifier regardless of the
+// rest of its score, so applyUniquenessGate drops it during the research
+// stage, before front/deep/suburb ever see it. Everywhere this script checks
+// what actually survives past research — chips, the suburbs editor, the
+// preview front page — must expect these two, not all three of SUBURBS.
+const KEPT_SUBURBS = ['North Stubville', 'Mock Hollow']
+const DROPPED_SUBURB = 'Fixture Heights'
 // Plan 5: name+slug pairs, mirroring tests/fixtures/stub-pipeline.json's own
 // research.structure.suburbs (the canned data StubModelClient serves) —
 // hardcoded here the same way SUBURBS itself is, rather than read from the
@@ -441,29 +450,48 @@ try {
   /* 3a. Skill cards + activity feed (Task 4) ────────────────────────────── */
   const genScreenText = await text(page)
   check(
+    // 'Local Area Writer' was the retired 'home' stage's SKILL_META card
+    // (Task 10). The 'suburb' stage that replaced it has no SKILL_META entry
+    // of its own — src/app/admin/(console)/generate/[key]/stage-runner.tsx
+    // falls back to `{ icon: '•', name: stage.label, tagline: '' }`, and
+    // stage.label (src/content/slots.ts STAGES) is 'Writing the area pages'.
     'generate screen shows the four skill names',
-    ['City Research', 'Front-Page Copywriter', 'Local Area Writer', 'Deep-Clean Copywriter'].every(
+    ['City Research', 'Front-Page Copywriter', 'Writing the area pages', 'Deep-Clean Copywriter'].every(
       (name) => genScreenText.includes(name),
     ),
   )
 
   // Stub stages are instant, so the four runStageAction calls above can beat
   // the 1.2s poll to the punch. Give the snapshot a few beats to land before
-  // asserting on it.
+  // asserting on it. Fixture Heights (zero subdivisions) never gets a chip —
+  // applyUniquenessGate drops it during the research stage itself, so
+  // draft.research (what the chips render from) only ever holds the two kept
+  // areas — so this waits on KEPT_SUBURBS, not the full fixture SUBURBS.
   let chipsText = genScreenText
-  let chipsFound = SUBURBS.every((s) => chipsText.includes(s))
+  let chipsFound = KEPT_SUBURBS.every((s) => chipsText.includes(s))
   const chipDeadline = Date.now() + 10_000
   while (!chipsFound && Date.now() < chipDeadline) {
     await page.waitForTimeout(500)
     chipsText = await text(page)
-    chipsFound = SUBURBS.every((s) => chipsText.includes(s))
+    chipsFound = KEPT_SUBURBS.every((s) => chipsText.includes(s))
   }
-  check('research chips render all three fixture suburbs', chipsFound, SUBURBS.join(', '))
+  check('research chips render the two kept fixture suburbs', chipsFound, KEPT_SUBURBS.join(', '))
 
-  const summaryMatch = chipsText.match(/\d+ areas · \d+ ZIP codes · \d+ landmarks/)
+  // The visible research summary is the LAST 'found' event logged for the
+  // stage (stage-runner.tsx's summaryEvent) — that is the "N areas kept ..."
+  // line appended after the uniqueness gate runs, not the earlier
+  // "areas · ZIP codes · subdivisions · search phrases" digest, which is
+  // superseded once the stage is done. ("landmarks" was the pre-branch
+  // field name; ResearchSchema replaced it with subdivisions.)
+  const summaryMatch = chipsText.match(/\d+ areas kept(?: · \d+ thin)?(?: · \d+ dropped: [^\n<]+)?/)
   check(
-    'research summary line reports the areas/ZIP/landmarks digest',
+    'research summary line reports how many areas were kept',
     summaryMatch !== null,
+    summaryMatch?.[0] ?? chipsText.slice(0, 0),
+  )
+  check(
+    'research summary line names Fixture Heights as dropped (zero subdivisions triggers the uniqueness gate)',
+    chipsText.includes(`dropped: ${DROPPED_SUBURB}`),
     summaryMatch?.[0] ?? chipsText.slice(0, 0),
   )
   await shot(page, 'skill-cards')
@@ -499,8 +527,13 @@ try {
     els.map((el) => el.value),
   )
   check(
-    'suburbs editor lists the three fixture areas',
-    SUBURBS.every((s) => editorNames.includes(s)) && editorNames.length === SUBURBS.length,
+    // finalizeDraft carries forward draft.research.suburbs, which is
+    // already post-gate — Fixture Heights never reaches the draft it
+    // finalizes, so the editor can only ever list the two kept areas.
+    'suburbs editor lists the two kept areas, not the dropped Fixture Heights',
+    KEPT_SUBURBS.every((s) => editorNames.includes(s)) &&
+      editorNames.length === KEPT_SUBURBS.length &&
+      !editorNames.includes(DROPPED_SUBURB),
     editorNames.join(', '),
   )
   await shot(page, 'review-draft')
@@ -550,21 +583,31 @@ try {
   )
 
   // Plan 5: finalizeDraft now stamps hasSuburbPages:true on every new draft
-  // (src/content/drafts.ts), so the three fixture suburbs must render as REAL
+  // (src/content/drafts.ts), so the KEPT fixture suburbs must render as REAL
   // links, not plain text — the inverse of the pre-Plan-5 assertion here.
+  // Fixture Heights is not among them: it never survives the uniqueness gate
+  // in the research stage, so finalizeDraft never sees it either.
   const suburbLinks = await preview.$$eval('a', (as) =>
     as.map((a) => ({ text: a.textContent ?? '', href: a.getAttribute('href') ?? '' })),
   )
   check(
-    'suburbs render linked (hasSuburbPages true) with /stubville/-prefixed hrefs',
-    previewText.includes(SUBURBS[0]) &&
-      SUBURBS.every((s) =>
+    'kept suburbs render linked (hasSuburbPages true) with /stubville/-prefixed hrefs',
+    previewText.includes(KEPT_SUBURBS[0]) &&
+      KEPT_SUBURBS.every((s) =>
         suburbLinks.some(
           (l) => l.text.includes(s) && (l.href === `/${KEY}` || l.href.startsWith(`/${KEY}/`)),
         ),
       ),
     suburbLinks
-      .filter((l) => SUBURBS.some((s) => l.text.includes(s)))
+      .filter((l) => KEPT_SUBURBS.some((s) => l.text.includes(s)))
+      .map((l) => `${l.text}→${l.href}`)
+      .join(' | '),
+  )
+  check(
+    'the dropped suburb (Fixture Heights) has no front-page link',
+    !suburbLinks.some((l) => l.text.includes(DROPPED_SUBURB)),
+    suburbLinks
+      .filter((l) => l.text.includes(DROPPED_SUBURB))
       .map((l) => `${l.text}→${l.href}`)
       .join(' | '),
   )
