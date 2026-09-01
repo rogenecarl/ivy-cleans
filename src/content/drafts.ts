@@ -20,8 +20,9 @@ import type { Facts } from '../pipeline/facts'
 import type { ResearchOutput } from '../pipeline/schemas'
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
+import { checkCity } from './similarity'
 import { validateCityContent } from './validate'
-import { revalidateCity } from './store'
+import { getCity, listLiveCityKeys, revalidateCity } from './store'
 
 export type DraftDoc = {
   facts: Facts
@@ -283,6 +284,32 @@ export async function publishCity(key: string, domain?: string): Promise<void> {
   assertKeyShape(key)
   const raw = await readFile(cityPath(key), 'utf-8')
   const doc = validateCityContent(JSON.parse(raw))
+
+  /*
+   * Publish is the irreversible step, so it is where duplication is refused.
+   * finalizeDraft deliberately does not check: an operator regenerating a
+   * stage should be able to SEE findings in the review screen and decide,
+   * rather than being blocked mid-iteration.
+   *
+   * Only live cities are compared against. A draft is not yet a page Google
+   * can see, and blocking on one would make the order two operators happen
+   * to work in decide whose copy is "the duplicate".
+   */
+  const liveKeys = (await listLiveCityKeys()).filter((k) => k !== key)
+  const published = await Promise.all(
+    liveKeys.map(async (k) => {
+      const other = await getCity(k)
+      return { city: other.city, sections: other.sections }
+    }),
+  )
+  const findings = checkCity(doc.city, doc.sections, published)
+  if (findings.length > 0) {
+    const lines = findings.map((f) => `  ${f.slot} ↔ ${f.otherCity} ${f.otherSlot}: ${f.detail}`)
+    throw new Error(
+      `cannot publish "${key}": ${findings.length} duplication finding(s)\n${lines.join('\n')}`,
+    )
+  }
+
   doc.status = 'live'
 
   let host: string | undefined

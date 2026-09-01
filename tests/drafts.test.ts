@@ -50,6 +50,8 @@ const ALL_TEST_KEYS = [
   'ztest-republish',
   'ztest-driftville',
   'ztest-progressme',
+  'ztest-dupe-a',
+  'ztest-dupe-b',
 ]
 
 function progressPath(key: string): string {
@@ -364,6 +366,64 @@ describe('drafts store', () => {
 
       const resolved = await getCity(key)
       expect(resolved.status).toBe('live')
+    })
+  })
+
+  describe('publishCity duplication guard', () => {
+    const keyA = 'ztest-dupe-a'
+    const keyB = 'ztest-dupe-b'
+
+    afterAll(async () => {
+      await rm(draftPath(keyA), { force: true })
+      await rm(cityPath(keyA), { force: true })
+      await rm(draftPath(keyB), { force: true })
+      await rm(cityPath(keyB), { force: true })
+      revalidateCity(keyA)
+      revalidateCity(keyB)
+    })
+
+    it('publishCity refuses copy that duplicates an already-live city', async () => {
+      // Long enough (well over the 60-char verbatim floor) that a byte-for-byte
+      // copy is unambiguously a collision rather than a coincidence of short,
+      // generic filler text.
+      const sharedWhatIs =
+        'Deep cleaning reaches the buildup a routine visit skips entirely, from baseboards ' +
+        'and window tracks to the tops of doorframes and the backs of every major appliance.'
+
+      const factsA = deriveFacts({ city: 'Ztest Dupe A', state: 'MN', phoneDigits: '6125550110' })
+      await createDraft(factsA)
+      const docA = await loadDraft(keyA)
+      docA.research = fullResearch()
+      docA.sections = { ...fullSections(), 'deep.whatIs': sharedWhatIs }
+      docA.done = ['research', 'front', 'home', 'deep']
+      await saveDraft(keyA, docA)
+      await finalizeDraft(keyA)
+      await publishCity(keyA)
+
+      // Everything BUT deep.whatIs is deliberately distinct prose, so the
+      // rejection can only be attributed to the one slot this test cares about.
+      const factsB = deriveFacts({ city: 'Ztest Dupe B', state: 'MN', phoneDigits: '6125550111' })
+      await createDraft(factsB)
+      const docB = await loadDraft(keyB)
+      docB.research = fullResearch()
+      docB.sections = {
+        ...fullSections(),
+        'services.heroParagraphs': ['City B opens with wholly separate hero copy.', 'And a second distinct hero line.'],
+        'services.serviceIntro': ['City B has an entirely unrelated service introduction paragraph.'],
+        'home.zipParagraph': 'City B serves an unrelated pair of zip codes, 00003 and 00004.',
+        'deep.whatIs': sharedWhatIs,
+      }
+      docB.done = ['research', 'front', 'home', 'deep']
+      await saveDraft(keyB, docB)
+      await finalizeDraft(keyB)
+
+      await expect(publishCity(keyB)).rejects.toThrow(/deep\.whatIs/)
+
+      // Refused publishes must not have side effects: B stays a draft, and its
+      // sidecar (an operator's in-progress work) is not deleted out from under them.
+      const validatedB = validateCityContent(JSON.parse(await readFile(cityPath(keyB), 'utf-8')))
+      expect(validatedB.status).toBe('draft')
+      await expect(readFile(draftPath(keyB), 'utf-8')).resolves.toBeTruthy()
     })
   })
 
