@@ -29,10 +29,12 @@ import {
   SYSTEM_BASE,
   FRONT_SYSTEM,
   DEEP_SYSTEM,
+  SUBURB_SYSTEM,
   buildDeepPrompt,
   buildFrontPrompt,
   buildResearchPrompt,
   buildResearchStructuringPrompt,
+  buildSuburbPrompt,
   applyUniquenessGate,
   normalizeResearchSlugs,
   regenerateStage,
@@ -40,6 +42,7 @@ import {
   runStage,
   scoreSuburb,
   scoreSuburbs,
+  MODEL_KEYS,
   type StageId,
 } from '../src/pipeline/stages'
 import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '../src/pipeline/schemas'
@@ -860,9 +863,79 @@ describe('pipeline stages', () => {
     })
   })
 
+  describe('buildSuburbPrompt', () => {
+    const facts = stubFacts()
+
+    // Two areas so siblings exist, and Katy carries a copySafe:false condition
+    // with a distinctive string — a flood-pool fact collected to judge
+    // whether Katy is a workable market, never to print on its page.
+    const katy: Suburb = {
+      name: 'Katy',
+      slug: 'katy',
+      subdivisions: ['Cinco Ranch', 'Firethorne'],
+      housingCharacter: 'Master-planned, built 2000 onward, 2,400-3,400 sq ft, tile and LVP.',
+      conditions: [
+        { condition: 'Construction nearby', implication: 'Fine grit on sills and blinds', copySafe: true },
+        { condition: 'Barker Reservoir flood pool', implication: 'Background only — never for customer copy', copySafe: false },
+      ],
+    }
+    const sugarLand: Suburb = {
+      name: 'Sugar Land',
+      slug: 'sugar-land',
+      subdivisions: ['Telfair', 'Riverstone'],
+      housingCharacter: 'Master-planned communities, built 1990s onward.',
+      conditions: [],
+    }
+    const research: ResearchOutput = {
+      suburbs: [katy, sugarLand],
+      conditions: [{ condition: 'Gulf humidity', implication: 'Grout and shower glass discolour faster', copySafe: true }],
+      zips: ['77494'],
+      keywords: ['house cleaning katy tx'],
+    }
+
+    it('lists only this area’s subdivisions and forbids adding any', () => {
+      const p = buildSuburbPrompt(facts, research, katy)
+      expect(p).toContain('Cinco Ranch')
+      expect(p).toMatch(/never add one/)
+    })
+
+    // The load-bearing test: a copySafe:false condition is flood risk, crime
+    // or income data, collected only to judge whether a market is workable.
+    // If its text reaches the prompt at all, that is the single worst failure
+    // this system can produce, so this asserts on the distinctive string
+    // rather than on any summary of the filtering logic.
+    it('never leaks a copySafe:false condition into the prompt', () => {
+      const p = buildSuburbPrompt(facts, research, katy)
+      expect(p).not.toContain('Barker Reservoir')
+    })
+
+    it('names the sibling areas and forbids copy that would fit them', () => {
+      const p = buildSuburbPrompt(facts, research, katy)
+      expect(p).toContain('Sugar Land')
+      expect(p).toMatch(/would sit equally well/)
+    })
+
+    it('leads with area-specific conditions before metro-wide ones', () => {
+      const p = buildSuburbPrompt(facts, research, katy)
+      expect(p.indexOf('Construction nearby')).toBeLessThan(p.indexOf('Gulf humidity'))
+    })
+
+    it('asks for exactly the three paragraphs intro, homes, local', () => {
+      const p = buildSuburbPrompt(facts, research, katy)
+      expect(p).toMatch(/1\. intro —/)
+      expect(p).toMatch(/2\. homes —/)
+      expect(p).toMatch(/3\. local —/)
+    })
+
+    it('MODEL_KEYS.suburb(slug) is keyed per area, distinct for each slug', () => {
+      expect(MODEL_KEYS.suburb('katy')).not.toBe(MODEL_KEYS.suburb('sugar-land'))
+      expect(MODEL_KEYS.suburb('katy')).toBe('suburb.katy')
+    })
+  })
+
   describe('system prompts', () => {
     it('every stage system prompt starts with the identical shared base (cache-prefix ready)', () => {
-      for (const system of [FRONT_SYSTEM, DEEP_SYSTEM]) {
+      for (const system of [FRONT_SYSTEM, DEEP_SYSTEM, SUBURB_SYSTEM]) {
         expect(system.startsWith(SYSTEM_BASE)).toBe(true)
         expect(system.length).toBeGreaterThan(SYSTEM_BASE.length)
       }

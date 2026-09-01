@@ -4,7 +4,7 @@ This document shows, word for word, the instructions the AI receives at each ste
 
 If you want the AI to research differently or write differently, this is the document to mark up — every change you suggest here maps to exactly one place in the system.
 
-There are four skills. Research runs first and feeds the other three.
+There are five skills. Research runs first and feeds the other four.
 
 ---
 
@@ -193,6 +193,57 @@ The brief:
 > Give it one angle that belongs to [CITY]: the local reason homes there accumulate what a deep clean removes — the humidity and mold pressure, the months sealed up against the cold, the pollen or desert dust or blown sand, the age and construction of the housing stock. One or two sentences of that, woven in, not bolted on.
 >
 > [THE MINNEAPOLIS VERSION SHOWN AS THE STRUCTURAL EXAMPLE]
+
+---
+
+## Skill 5: Area-Page Writer 📍
+
+This is the skill that makes one area's page different from the next. It runs once per area a city has (Katy, Sugar Land, and so on), and it is the whole point of this project: every area page on every generated site used to be identical apart from the place name, and the live Minneapolis site's 24 of them earned 23 clicks across 97,649 impressions in sixteen months — thirteen of them never earned a single one. This is the fix.
+
+Added to the voice guide:
+
+> STAGE: one area page. You are writing about ONE place that this branch serves, for people who live there.
+>
+> YOU OWN THE PLACE, NOT THE SERVICE. Every service has its own page and the reader is one click from any of them. If you find yourself explaining what a deep clean includes, or listing what a standard visit covers, stop — that is a different page and repeating it here makes both weaker. Your subject is this area: the homes in it, what those homes are like, and what living there does to them.
+>
+> THE TEST. Read back what you wrote and ask whether a single paragraph of it would sit unchanged on the page for a neighbouring area. If it would, it is filler and you have not used the research. The named developments, the age and size of the houses, the way the streets and driveways work — those are what make this page about this place.
+>
+> DO NOT reuse sentence constructions from any example you were shown. Match what an example does, never how it says it. If an example paragraph is short enough that matching its shape would mean reproducing it, write something different instead.
+
+The brief it receives, for one area at a time:
+
+> Write the area-page copy for [AREA], which this [CITY] branch serves.
+>
+> [OWNER NOTES, IF ANY]
+>
+> NAMED DEVELOPMENTS AND NEIGHBORHOODS in [AREA]. Use at least three of these by name. Use only these — never add one:
+> [THE SUBDIVISIONS RESEARCHED FOR THIS AREA]
+>
+> WHAT THE HOMES HERE ARE LIKE:
+> [THE HOUSING CHARACTER RESEARCHED FOR THIS AREA]
+>
+> LOCAL CONDITIONS, and what each one means for cleaning a house. The ones listed first are specific to [AREA]; the rest are true across [CITY]. Lead with the specific ones:
+> [THIS AREA'S OWN CONDITIONS, THEN THE METRO-WIDE CONDITIONS — EACH LIST FILTERED TO copySafe: true BEFORE IT EVER REACHES THIS BRIEF]
+>
+> OTHER AREAS this branch serves, each with its own page. Do NOT write anything that would sit equally well on one of theirs:
+> [THE NAMES OF EVERY OTHER AREA THIS CITY HAS]
+>
+> Produce three paragraphs.
+>
+> 1. intro — 60 to 90 words. That we clean homes in [AREA], and one concrete thing about the place that shapes the work. Do not open with the area name followed by a comma. Do not open with a question.
+>
+> 2. homes — 90 to 130 words. What the houses in [AREA] are actually like, naming at least three of the developments above, and what that means for cleaning them: the size of the rooms, the flooring, the age of the fittings, whether these are newer builds or older streets. A reader who lives there should recognise their own house.
+>
+> 3. local — 90 to 130 words. The conditions above, turned into cleaning. What gets into these homes, where it settles, and what we do about it. Lead with what is specific to [AREA] before anything that is true of [CITY] generally.
+>
+>    STRUCTURAL EXAMPLE — note only the movement, condition to what it does indoors to the cleaning. Write entirely different sentences and carry over no Houston detail:
+>    Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds.
+
+**Two things in this brief are load-bearing.**
+
+The conditions list is built by filtering OUT anything marked `copySafe: false` — household income, poverty, crime, flood risk, property values, collected during research only to judge whether a market is worth working — before the list is ever turned into text. That filtering happens before this brief exists, not inside it, so there is no wording in this document that could leak one of those facts onto a page; the guarantee is structural, not a request the model is trusted to honour.
+
+The structural example is deliberately NOT the live Savage, Minnesota page that the original area-page template was built from — that page is one of the twenty-four that earned twenty-three clicks. It is instead the best paragraph this pipeline has actually generated (for a Houston-area page), shown only for its movement — name a real condition, say what it does inside a house, land on the cleaning — with an explicit instruction to carry over none of its Houston-specific detail.
 
 ---
 

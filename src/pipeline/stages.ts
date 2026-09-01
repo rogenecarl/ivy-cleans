@@ -187,6 +187,16 @@ export const DEEP_SYSTEM = `${SYSTEM_BASE}
 
 STAGE: the deep-cleaning page. You are writing the single paragraph that answers "What is Deep House Cleaning?" — an explanation, calmly given, of what a deep clean covers and why homes in this particular city need one.`
 
+export const SUBURB_SYSTEM = `${SYSTEM_BASE}
+
+STAGE: one area page. You are writing about ONE place that this branch serves, for people who live there.
+
+YOU OWN THE PLACE, NOT THE SERVICE. Every service has its own page and the reader is one click from any of them. If you find yourself explaining what a deep clean includes, or listing what a standard visit covers, stop — that is a different page and repeating it here makes both weaker. Your subject is this area: the homes in it, what those homes are like, and what living there does to them.
+
+THE TEST. Read back what you wrote and ask whether a single paragraph of it would sit unchanged on the page for a neighbouring area. If it would, it is filler and you have not used the research. The named developments, the age and size of the houses, the way the streets and driveways work — those are what make this page about this place.
+
+DO NOT reuse sentence constructions from any example you were shown. Match what an example does, never how it says it. If an example paragraph is short enough that matching its shape would mean reproducing it, write something different instead.`
+
 /**
  * The structuring call that turns raw web-research findings into
  * ResearchSchema. Deliberately NOT built on SYSTEM_BASE: this call writes no
@@ -358,16 +368,88 @@ STRUCTURAL EXAMPLE — the Minneapolis version, for tone and coverage. It runs s
 ${MPLS_WHAT_IS}`
 }
 
+/**
+ * Structural exemplar. Deliberately NOT taken from the live Savage page that
+ * src/data/suburb.ts was transcribed from: that page is one of the twenty-four
+ * that produced twenty-three clicks in sixteen months, and it is exactly the
+ * register we are trying to leave behind.
+ *
+ * This is the generated Houston deep-cleaning paragraph — the one piece of
+ * output this pipeline has produced that does the job properly. It names a
+ * real condition, says what that condition does inside a house, and lands on
+ * the cleaning. That movement is what the model should copy.
+ */
+const EXEMPLAR_LOCAL =
+  'Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds.'
+
+/**
+ * One area page: three paragraphs (intro, homes, local). `suburb.conditions`
+ * is placed BEFORE `research.conditions` — area-specific material leads,
+ * metro-wide material follows — and both are filtered to `copySafe` before
+ * they ever reach the string that becomes this prompt. A `copySafe: false`
+ * condition (flood risk, crime, income — collected only to judge whether a
+ * market is workable) must never be printable, and filtering here, before any
+ * template interpolation, is what makes that true rather than merely intended.
+ */
+export function buildSuburbPrompt(
+  facts: Facts,
+  research: ResearchOutput,
+  suburb: Suburb
+): string {
+  const safe = suburb.conditions.filter((c) => c.copySafe)
+  const metroSafe = research.conditions.filter((c) => c.copySafe)
+  const conditionLines = [...safe, ...metroSafe]
+    .map((c) => `- ${c.condition} — ${c.implication}`)
+    .join('\n')
+
+  const siblings = research.suburbs
+    .filter((s) => s.slug !== suburb.slug)
+    .map((s) => s.name)
+    .join(', ')
+
+  return `Write the area-page copy for ${suburb.name}, which this ${facts.city} branch serves.
+${notesBlock(facts)}
+NAMED DEVELOPMENTS AND NEIGHBORHOODS in ${suburb.name}. Use at least three of these by name. Use only these — never add one:
+${suburb.subdivisions.map((s) => `- ${s}`).join('\n')}
+
+WHAT THE HOMES HERE ARE LIKE:
+${suburb.housingCharacter}
+
+LOCAL CONDITIONS, and what each one means for cleaning a house. The ones listed first are specific to ${suburb.name}; the rest are true across ${facts.city}. Lead with the specific ones:
+${conditionLines}
+
+OTHER AREAS this branch serves, each with its own page. Do NOT write anything that would sit equally well on one of theirs:
+${siblings}
+
+Produce three paragraphs.
+
+1. intro — 60 to 90 words. That we clean homes in ${suburb.name}, and one concrete thing about the place that shapes the work. Do not open with the area name followed by a comma. Do not open with a question.
+
+2. homes — 90 to 130 words. What the houses in ${suburb.name} are actually like, naming at least three of the developments above, and what that means for cleaning them: the size of the rooms, the flooring, the age of the fittings, whether these are newer builds or older streets. A reader who lives there should recognise their own house.
+
+3. local — 90 to 130 words. The conditions above, turned into cleaning. What gets into these homes, where it settles, and what we do about it. Lead with what is specific to ${suburb.name} before anything that is true of ${facts.city} generally.
+
+   STRUCTURAL EXAMPLE — note only the movement, condition to what it does indoors to the cleaning. Write entirely different sentences and carry over no Houston detail:
+   ${EXEMPLAR_LOCAL}`
+}
+
 /* ────────────────────────────────────────────────────────────────────────────
  * Stage execution
  * ──────────────────────────────────────────────────────────────────────────── */
 
-/** ModelClient keys, one per call. Also the StubModelClient fixture keys. */
+/** ModelClient keys, one per call. Also the StubModelClient fixture keys.
+ *
+ * `suburb` is keyed per area rather than a single string: StubModelClient
+ * fixtures (and the tests that read them) can then give each area its own
+ * canned copy, so a bug that returned identical text for every area would be
+ * caught instead of hidden behind one shared fixture key.
+ */
 export const MODEL_KEYS = {
   research: 'research',
   researchStructure: 'research.structure',
   front: 'front',
   deep: 'deep',
+  suburb: (slug: string) => `suburb.${slug}`,
 } as const
 
 /**
