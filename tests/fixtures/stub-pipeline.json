@@ -9,14 +9,21 @@
         {
           "name": "North Stubville",
           "slug": "house-cleaning-north-stubville",
-          "subdivisions": ["Assertion Acres"],
+          "subdivisions": [
+            "Assertion Acres",
+            "Mock Meadows",
+            "Fixture Court",
+            "Stub Village Estates",
+            "Placeholder Heights",
+            "Canned Creek"
+          ],
           "housingCharacter": "Mock bungalows from the fixture era, mostly one story, with small fenced yards.",
           "conditions": []
         },
         {
           "name": "Mock Hollow",
           "slug": "cleaning-services-mock-hollow",
-          "subdivisions": ["Mock Hollow Commons"],
+          "subdivisions": ["Mock Hollow Commons", "Mock Hollow Terrace"],
           "housingCharacter": "Stub-frame duplexes built close together along the fixture line.",
           "conditions": []
         },

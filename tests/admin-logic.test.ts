@@ -350,7 +350,14 @@ describe('updateSuburbsLogic', () => {
       {
         name: 'North Stubville',
         slug: 'house-cleaning-north-stubville',
-        subdivisions: ['Assertion Acres'],
+        subdivisions: [
+          'Assertion Acres',
+          'Mock Meadows',
+          'Fixture Court',
+          'Stub Village Estates',
+          'Placeholder Heights',
+          'Canned Creek',
+        ],
         housingCharacter: 'Mock bungalows from the fixture era, mostly one story, with small fenced yards.',
         conditions: [],
       },
@@ -373,7 +380,14 @@ describe('updateSuburbsLogic', () => {
       {
         name: 'North Stubville',
         slug: 'house-cleaning-north-stubville',
-        subdivisions: ['Assertion Acres'],
+        subdivisions: [
+          'Assertion Acres',
+          'Mock Meadows',
+          'Fixture Court',
+          'Stub Village Estates',
+          'Placeholder Heights',
+          'Canned Creek',
+        ],
         housingCharacter: 'Mock bungalows from the fixture era, mostly one story, with small fenced yards.',
         conditions: [],
       },

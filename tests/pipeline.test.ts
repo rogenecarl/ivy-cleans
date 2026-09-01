@@ -216,7 +216,10 @@ describe('pipeline stages', () => {
       const draft = await loadDraft(KEY)
       expect(draft.done).toEqual(['research', 'front', 'deep'])
       expect(draft.research?.zips).toEqual(['00001', '00002'])
-      expect(draft.research?.suburbs).toHaveLength(3)
+      // Fixture Heights (0 researched, everything blank) is a 'skip' verdict
+      // under the uniqueness gate wired into the research stage — only the
+      // two researched areas survive.
+      expect(draft.research?.suburbs).toHaveLength(2)
     })
 
     it('fills all eight section slots with the fixture copy', async () => {
@@ -361,7 +364,9 @@ describe('pipeline stages', () => {
       const kinds = events.map((e) => e.kind)
       expect(kinds[0]).toBe('start')
       expect(kinds).toContain('search') // forwarded from the stub fixture
-      expect(kinds.filter((k) => k === 'found').length).toBe(2)
+      // 'Collected findings', the areas/ZIP/subdivisions/keywords digest, and
+      // the uniqueness-gate summary are all appended as 'found'.
+      expect(kinds.filter((k) => k === 'found').length).toBe(3)
       expect(kinds[kinds.length - 1]).toBe('done')
       expect(events.every((e) => e.stage === 'research')).toBe(true)
     })
@@ -408,16 +413,26 @@ describe('pipeline stages', () => {
   describe('slug normalization', () => {
     /** Fixture variant whose structuring call returns hostile slugs. */
     function messyFixtures(): StubFixtures {
-      const blank = { subdivisions: [], housingCharacter: '', conditions: [] }
+      // Not actually blank: the uniqueness gate now runs right after slug
+      // normalization inside the research stage, so a genuinely 0-scored
+      // suburb here would vanish before these slug assertions ever saw it.
+      // This fixture exists to test slug normalization, not the gate, so
+      // every entry carries just enough (4 subdivisions + housing character,
+      // scoring 6 — 'review', not 'skip') to survive it untouched.
+      const enoughToSurvive = {
+        subdivisions: ['A', 'B', 'C', 'D'],
+        housingCharacter: 'Present.',
+        conditions: [],
+      }
       const structured = {
         ...(fixtures.generated['research.structure'] as ResearchOutput),
         suburbs: [
-          { name: 'Weird Slug', slug: 'Weird Slug!', ...blank },
-          { name: 'Weird Slug Again', slug: 'weird--slug', ...blank },
-          { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow', ...blank },
-          { name: 'Mock Hollow Duplicate', slug: 'Cleaning-Services-Mock-Hollow', ...blank },
-          { name: 'Under Scored', slug: '  house_cleaning_under scored  ', ...blank },
-          { name: 'Punctuation Only', slug: '!!!', ...blank },
+          { name: 'Weird Slug', slug: 'Weird Slug!', ...enoughToSurvive },
+          { name: 'Weird Slug Again', slug: 'weird--slug', ...enoughToSurvive },
+          { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow', ...enoughToSurvive },
+          { name: 'Mock Hollow Duplicate', slug: 'Cleaning-Services-Mock-Hollow', ...enoughToSurvive },
+          { name: 'Under Scored', slug: '  house_cleaning_under scored  ', ...enoughToSurvive },
+          { name: 'Punctuation Only', slug: '!!!', ...enoughToSurvive },
         ],
       }
       return {
@@ -451,10 +466,11 @@ describe('pipeline stages', () => {
       await runStage(newClient(), KEY, 'research')
 
       const draft = await loadDraft(KEY)
+      // Fixture Heights is dropped by the uniqueness gate (nothing researched
+      // for it), so only the two researched areas' slugs survive.
       expect(draft.research!.suburbs.map((s) => s.slug)).toEqual([
         'house-cleaning-north-stubville',
         'cleaning-services-mock-hollow',
-        'fixture-heights-cleaning-services',
       ])
     })
 
@@ -638,6 +654,66 @@ describe('pipeline stages', () => {
       const scored = scoreSuburbs(fixtureResearchWith([katy(), thin()]))
       expect(scored).toHaveLength(2)
       for (const s of scored) expect(s.reason.trim().length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('the gate wired into the research stage', () => {
+    /**
+     * Same three fixture suburbs, but every one carries enough subdivisions
+     * and housing character to score 'build' or 'review' — nothing to skip.
+     * Proves the "dropped" text is conditional, not unconditionally appended.
+     */
+    function allGoodFixtures(): StubFixtures {
+      const researched = { subdivisions: ['A', 'B', 'C', 'D'], housingCharacter: 'Present.', conditions: [] }
+      const structured = {
+        ...(fixtures.generated['research.structure'] as ResearchOutput),
+        suburbs: [
+          { name: 'North Stubville', slug: 'house-cleaning-north-stubville', ...researched },
+          { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow', ...researched },
+          { name: 'Fixture Heights', slug: 'fixture-heights-cleaning-services', ...researched },
+        ],
+      }
+      return {
+        research: fixtures.research,
+        generated: { ...fixtures.generated, 'research.structure': structured },
+      }
+    }
+
+    beforeEach(async () => {
+      await resetDraft()
+      await clearProgress(KEY)
+    })
+
+    it('running research under STUB_MODEL=1 drops the empty area from draft.research.suburbs', async () => {
+      // stub-pipeline.json's Fixture Heights has nothing researched
+      // (subdivisions [], housingCharacter '', conditions []) — score 0,
+      // verdict 'skip'. North Stubville and Mock Hollow are researched
+      // enough to survive.
+      await runStage(newClient(), KEY, 'research')
+
+      const draft = await loadDraft(KEY)
+      const names = draft.research!.suburbs.map((s) => s.name)
+      expect(names).not.toContain('Fixture Heights')
+      expect(names).toEqual(['North Stubville', 'Mock Hollow'])
+    })
+
+    it('names the areas the gate dropped in the progress line', async () => {
+      await runStage(newClient(), KEY, 'research')
+
+      const events = await readProgress(KEY)
+      const dropped = events.find((e) => /dropped:/.test(e.label))
+      expect(dropped).toBeDefined()
+      expect(dropped!.label).toContain('Fixture Heights')
+    })
+
+    it('an all-good fixture never appends "dropped" text to any progress entry', async () => {
+      await runStage(new CountingClient(new StubModelClient(allGoodFixtures())), KEY, 'research')
+
+      const events = await readProgress(KEY)
+      expect(events.some((e) => /dropped:/.test(e.label))).toBe(false)
+      // Confirms the label is genuinely conditional, not just missing the
+      // word: all three areas were kept.
+      expect((await loadDraft(KEY)).research!.suburbs).toHaveLength(3)
     })
   })
 

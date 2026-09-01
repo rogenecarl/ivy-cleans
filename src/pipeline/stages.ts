@@ -567,8 +567,19 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
         system: RESEARCH_STRUCTURE_SYSTEM,
         prompt: buildResearchStructuringPrompt(findings, facts, []),
       })
-      const r = normalizeResearchSlugs(structured, facts.city)
+      const normalized = normalizeResearchSlugs(structured, facts.city)
+      // The uniqueness gate runs here, right after slugs settle and before
+      // anything downstream (front/deep prompts, finalize, the suburb pages
+      // Task 14 adds) can see a 'skip' area. Minneapolis is the argument:
+      // Vadnais Heights and Richfield ran a combined 1,679 impressions and
+      // zero clicks over sixteen months because there was nothing on their
+      // pages that wasn't on twenty-two siblings. A dropped area must never
+      // look like research simply finding less than usual, so its name is
+      // put in the progress line below rather than swallowed silently.
+      const { research: r, scored } = applyUniquenessGate(normalized)
       draft.research = r
+      const skipped = scored.filter((s) => s.verdict === 'skip')
+      const flagged = scored.filter((s) => s.verdict === 'review')
       // Landmarks are gone (see schemas.ts ResearchSchema) — subdivisions are
       // the fact this pipeline now leans on, so the progress label counts
       // those instead.
@@ -577,6 +588,16 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
         stage: 'research',
         kind: 'found',
         label: `${r.suburbs.length} areas · ${r.zips.length} ZIP codes · ${subdivisionCount} subdivisions · ${r.keywords.length} search phrases`,
+      })
+      await appendProgress(key, {
+        stage: 'research',
+        kind: 'found',
+        label:
+          `${r.suburbs.length} areas kept` +
+          (flagged.length ? ` · ${flagged.length} thin` : '') +
+          (skipped.length
+            ? ` · ${skipped.length} dropped: ${skipped.map((s) => s.suburb.name).join(', ')}`
+            : ''),
       })
       await appendProgress(key, { stage: 'research', kind: 'done', label: 'Research complete' })
       break
