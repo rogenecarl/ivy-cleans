@@ -643,4 +643,50 @@ describe('drafts store', () => {
       expect(keys).toEqual(['minneapolis'])
     })
   })
+
+  /*
+   * Task 13 Part B. content/_drafts/houston.json and miami.json are real,
+   * in-progress operator drafts (not ztest- fixtures) that were written
+   * before this branch added subdivisions/housingCharacter/conditions to
+   * Suburb and conditions to ResearchOutput. loadDraft does not zod-validate,
+   * so resuming either one silently carried the old shape all the way to
+   * finalizeDraft, which then wrote `conditions: undefined` into
+   * research.suburbs[] -- rejected by validateCityContent, but only at the
+   * very last step. The sidecars were migrated by hand (empty arrays, since
+   * nothing was actually researched under the new brief); this is the proof
+   * that resuming them now works, not an assumption that the migration was
+   * enough.
+   *
+   * These touch real content/<key>.json files this suite does not otherwise
+   * own, so each case snapshots and restores its city document byte-for-byte
+   * rather than leaving finalizeDraft's rewrite in place.
+   */
+  describe('resuming the migrated houston/miami draft sidecars', () => {
+    it.each(['houston', 'miami'] as const)(
+      'loadDraft then finalizeDraft does not throw for the resumable %s draft',
+      async (key) => {
+        const before = await readFile(cityPath(key), 'utf-8')
+        try {
+          const draft = await loadDraft(key)
+          expect(draft.research).toBeDefined()
+
+          await finalizeDraft(key)
+
+          const validated = validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8')))
+          expect(validated.city).toBe(draft.facts.city)
+          // The pre-migration shape (`landmarks`, no top-level `conditions`,
+          // suburbs missing subdivisions/housingCharacter/conditions) would
+          // have failed validateCityContent before this line -- reaching it
+          // is most of the proof that the migration actually worked.
+          expect(validated.research.conditions).toEqual([])
+          for (const suburb of validated.research.suburbs) {
+            expect(suburb.conditions).toEqual([])
+          }
+        } finally {
+          await writeFile(cityPath(key), before, 'utf-8')
+          revalidateCity(key)
+        }
+      },
+    )
+  })
 })
