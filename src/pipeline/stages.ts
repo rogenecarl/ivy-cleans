@@ -27,6 +27,7 @@ import {
   DeepSchema,
   FrontSectionsSchema,
   ResearchSchema,
+  SuburbCopySchema,
   type Condition,
   type ResearchOutput,
   type Suburb,
@@ -752,11 +753,57 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       break
     }
     case 'suburb': {
-      // Generation itself is Task 16. This task is structural only — it
-      // exists so stageSlots(research).suburb has real slots to own and
-      // regenerateStage has something correct to clear — so a call this
-      // early fails loudly instead of silently writing nothing.
-      throw new Error('suburb stage generation is not implemented yet')
+      // The only stage that makes more than one model call, so it is the
+      // only one that has to be resumable INSIDE itself: a serverless
+      // timeout or a transient API error on area nine must not discard
+      // areas one through eight, and redoing eleven good areas to recover
+      // the twelfth is both slow and expensive.
+      const research = requireResearch(draft, key, stage)
+      await appendProgress(key, {
+        stage: 'suburb',
+        kind: 'start',
+        label: `Writing ${research.suburbs.length} area pages for ${facts.city}`,
+      })
+
+      for (const suburb of research.suburbs) {
+        const [introSlot, homesSlot, localSlot] = suburbSlots(suburb.slug)
+
+        // Already written on an earlier attempt — skip, do not pay for it twice.
+        if (
+          draft.sections[introSlot] !== undefined &&
+          draft.sections[homesSlot] !== undefined &&
+          draft.sections[localSlot] !== undefined
+        ) {
+          continue
+        }
+
+        const out = await client.generate({
+          schema: SuburbCopySchema,
+          key: MODEL_KEYS.suburb(suburb.slug),
+          system: SUBURB_SYSTEM,
+          prompt: buildSuburbPrompt(facts, research, suburb),
+        })
+
+        draft.sections[introSlot] = out.intro
+        draft.sections[homesSlot] = out.homes
+        draft.sections[localSlot] = out.local
+
+        // Save per area: this is what makes the loop resumable.
+        await saveDraft(key, draft)
+
+        await appendProgress(key, {
+          stage: 'suburb',
+          kind: 'found',
+          label: `${suburb.name} — ${suburb.subdivisions.length} developments named`,
+        })
+      }
+
+      await appendProgress(key, {
+        stage: 'suburb',
+        kind: 'done',
+        label: `${research.suburbs.length} area pages written`,
+      })
+      break
     }
     default: {
       const exhaustive: never = stage

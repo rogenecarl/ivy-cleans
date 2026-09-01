@@ -955,4 +955,117 @@ describe('pipeline stages', () => {
       expect(ids).toEqual(STAGES.map((s) => s.id))
     })
   })
+
+  // The suburb stage is the only one that makes more than one model call —
+  // one per kept area — so it is the only one that must be resumable INSIDE
+  // itself rather than just at the runStage/regenerateStage level tested
+  // above. These tests run 'research' first (real stage, real gate) so the
+  // two kept Stubville areas (Fixture Heights is a 'skip' verdict — see
+  // 'full stub run' above) drive the loop under test.
+  describe('suburb stage', () => {
+    const NORTH = 'house-cleaning-north-stubville'
+    const MOCK_HOLLOW = 'cleaning-services-mock-hollow'
+
+    beforeEach(async () => {
+      await resetDraft()
+      await runStage(newClient(), KEY, 'research')
+    })
+
+    it('writes all three slots for every kept area, matching suburbSlots(slug) exactly', async () => {
+      await runStage(newClient(), KEY, 'suburb')
+      const draft = await loadDraft(KEY)
+
+      expect(draft.research!.suburbs.map((s) => s.slug)).toEqual([NORTH, MOCK_HOLLOW])
+      expect(draft.done).toContain('suburb')
+
+      for (const slug of [NORTH, MOCK_HOLLOW]) {
+        for (const slot of suburbSlots(slug)) {
+          expect(draft.sections[slot]).toBeTruthy()
+        }
+      }
+
+      // Pin the literal slot ids and their exact fixture text for a known
+      // slug — Task 17 reads these ids verbatim, and a mismatch there would
+      // be silent (fallback template renders, page looks unchanged).
+      const fixture = fixtures.generated[`suburb.${NORTH}`] as { intro: string; homes: string; local: string }
+      expect(draft.sections[`suburb.${NORTH}.intro`]).toBe(fixture.intro)
+      expect(draft.sections[`suburb.${NORTH}.homes`]).toBe(fixture.homes)
+      expect(draft.sections[`suburb.${NORTH}.local`]).toBe(fixture.local)
+    })
+
+    it('writes genuinely different copy per area, not one blob repeated', async () => {
+      await runStage(newClient(), KEY, 'suburb')
+      const draft = await loadDraft(KEY)
+
+      expect(draft.sections[`suburb.${NORTH}.intro`]).not.toBe(draft.sections[`suburb.${MOCK_HOLLOW}.intro`])
+      expect(draft.sections[`suburb.${NORTH}.homes`]).not.toBe(draft.sections[`suburb.${MOCK_HOLLOW}.homes`])
+      expect(draft.sections[`suburb.${NORTH}.local`]).not.toBe(draft.sections[`suburb.${MOCK_HOLLOW}.local`])
+    })
+
+    it('skips an area whose three slots are already written, calling the stub only for the rest', async () => {
+      // Simulate an earlier attempt that completed North Stubville before a
+      // timeout hit on the second area.
+      const draft = await loadDraft(KEY)
+      const [introSlot, homesSlot, localSlot] = suburbSlots(NORTH)
+      draft.sections[introSlot] = 'already written intro'
+      draft.sections[homesSlot] = 'already written homes'
+      draft.sections[localSlot] = 'already written local'
+      await saveDraft(KEY, draft)
+
+      const client = newClient()
+      await runStage(client, KEY, 'suburb')
+
+      // Assert on which key was called, not just a count — this is the test
+      // that proves the money-saving behaviour actually works.
+      expect(client.calls).toEqual([`generate:suburb.${MOCK_HOLLOW}`])
+
+      const after = await loadDraft(KEY)
+      expect(after.sections[introSlot]).toBe('already written intro')
+      expect(after.sections[homesSlot]).toBe('already written homes')
+      expect(after.sections[localSlot]).toBe('already written local')
+      expect(after.done).toContain('suburb')
+    })
+
+    it('a partial failure mid-loop does not lose already-completed areas, and resuming retries only the failed one', async () => {
+      const inner = new StubModelClient(fixtures)
+      const flaky: ModelClient = {
+        research: (prompt, key, onEvent) => inner.research(prompt, key, onEvent),
+        generate: async (args) => {
+          if (args.key === `suburb.${MOCK_HOLLOW}`) {
+            throw new Error('simulated transient failure on area two')
+          }
+          return inner.generate(args)
+        },
+      }
+
+      await expect(runStage(flaky, KEY, 'suburb')).rejects.toThrow('simulated transient failure')
+
+      const midway = await loadDraft(KEY)
+      // North Stubville (the first, successful area) survived the throw
+      // that hit on Mock Hollow — redoing a good area to recover a failed
+      // one would be exactly the loss this loop exists to prevent.
+      for (const slot of suburbSlots(NORTH)) expect(midway.sections[slot]).toBeTruthy()
+      for (const slot of suburbSlots(MOCK_HOLLOW)) expect(midway.sections[slot]).toBeUndefined()
+      expect(midway.done).not.toContain('suburb')
+
+      const client = newClient()
+      await runStage(client, KEY, 'suburb')
+      expect(client.calls).toEqual([`generate:suburb.${MOCK_HOLLOW}`])
+
+      const after = await loadDraft(KEY)
+      for (const slot of suburbSlots(MOCK_HOLLOW)) expect(after.sections[slot]).toBeTruthy()
+      expect(after.done).toContain('suburb')
+    })
+
+    it('appends a progress event per area so an operator sees movement across sequential calls', async () => {
+      await clearProgress(KEY)
+      await runStage(newClient(), KEY, 'suburb')
+      const events = await readProgress(KEY)
+      const suburbEvents = events.filter((e) => e.stage === 'suburb')
+      expect(suburbEvents[0].kind).toBe('start')
+      // One 'found' event per area (two kept areas), plus the final 'done'.
+      expect(suburbEvents.filter((e) => e.kind === 'found')).toHaveLength(2)
+      expect(suburbEvents[suburbEvents.length - 1].kind).toBe('done')
+    })
+  })
 })
