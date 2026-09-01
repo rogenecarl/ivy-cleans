@@ -36,7 +36,7 @@ import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
-import { STAGES, STAGE_IDS, stageSlots, suburbSlots, type StageId } from '../content/slots'
+import { STAGES, STAGE_IDS, isWrittenSlot, stageSlots, suburbSlots, type StageId } from '../content/slots'
 import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
@@ -636,18 +636,6 @@ function requireResearch(draft: DraftDoc, key: string, stage: StageId): Research
     throw new Error(`cannot run stage "${stage}" for "${key}": the research stage has not completed`)
   }
   return draft.research
-}
-
-/**
- * A suburb slot counts as written only if it holds real text. `!== undefined`
- * alone is not enough: a model can return `""` (SuburbCopySchema carries no
- * min-length constraint — the structured-output API rejects that constraint
- * at the schema level, so this can't be enforced there), and an empty string
- * IS `!== undefined`. Without this, a blank paragraph would be indistinguishable
- * from a finished one and would never be retried on a later resume.
- */
-function isWrittenSlot(value: string | string[] | undefined): boolean {
-  return typeof value === 'string' && value.trim() !== ''
 }
 
 async function executeStage(client: ModelClient, key: string, stage: StageId): Promise<void> {
