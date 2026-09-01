@@ -11,6 +11,7 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { getCity } from '../src/content/store'
 import { suburbData } from '../src/data/suburb'
+import { suburbSlots } from '../src/content/slots'
 
 const minneapolis = await getCity('minneapolis')
 const miami = await getCity('miami')
@@ -125,6 +126,56 @@ describe('suburbData', () => {
         { label: 'Move-Out Cleanings Coconut Grove', href: '/miami/services/move-in-move-out-cleaning' },
         { label: 'Deep Cleaning Coconut Grove', href: '/miami/services/deep-cleaning' },
       ])
+    })
+  })
+
+  describe('generated per-area copy (Task 17)', () => {
+    const katy = { name: 'Katy', slug: 'katy' }
+    const [introSlot, homesSlot, localSlot] = suburbSlots(katy.slug)
+
+    test('suburbSlots ids match the cross-task contract exactly', () => {
+      expect(suburbSlots('katy')).toEqual(['suburb.katy.intro', 'suburb.katy.homes', 'suburb.katy.local'])
+      expect(introSlot).toBe('suburb.katy.intro')
+      expect(homesSlot).toBe('suburb.katy.homes')
+      expect(localSlot).toBe('suburb.katy.local')
+    })
+
+    const cityWithSuburbCopy = {
+      ...miami,
+      sections: {
+        ...miami.sections,
+        [introSlot]: 'Katy homeowners know us for the developments near Cinco Ranch.',
+        [homesSlot]: 'Homes in Katy tend to be newer builds with tile floors and HOAs.',
+        [localSlot]: 'Katy summers bring dust and pollen that settle fast on floors here.',
+      },
+    }
+
+    test('hero.paragraphs renders the generated intro, not the Savage template', () => {
+      const data = suburbData(cityWithSuburbCopy, katy)
+      expect(data.hero.paragraphs).toEqual(['Katy homeowners know us for the developments near Cinco Ranch.'])
+      expect(data.hero.paragraphs.join(' ')).not.toContain('exceptional house cleaning services')
+    })
+
+    test('houseCleaning.paragraph renders the generated homes text, not the "You’re in luck" template', () => {
+      const data = suburbData(cityWithSuburbCopy, katy)
+      expect(data.houseCleaning.paragraph).toBe('Homes in Katy tend to be newer builds with tile floors and HOAs.')
+      expect(data.houseCleaning.paragraph).not.toContain('You’re in luck')
+    })
+
+    test('benefits.paragraphs renders the generated local text, not the static template', () => {
+      const data = suburbData(cityWithSuburbCopy, katy)
+      expect(data.benefits.paragraphs).toEqual(['Katy summers bring dust and pollen that settle fast on floors here.'])
+      expect(data.benefits.paragraphs.join(' ')).not.toContain('vital aspects of health')
+    })
+
+    test('with NO generated copy, all three fall back to the template and nothing throws (protects the 24 live Minneapolis pages)', () => {
+      const savage = { name: 'Savage', slug: 'cleaning-service-savage-mn' }
+      expect(() => suburbData(minneapolis, savage)).not.toThrow()
+      const data = suburbData(minneapolis, savage)
+      expect(data.hero.paragraphs.length).toBeGreaterThan(0)
+      expect(data.houseCleaning.paragraph).toContain('You’re in luck')
+      expect(data.benefits.paragraphs.length).toBeGreaterThan(0)
+      expect(data.benefits.paragraphs[0]).toContain('vital aspects of health')
     })
   })
 

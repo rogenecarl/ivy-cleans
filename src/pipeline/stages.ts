@@ -36,6 +36,7 @@ import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
+import { suburbSlots } from '../content/slots'
 import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
@@ -52,13 +53,14 @@ export type StageId = (typeof STAGES)[number]['id']
 export const STAGE_IDS: readonly StageId[] = STAGES.map((s) => s.id)
 
 /**
- * The three slot ids one area page owns. Single source of truth for
- * stageSlots below, regenerateStage's clearing loop, and (Task 16)
- * executeStage's suburb case — a mismatch here is silent everywhere else.
+ * Re-exported from src/content/slots.ts, which is the single source of
+ * truth (Task 17): that module has no pipeline dependencies, so
+ * src/data/suburb.ts — the render-time reader — can import the slot-id
+ * contract without pulling in this file's model client, draft store, and
+ * progress-log machinery. Used below by stageSlots, regenerateStage's
+ * clearing loop, and executeStage's suburb case.
  */
-export function suburbSlots(slug: string): readonly string[] {
-  return [`suburb.${slug}.intro`, `suburb.${slug}.homes`, `suburb.${slug}.local`]
-}
+export { suburbSlots }
 
 /**
  * Section slots each stage owns. regenerateStage() deletes exactly these

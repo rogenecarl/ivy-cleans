@@ -9,7 +9,21 @@
 // two-letter state code (Savage's own state, since a suburb always sits in
 // its metro's state); {city}/{citySlug} come from the metro CityContent via
 // t(). Every literal below traces to a specific dump line — see the inline
-// citations. No AI-class slots: this page is pure token substitution.
+// citations.
+//
+// Three blocks are now AI-class, not pure token substitution (Task 17):
+// hero.paragraphs, houseCleaning.paragraph, and benefits.paragraphs read the
+// per-area `suburb.<slug>.intro` / `.homes` / `.local` slots the suburb
+// pipeline stage generates (src/pipeline/stages.ts, Task 16). Everything
+// else — CTA labels, otherServices, workInAction, closing — stays template:
+// not everything needs generating, and that copy is still bound by the
+// reference-fidelity rules. The template literals in those three blocks are
+// NOT dead code: they are the fallback for a city whose suburb research
+// predates the generation stage. Migrated Minneapolis has 24 live areas with
+// empty `subdivisions`/`housingCharacter`/`conditions` and no generated
+// copy at all — reading its slots unconditionally would throw on every one
+// of those pages, so each block falls back to the token-substituted literal
+// when the slot is absent (see sOpt in src/content/slots.ts).
 //
 // Unlike deep-cleaning.ts / move-out.ts, this builder takes a second
 // argument (the suburb ref) because the page repeats per-suburb, not once
@@ -18,6 +32,7 @@
 
 import type { CityContent } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
+import { sOpt, suburbSlots } from '../content/slots'
 
 export type SuburbRef = { name: string; slug: string }
 
@@ -35,6 +50,10 @@ const CTA_LABEL = 'Set an appointment 👈' // dump lines 21, 34, 42
 
 export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
   const { name } = suburb
+  const [introSlot, homesSlot, localSlot] = suburbSlots(suburb.slug)
+  const intro = sOpt(c, introSlot)
+  const homes = sOpt(c, homesSlot)
+  const local = sOpt(c, localSlot)
 
   return {
     // <title> / meta description read from suburb-savage.html (not in the
@@ -45,37 +64,50 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       description: `Choose Ivy Cleans for superior house cleaning in ${name} ${c.state}. Best-in-class home cleaning service awaits. Book your cleaning now!`,
     },
 
-    // dump lines 17-21
+    // dump lines 17-21. `intro` (suburb.<slug>.intro) is Task 16's generated
+    // per-area hero copy; falls back to the Savage template when absent.
     hero: {
       titleLines: [`${name}, ${c.state}`, 'Cleaning Services'],
-      paragraphs: [
-        t(
-          'At Ivy Cleans, we specialize in providing exceptional house cleaning services to individuals in {city} and the surrounding areas. We understand the importance of a clean and comfortable living environment, so we are committed to providing top-notch cleaning services that meet your needs.',
-          c,
-        ),
-        'Contact us today to book your quote.',
-      ],
+      paragraphs:
+        intro !== undefined
+          ? [intro]
+          : [
+              t(
+                'At Ivy Cleans, we specialize in providing exceptional house cleaning services to individuals in {city} and the surrounding areas. We understand the importance of a clean and comfortable living environment, so we are committed to providing top-notch cleaning services that meet your needs.',
+                c,
+              ),
+              'Contact us today to book your quote.',
+            ],
       ctaLabel: CTA_LABEL,
     },
 
-    // dump lines 22-23
+    // dump lines 22-23. `homes` (suburb.<slug>.homes) is Task 16's generated
+    // per-area "what the homes here are like" copy; falls back to the
+    // Savage template when absent.
     houseCleaning: {
       heading: `House Cleaning ${name} ${c.state}`,
-      paragraph: t(
-        `Do you live in ${name} {state}? You’re in luck our cleaning services span the entire {city} area. We have been providing the highest quality cleaning services for years. That being said if you want your home to be cleaner, more appealing, and tidy than ever, just give us a call and we can turn your house into a home because a clean home is a place where you can belong.`,
-        c,
-      ),
+      paragraph:
+        homes ??
+        t(
+          `Do you live in ${name} {state}? You’re in luck our cleaning services span the entire {city} area. We have been providing the highest quality cleaning services for years. That being said if you want your home to be cleaner, more appealing, and tidy than ever, just give us a call and we can turn your house into a home because a clean home is a place where you can belong.`,
+          c,
+        ),
     },
 
-    // dump lines 24-33
+    // dump lines 24-33. `local` (suburb.<slug>.local) is Task 16's generated
+    // per-area local-conditions copy; falls back to the Savage template
+    // (static, no city/suburb mention) when absent.
     benefits: {
       heading: `Benefits of House Cleaning ${name}`,
-      paragraphs: [
-        // Static — no city/suburb mention (dump line 25).
-        'House cleaning is one of the vital aspects of health. Your home is where you spend much of your time on your own or with children, why risk sickness or infection. When you request these services you can assure yourself not only of the quality you’re going to receive but also of the depth of the services. We make sure that your home is ready to turn into a landlord, incoming homeowner, or current homeowner.',
-        // Static — no city/suburb mention (dump line 26).
-        'The benefits of our house cleaning really come in because the service is so comprehensive. Areas that aren’t typically cleaned are covered, wiped down, and sanitized. Ivy cleans specializes in improving the cleanliness of clients’ homes. To offer the most comprehensive service available, making sure that there isn’t a single box we leave unchecked.',
-      ],
+      paragraphs:
+        local !== undefined
+          ? [local]
+          : [
+              // Static — no city/suburb mention (dump line 25).
+              'House cleaning is one of the vital aspects of health. Your home is where you spend much of your time on your own or with children, why risk sickness or infection. When you request these services you can assure yourself not only of the quality you’re going to receive but also of the depth of the services. We make sure that your home is ready to turn into a landlord, incoming homeowner, or current homeowner.',
+              // Static — no city/suburb mention (dump line 26).
+              'The benefits of our house cleaning really come in because the service is so comprehensive. Areas that aren’t typically cleaned are covered, wiped down, and sanitized. Ivy cleans specializes in improving the cleanliness of clients’ homes. To offer the most comprehensive service available, making sure that there isn’t a single box we leave unchecked.',
+            ],
       listIntro: t('There are many benefits to deep cleaning your home in {city}, including:', c),
       items: [
         'Reducing the number of allergens in your home',
