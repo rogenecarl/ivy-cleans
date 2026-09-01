@@ -43,6 +43,7 @@ export const STAGES = [
   { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
   { id: 'front', label: 'Writing the front page — hero and services' },
   { id: 'deep', label: 'Writing the deep-cleaning page' },
+  { id: 'suburb', label: 'Writing the area pages' },
 ] as const
 
 export type StageId = (typeof STAGES)[number]['id']
@@ -50,27 +51,45 @@ export type StageId = (typeof STAGES)[number]['id']
 export const STAGE_IDS: readonly StageId[] = STAGES.map((s) => s.id)
 
 /**
+ * The three slot ids one area page owns. Single source of truth for
+ * stageSlots below, regenerateStage's clearing loop, and (Task 16)
+ * executeStage's suburb case — a mismatch here is silent everywhere else.
+ */
+export function suburbSlots(slug: string): readonly string[] {
+  return [`suburb.${slug}.intro`, `suburb.${slug}.homes`, `suburb.${slug}.local`]
+}
+
+/**
  * Section slots each stage owns. regenerateStage() deletes exactly these
  * before re-running, so a regenerate never leaves half of an older draft
  * mixed into a newer one. `research` owns no section slots — it owns the
  * `draft.research` object instead (see clearStageOutputs).
  *
- * Their union must equal drafts.ts REQUIRED_SLOTS exactly: any slot a stage
- * does not own could never be regenerated, and any slot no stage writes would
- * block finalizeDraft forever. Pinned by a test.
+ * A function of the research rather than a static map: the suburb stage
+ * writes three slots PER AREA, and how many areas there are isn't known
+ * until research has run. With `research` undefined (research hasn't run
+ * yet), `suburb` is `[]` — there is nothing yet to own or to clear.
+ *
+ * The union of stageSlots(research) across all stages must equal
+ * drafts.ts requiredSlotsFor(research) exactly: any slot a stage does not
+ * own could never be regenerated, and any slot no stage writes would block
+ * finalizeDraft forever. Pinned by a test.
  */
-export const STAGE_SLOTS: Record<StageId, readonly string[]> = {
-  research: [],
-  front: [
-    'services.heroParagraphs',
-    'services.serviceIntro',
-    'services.cards.dusting',
-    'services.cards.vacuuming',
-    'services.cards.bathroom',
-    'services.cards.window',
-    'services.cards.upholstery',
-  ],
-  deep: ['deep.whatIs'],
+export function stageSlots(research: ResearchOutput | undefined): Record<StageId, readonly string[]> {
+  return {
+    research: [],
+    front: [
+      'services.heroParagraphs',
+      'services.serviceIntro',
+      'services.cards.dusting',
+      'services.cards.vacuuming',
+      'services.cards.bathroom',
+      'services.cards.window',
+      'services.cards.upholstery',
+    ],
+    deep: ['deep.whatIs'],
+    suburb: research ? research.suburbs.flatMap((s) => suburbSlots(s.slug)) : [],
+  }
 }
 
 /**
@@ -650,6 +669,13 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       })
       break
     }
+    case 'suburb': {
+      // Generation itself is Task 16. This task is structural only — it
+      // exists so stageSlots(research).suburb has real slots to own and
+      // regenerateStage has something correct to clear — so a call this
+      // early fails loudly instead of silently writing nothing.
+      throw new Error('suburb stage generation is not implemented yet')
+    }
     default: {
       const exhaustive: never = stage
       throw new Error(`unknown stage "${String(exhaustive)}"`)
@@ -677,21 +703,29 @@ export async function runStage(client: ModelClient, key: string, stage: StageId)
   }
 }
 
-/** Strips a stage's outputs (and its `done` entry) from a draft in memory. */
+/**
+ * Strips a stage's outputs (and its `done` entry) from a draft in memory.
+ * Slot ownership is computed against the draft's OWN research (before any
+ * clearing below touches it) — clearing 'suburb' must delete the slots for
+ * the areas this draft actually has, not an empty set.
+ */
 function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
   draft.done = draft.done.filter((s) => s !== stage)
-  for (const slot of STAGE_SLOTS[stage]) delete draft.sections[slot]
+  for (const slot of stageSlots(draft.research)[stage]) delete draft.sections[slot]
   if (stage === 'research') delete draft.research
 }
 
 /**
  * Force a stage to run again: drop its outputs, drop its `done` entry, re-run.
  *
- * Regenerating `research` also clears front and deep. Those two stages
- * CONSUMED the research they were written against — the front and deep copy
- * is built on its keywords and local detail — so leaving them in place would
- * publish copy that cites a suburb list and a ZIP list the site no longer
- * has. Cheaper to rewrite them than to ship that mismatch.
+ * Regenerating `research` also clears front, deep AND suburb. All three
+ * CONSUMED the research they were written against — front and deep are built
+ * on its keywords and local detail, and the area pages quote its subdivisions
+ * and conditions directly — so leaving any of them in place would publish
+ * copy that cites a suburb list, ZIP list or local-condition set the site no
+ * longer has. Cheaper to rewrite them than to ship that mismatch. This must
+ * run BEFORE clearStageOutputs('research') deletes draft.research, since
+ * stageSlots needs it to know which suburb slots to strip.
  */
 export async function regenerateStage(
   client: ModelClient,
@@ -700,19 +734,19 @@ export async function regenerateStage(
 ): Promise<void> {
   const draft = await loadDraft(key)
 
-  clearStageOutputs(draft, stage)
   if (stage === 'research') {
-    for (const downstream of ['front', 'deep'] as const) {
+    for (const downstream of ['front', 'deep', 'suburb'] as const) {
       clearStageOutputs(draft, downstream)
     }
   }
+  clearStageOutputs(draft, stage)
 
-  await clearProgress(key, stage)
   if (stage === 'research') {
-    for (const downstream of ['front', 'deep'] as const) {
+    for (const downstream of ['front', 'deep', 'suburb'] as const) {
       await clearProgress(key, downstream)
     }
   }
+  await clearProgress(key, stage)
 
   await saveDraft(key, draft)
   await runStage(client, key, stage)

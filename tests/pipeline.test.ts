@@ -15,7 +15,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { REQUIRED_SLOTS, createDraft, finalizeDraft, loadDraft, saveDraft } from '../src/content/drafts'
+import { REQUIRED_SLOTS, createDraft, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '../src/content/drafts'
 import { deriveFacts, type Facts } from '../src/pipeline/facts'
 import { getCity, revalidateCity } from '../src/content/store'
 import { validateCityContent } from '../src/content/validate'
@@ -24,7 +24,8 @@ import { clearProgress, readProgress } from '../src/pipeline/progress'
 import {
   SLUG_PATTERNS,
   STAGES,
-  STAGE_SLOTS,
+  stageSlots,
+  suburbSlots,
   SYSTEM_BASE,
   FRONT_SYSTEM,
   DEEP_SYSTEM,
@@ -53,6 +54,12 @@ const DOMAINS_JSON = path.join(CONTENT_DIR, '_domains.json')
 const FIXTURE_PATH = path.join(process.cwd(), 'tests/fixtures/stub-pipeline.json')
 
 const KEY = 'ztest-stubville'
+
+// executeStage's 'suburb' case is Task 16's work (see stages.ts) — until it
+// lands, "run every stage" in these fixtures means every stage that actually
+// generates something. STAGES itself still lists all four; this is only
+// about which ones the stub client can be asked to run end to end.
+const RUNNABLE_STAGES = STAGES.filter((s) => s.id !== 'suburb')
 
 function draftPath(key: string): string {
   return path.join(DRAFTS_DIR, `${key}.json`)
@@ -172,23 +179,45 @@ describe('pipeline stages', () => {
   })
 
   describe('STAGES metadata', () => {
-    // TEMPORARY: this is today's post-Task-10 state. Task 14 adds a `suburb`
-    // stage and will update this assertion.
-    it('the home stage no longer exists', () => {
-      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'deep'])
+    // The home stage is gone (Task 10) and the suburb stage exists (Task 14)
+    // — its generation isn't implemented until Task 16, but the stage id,
+    // label and slot ownership are structural and land here.
+    it('the home stage no longer exists and the suburb stage does', () => {
+      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'deep', 'suburb'])
       for (const stage of STAGES) expect(stage.label.length).toBeGreaterThan(10)
     })
 
-    it('the union of STAGE_SLOTS is exactly drafts.ts REQUIRED_SLOTS', () => {
+    it('the union of stageSlots(research) is exactly drafts.ts requiredSlotsFor(research)', () => {
       // Both directions matter: a required slot no stage owns can never be
       // regenerated (and, if a stage stopped writing it, would block finalize
-      // forever); a stage slot that is not required is dead output.
-      const owned = STAGES.flatMap((stage) => STAGE_SLOTS[stage.id])
+      // forever); a stage slot that is not required is dead output. Uses a
+      // real (multi-suburb) research fixture so the suburb slots are exercised
+      // too, not just the eight research-free ones.
+      const research = fixtureResearch()
+      const owned = STAGES.flatMap((stage) => stageSlots(research)[stage.id])
       expect(owned).toHaveLength(new Set(owned).size)
-      expect([...owned].sort()).toEqual([...REQUIRED_SLOTS].sort())
+      expect([...owned].sort()).toEqual([...requiredSlotsFor(research)].sort())
     })
 
-    it('REQUIRED_SLOTS no longer contains the home slots', () => {
+    it('emits exactly three suburb slots per area', () => {
+      const katy: Suburb = { name: 'Katy', slug: 'katy', subdivisions: [], housingCharacter: '', conditions: [] }
+      const sugarLand: Suburb = { name: 'Sugar Land', slug: 'sugar-land', subdivisions: [], housingCharacter: '', conditions: [] }
+      const research: ResearchOutput = { suburbs: [katy, sugarLand], conditions: [], zips: [], keywords: [] }
+      expect(stageSlots(research).suburb).toHaveLength(6)
+    })
+
+    it('emits no suburb slots when research has not run', () => {
+      expect(stageSlots(undefined).suburb).toEqual([])
+    })
+
+    // Task 16 (executeStage's suburb case) and Task 17 (the suburb data
+    // reader) both key their reads and writes off this exact string shape —
+    // a mismatch between them would be silent, so the literal is pinned here.
+    it('suburb slot ids are exactly suburb.<slug>.intro / .homes / .local', () => {
+      expect(suburbSlots('katy')).toEqual(['suburb.katy.intro', 'suburb.katy.homes', 'suburb.katy.local'])
+    })
+
+    it('REQUIRED_SLOTS (the research-free base) no longer contains the home slots', () => {
       expect(REQUIRED_SLOTS).not.toContain('home.zipParagraph')
       expect(REQUIRED_SLOTS).not.toContain('home.landmarksParagraph')
     })
@@ -200,7 +229,7 @@ describe('pipeline stages', () => {
     beforeAll(async () => {
       await resetDraft()
       client = newClient()
-      for (const stage of STAGES) await runStage(client, KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
     })
 
     it('calls the model once per stage, research being two calls', () => {
@@ -263,12 +292,12 @@ describe('pipeline stages', () => {
     beforeEach(async () => {
       await resetDraft()
       const client = newClient()
-      for (const stage of STAGES) await runStage(client, KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
     })
 
     it('re-running a completed pipeline executes nothing', async () => {
       const client = newClient()
-      for (const stage of STAGES) await runStage(client, KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
       expect(client.calls).toEqual([])
     })
 
@@ -279,7 +308,7 @@ describe('pipeline stages', () => {
       await saveDraft(KEY, draft)
 
       const client = newClient()
-      for (const stage of STAGES) await runStage(client, KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
 
       expect(client.calls).toEqual(['generate:front'])
       const after = await loadDraft(KEY)
@@ -304,7 +333,7 @@ describe('pipeline stages', () => {
     beforeEach(async () => {
       await resetDraft()
       const client = newClient()
-      for (const stage of STAGES) await runStage(client, KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
     })
 
     it('re-runs a single downstream stage without touching the others', async () => {
@@ -339,11 +368,35 @@ describe('pipeline stages', () => {
       }
     })
 
+    // The suburb stage isn't runnable yet (Task 16), so this seeds its output
+    // by hand rather than by running it — the point under test is that
+    // regenerateStage('research') clears whatever suburb.* slots the CURRENT
+    // draft.research says exist, not that the suburb stage itself works.
+    // This is exactly the failure regenerateStage exists to prevent: area
+    // copy left in place citing a suburb list the site no longer has.
+    it('clears suburb slots along with front and deep when research is regenerated', async () => {
+      const draft = await loadDraft(KEY)
+      const slug = draft.research!.suburbs[0].slug
+      for (const slot of suburbSlots(slug)) draft.sections[slot] = `stale ${slot}`
+      await saveDraft(KEY, draft)
+
+      const client = newClient()
+      await regenerateStage(client, KEY, 'research')
+
+      const after = await loadDraft(KEY)
+      for (const slot of suburbSlots(slug)) {
+        expect(after.sections[slot]).toBeUndefined()
+      }
+      // front/deep are still cleared too — the seeded suburb slot didn't
+      // change that existing guarantee.
+      expect(after.sections['deep.whatIs']).toBeUndefined()
+    })
+
     it('leaves the draft runnable again after a research regenerate', async () => {
       await regenerateStage(newClient(), KEY, 'research')
 
       const client = newClient()
-      for (const stage of STAGES) await runStage(client, KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
 
       expect(client.calls).toEqual(['generate:front', 'generate:deep'])
       const draft = await loadDraft(KEY)
@@ -399,7 +452,7 @@ describe('pipeline stages', () => {
     })
 
     it('regenerateStage(research) clears research AND downstream progress', async () => {
-      for (const stage of STAGES) await runStage(newClient(), KEY, stage.id)
+      for (const stage of RUNNABLE_STAGES) await runStage(newClient(), KEY, stage.id)
 
       await regenerateStage(newClient(), KEY, 'research')
 
@@ -824,8 +877,8 @@ describe('pipeline stages', () => {
   })
 
   describe('stage id typing', () => {
-    it('runStage accepts only the three known ids', async () => {
-      const ids: StageId[] = ['research', 'front', 'deep']
+    it('runStage accepts only the four known ids', async () => {
+      const ids: StageId[] = ['research', 'front', 'deep', 'suburb']
       expect(ids).toEqual(STAGES.map((s) => s.id))
     })
   })

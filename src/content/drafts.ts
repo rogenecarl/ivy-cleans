@@ -18,6 +18,7 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '../pipeline/facts'
 import type { ResearchOutput } from '../pipeline/schemas'
+import { STAGES, stageSlots } from '../pipeline/stages'
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
 import { checkCity } from './similarity'
@@ -168,6 +169,20 @@ export const REQUIRED_SLOTS = [
   'services.cards.upholstery',
   'deep.whatIs',
 ] as const
+
+/**
+ * The full required-slot set for a given research state: REQUIRED_SLOTS plus
+ * three slots per researched area. Suburb slots can't be known statically —
+ * how many areas exist is a property of the research, not of the pipeline —
+ * so this is the union of stageSlots(research) across every stage rather than
+ * a const. With `research` undefined it reduces to exactly REQUIRED_SLOTS,
+ * which is kept exported as that research-free base so existing call sites
+ * that pre-date the suburb stage keep compiling untouched. Task 18 switches
+ * finalizeDraft's missing-slot check and copy loop over to this function.
+ */
+export function requiredSlotsFor(research: ResearchOutput | undefined): readonly string[] {
+  return STAGES.flatMap((stage) => stageSlots(research)[stage.id])
+}
 
 /** Idempotently appends `key` to content/_cities.json. */
 async function appendCityKey(key: string): Promise<void> {

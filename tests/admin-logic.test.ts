@@ -78,8 +78,14 @@ async function freshDraft(key: (typeof KEYS)[number]) {
   })
 }
 
+// The suburb stage's generation is Task 16's work (see stages.ts executeStage)
+// — until it lands, running "every stage" here means every stage that
+// actually generates something, same as tests/pipeline.test.ts's
+// RUNNABLE_STAGES.
+const RUNNABLE_STAGE_IDS = STAGE_IDS.filter((id) => id !== 'suburb')
+
 async function runAllStages(key: string): Promise<void> {
-  for (const stage of STAGE_IDS) {
+  for (const stage of RUNNABLE_STAGE_IDS) {
     const result = await runStageLogic(key, stage)
     expect(result).toEqual({ ok: true })
   }
@@ -237,7 +243,7 @@ describe('stage run → finalize → publish', () => {
   it('runs all three stages through the stub client', async () => {
     await runAllStages(KEY)
     const draft = await loadDraft(KEY)
-    expect(draft.done).toEqual([...STAGE_IDS])
+    expect(draft.done).toEqual([...RUNNABLE_STAGE_IDS])
     expect(Object.keys(draft.sections)).toHaveLength(8)
     expect(draft.research?.zips).toEqual(['00001', '00002'])
   })
@@ -639,12 +645,19 @@ describe('listCities', () => {
     })
   })
 
-  it('labels a fully-run but unfinalized sidecar draft-unfinalized', async () => {
+  // listCities' own logic (src/pipeline/admin-logic.ts) only flips to
+  // 'draft-unfinalized' once ALL of STAGE_IDS are done — and its comment has
+  // said "all four" since before the suburb stage existed, anticipating
+  // exactly this. Until Task 16 implements the suburb stage's generation,
+  // runAllStages tops out at three of the four ids, so a draft that has run
+  // every stage IT CAN run is still, correctly, 'generating': the suburb
+  // stage genuinely hasn't happened yet.
+  it('labels a sidecar that ran every currently-implemented stage as still GENERATING (suburb pending)', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
 
     expect(row(await listCities(), KEY)).toMatchObject({
-      status: 'draft-unfinalized',
+      status: 'generating',
       hasDraft: true,
       doneCount: 3,
     })
