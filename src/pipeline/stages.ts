@@ -682,6 +682,18 @@ function requireResearch(draft: DraftDoc, key: string, stage: StageId): Research
   return draft.research
 }
 
+/**
+ * A suburb slot counts as written only if it holds real text. `!== undefined`
+ * alone is not enough: a model can return `""` (SuburbCopySchema carries no
+ * min-length constraint — the structured-output API rejects that constraint
+ * at the schema level, so this can't be enforced there), and an empty string
+ * IS `!== undefined`. Without this, a blank paragraph would be indistinguishable
+ * from a finished one and would never be retried on a later resume.
+ */
+function isWrittenSlot(value: string | string[] | undefined): boolean {
+  return typeof value === 'string' && value.trim() !== ''
+}
+
 async function executeStage(client: ModelClient, key: string, stage: StageId): Promise<void> {
   const draft = await loadDraft(key)
   const { facts } = draft
@@ -807,12 +819,30 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       for (const suburb of research.suburbs) {
         const [introSlot, homesSlot, localSlot] = suburbSlots(suburb.slug)
 
-        // Already written on an earlier attempt — skip, do not pay for it twice.
-        if (
-          draft.sections[introSlot] !== undefined &&
-          draft.sections[homesSlot] !== undefined &&
-          draft.sections[localSlot] !== undefined
-        ) {
+        // Already written on an earlier attempt — skip, do not pay for it
+        // twice. A blank string counts as NOT written: it is `!== undefined`
+        // but it is also not usable copy, and treating it as done would
+        // leave a permanently blank paragraph on a published page with no
+        // way to ever regenerate it.
+        if (isWrittenSlot(draft.sections[introSlot]) && isWrittenSlot(draft.sections[homesSlot]) && isWrittenSlot(draft.sections[localSlot])) {
+          continue
+        }
+
+        // buildSuburbPrompt throws on subdivisions.length === 0 — correctly,
+        // since the homes paragraph it builds requires at least three real
+        // subdivision names and there is nothing honest to put there. The
+        // uniqueness gate is supposed to have already dropped an area like
+        // this, but if one still reaches here, failing this ONE area must
+        // not stop the other N-1: catching the whole call (or a broader
+        // try/catch around it) would also swallow real API errors, timeouts
+        // and schema-parse failures that resumability depends on surfacing,
+        // so this checks the exact precondition instead of catching a throw.
+        if (suburb.subdivisions.length === 0) {
+          await appendProgress(key, {
+            stage: 'suburb',
+            kind: 'found',
+            label: `${suburb.name} — skipped, no subdivisions researched`,
+          })
           continue
         }
 

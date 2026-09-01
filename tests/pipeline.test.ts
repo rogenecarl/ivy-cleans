@@ -1135,5 +1135,107 @@ describe('pipeline stages', () => {
       expect(suburbEvents.filter((e) => e.kind === 'found')).toHaveLength(2)
       expect(suburbEvents[suburbEvents.length - 1].kind).toBe('done')
     })
+
+    // Fix round on commit e3de1e8: f624a53 made buildSuburbPrompt throw on
+    // subdivisions.length === 0 (a prompt can't honestly say "use at least
+    // three of these" over an empty list). The uniqueness gate is supposed
+    // to drop such an area before it ever reaches this stage, but if one
+    // slips through anyway, the loop must skip just that area rather than
+    // deadlocking the whole stage on every retry.
+    it('an area with zero researched subdivisions is skipped, not thrown on, and the run still completes', async () => {
+      const draft = await loadDraft(KEY)
+      draft.research!.suburbs.push({
+        name: 'Blank Ridge',
+        slug: 'blank-ridge',
+        subdivisions: [],
+        housingCharacter: '',
+        conditions: [],
+      })
+      await saveDraft(KEY, draft)
+
+      const client = newClient()
+      await runStage(client, KEY, 'suburb')
+
+      // No model call was ever made for the unbuildable area.
+      expect(client.calls).not.toContain('generate:suburb.blank-ridge')
+      // The other two areas were not collateral damage.
+      expect(client.calls).toEqual([`generate:suburb.${NORTH}`, `generate:suburb.${MOCK_HOLLOW}`])
+
+      const after = await loadDraft(KEY)
+      for (const slot of suburbSlots('blank-ridge')) expect(after.sections[slot]).toBeUndefined()
+      for (const slug of [NORTH, MOCK_HOLLOW]) {
+        for (const slot of suburbSlots(slug)) expect(after.sections[slot]).toBeTruthy()
+      }
+      // The stage completed rather than deadlocking on the unbuildable area.
+      expect(after.done).toContain('suburb')
+    })
+
+    it('names the skipped area in a progress entry', async () => {
+      const draft = await loadDraft(KEY)
+      draft.research!.suburbs.push({
+        name: 'Blank Ridge',
+        slug: 'blank-ridge',
+        subdivisions: [],
+        housingCharacter: '',
+        conditions: [],
+      })
+      await saveDraft(KEY, draft)
+      await clearProgress(KEY)
+
+      await runStage(newClient(), KEY, 'suburb')
+
+      const events = await readProgress(KEY)
+      const skipEvent = events.find((e) => e.stage === 'suburb' && e.label.includes('Blank Ridge'))
+      expect(skipEvent).toBeDefined()
+      expect(skipEvent!.label).toMatch(/skipped/)
+    })
+
+    // Fix round on commit e3de1e8: the original skip check was
+    // `!== undefined`, so a model returning "" for a slot counted as
+    // "already written" and would never be retried on a later resume,
+    // leaving a permanently blank paragraph live.
+    it('a blank (empty-string) slot is treated as unwritten and regenerates on the next run', async () => {
+      const draft = await loadDraft(KEY)
+      const [introSlot, homesSlot, localSlot] = suburbSlots(NORTH)
+      draft.sections[introSlot] = '   ' // whitespace-only — not usable copy
+      draft.sections[homesSlot] = 'already written homes'
+      draft.sections[localSlot] = 'already written local'
+      await saveDraft(KEY, draft)
+
+      const client = newClient()
+      await runStage(client, KEY, 'suburb')
+
+      // North Stubville was regenerated despite two of its three slots
+      // already holding real text — a blank slot forces the whole area to
+      // be redone rather than being silently accepted as done.
+      expect(client.calls).toContain(`generate:suburb.${NORTH}`)
+
+      const after = await loadDraft(KEY)
+      expect(after.sections[introSlot]).toBeTruthy()
+      expect((after.sections[introSlot] as string).trim()).not.toBe('')
+    })
+
+    // Verifies the fix-round change did not weaken the existing failure
+    // path: a genuine model error (as opposed to the zero-subdivisions
+    // precondition, which is now handled separately) must still propagate
+    // and still leave 'suburb' out of draft.done. This is the same
+    // assertion the pre-existing 'a partial failure mid-loop...' test above
+    // makes; re-stated here to confirm it still holds after this fix round.
+    it('a genuine (non-precondition) model error still propagates and leaves the stage undone', async () => {
+      const inner = new StubModelClient(fixtures)
+      const failing: ModelClient = {
+        research: (prompt, key, onEvent) => inner.research(prompt, key, onEvent),
+        generate: async (args) => {
+          if (args.key === `suburb.${NORTH}`) throw new Error('simulated API error')
+          return inner.generate(args)
+        },
+      }
+
+      await expect(runStage(failing, KEY, 'suburb')).rejects.toThrow('simulated API error')
+
+      const draft = await loadDraft(KEY)
+      expect(draft.done).not.toContain('suburb')
+      for (const slot of suburbSlots(NORTH)) expect(draft.sections[slot]).toBeUndefined()
+    })
   })
 })
