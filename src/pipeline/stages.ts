@@ -397,6 +397,17 @@ export function buildSuburbPrompt(
   research: ResearchOutput,
   suburb: Suburb
 ): string {
+  // Defensive, not just documentary: the homes paragraph below requires at
+  // least three named subdivisions, and there is no way to satisfy that
+  // instruction honestly with none. The uniqueness gate (scoreSuburbs) is
+  // supposed to have already skipped an area like this; this throw is what
+  // makes the contradiction unbuildable even if some future path bypasses it.
+  if (suburb.subdivisions.length === 0) {
+    throw new Error(
+      `cannot write the area page for "${suburb.name}": no subdivisions were researched for it, and the homes paragraph must name real ones rather than invent one. The uniqueness gate should have dropped this area before it reached generation.`
+    )
+  }
+
   const safe = suburb.conditions.filter((c) => c.copySafe)
   const metroSafe = research.conditions.filter((c) => c.copySafe)
   const conditionLines = [...safe, ...metroSafe]
@@ -408,16 +419,24 @@ export function buildSuburbPrompt(
     .map((s) => s.name)
     .join(', ')
 
+  // A header followed by nothing reads as missing data the model should
+  // fill in — which is exactly the invitation to invent that this whole
+  // change exists to close off. So an empty section is omitted entirely
+  // rather than emitted blank; the surviving lines are unchanged verbatim.
+  const housingSection =
+    suburb.housingCharacter.trim() === ''
+      ? ''
+      : `\n\nWHAT THE HOMES HERE ARE LIKE:\n${suburb.housingCharacter}`
+
+  const conditionsSection =
+    conditionLines === ''
+      ? ''
+      : `\n\nLOCAL CONDITIONS, and what each one means for cleaning a house. The ones listed first are specific to ${suburb.name}; the rest are true across ${facts.city}. Lead with the specific ones:\n${conditionLines}`
+
   return `Write the area-page copy for ${suburb.name}, which this ${facts.city} branch serves.
 ${notesBlock(facts)}
 NAMED DEVELOPMENTS AND NEIGHBORHOODS in ${suburb.name}. Use at least three of these by name. Use only these — never add one:
-${suburb.subdivisions.map((s) => `- ${s}`).join('\n')}
-
-WHAT THE HOMES HERE ARE LIKE:
-${suburb.housingCharacter}
-
-LOCAL CONDITIONS, and what each one means for cleaning a house. The ones listed first are specific to ${suburb.name}; the rest are true across ${facts.city}. Lead with the specific ones:
-${conditionLines}
+${suburb.subdivisions.map((s) => `- ${s}`).join('\n')}${housingSection}${conditionsSection}
 
 OTHER AREAS this branch serves, each with its own page. Do NOT write anything that would sit equally well on one of theirs:
 ${siblings}
@@ -608,6 +627,24 @@ export function scoreSuburb(suburb: Suburb): number {
 export function scoreSuburbs(research: ResearchOutput): ScoredSuburb[] {
   return research.suburbs.map((suburb) => {
     const score = scoreSuburb(suburb)
+
+    // Zero subdivisions is a structural disqualifier, not just a low score:
+    // buildSuburbPrompt's homes paragraph must name at least three real ones,
+    // and there is no honest way to do that with none. An area here would
+    // otherwise still reach 'review' on housing character plus conditions
+    // alone (e.g. 0 + 2 + 4 = 6) and pass straight into a prompt that asks
+    // for developments it cannot supply — the exact setup that invites the
+    // model to invent one. So this overrides the threshold ladder outright,
+    // regardless of how high the rest of the score runs.
+    if (suburb.subdivisions.length === 0) {
+      return {
+        suburb,
+        score,
+        verdict: 'skip',
+        reason: 'no subdivisions found; the homes paragraph cannot name real ones without inventing one',
+      }
+    }
+
     const verdict: SuburbVerdict =
       score >= BUILD_THRESHOLD ? 'build' : score >= REVIEW_THRESHOLD ? 'review' : 'skip'
     const reason =

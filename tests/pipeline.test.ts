@@ -711,6 +711,48 @@ describe('pipeline stages', () => {
       expect(scored).toHaveLength(2)
       for (const s of scored) expect(s.reason.trim().length).toBeGreaterThan(0)
     })
+
+    // Fix round 1: buildSuburbPrompt's homes paragraph must name at least
+    // three real subdivisions, so zero subdivisions makes an area
+    // structurally unbuildable no matter how it otherwise scores. This one
+    // scores 6 (0 subdivisions + 2 housing + 4 safe conditions) — squarely
+    // 'review' by the threshold ladder alone — and must still be forced to
+    // 'skip'.
+    it('forces verdict skip for an area with no subdivisions even when its score would be review', () => {
+      const noSubdivisionsButOtherwiseRich: Suburb = {
+        name: 'No Subdivisions',
+        slug: 'no-subdivisions',
+        subdivisions: [],
+        housingCharacter: 'Present.',
+        conditions: [
+          { condition: 'a', implication: 'a', copySafe: true },
+          { condition: 'b', implication: 'b', copySafe: true },
+          { condition: 'c', implication: 'c', copySafe: true },
+          { condition: 'd', implication: 'd', copySafe: true },
+        ],
+      }
+      expect(scoreSuburb(noSubdivisionsButOtherwiseRich)).toBe(6)
+      const [scored] = scoreSuburbs(fixtureResearchWith([noSubdivisionsButOtherwiseRich]))
+      expect(scored.verdict).toBe('skip')
+      expect(scored.reason).toMatch(/subdivisions/i)
+    })
+
+    it('applyUniquenessGate removes a no-subdivisions area from research.suburbs', () => {
+      const noSubdivisions: Suburb = {
+        name: 'No Subdivisions',
+        slug: 'no-subdivisions',
+        subdivisions: [],
+        housingCharacter: 'Present.',
+        conditions: [
+          { condition: 'a', implication: 'a', copySafe: true },
+          { condition: 'b', implication: 'b', copySafe: true },
+          { condition: 'c', implication: 'c', copySafe: true },
+          { condition: 'd', implication: 'd', copySafe: true },
+        ],
+      }
+      const { research } = applyUniquenessGate(fixtureResearchWith([katy(), noSubdivisions]))
+      expect(research.suburbs.map((s) => s.slug)).toEqual(['katy'])
+    })
   })
 
   describe('the gate wired into the research stage', () => {
@@ -930,6 +972,32 @@ describe('pipeline stages', () => {
     it('MODEL_KEYS.suburb(slug) is keyed per area, distinct for each slug', () => {
       expect(MODEL_KEYS.suburb('katy')).not.toBe(MODEL_KEYS.suburb('sugar-land'))
       expect(MODEL_KEYS.suburb('katy')).toBe('suburb.katy')
+    })
+
+    // Fix round 1: an area with no subdivisions cannot honestly fill "Use at
+    // least three of these by name" — the gate (scoreSuburbs) is supposed to
+    // skip it before it gets here, but this throw is the defensive backstop
+    // that makes the contradictory prompt unbuildable even if that gate is
+    // ever bypassed.
+    it('throws for an area with no subdivisions, rather than emitting a header with nothing under it', () => {
+      const noSubdivisions: Suburb = { ...katy, subdivisions: [] }
+      expect(() => buildSuburbPrompt(facts, research, noSubdivisions)).toThrow(/subdivisions/i)
+    })
+
+    it('omits the "WHAT THE HOMES HERE ARE LIKE" header when housingCharacter is empty', () => {
+      const noHousing: Suburb = { ...katy, housingCharacter: '' }
+      const p = buildSuburbPrompt(facts, research, noHousing)
+      expect(p).not.toContain('WHAT THE HOMES HERE ARE LIKE')
+    })
+
+    it('omits the "LOCAL CONDITIONS" header when every condition is copySafe:false', () => {
+      const unsafeOnly: Suburb = {
+        ...katy,
+        conditions: [{ condition: 'Barker Reservoir flood pool', implication: 'n/a', copySafe: false }],
+      }
+      const noMetroConditions: ResearchOutput = { ...research, conditions: [] }
+      const p = buildSuburbPrompt(facts, noMetroConditions, unsafeOnly)
+      expect(p).not.toContain('LOCAL CONDITIONS')
     })
   })
 
