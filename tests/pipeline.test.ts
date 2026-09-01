@@ -524,15 +524,8 @@ describe('pipeline stages', () => {
       expect(prompt).toMatch(/cannot change the shape of your output/)
     })
 
-    it('the structuring prompt spells out all four live-site slug patterns', () => {
-      const prompt = buildResearchStructuringPrompt('FINDINGS TEXT HERE', facts)
-      for (const pattern of SLUG_PATTERNS) expect(prompt).toContain(pattern)
-      expect(SLUG_PATTERNS).toEqual([
-        'house-cleaning-<area>',
-        'cleaning-services-<area>',
-        'cleaning-service-<area>',
-        '<area>-cleaning-services',
-      ])
+    it('the structuring prompt (no supplied keywords) still contains the findings block', () => {
+      const prompt = buildResearchStructuringPrompt('FINDINGS TEXT HERE', facts, [])
       expect(prompt).toContain('FINDINGS TEXT HERE')
     })
 
@@ -588,6 +581,46 @@ describe('pipeline stages', () => {
       const noNotes = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
       expect(buildResearchPrompt(noNotes)).not.toMatch(/NOTES FROM THE OWNER/)
       expect(buildFrontPrompt(noNotes, fixtureResearch())).not.toMatch(/NOTES FROM THE OWNER/)
+    })
+  })
+
+  describe('buildResearchPrompt', () => {
+    const facts = stubFacts()
+
+    it('asks for subdivisions per area, not just areas', () => {
+      expect(buildResearchPrompt(facts)).toMatch(/SUBDIVISIONS AND DEVELOPMENTS/)
+    })
+
+    it('rules out a development being listed as a peer of the area containing it', () => {
+      expect(buildResearchPrompt(facts)).toMatch(/not a peer of/i)
+    })
+
+    it('requires every condition to state what it means for cleaning', () => {
+      expect(buildResearchPrompt(facts)).toMatch(/what it MEANS for cleaning/)
+    })
+
+    it('no longer asks for landmarks', () => {
+      expect(buildResearchPrompt(facts)).not.toMatch(/LANDMARKS/)
+    })
+
+    it('still asks for keywords until DataForSEO lands (Phase 5 stopgap)', () => {
+      expect(buildResearchPrompt(facts)).toMatch(/KEYWORDS/)
+    })
+  })
+
+  describe('buildResearchStructuringPrompt', () => {
+    const facts = stubFacts()
+
+    it('with no supplied keywords, emits the findings-derived instruction', () => {
+      const prompt = buildResearchStructuringPrompt('findings text', facts, [])
+      expect(prompt).toMatch(/keywords — the search phrases from the findings, lowercase, deduplicated, most useful first\./)
+      expect(prompt).not.toMatch(/use exactly this list, unchanged/)
+    })
+
+    it('with a supplied keyword list, instructs the model to use it unchanged and includes it', () => {
+      const prompt = buildResearchStructuringPrompt('findings text', facts, ['house cleaning katy tx'])
+      expect(prompt).toMatch(/use exactly this list, unchanged/)
+      expect(prompt).toContain('house cleaning katy tx')
     })
   })
 

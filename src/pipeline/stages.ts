@@ -182,9 +182,11 @@ STAGE: the deep-cleaning page. You are writing the single paragraph that answers
  */
 export const RESEARCH_STRUCTURE_SYSTEM = `You convert a block of local-market research findings into strict JSON.
 
-You are a transcriber, not a researcher and not a writer. Every suburb name, ZIP code and landmark you output must appear in the findings text you are given. Do not add entries from your own knowledge, do not correct or "improve" spellings, and do not guess at a ZIP code that is not written in the findings. If the findings contain fewer items than requested, return fewer items — a short accurate list is correct, an invented one is not.
+You are a transcriber, not a researcher and not a writer. Every area name, subdivision, ZIP code and local condition you output must appear in the findings text you are given. Do not add entries from your own knowledge, do not correct or "improve" spellings, and do not guess at a ZIP code or a development name that is not written in the findings. If the findings contain fewer items than requested, return fewer items — a short accurate list is correct, an invented one is not. An empty subdivisions array for an area is a valid and useful answer.
 
-Drop anything the findings themselves flag as uncertain, disputed, or out of the service area, and drop any phone number, street address or business name that wandered into the findings — those fields do not exist in this output.`
+Drop anything the findings themselves flag as uncertain, disputed, or out of the service area, and drop any phone number, street address or business name that wandered into the findings — those fields do not exist in this output.
+
+Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.`
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Prompt builders
@@ -201,51 +203,82 @@ function numberedExample(paragraphs: string[]): string {
   return paragraphs.map((p, i) => `${i + 1}. ${p}`).join('\n\n')
 }
 
+// STOPGAP until keywords.ts (feature 6) lands: buildFrontPrompt and
+// buildDeepPrompt both read research.keywords, so removing this before
+// DataForSEO supplies them would empty both prompts' steering. Delete this
+// part, and this comment, in Phase 5.
+function keywordsPart(city: string): string {
+  return `(e) KEYWORDS — the search phrases people in this area actually type when they are looking to hire a cleaner, in the family of "cleaning services ${city}": house cleaning, maid service, deep cleaning, move-out cleaning, and any local phrasing that shows up in search results or competitor titles.`
+}
+
 /**
  * The web-search brief. This is the only prompt that reaches the internet,
  * and every downstream stage is limited by how good its answer is, so it asks
- * for the four kinds of fact separately and refuses recall as a source.
+ * for the five kinds of fact separately and refuses recall as a source.
  */
 export function buildResearchPrompt(facts: Facts): string {
   return `Research the local market for a residential cleaning company that serves ${facts.city}, ${facts.stateName}. Search the web for each part below and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
 ${notesBlock(facts)}
-Report these four things:
+Report these five things:
 
-(a) SUBURBS AND NEIGHBORHOODS — 8 to 12 real, named places a cleaning company based in ${facts.city} would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to ${facts.city}.
+(a) AREAS — 8 to 12 real, named places a cleaning company based in ${facts.city} would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to ${facts.city}.
 
-(b) ZIP CODES — the main residential ZIP codes of ${facts.city} itself, about 15 to 25 of them, as five-digit strings. Use an authoritative listing (a postal-service or municipal source), not a guess, and skip PO-box-only and non-residential codes.
+  These must be places of the same KIND — municipalities and recognised neighborhoods. A named housing development inside one of them is NOT a separate area; it belongs in (b) under the area that contains it. Cinco Ranch is part of Katy, not a peer of Katy.
 
-(c) LANDMARKS — 5 to 8 landmarks or well-known places in ${facts.city} that a resident would name without hesitating: museums, parks, stadiums, bridges, markets, campuses. Give the exact proper name of each.
+(b) SUBDIVISIONS AND DEVELOPMENTS — for each area in (a), the named residential subdivisions, master-planned communities or distinct neighborhoods within it that a resident would recognise. Aim for 3 to 6 per area. These are the most useful facts in this entire brief, and also the easiest to get wrong: report only names you actually found on a page. If you cannot find real ones for an area, say so plainly for that area — an area with no subdivisions found is a useful finding, and an invented development name is the worst possible outcome.
 
-(d) KEYWORDS — the search phrases people in this area actually type when they are looking to hire a cleaner, in the family of "cleaning services ${facts.city}": house cleaning, maid service, deep cleaning, move-out cleaning, and any local phrasing that shows up in search results or competitor titles.
+(c) HOUSING AND LOCAL CONDITIONS — twice over.
 
-Also note in passing anything about ${facts.city} that would shape how a cleaning company writes about it: the climate and its seasons, the dominant housing stock and typical age of homes, and any local condition that dirties a house (road salt, humidity and mold, pollen, desert dust, blowing sand, coastal salt air, wildfire smoke).
+  For ${facts.city} as a whole: the climate and its seasons, the dominant housing stock and typical age and construction of homes, the usual flooring and foundation type, and any local condition that dirties a house — road salt, humidity and mold, hard water, pollen, desert dust, blowing sand, coastal salt air, wildfire smoke, year-round air conditioning.
+
+  Then for each area in (a) separately: what the homes there are like — when they were built, roughly how large, whether they sit in master-planned communities with HOAs or on older streets — and anything specific to that area that affects how a house gets dirty or how a cleaning crew reaches it.
+
+  For every condition you report, say what it MEANS for cleaning a home. "Humid subtropical climate" on its own is not useful; "humidity keeps bathrooms damp enough that grout and shower glass discolour faster than owners expect" is.
+
+  Report income, poverty, flood or crime data ONLY if it is relevant to whether this is a workable market, and mark anything of that kind clearly as background — it will never appear on the website.
+
+(d) ZIP CODES — the main residential ZIP codes of ${facts.city} itself, about 15 to 25 of them, as five-digit strings. Use an authoritative listing (a postal-service or municipal source), not a guess, and skip PO-box-only and non-residential codes.
+
+${keywordsPart(facts.city)}
 
 Do NOT research or report phone numbers, street addresses, business names, prices, or contact details of any kind — those are supplied separately and anything you found would be wrong.`
 }
 
 /**
- * Second research call: findings text in, ResearchSchema out. The slug rules
- * live here rather than in the web-search brief because this is the call that
- * actually emits the slugs.
+ * Second research call: findings text in, ResearchSchema out.
+ *
+ * `keywords` branches on the third argument. An empty list means Phase 5
+ * (DataForSEO) has not landed yet, so we still ask the model to derive
+ * keywords from the findings, matching buildResearchPrompt's part (e). Once
+ * real search-volume keywords are supplied, telling the model to derive its
+ * own from the findings would be circular — it would just be asked to
+ * faithfully reproduce a list it had itself invented — so a non-empty list
+ * instead gets a "use this exact list" instruction.
  */
-export function buildResearchStructuringPrompt(findings: string, facts: Facts): string {
+export function buildResearchStructuringPrompt(
+  findings: string,
+  facts: Facts,
+  keywords: readonly string[]
+): string {
+  const keywordsSection =
+    keywords.length === 0
+      ? 'keywords — the search phrases from the findings, lowercase, deduplicated, most useful first.'
+      : `keywords — use exactly this list, unchanged. It comes from search-volume data, not from the findings:\n${keywords.map((k) => `  ${k}`).join('\n')}`
+
   return `Below are research findings for ${facts.city}, ${facts.stateName}. Convert them into the required JSON.
 
-suburbs — one entry per real place named in the findings (aim for the 8 to 12 they contain), each with:
-  name: the place name exactly as the findings write it, e.g. "St. Louis Park", "Eden Prairie".
-  slug: a URL slug built from that name lowercased, with spaces and punctuation replaced by single hyphens (so "St. Louis Park" gives "st-louis-park"), placed into ONE of these four patterns:
-    ${SLUG_PATTERNS[0]}
-    ${SLUG_PATTERNS[1]}
-    ${SLUG_PATTERNS[2]}
-    ${SLUG_PATTERNS[3]}
-  Vary the pattern across the list — use all four where the list is long enough, with no single pattern taking more than half the entries. Slugs must be unique, lowercase, and contain only a-z, 0-9 and hyphens.
+suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 they contain). A named subdivision inside an area is never its own entry; it goes in that area's subdivisions array. Each entry has:
+  name: the place name exactly as the findings write it, e.g. "St. Louis Park", "Sugar Land".
+  slug: that name lowercased, with spaces and punctuation replaced by single hyphens — "St. Louis Park" gives "st-louis-park". Nothing else: no prefix, no suffix. Unique, lowercase, a-z 0-9 and hyphens only.
+  subdivisions: the named developments and neighborhoods the findings place inside this area. Empty array if the findings name none — do not fill it from your own knowledge.
+  housingCharacter: one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
+  conditions: the local conditions the findings give for THIS area specifically, each with what it means for cleaning.
 
-zips — the five-digit ZIP codes from the findings, as strings, in ascending order, with duplicates removed.
+conditions — the metro-wide conditions from the findings, each with its cleaning implication and its copySafe flag.
 
-landmarks — the landmark names from the findings, exactly as written there.
+zips — the five-digit ZIP codes from the findings, as strings, ascending, deduplicated.
 
-keywords — the search phrases from the findings, lowercase, deduplicated, most useful first.
+${keywordsSection}
 
 FINDINGS
 ${findings}`
@@ -486,7 +519,7 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
         schema: ResearchSchema,
         key: MODEL_KEYS.researchStructure,
         system: RESEARCH_STRUCTURE_SYSTEM,
-        prompt: buildResearchStructuringPrompt(findings, facts),
+        prompt: buildResearchStructuringPrompt(findings, facts, []),
       })
       const r = normalizeResearchSlugs(structured, facts.city)
       draft.research = r
