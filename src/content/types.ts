@@ -1,4 +1,15 @@
-export type Suburb = { name: string; slug: string }
+export type Condition = { condition: string; implication: string; copySafe: boolean }
+
+export type Suburb = {
+  name: string
+  slug: string
+  /** Named developments inside this area — the strongest local signal available. */
+  subdivisions: string[]
+  /** Build era, typical size, flooring, HOA prevalence. One or two sentences. */
+  housingCharacter: string
+  /** Conditions specific to THIS area. Metro-wide ones live on research.conditions. */
+  conditions: Condition[]
+}
 
 export type CityContent = {
   /** Display name, e.g. "Minneapolis". */
@@ -15,7 +26,7 @@ export type CityContent = {
     /** Slugs are STORED, never derived — live-site URL patterns vary. */
     suburbs: Suburb[]
     zips: string[]
-    landmarks: string[]
+    conditions: Condition[]
     mapEmbedUrl: string | null
   }
   /**

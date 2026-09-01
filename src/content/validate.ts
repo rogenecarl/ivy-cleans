@@ -22,6 +22,16 @@ function isStringOrNull(v: unknown): v is string | null {
   return v === null || isString(v)
 }
 
+function isCondition(v: unknown): v is { condition: string; implication: string; copySafe: boolean } {
+  return (
+    v !== null &&
+    typeof v === 'object' &&
+    isString((v as Record<string, unknown>).condition) &&
+    isString((v as Record<string, unknown>).implication) &&
+    typeof (v as Record<string, unknown>).copySafe === 'boolean'
+  )
+}
+
 export function validateCityContent(raw: unknown): CityContent {
   const errors: string[] = []
 
@@ -66,20 +76,31 @@ export function validateCityContent(raw: unknown): CityContent {
           s === null ||
           typeof s !== 'object' ||
           !isString((s as Record<string, unknown>).name) ||
-          !isString((s as Record<string, unknown>).slug)
+          !isString((s as Record<string, unknown>).slug) ||
+          !isStringArray((s as Record<string, unknown>).subdivisions) ||
+          !isString((s as Record<string, unknown>).housingCharacter) ||
+          !Array.isArray((s as Record<string, unknown>).conditions) ||
+          !((s as Record<string, unknown>).conditions as unknown[]).every(isCondition)
         ) {
-          errors.push(`research.suburbs[${i}] must be { name: string, slug: string }`)
+          errors.push(
+            `research.suburbs[${i}] must be { name: string, slug: string, subdivisions: string[], housingCharacter: string, conditions: Condition[] }`,
+          )
         }
       })
     }
     if (!isStringArray(r.zips)) {
       errors.push('research.zips must be an array of strings')
     }
-    if (!isStringArray(r.landmarks)) {
-      errors.push('research.landmarks must be an array of strings')
+    if (!Array.isArray(r.conditions) || !r.conditions.every(isCondition)) {
+      errors.push('research.conditions must be an array of { condition: string, implication: string, copySafe: boolean }')
     }
     if (!isStringOrNull(r.mapEmbedUrl)) {
       errors.push('research.mapEmbedUrl must be a string or null')
+    }
+    // A document generated before this shape landed carries dead `landmarks`
+    // data — reject it explicitly rather than silently dropping the field.
+    if ('landmarks' in r) {
+      errors.push('research.landmarks is no longer a valid field (moved to research.conditions)')
     }
   }
 
