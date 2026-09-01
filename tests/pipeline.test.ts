@@ -862,6 +862,26 @@ describe('pipeline stages', () => {
       expect(prompt).toContain('Mock Hollow')
     })
 
+    it('does not ship the two exempt one-sentence hero paragraphs (4 and 5) as structural examples', () => {
+      // similarity.ts exempts hero indices 3/4 from cross-city duplication
+      // detection ON THE PRODUCT OF this prompt — that exemption only makes
+      // sense if the prompt stops asking the model to imitate a concrete
+      // sentence for them. Otherwise the exempt sentences keep being
+      // generated verbatim; they are just no longer caught doing it.
+      const prompt = buildFrontPrompt(facts, fixtureResearch())
+      expect(prompt).not.toContain(
+        'Whether it’s your home or business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!',
+      )
+      expect(prompt).not.toContain(
+        'Call our professional cleaning company Ivy Cleans today, get an estimate of our prices and put us to the test!',
+      )
+      // The first three paragraphs are still shown as examples.
+      expect(prompt).toContain(
+        'That is why we hold fast to the notion that our services are the top most in the Minneapolis area.',
+      )
+      expect(prompt).toContain('Do you have a mess that needs cleaning?')
+    })
+
     it('the deep prompt uses the Minneapolis whatIs as its shape example', () => {
       const prompt = buildDeepPrompt(facts, fixtureResearch())
       expect(prompt).toContain('Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks.')

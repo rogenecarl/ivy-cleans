@@ -288,8 +288,10 @@ Produce three things.
    4) One sentence: home or business, call our professional cleaning company today and request a quote.
    5) One sentence: call Ivy Cleans today and get an estimate. Similar in spirit to paragraph 4 but not a repeat of its wording.
 
-   STRUCTURAL EXAMPLE — this is the Minneapolis version of these five paragraphs. Match its SHAPE, its paragraph lengths, its rhythm and its voice; never copy its sentences, and never carry over a Minneapolis detail:
-${numberedExample(MPLS_HERO_PARAGRAPHS)}
+   STRUCTURAL EXAMPLE — this is the Minneapolis version of the first three of these paragraphs. Match its SHAPE, its paragraph lengths, its rhythm and its voice; never copy its sentences, and never carry over a Minneapolis detail:
+${numberedExample(MPLS_HERO_PARAGRAPHS.slice(0, 3))}
+
+   Paragraphs 4 and 5 are one sentence each, so there is no shape left to imitate once you match it — write them to the spec in steps 4 and 5 above: a direct call to action, then a request for a quote or estimate close in spirit to it but not a repeat of its wording. Do not imitate a sample sentence for either.
 
 2. serviceIntro — exactly 5 paragraphs:
    1) An overview: the range of professional cleaning services we provide in ${facts.city} and nearby areas — residential, commercial, office upkeep, maid service — our experienced house cleaners, quality products and equipment, and flexible scheduling for busy people. Roughly 80 to 100 words.
