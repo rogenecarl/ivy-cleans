@@ -260,7 +260,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                           <Pill key={name}>{name}</Pill>
                         ))}
                         <Pill>{research.zips.length} ZIP codes</Pill>
-                        <Pill>{research.landmarks.length} landmarks</Pill>
+                        <Pill>{research.subdivisions} subdivisions</Pill>
                       </div>
                     )}
 

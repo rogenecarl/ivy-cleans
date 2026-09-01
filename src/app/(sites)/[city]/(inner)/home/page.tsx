@@ -38,8 +38,7 @@ export default async function HomePage({ params }: { params: CityParams }) {
     featuresOutro,
     houseCleaning,
     principles,
-    zipParagraph,
-    landmarksParagraph,
+    zips,
     workImages,
   } = homeData(c);
   const { heroParagraphs, serviceIntro, services } = servicesData(c);
@@ -69,8 +68,7 @@ export default async function HomePage({ params }: { params: CityParams }) {
           its heading and its location-list paragraphs — see Locations.tsx */}
       <Locations
         areas={areas}
-        zipParagraph={zipParagraph}
-        landmarksParagraph={landmarksParagraph}
+        zips={zips}
         mapSrc={c.maps.home}
         hasSuburbPages={c.hasSuburbPages}
       />

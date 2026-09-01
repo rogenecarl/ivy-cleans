@@ -99,12 +99,11 @@ describe('ServiceArea', () => {
 
 describe('Locations', () => {
   it('renders every name of a no-suburb-pages city, unlinked and undropped', () => {
-    const { zipParagraph, landmarksParagraph } = homeData(testville)
+    const { zips } = homeData(testville)
     const html = renderToStaticMarkup(
       <Locations
         areas={areasData(testville).areas}
-        zipParagraph={zipParagraph}
-        landmarksParagraph={landmarksParagraph}
+        zips={zips}
         mapSrc={testville.maps.home}
         hasSuburbPages={false}
       />,
@@ -114,12 +113,11 @@ describe('Locations', () => {
   })
 
   it('links all 3 Testville names once its own hasSuburbPages is true', () => {
-    const { zipParagraph, landmarksParagraph } = homeData(testville)
+    const { zips } = homeData(testville)
     const html = renderToStaticMarkup(
       <Locations
         areas={areasData(testville).areas}
-        zipParagraph={zipParagraph}
-        landmarksParagraph={landmarksParagraph}
+        zips={zips}
         mapSrc={testville.maps.home}
         hasSuburbPages={testville.hasSuburbPages}
       />,
@@ -129,19 +127,31 @@ describe('Locations', () => {
     for (const s of testville.research.suburbs) expect(html).toContain(s.name)
   })
 
-  it('keeps all 24 Minneapolis names linked across the two paragraphs', () => {
-    const { zipParagraph, landmarksParagraph } = homeData(minneapolis)
+  it('keeps all 24 Minneapolis names linked, and lists every researched ZIP', () => {
+    const { zips } = homeData(minneapolis)
     const html = renderToStaticMarkup(
       <Locations
         areas={areasData(minneapolis).areas}
-        zipParagraph={zipParagraph}
-        landmarksParagraph={landmarksParagraph}
+        zips={zips}
         mapSrc={minneapolis.maps.home}
         hasSuburbPages={minneapolis.hasSuburbPages}
       />,
     )
     expect(countAnchors(html)).toBe(24)
     for (const s of minneapolis.research.suburbs) expect(html).toContain(s.name)
+    for (const zip of zips) expect(html).toContain(zip)
+  })
+
+  it('omits the ZIP section entirely when there are no ZIPs', () => {
+    const html = renderToStaticMarkup(
+      <Locations
+        areas={areasData(testville).areas}
+        zips={[]}
+        mapSrc={null}
+        hasSuburbPages={false}
+      />,
+    )
+    expect(html).not.toContain('ZIP codes we serve')
   })
 })
 

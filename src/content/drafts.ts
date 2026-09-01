@@ -154,7 +154,7 @@ export async function deleteDraft(key: string): Promise<void> {
 }
 
 /**
- * The 10 section slots every src/data builder reads (mirrors testville.json's
+ * The 8 section slots every src/data builder reads (mirrors testville.json's
  * `sections` keys). finalizeDraft() requires every one of these to be present
  * in draft.sections before a draft can become a published CityContent.
  */
@@ -167,8 +167,6 @@ export const REQUIRED_SLOTS = [
   'services.cards.window',
   'services.cards.upholstery',
   'deep.whatIs',
-  'home.zipParagraph',
-  'home.landmarksParagraph',
 ] as const
 
 /** Idempotently appends `key` to content/_cities.json. */

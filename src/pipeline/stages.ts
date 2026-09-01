@@ -1,5 +1,5 @@
 /**
- * The four pipeline stages, and the prompts that are the actual product.
+ * The three pipeline stages, and the prompts that are the actual product.
  *
  * Each stage is resumable: `runStage` loads the draft sidecar, returns
  * immediately if the stage is already in `draft.done`, otherwise calls the
@@ -10,16 +10,22 @@
  *
  * The prompt builders are exported individually and are pure functions of
  * (facts, research): they are unit-testable, and they are where the quality
- * of every generated city site is decided. All four `generate()` system
- * prompts start with the identical SYSTEM_BASE string so that a future
+ * of every generated city site is decided. Both `generate()` system prompts
+ * (front, deep) start with the identical SYSTEM_BASE string so that a future
  * prompt-cache breakpoint can be placed after it and reused across stages.
+ *
+ * The `home` stage (ZIP and landmark prose for the Locations block) is gone:
+ * its two sentences were byte-identical across every Ivy Cleans site apart
+ * from the city name — a network fingerprint, not content — and the landmark
+ * sentence itself never earned a click (Minneapolis: 3,030 impressions, zero
+ * clicks over sixteen months). ZIPs are still researched; they render as a
+ * plain list (src/components/home/Locations.tsx) with no model call at all.
  */
 
 import type { Facts } from './facts'
 import {
   DeepSchema,
   FrontSectionsSchema,
-  HomeProseSchema,
   ResearchSchema,
   type Condition,
   type ResearchOutput,
@@ -36,7 +42,6 @@ import { posts as recentPosts } from '../data/recent-posts'
 export const STAGES = [
   { id: 'research', label: 'Researching the city — suburbs, ZIP codes, landmarks' },
   { id: 'front', label: 'Writing the front page — hero and services' },
-  { id: 'home', label: 'Writing the home page — ZIP and landmarks copy' },
   { id: 'deep', label: 'Writing the deep-cleaning page' },
 ] as const
 
@@ -65,7 +70,6 @@ export const STAGE_SLOTS: Record<StageId, readonly string[]> = {
     'services.cards.window',
     'services.cards.upholstery',
   ],
-  home: ['home.zipParagraph', 'home.landmarksParagraph'],
   deep: ['deep.whatIs'],
 }
 
@@ -120,12 +124,6 @@ const MPLS_CARD_DUSTING =
 const MPLS_CARD_VACUUMING =
   'Vacuuming is another crucial cleaning service that is particularly important in Minneapolis. The city’s cold winters mean that people spend more time indoors, leading to a buildup of dirt and debris on floors and carpets. Our professional vacuuming services ensure that your home is free from dirt and dust, providing a more pleasant and hygienic living environment.'
 
-const MPLS_ZIP_SENTENCE =
-  'We offer home cleaning service in most or all of the following Minneapolis ZIP Codes: 55401, 55402, 55403, 55404, 55405, 55406, 55407, 55408, 55409, 55410, 55411, 55412, 55413, 55414, 55415, 55416, 55417, 55418, 55419, 55421, 55423, 55430, 55450, 55454, and 55455.'
-
-const MPLS_LANDMARK_SENTENCE =
-  'Ivy cleans serves in almost all the area of Minneapolis including Mill City Museum, Walker Art Center, Stone Arch Bridge, Minneapolis Institute of Art, Target Field and so on.'
-
 const MPLS_WHAT_IS =
   'Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.'
 
@@ -165,12 +163,6 @@ Return only the requested fields, filled with finished copy — no commentary, n
 export const FRONT_SYSTEM = `${SYSTEM_BASE}
 
 STAGE: the front page. You are writing the opening hero paragraphs, the service-introduction paragraphs, and the five short service cards (dusting, vacuuming, bathroom, window, upholstery). This copy is the first thing a visitor reads, so the city has to be recognizable in it within the first two sentences.`
-
-export const HOME_SYSTEM = `${SYSTEM_BASE}
-
-STAGE: the "Locations" block on the home page. You are writing exactly two sentences of service-area copy from a list of ZIP codes and a list of landmarks that were researched for this city. This is the most factual copy on the site: the shapes of the two sentences are fixed, and the only content in them is the data you were given.
-
-The SUBSTANCE guidance above does not apply to this stage. These two sentences are deliberately identical across every Ivy Cleans site apart from the city name and the data supplied — do not vary, improve or localize their wording.`
 
 export const DEEP_SYSTEM = `${SYSTEM_BASE}
 
@@ -330,38 +322,6 @@ ${numberedExample(MPLS_SERVICE_INTRO)}
    Note that the real Minneapolis card and its matching intro paragraph overlap heavily. Yours must not — the two sit on one page and a reader sees both.`
 }
 
-/**
- * Home "Locations" prose. The zips and landmarks are pasted in verbatim and
- * the model is told, twice, that it may not add to them: these two sentences
- * are the only place on the site where researched facts are rendered as prose
- * rather than as a list, so a hallucinated ZIP would look exactly like a real
- * one.
- */
-export function buildHomePrompt(facts: Facts, research: ResearchOutput): string {
-  // No notesBlock here, deliberately: these two sentences have a fixed shape
-  // and carry only researched data, so there is nothing an owner note could
-  // legitimately change about them.
-  return `Write the two "Locations" sentences for the Ivy Cleans website serving ${facts.city}, ${facts.stateName}.
-
-ZIP CODES — use exactly these, all of them, in this order, and no others:
-${research.zips.join(', ')}
-
-LANDMARKS — use exactly these, all of them, in this order, and no others:
-${research.landmarks.join(', ')}
-
-1. zipParagraph — one sentence listing every ZIP code above and no others, in the shape of this real example:
-${MPLS_ZIP_SENTENCE}
-
-   So: "We offer home cleaning service in most or all of the following ${facts.city} ZIP Codes: " then the codes separated by commas, then a comma, then "and", then the final code, ending in a full stop. Do not add, drop, reorder or re-format a single code, and do not add any other sentence.
-
-2. landmarksParagraph — one sentence naming every landmark above and no others, in the shape of this real example:
-${MPLS_LANDMARK_SENTENCE}
-
-   So: "Ivy cleans serves in almost all the area of ${facts.city} including " then the landmark names comma-separated, ending with "and so on." Keep the lowercase "cleans" and the trailing "and so on." exactly as the example has them — this sentence is reproduced across the network of sites and its wording is fixed. Spell each landmark exactly as given above.
-
-Invent nothing here. If a ZIP code or landmark is not in the lists above, it does not go in the sentence.`
-}
-
 /** Deep-cleaning page: the "What is Deep House Cleaning?" paragraph. */
 export function buildDeepPrompt(facts: Facts, research: ResearchOutput): string {
   const keywordList = research.keywords.slice(0, 8).map((k) => `- ${k}`).join('\n')
@@ -388,7 +348,6 @@ export const MODEL_KEYS = {
   research: 'research',
   researchStructure: 'research.structure',
   front: 'front',
-  home: 'home',
   deep: 'deep',
 } as const
 
@@ -610,10 +569,14 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       })
       const r = normalizeResearchSlugs(structured, facts.city)
       draft.research = r
+      // Landmarks are gone (see schemas.ts ResearchSchema) — subdivisions are
+      // the fact this pipeline now leans on, so the progress label counts
+      // those instead.
+      const subdivisionCount = r.suburbs.reduce((n, s) => n + s.subdivisions.length, 0)
       await appendProgress(key, {
         stage: 'research',
         kind: 'found',
-        label: `${r.suburbs.length} areas · ${r.zips.length} ZIP codes · ${r.landmarks.length} landmarks · ${r.keywords.length} search phrases`,
+        label: `${r.suburbs.length} areas · ${r.zips.length} ZIP codes · ${subdivisionCount} subdivisions · ${r.keywords.length} search phrases`,
       })
       await appendProgress(key, { stage: 'research', kind: 'done', label: 'Research complete' })
       break
@@ -642,28 +605,6 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
         stage: 'front',
         kind: 'done',
         label: `${out.heroParagraphs.length} hero paragraphs · ${out.serviceIntro.length} intro paragraphs · 5 service cards`,
-      })
-      break
-    }
-    case 'home': {
-      const research = requireResearch(draft, key, stage)
-      await appendProgress(key, {
-        stage: 'home',
-        kind: 'start',
-        label: 'Composing ZIP and landmark sentences from researched data',
-      })
-      const out = await client.generate({
-        schema: HomeProseSchema,
-        key: MODEL_KEYS.home,
-        system: HOME_SYSTEM,
-        prompt: buildHomePrompt(facts, research),
-      })
-      draft.sections['home.zipParagraph'] = out.zipParagraph
-      draft.sections['home.landmarksParagraph'] = out.landmarksParagraph
-      await appendProgress(key, {
-        stage: 'home',
-        kind: 'done',
-        label: `ZIP sentence (${research.zips.length} codes) · landmark sentence (${research.landmarks.length} landmarks)`,
       })
       break
     }
@@ -725,12 +666,11 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
 /**
  * Force a stage to run again: drop its outputs, drop its `done` entry, re-run.
  *
- * Regenerating `research` also clears front, home and deep. Those three stages
- * CONSUMED the research they were written against — the home ZIP and landmark
- * sentences quote it literally, and the front and deep copy is built on its
- * keywords and local detail — so leaving them in place would publish copy that
- * cites a suburb list and a ZIP list the site no longer has. Cheaper to
- * rewrite them than to ship that mismatch.
+ * Regenerating `research` also clears front and deep. Those two stages
+ * CONSUMED the research they were written against — the front and deep copy
+ * is built on its keywords and local detail — so leaving them in place would
+ * publish copy that cites a suburb list and a ZIP list the site no longer
+ * has. Cheaper to rewrite them than to ship that mismatch.
  */
 export async function regenerateStage(
   client: ModelClient,
@@ -741,14 +681,14 @@ export async function regenerateStage(
 
   clearStageOutputs(draft, stage)
   if (stage === 'research') {
-    for (const downstream of ['front', 'home', 'deep'] as const) {
+    for (const downstream of ['front', 'deep'] as const) {
       clearStageOutputs(draft, downstream)
     }
   }
 
   await clearProgress(key, stage)
   if (stage === 'research') {
-    for (const downstream of ['front', 'home', 'deep'] as const) {
+    for (const downstream of ['front', 'deep'] as const) {
       await clearProgress(key, downstream)
     }
   }

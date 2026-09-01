@@ -1,6 +1,5 @@
 // src/data/home.ts
 import type { CityContent } from '../content/types'
-import { s } from '../content/slots'
 import { t } from '../content/interpolate'
 
 export type Feature = { title: string; text: string; icon: string; width: number; height: number };
@@ -12,8 +11,7 @@ export type HomeData = {
   featuresOutro: string;
   houseCleaning: string[];
   principles: string[];
-  zipParagraph: string;
-  landmarksParagraph: string;
+  zips: string[];
   workImages: string[];
 };
 
@@ -71,10 +69,10 @@ export function homeData(c: CityContent): HomeData {
       "We have full assurance that you will observe the excellence in our services, encompassing our team and thorough cleaning procedures. As a result, we extend a 100% satisfaction guarantee, with no inquiries asked. If, within the initial 24 hours following completion of the service, you are dissatisfied, we will refund your payment in its entirety.",
     ],
 
-    /* RESEARCH-class: whole paragraphs are per-city facts (ZIPs, landmarks) — slot ids home.zipParagraph / home.landmarksParagraph are part of the Plan 3 writer-schema contract. */
-    zipParagraph: s(c, 'home.zipParagraph'),
-
-    landmarksParagraph: s(c, 'home.landmarksParagraph'),
+    /* RESEARCH-class: the raw ZIP list is per-city fact data, not model-written
+       copy — it renders as a compact list (see Locations.tsx), so no slot or
+       model call is needed for it. */
+    zips: c.research.zips,
 
     workImages: [
       "/images/rn_image_picker_lib_temp_d129a169-21-1.jpg",

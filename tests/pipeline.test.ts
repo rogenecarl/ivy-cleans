@@ -1,7 +1,7 @@
 // tests/pipeline.test.ts
 /*
- * Stub end-to-end for the four pipeline stages (src/pipeline/stages.ts): a
- * draft goes in, four StubModelClient-backed stages run, finalizeDraft turns
+ * Stub end-to-end for the three pipeline stages (src/pipeline/stages.ts): a
+ * draft goes in, three StubModelClient-backed stages run, finalizeDraft turns
  * it into a real CityContent, and getCity serves it. Plus the two behaviours
  * that make the admin screen safe to reload — resume (a done stage never
  * re-runs) and regenerate (research clears everything downstream) — and unit
@@ -27,11 +27,9 @@ import {
   STAGE_SLOTS,
   SYSTEM_BASE,
   FRONT_SYSTEM,
-  HOME_SYSTEM,
   DEEP_SYSTEM,
   buildDeepPrompt,
   buildFrontPrompt,
-  buildHomePrompt,
   buildResearchPrompt,
   buildResearchStructuringPrompt,
   applyUniquenessGate,
@@ -174,8 +172,10 @@ describe('pipeline stages', () => {
   })
 
   describe('STAGES metadata', () => {
-    it('is the ordered research → front → home → deep list, each with a label', () => {
-      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'home', 'deep'])
+    // TEMPORARY: this is today's post-Task-10 state. Task 14 adds a `suburb`
+    // stage and will update this assertion.
+    it('the home stage no longer exists', () => {
+      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'deep'])
       for (const stage of STAGES) expect(stage.label.length).toBeGreaterThan(10)
     })
 
@@ -186,6 +186,11 @@ describe('pipeline stages', () => {
       const owned = STAGES.flatMap((stage) => STAGE_SLOTS[stage.id])
       expect(owned).toHaveLength(new Set(owned).size)
       expect([...owned].sort()).toEqual([...REQUIRED_SLOTS].sort())
+    })
+
+    it('REQUIRED_SLOTS no longer contains the home slots', () => {
+      expect(REQUIRED_SLOTS).not.toContain('home.zipParagraph')
+      expect(REQUIRED_SLOTS).not.toContain('home.landmarksParagraph')
     })
   })
 
@@ -203,20 +208,18 @@ describe('pipeline stages', () => {
         'research:research',
         'generate:research.structure',
         'generate:front',
-        'generate:home',
         'generate:deep',
       ])
     })
 
     it('records every stage as done and stores the research object', async () => {
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front', 'home', 'deep'])
+      expect(draft.done).toEqual(['research', 'front', 'deep'])
       expect(draft.research?.zips).toEqual(['00001', '00002'])
-      expect(draft.research?.landmarks).toEqual(['Stub Tower', 'Fixture Park'])
       expect(draft.research?.suburbs).toHaveLength(3)
     })
 
-    it('fills all ten section slots with the fixture copy', async () => {
+    it('fills all eight section slots with the fixture copy', async () => {
       const draft = await loadDraft(KEY)
       const hero = draft.sections['services.heroParagraphs'] as string[]
       const intro = draft.sections['services.serviceIntro'] as string[]
@@ -229,8 +232,9 @@ describe('pipeline stages', () => {
       expect(draft.sections['services.cards.window']).toMatch(/Stubville/)
       expect(draft.sections['services.cards.upholstery']).toMatch(/Stubville/)
       expect(draft.sections['deep.whatIs']).toMatch(/Deep cleaning/)
-      expect(draft.sections['home.zipParagraph']).toMatch(/00001, and 00002/)
-      expect(draft.sections['home.landmarksParagraph']).toMatch(/Stub Tower, Fixture Park/)
+      // The home stage is gone (Task 10) — no home.* slot is ever written.
+      expect(draft.sections['home.zipParagraph']).toBeUndefined()
+      expect(draft.sections['home.landmarksParagraph']).toBeUndefined()
     })
 
     it('finalizes into a valid CityContent that getCity resolves', async () => {
@@ -241,7 +245,7 @@ describe('pipeline stages', () => {
       expect(validated.city).toBe('Ztest Stubville')
       expect(validated.status).toBe('draft')
       expect(validated.research.zips).toEqual(['00001', '00002'])
-      expect(validated.sections['home.landmarksParagraph']).toMatch(/Fixture Park/)
+      expect(validated.sections['home.landmarksParagraph']).toBeUndefined()
 
       const cities = JSON.parse(await readFile(CITIES_JSON, 'utf-8')) as string[]
       expect(cities).toContain(KEY)
@@ -267,17 +271,20 @@ describe('pipeline stages', () => {
 
     it('re-runs only the stage whose done entry was removed', async () => {
       const draft = await loadDraft(KEY)
-      draft.done = draft.done.filter((s) => s !== 'home')
-      draft.sections['home.zipParagraph'] = 'STALE'
+      draft.done = draft.done.filter((s) => s !== 'front')
+      draft.sections['services.heroParagraphs'] = ['STALE']
       await saveDraft(KEY, draft)
 
       const client = newClient()
       for (const stage of STAGES) await runStage(client, KEY, stage.id)
 
-      expect(client.calls).toEqual(['generate:home'])
+      expect(client.calls).toEqual(['generate:front'])
       const after = await loadDraft(KEY)
-      expect(after.done).toEqual(['research', 'front', 'deep', 'home'])
-      expect(after.sections['home.zipParagraph']).toMatch(/00001/)
+      // 'front' was removed from the middle and re-appended on completion —
+      // proof the resume picks up exactly the missing stage, not just "the
+      // next one in STAGES order".
+      expect(after.done).toEqual(['research', 'deep', 'front'])
+      expect((after.sections['services.heroParagraphs'] as string[])[0]).toMatch(/Stubville/)
     })
 
     it('a stage that needs research but has none throws instead of writing junk', async () => {
@@ -303,7 +310,7 @@ describe('pipeline stages', () => {
 
       expect(client.calls).toEqual(['generate:deep'])
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front', 'home', 'deep'])
+      expect(draft.done).toEqual(['research', 'front', 'deep'])
       expect(draft.sections['deep.whatIs']).toMatch(/Stubville/)
       expect(draft.sections['services.cards.dusting']).toMatch(/Stubville/)
     })
@@ -312,7 +319,7 @@ describe('pipeline stages', () => {
       const client = newClient()
       await regenerateStage(client, KEY, 'research')
 
-      // Only research re-ran; front/home/deep are cleared, awaiting their own runs.
+      // Only research re-ran; front/deep are cleared, awaiting their own runs.
       expect(client.calls).toEqual(['research:research', 'generate:research.structure'])
 
       const draft = await loadDraft(KEY)
@@ -323,8 +330,6 @@ describe('pipeline stages', () => {
         'services.serviceIntro',
         'services.cards.dusting',
         'services.cards.upholstery',
-        'home.zipParagraph',
-        'home.landmarksParagraph',
         'deep.whatIs',
       ]) {
         expect(draft.sections[slot]).toBeUndefined()
@@ -337,10 +342,10 @@ describe('pipeline stages', () => {
       const client = newClient()
       for (const stage of STAGES) await runStage(client, KEY, stage.id)
 
-      expect(client.calls).toEqual(['generate:front', 'generate:home', 'generate:deep'])
+      expect(client.calls).toEqual(['generate:front', 'generate:deep'])
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front', 'home', 'deep'])
-      expect(Object.keys(draft.sections)).toHaveLength(10)
+      expect(draft.done).toEqual(['research', 'front', 'deep'])
+      expect(Object.keys(draft.sections)).toHaveLength(8)
     })
   })
 
@@ -665,35 +670,6 @@ describe('pipeline stages', () => {
       expect(prompt).toContain('Mock Hollow')
     })
 
-    it('the home prompt embeds every researched zip and landmark plus the two real sentence shapes', () => {
-      const research = fixtureResearch()
-      const prompt = buildHomePrompt(facts, research)
-      for (const zip of research.zips) expect(prompt).toContain(zip)
-      for (const landmark of research.landmarks) expect(prompt).toContain(landmark)
-      expect(prompt).toContain('We offer home cleaning service in most or all of the following Minneapolis ZIP Codes:')
-      expect(prompt).toContain('Ivy cleans serves in almost all the area of Minneapolis including')
-      expect(prompt).toContain(
-        'We offer home cleaning service in most or all of the following Ztest Stubville ZIP Codes: '
-      )
-      expect(prompt).toContain('then a comma, then "and", then the final code')
-    })
-
-    it('carries the "and no others" fence on the ZIP block AND the landmarks block', () => {
-      const prompt = buildHomePrompt(facts, fixtureResearch())
-      const zipBlock = prompt.slice(prompt.indexOf('ZIP CODES —'), prompt.indexOf('LANDMARKS —'))
-      const landmarkBlock = prompt.slice(prompt.indexOf('LANDMARKS —'))
-      expect(zipBlock).toMatch(/and no others/i)
-      expect(landmarkBlock).toMatch(/and no others/i)
-      // ...and again on each of the two field instructions.
-      expect(prompt).toContain('one sentence listing every ZIP code above and no others')
-      expect(prompt).toContain('one sentence naming every landmark above and no others')
-    })
-
-    it('never carries the owner-notes block: these two sentences have a fixed shape', () => {
-      expect(buildHomePrompt(facts, fixtureResearch())).not.toMatch(/NOTES FROM THE OWNER/)
-      expect(facts.notes).toBeTruthy() // the facts under test DO have notes
-    })
-
     it('the deep prompt uses the Minneapolis whatIs as its shape example', () => {
       const prompt = buildDeepPrompt(facts, fixtureResearch())
       expect(prompt).toContain('Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks.')
@@ -750,7 +726,7 @@ describe('pipeline stages', () => {
 
   describe('system prompts', () => {
     it('every stage system prompt starts with the identical shared base (cache-prefix ready)', () => {
-      for (const system of [FRONT_SYSTEM, HOME_SYSTEM, DEEP_SYSTEM]) {
+      for (const system of [FRONT_SYSTEM, DEEP_SYSTEM]) {
         expect(system.startsWith(SYSTEM_BASE)).toBe(true)
         expect(system.length).toBeGreaterThan(SYSTEM_BASE.length)
       }
@@ -765,8 +741,8 @@ describe('pipeline stages', () => {
   })
 
   describe('stage id typing', () => {
-    it('runStage accepts only the four known ids', async () => {
-      const ids: StageId[] = ['research', 'front', 'home', 'deep']
+    it('runStage accepts only the three known ids', async () => {
+      const ids: StageId[] = ['research', 'front', 'deep']
       expect(ids).toEqual(STAGES.map((s) => s.id))
     })
   })

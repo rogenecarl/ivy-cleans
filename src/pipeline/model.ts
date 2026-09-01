@@ -35,7 +35,7 @@ const MODEL = 'claude-opus-5'
 
 const RESEARCH_SYSTEM =
   'You are a local-market researcher for a residential cleaning company. ' +
-  'Ground every claim in the web_search results — never invent suburbs, zip codes, or landmarks.'
+  'Ground every claim in the web_search results — never invent suburbs, subdivisions, or zip codes.'
 
 /** Shared refusal → Error mapping for both calls below. */
 function refusalError(stopDetails: { category: string | null } | null): Error {

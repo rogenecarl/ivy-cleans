@@ -150,14 +150,16 @@ export async function regenerateLogic(key: string, stage: StageId): Promise<Acti
 }
 
 /** Snapshot the admin's live activity feed can poll: the raw event log, which stages
- * are done, and (once research has run) the researched suburb names / zips / landmarks
- * as plain strings — not the {name, slug} objects draft.research stores them as. */
+ * are done, and (once research has run) the researched suburb names / zips as plain
+ * strings — not the {name, slug} objects draft.research stores them as — plus a
+ * subdivisions total (landmarks are gone; subdivisions are the fact that replaced
+ * them, see src/pipeline/schemas.ts ResearchSchema). */
 export type ProgressSnapshot =
   | {
       ok: true
       events: ProgressEvent[]
       done: string[]
-      research: { suburbs: string[]; zips: string[]; landmarks: string[] } | null
+      research: { suburbs: string[]; zips: string[]; subdivisions: number } | null
     }
   | { ok: false; error: string }
 
@@ -169,7 +171,7 @@ export async function getProgressLogic(key: string): Promise<ProgressSnapshot> {
       ? {
           suburbs: draft.research.suburbs.map((s) => s.name),
           zips: draft.research.zips,
-          landmarks: draft.research.landmarks,
+          subdivisions: draft.research.suburbs.reduce((n, s) => n + s.subdivisions.length, 0),
         }
       : null
     return { ok: true, events, done: draft.done, research }
