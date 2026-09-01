@@ -3,7 +3,8 @@ import { ChevronLeft, ExternalLink } from 'lucide-react'
 import { loadDraft } from '@/content/drafts'
 import { getCity } from '@/content/store'
 import { errorMessage } from '@/pipeline/admin-logic'
-import { STAGES } from '@/pipeline/stages'
+import { STAGES, scoreSuburbs } from '@/pipeline/stages'
+import type { ResearchOutput } from '@/pipeline/schemas'
 import { Button } from '@/components/ui/button'
 import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
 import { ErrorText, Panel, StatusChip } from '../../../ui'
@@ -58,13 +59,29 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
   }
 
   // The sidecar survives finalize and is deleted by publish, so its presence
-  // is exactly "this city can still be regenerated".
+  // is exactly "this city can still be regenerated". Reused below to build
+  // the suburb chip metadata, so it's loaded once rather than twice.
   let hasDraft = true
+  let draftResearch: ResearchOutput | undefined = undefined
   try {
-    await loadDraft(key)
+    draftResearch = (await loadDraft(key)).research
   } catch {
     hasDraft = false
   }
+
+  // Recomputed from the draft's research every render, never persisted: a
+  // stored score would drift the moment an operator edits the suburb list
+  // below, and a stale score on a decision screen is worse than no score.
+  // Keyed by slug so a row the operator added by hand -- one scoreSuburbs
+  // never saw -- simply has no entry, which SuburbsEditor renders as "not
+  // researched" rather than a wrong or borrowed score. 'skip' verdicts never
+  // appear here: applyUniquenessGate already dropped those suburbs from
+  // draft.research during the research stage (see stages.ts), before this
+  // list could ever reach the review screen.
+  const scored = draftResearch ? scoreSuburbs(draftResearch) : []
+  const suburbMeta = Object.fromEntries(
+    scored.map((s) => [s.suburb.slug, { score: s.score, verdict: s.verdict, reason: s.reason }]),
+  )
 
   const isLive = doc.status === 'live'
 
@@ -98,7 +115,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
       </Button>
 
       <Panel title="Service areas">
-        <SuburbsEditor cityKey={key} initial={doc.research.suburbs} />
+        <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />
       </Panel>
 
       <Panel title="Regenerate copy">

@@ -5,6 +5,8 @@ import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { SuburbVerdict } from '@/pipeline/stages'
+import { cn } from '@/lib/utils'
 import { updateSuburbsAction } from '../../actions'
 import { ErrorText } from '../../../ui'
 
@@ -24,16 +26,73 @@ import { ErrorText } from '../../../ui'
  * by count (`SUBURBS.length`), so rendering them twice for two breakpoints
  * would double that count. Each row reflows from a row to a stacked block
  * with Tailwind alone instead.
+ *
+ * Task 13: each row also carries a verdict chip, keyed by slug off `meta` —
+ * the uniqueness score Task 12's research-stage gate already computed, so an
+ * operator sees WHY an area survived (or was hand-added) rather than only
+ * being able to infer it from a progress line that has already scrolled by.
+ * `meta` is recomputed by the caller from the draft's research every render
+ * (see page.tsx) rather than stored, so it can never drift once the operator
+ * edits the row list here. A 'skip' area never reaches this screen at all —
+ * the research stage already dropped it — so re-adding one by hand renders
+ * as "Not researched" rather than as a chip this file has no data for.
+ *
+ * Chip styling borrows the sites screen's status-chip shape (rounded-md
+ * border, sentence case, small text — src/app/admin/(console)/sites/status-
+ * chips.tsx) rather than the bold all-caps StatusChip/LeadStatusChip pill:
+ * these sit one per row next to a table of inputs, not as a single
+ * page-level status, so the quieter chip reads better at that density. The
+ * fill colors reuse the same success/warning tokens those pill chips use
+ * (src/components/ui/badge.tsx), so the color vocabulary stays one thing
+ * across the console even though the shape differs here.
  */
 
 type Row = { name: string; slug: string }
 
+export type SuburbMeta = { score: number; verdict: SuburbVerdict; reason: string }
+
+const VERDICT_CHIP: Record<SuburbVerdict, { label: string; className: string }> = {
+  build: { label: 'Researched', className: 'border-green-600/30 bg-green-50 text-green-700' },
+  review: { label: 'Thin', className: 'border-amber-600/30 bg-amber-50 text-amber-700' },
+  // Never actually reached — the research stage drops 'skip' areas before
+  // this screen exists — kept only so this map stays exhaustive over
+  // SuburbVerdict without an `as` cast.
+  skip: { label: 'Skip', className: 'border-border bg-muted text-muted-foreground' },
+}
+
+function VerdictChip({ meta }: { meta: SuburbMeta | undefined }) {
+  if (!meta) {
+    return (
+      <span
+        title="Added by hand — not part of the researched list, so it has no uniqueness score."
+        className="inline-flex shrink-0 items-center rounded-md border border-border bg-card px-2 py-0.5 text-[0.72rem] font-medium text-muted-foreground"
+      >
+        Not researched
+      </span>
+    )
+  }
+  const chip = VERDICT_CHIP[meta.verdict]
+  return (
+    <span
+      title={meta.reason}
+      className={cn(
+        'inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[0.72rem] font-medium',
+        chip.className,
+      )}
+    >
+      {chip.label}
+    </span>
+  )
+}
+
 export default function SuburbsEditor({
   cityKey,
   initial,
+  meta,
 }: {
   cityKey: string
   initial: Row[]
+  meta: Record<string, SuburbMeta>
 }) {
   const [rows, setRows] = useState<Row[]>(initial.length > 0 ? initial : [{ name: '', slug: '' }])
   const [saving, setSaving] = useState(false)
@@ -70,6 +129,7 @@ export default function SuburbsEditor({
       <div className="hidden gap-3 px-1 text-[0.72rem] font-semibold tracking-wide text-muted-foreground uppercase sm:flex">
         <span className="flex-1">Area name</span>
         <span className="flex-1">URL slug</span>
+        <span className="w-28 shrink-0">Research</span>
         <span className="w-11 shrink-0" />
       </div>
 
@@ -102,6 +162,9 @@ export default function SuburbsEditor({
                 onChange={(e) => edit(i, 'slug', e.target.value)}
                 className="min-h-11 sm:min-h-9"
               />
+            </div>
+            <div className="flex items-center sm:w-28 sm:shrink-0">
+              <VerdictChip meta={meta[row.slug]} />
             </div>
             <Button
               type="button"
