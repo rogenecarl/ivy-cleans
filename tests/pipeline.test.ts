@@ -197,10 +197,38 @@ describe('pipeline stages', () => {
       // forever); a stage slot that is not required is dead output. Uses a
       // real (multi-suburb) research fixture so the suburb slots are exercised
       // too, not just the eight research-free ones.
+      //
+      // EXPECTED is written out by hand from the fixture's three suburbs
+      // (house-cleaning-north-stubville, cleaning-services-mock-hollow,
+      // fixture-heights-cleaning-services) rather than derived by calling
+      // stageSlots/requiredSlotsFor — requiredSlotsFor's own body is
+      // `STAGES.flatMap((stage) => stageSlots(research)[stage.id])`, so
+      // comparing that same expression's output to itself would hold by
+      // construction and could never catch a real drift between the two.
       const research = fixtureResearch()
+      const EXPECTED: readonly string[] = [
+        'services.heroParagraphs',
+        'services.serviceIntro',
+        'services.cards.dusting',
+        'services.cards.vacuuming',
+        'services.cards.bathroom',
+        'services.cards.window',
+        'services.cards.upholstery',
+        'deep.whatIs',
+        'suburb.house-cleaning-north-stubville.intro',
+        'suburb.house-cleaning-north-stubville.homes',
+        'suburb.house-cleaning-north-stubville.local',
+        'suburb.cleaning-services-mock-hollow.intro',
+        'suburb.cleaning-services-mock-hollow.homes',
+        'suburb.cleaning-services-mock-hollow.local',
+        'suburb.fixture-heights-cleaning-services.intro',
+        'suburb.fixture-heights-cleaning-services.homes',
+        'suburb.fixture-heights-cleaning-services.local',
+      ]
       const owned = STAGES.flatMap((stage) => stageSlots(research)[stage.id])
       expect(owned).toHaveLength(new Set(owned).size)
-      expect([...owned].sort()).toEqual([...requiredSlotsFor(research)].sort())
+      expect([...owned].sort()).toEqual([...EXPECTED].sort())
+      expect([...requiredSlotsFor(research)].sort()).toEqual([...EXPECTED].sort())
     })
 
     it('emits exactly three suburb slots per area', () => {
