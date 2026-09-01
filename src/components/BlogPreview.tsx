@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { posts } from "@/data/posts";
+import { posts } from "@/data/recent-posts";
 
 export default function BlogPreview() {
   return (

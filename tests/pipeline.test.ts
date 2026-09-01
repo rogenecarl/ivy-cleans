@@ -41,6 +41,9 @@ import {
   type StageId,
 } from '../src/pipeline/stages'
 import type { ResearchOutput } from '../src/pipeline/schemas'
+import { postSlugs } from '../src/data/posts'
+import { blogCards } from '../src/data/blog'
+import { posts as recentPosts } from '../src/data/recent-posts'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -425,10 +428,11 @@ describe('pipeline stages', () => {
       ])
     })
 
-    it('reservedSlugs is the static sibling routes plus this city\'s two computed service slugs', () => {
+    it('reservedSlugs is the static sibling routes, every blog post URL, and this city\'s two computed service slugs', () => {
       // Enumerated from src/app/(sites)/[city]/(front)/ and .../(inner)/ — see
       // that comment on reservedSlugs for the folder-by-folder citation.
-      expect(reservedSlugs('Ztest Stubville')).toEqual(
+      const reserved = reservedSlugs('Ztest Stubville')
+      expect(reserved).toEqual(
         new Set([
           'book-now',
           'blog',
@@ -438,11 +442,30 @@ describe('pipeline stages', () => {
           'faq',
           'home',
           'services',
-          'do-i-need-to-be-home-during-a-deep-cleaning-service',
+          ...postSlugs,
+          ...blogCards.map((c) => c.href.slice(1)),
+          ...recentPosts.map((p) => p.href.slice(1)),
           'deep-cleaning-ztest-stubville',
           'ztest-stubville-move-out-cleaning-services',
         ]),
       )
+    })
+
+    it('reserves post slugs that have no post module, so a suburb cannot claim a URL a blog card links to', () => {
+      const reserved = reservedSlugs('Ztest Stubville')
+      // Both are blogCards entries; live builds them as bespoke Elementor pages
+      // (elementor-page-2248 / -2262), not on the shared post template, so
+      // src/data/posts has no module for either.
+      expect(postSlugs).not.toContain('how-to-clean-smoke-detectors')
+      expect(postSlugs).not.toContain('what-to-do-in-st-louis-park-mn')
+      expect(reserved.has('how-to-clean-smoke-detectors')).toBe(true)
+      expect(reserved.has('what-to-do-in-st-louis-park-mn')).toBe(true)
+    })
+
+    it('reserves every slug the blog listing and the front-page recent posts link to', () => {
+      const reserved = reservedSlugs('Ztest Stubville')
+      for (const card of blogCards) expect(reserved.has(card.href.slice(1))).toBe(true)
+      for (const post of recentPosts) expect(reserved.has(post.href.slice(1))).toBe(true)
     })
   })
 

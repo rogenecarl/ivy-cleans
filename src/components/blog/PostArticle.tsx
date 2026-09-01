@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { ArticleBlock } from "@/data/blog";
+import type { ArticleBlock, Inline, PostArticleData } from "@/data/posts/types";
 
 /*
  * post-952.css: section elementor-element-4fed1c62 has a flat 50px top/bottom
@@ -17,12 +17,23 @@ import type { ArticleBlock } from "@/data/blog";
  * Content (elementor-element-32c6aca7): 18px / 2.1em line-height.
  *
  * Values below that post-952.css does not carry were measured off the live
- * page with a Playwright computed-style probe at 1440x900 and 390x844
- * (round-4 fidelity pass): body copy #374151; h2 22px/700 and h3 20px/600,
- * both 0.5rem top / 1rem bottom margin and 1.2 line-height; paragraphs 2rem
- * bottom margin; figures 18px bottom margin with a 1rem side margin on the
- * floated ones; and the share buttons' official brand colours (Elementor's
- * "color-official" skin, whose stylesheet is not in the reference set).
+ * pages with the Playwright computed-style probe at 1440x900 and 390x844,
+ * across how-to-clean-bathroom-walls (paragraphs, lists, inline runs) and
+ * guide-to-basement-cleaning-services-near-you (in-body H1, floated figures):
+ *
+ *   p       18px/27px 400 #374151, 2rem bottom margin
+ *   h1      26px/1.2em 700   |  h2 22px/1.2em 700  |  h3 20px/1.2em 600
+ *           all three: 0.5rem top / 1rem bottom margin
+ *   ul/ol   margin 0, padding-left 40px, disc / decimal, marker outside;
+ *           list items keep the wrapper's 2.1em line-height (37.8px), which
+ *           is why the 1.5 above is set on the paragraph and not the wrapper
+ *   a       #cc3366, 1.2em, no underline
+ *   strong  font-weight: bolder — resolves to 700 inside a paragraph and 900
+ *           inside a heading, so it is written as `bolder`, not a fixed weight
+ *   figure  18px bottom margin; floats add a 1rem gutter on their inner side
+ *
+ * and the share buttons' official brand colours (Elementor's "color-official"
+ * skin, whose stylesheet is not in the reference set).
  */
 const SHARE_LINKS: { label: string; icon: string; bg: string }[] = [
   { label: "Facebook", icon: "/icons/facebook.svg", bg: "#3b5998" },
@@ -31,23 +42,122 @@ const SHARE_LINKS: { label: string; icon: string; bg: string }[] = [
   { label: "Pinterest", icon: "/icons/pinterest.svg", bg: "#bd081c" },
 ];
 
-const ALIGN_CLASS: Record<"left" | "center" | "right", string> = {
+/*
+ * A floated figure is shrink-to-fit, so live caps it at the space left after
+ * its own 1rem gutter — 380px inside a 390px column, not 390. The non-floated
+ * ones have no side margin and cap at the full column.
+ */
+const ALIGN_CLASS: Record<"left" | "center" | "right" | "none", string> = {
   left: "float-left mr-[1rem] mb-[18px] max-w-[calc(100%-1rem)]",
-  center: "mx-auto mb-[18px] block h-auto w-full max-w-full",
+  center: "mx-auto mb-[18px] block max-w-full",
   right: "float-right ml-[1rem] mb-[18px] max-w-[calc(100%-1rem)]",
+  none: "mb-[18px] block max-w-full",
 };
 
-export default function PostArticle({
-  h1,
-  heroImage,
-  meta,
-  blocks,
-}: {
-  h1: string;
-  heroImage: { src: string; width: number; height: number; alt: string };
-  meta: { author?: string; date?: string; category?: string; time?: string; commentCount?: string };
-  blocks: ArticleBlock[];
-}) {
+const HEADING_CLASS: Record<"h1" | "h2" | "h3", string> = {
+  h1: "mt-[0.5rem] mb-[1rem] text-[26px] leading-[1.2em] font-bold text-[#374151]",
+  h2: "mt-[0.5rem] mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]",
+  h3: "mt-[0.5rem] mb-[1rem] text-[20px] leading-[1.2em] font-semibold text-[#374151]",
+};
+
+/*
+ * Inline runs carry the bold/italic/link markup the live posts use mid-
+ * sentence. `bolder` is deliberate: it is what the live stylesheet resolves,
+ * and it is the only value that gives 700 in a paragraph and 900 in a heading
+ * off the same source tag.
+ */
+function InlineRuns({ runs }: { runs: Inline[] }) {
+  return (
+    <>
+      {runs.map((run, i) => {
+        if (typeof run === "string") return <span key={i}>{run}</span>;
+        if ("b" in run) {
+          return (
+            <strong key={i} className="[font-weight:bolder]">
+              <InlineRuns runs={run.b} />
+            </strong>
+          );
+        }
+        if ("i" in run) {
+          return (
+            <em key={i}>
+              <InlineRuns runs={run.i} />
+            </em>
+          );
+        }
+        return (
+          <a key={i} href={run.href} className="text-[#cc3366] leading-[1.2em] no-underline">
+            <InlineRuns runs={run.a} />
+          </a>
+        );
+      })}
+    </>
+  );
+}
+
+function Block({ block }: { block: ArticleBlock }) {
+  // A switch, not a chain of ifs: the heading member carries a three-literal
+  // discriminant ("h1" | "h2" | "h3"), which `if (a || b || c)` does not narrow
+  // away for the branches below it.
+  switch (block.type) {
+    case "h1":
+    case "h2":
+    case "h3": {
+      const Tag = block.type;
+      return (
+        <Tag className={HEADING_CLASS[block.type]}>
+          <InlineRuns runs={block.text} />
+        </Tag>
+      );
+    }
+    case "ul":
+    case "ol": {
+      const Tag = block.type;
+      return (
+        <Tag
+          className={`m-0 list-outside pl-[40px] ${
+            block.type === "ul" ? "list-disc" : "list-decimal"
+          }`}
+        >
+          {block.items.map((item, i) => (
+            <li key={i}>
+              <InlineRuns runs={item} />
+            </li>
+          ))}
+        </Tag>
+      );
+    }
+    case "img":
+      /*
+       * Live sizes these from the editor's own numbers: a figure whose inline
+       * style pins `height:NNNpx` keeps that height while max-width squeezes
+       * its width on mobile (fixedHeight), whereas `height:auto` and bare
+       * width/height attributes both scale with the width, because the theme
+       * sets `img { height: auto }`.
+       */
+      return (
+        <Image
+          src={block.src}
+          alt={block.alt}
+          width={block.width}
+          height={block.height}
+          className={`${ALIGN_CLASS[block.align]} ${block.fixedHeight ? "" : "h-auto"}`}
+          style={
+            block.fixedHeight ? { width: block.width, height: block.height } : { width: block.width }
+          }
+        />
+      );
+    case "p":
+      return (
+        <p className="mb-[2rem] leading-[1.5]">
+          <InlineRuns runs={block.text} />
+        </p>
+      );
+  }
+}
+
+export default function PostArticle({ post }: { post: PostArticleData }) {
+  const { h1, heroImage, info, authorBox, blocks } = post;
   /*
    * The live page runs the article and the comment form down one Elementor
    * column, so the 50px section margin lives on this component's top edge
@@ -66,82 +176,51 @@ export default function PostArticle({
             {h1}
           </h1>
           <ul className="mt-0 mb-[2rem] flex flex-wrap items-center gap-x-[7.5px] gap-y-[0.5rem] border-y border-dotted border-[#afafaf] py-[15px] text-[13px] leading-[27px] font-light text-[#54595f] md:gap-x-[12.5px] md:leading-[1.2em]">
-            {meta.author && <li>By {meta.author}</li>}
-            {meta.author && <li aria-hidden="true">&bull;</li>}
-            {meta.date && <li>{meta.date}</li>}
-            {meta.date && <li aria-hidden="true">&bull;</li>}
-            {meta.time && <li>{meta.time}</li>}
-            {meta.time && <li aria-hidden="true">&bull;</li>}
-            {meta.commentCount && <li>{meta.commentCount}</li>}
+            {info.author && <li>By {info.author}</li>}
+            {info.author && <li aria-hidden="true">&bull;</li>}
+            {info.date && <li>{info.date}</li>}
+            {info.date && <li aria-hidden="true">&bull;</li>}
+            {info.time && <li>{info.time}</li>}
+            {info.time && <li aria-hidden="true">&bull;</li>}
+            {info.commentCount && <li>{info.commentCount}</li>}
           </ul>
           {/*
-            The live featured image is an Elementor "thumbs/" derivative of
-            image-12 cropped to 2.277:1 (measured 870x382 at 1440, 390x171 at
-            390); the asset mirrored into public/ is the uncropped 600x400
-            original, so the same box geometry is reproduced with an explicit
-            aspect ratio plus object-cover.
+            The live featured image is an Elementor "thumbs/" derivative cropped
+            to 2.277:1 (measured 870x382 at 1440, 390x171 at 390). Four of the
+            nine posts have no featured image at all, and live renders no hero
+            widget for those rather than an empty one.
           */}
-          <Image
-            src={heroImage.src}
-            alt={heroImage.alt}
-            width={heroImage.width}
-            height={heroImage.height}
-            className="mb-[2rem] aspect-[870/382] w-full object-cover"
-          />
-          <div className="text-[18px] leading-[2.1em] text-[#374151] after:block after:clear-both after:content-['']">
-            {/* blocks is a fixed, ordered content list (extracted once from
-                blog-post.html) that never reorders/inserts/deletes at
-                runtime, so the array index is a stable, safe React key. */}
-            {blocks.map((block, i) => {
-              if (block.type === "h2") {
-                return (
-                  <h2
-                    key={i}
-                    className="mt-[0.5rem] mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]"
-                  >
-                    {block.text}
-                  </h2>
-                );
-              }
-              if (block.type === "h3") {
-                return (
-                  <h3
-                    key={i}
-                    className="mt-[0.5rem] mb-[1rem] text-[20px] leading-[1.2em] font-semibold text-[#374151]"
-                  >
-                    {block.text}
-                  </h3>
-                );
-              }
-              if (block.type === "img") {
-                /*
-                 * The two floated figures carry an explicit
-                 * `style="width:NNNpx;height:NNNpx"` in blog-post.html, which
-                 * live honours verbatim — the alignright one is squeezed to
-                 * the viewport at 390 while keeping its 305px height. Mirror
-                 * that with the same inline sizing + max-width:100%. The two
-                 * aligncenter figures have no inline size and simply fill the
-                 * content column at their natural aspect.
-                 */
-                const sized = block.align !== "center";
-                return (
-                  <Image
-                    key={i}
-                    src={block.src}
-                    alt={block.alt}
-                    width={block.width}
-                    height={block.height}
-                    className={ALIGN_CLASS[block.align]}
-                    style={sized ? { width: block.width, height: block.height } : undefined}
-                  />
-                );
-              }
-              return (
-                <p key={i} className="mb-[2rem]">
-                  {block.text}
-                </p>
-              );
-            })}
+          {heroImage && (
+            <Image
+              src={heroImage.src}
+              alt={heroImage.alt}
+              width={heroImage.width}
+              height={heroImage.height}
+              className="mb-[2rem] aspect-[870/382] w-full object-cover"
+            />
+          )}
+          {/*
+            Two boxes, mirroring live: an outer WIDGET carrying Elementor's 2rem
+            widget spacing, wrapping a plain block CONTAINER that holds the
+            copy. The nesting is not decoration — it decides the gap under the
+            article. The container establishes no BFC, so the last block's
+            bottom margin collapses out of it; the widget does establish one
+            (flow-root), so it absorbs that margin instead of letting it
+            collapse away, and it contains the floated figures. That is what
+            leaves 2rem of white space under a post ending in a paragraph and
+            none under one ending in a list — live behaves the same way in both
+            cases. A clearfix here instead of flow-root would only contain the
+            margin on the posts that happen to have a float above it.
+          */}
+          <div className="mb-[2rem] flow-root">
+            <div className="text-[18px] leading-[2.1em] text-[#374151]">
+              {/* blocks is a fixed, ordered content list (extracted once from
+                  the captured post HTML) that never reorders/inserts/deletes
+                  at runtime, so the array index is a stable, safe React key. */}
+              {blocks.map((block, i) => (
+                <Block key={i} block={block} />
+              ))}
+            </div>
           </div>
 
           {/* share buttons (elementor-element-59aa5822): skin-flat, view
@@ -193,26 +272,36 @@ export default function PostArticle({
               image-left at every width. Name is 18px/700 uppercase in the link
               colour, the "All Posts »" button 15px/100 uppercase #3f444b with
               no border or padding (`border-width:0px;padding:0px`). The live
-              bio field is empty, so no bio line is rendered. */}
+              bio field is empty on every post in this set, so no bio line is
+              rendered. Eight posts are bylined "aj"; the ninth is
+              "Support IvyCleans", with its own gravatar and author archive. */}
           <div className="mt-[2rem] flex items-center rounded-b-[6px] bg-[#f2f2f2] p-[35px_45px]">
-            <a href="https://ivycleans.com/author/aj/" className="mr-[45px] shrink-0">
+            {/* The avatar link is a block wrapping an inline <img>, so live
+                measures it 2px taller than the image at 1440 and 3px at 390 —
+                the inline baseline gap. Pinned explicitly, because Tailwind's
+                preflight makes images block and would drop those pixels. */}
+            <a href={authorBox.href} className="mr-[45px] h-[40px] shrink-0 md:h-[102px]">
               <Image
-                src="/images/avatar-aj.jpg"
-                alt="Picture of aj"
+                src={authorBox.avatar}
+                alt={`Picture of ${authorBox.name}`}
                 width={100}
                 height={100}
                 className="h-[37px] w-[37px] rounded-full object-cover md:h-[100px] md:w-[100px]"
               />
             </a>
             <div>
-              <a href="https://ivycleans.com/author/aj/">
-                <h4 className="text-link mb-[11px] text-[18px] leading-[1.2em] font-bold uppercase">
-                  aj
+              <a href={authorBox.href}>
+                <h4 className="text-link mt-[0.5rem] mb-[5px] text-[18px] leading-[1.2em] font-bold uppercase">
+                  {authorBox.name}
                 </h4>
               </a>
+              {/* Every post in this set has an empty author bio. Live still
+                  renders the empty .elementor-author-box__bio div, and its 12px
+                  bottom margin is real space between the name and the button. */}
+              <div className="mb-[12px]" />
               <a
-                href="https://ivycleans.com/author/aj/"
-                className="inline-block rounded-[5px] text-[15px] leading-[1.2em] font-thin text-[#3f444b] uppercase"
+                href={authorBox.href}
+                className="inline-block rounded-[5px] text-[15px] leading-[18px] font-thin text-[#3f444b] uppercase"
               >
                 All Posts &raquo;
               </a>

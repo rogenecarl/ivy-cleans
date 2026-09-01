@@ -27,6 +27,9 @@ import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
+import { postSlugs } from '../data/posts'
+import { blogCards } from '../data/blog'
+import { posts as recentPosts } from '../data/recent-posts'
 
 export const STAGES = [
   { id: 'research', label: 'Researching the city — suburbs, ZIP codes, landmarks' },
@@ -383,13 +386,17 @@ export function normalizeSlug(raw: string): string {
  *
  * Enumerated from the folder names actually present under
  * src/app/(sites)/[city]/(front)/ and .../(inner)/ — every static leaf
- * except the [serviceSlug] catch-all itself:
+ * except the [slug] catch-all itself:
  *   (front)/book-now
  *   (inner)/blog, book, cleaning-services, contact, faq, home, services
  *           (the parent segment of services/[serviceSlug], which has no
- *            page.tsx of its own, so /services itself 404s),
- *           do-i-need-to-be-home-during-a-deep-cleaning-service
- *             (the blog post's own literal route segment)
+ *            page.tsx of its own, so /services itself 404s)
+ *
+ * plus every root-level blog-post URL (blogPostSlugs). Posts are no longer one
+ * literal route segment: they share the [slug] segment with suburbs, and that
+ * segment matches suburbs FIRST, so a suburb slug equal to a post slug would
+ * shadow the post rather than the other way round. Either way the URL is
+ * double-claimed, so it is reserved here.
  */
 export function reservedSlugs(cityName: string): Set<string> {
   const slug = citySlug(cityName)
@@ -402,10 +409,27 @@ export function reservedSlugs(cityName: string): Set<string> {
     'faq',
     'home',
     'services',
-    'do-i-need-to-be-home-during-a-deep-cleaning-service',
+    ...blogPostSlugs(),
     `deep-cleaning-${slug}`,
     `${slug}-move-out-cleaning-services`,
   ])
+}
+
+/**
+ * Every root-level slug the site serves, or links to, as a blog post. Derived
+ * rather than listed so it cannot drift: the posts we render (src/data/posts),
+ * the listing cards (src/data/blog), and the front page's recent-post cards
+ * (src/data/recent-posts). The last two matter because two of the cards point
+ * at posts that are NOT on the shared post template and so have no module in
+ * src/data/posts — their URLs are still spoken for.
+ */
+function blogPostSlugs(): string[] {
+  const hrefSlug = (href: string) => href.replace(/^\//, '')
+  return [
+    ...postSlugs,
+    ...blogCards.map((c) => hrefSlug(c.href)),
+    ...recentPosts.map((p) => hrefSlug(p.href)),
+  ]
 }
 
 /**

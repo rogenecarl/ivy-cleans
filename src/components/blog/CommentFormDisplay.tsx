@@ -22,10 +22,28 @@
  * fill, 1px #cc3366 border, 5px radius, 1rem/700 uppercase #cc3366 text with
  * 1.1rem 2.4rem padding. Sibling paragraphs are spaced 2rem apart.
  */
+/*
+ * Elementor renders #comments' list only when the post actually has a
+ * response. In this set that is always a single WordPress pingback — an
+ * `<li class="pingback">` holding the literal "Pingback:" prefix and a link
+ * to the post that referenced this one — under an h2.title-comments reading
+ * "One Response".
+ *
+ * Measured off live at 1440 and 390 (guide-to-basement-cleaning-services-near-you):
+ * h2.title-comments is the post body's h2 (22px/1.2em/700 #374151, 0.5rem top
+ * / 1rem bottom margin); ul.comment-list has no marker, margin or padding and
+ * drops to 0.9rem/1.5rem — markedly smaller than the 18px body copy, which is
+ * why it is set here rather than inherited; .comment-body carries a flat
+ * `30px 0 30px 60px` padding at every width; and the link is the site link
+ * colour at 1.2em with no underline. The list adds no bottom margin — the
+ * 4.1px gap live shows before #respond is the reply title's own 0.5rem.
+ */
+type Responses = { heading: string; items: { prefix: string; text: string; href: string }[] };
+
 const FIELD_CLASS =
   "w-full rounded-[3px] border border-[#666] px-[1rem] py-[0.5rem] text-[1rem] leading-[1.5] text-black";
 
-export default function CommentFormDisplay() {
+export default function CommentFormDisplay({ responses }: { responses?: Responses }) {
   /*
    * mt is 2rem (Elementor's widget gap) plus the heading's own 0.5rem top
    * margin, folded into one value so the two don't collapse across the
@@ -36,7 +54,36 @@ export default function CommentFormDisplay() {
     <section className="mt-[2.5rem] mb-[50px] bg-white">
       <div className="mx-auto max-w-[119rem]">
         <div className="p-0 md:px-[60px] md:pb-[60px]">
-          <h2 className="mt-0 mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]">
+          {responses && (
+            <>
+              <h2 className="mt-0 mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]">
+                {responses.heading}
+              </h2>
+              <ol className="m-0 list-none p-0 text-[0.9rem] leading-[1.5rem] text-[#374151]">
+                {responses.items.map((item) => (
+                  <li key={item.href}>
+                    <div className="py-[30px] pl-[60px]">
+                      {item.prefix}{" "}
+                      {/* live's comment stylesheet makes the pingback link a block, so it
+                          drops onto its own line under the "Pingback:" prefix */}
+                      <a
+                        href={item.href}
+                        className="block text-[#cc3366] leading-[1.2em] no-underline"
+                      >
+                        {item.text}
+                      </a>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+          {/* The 0.5rem top margin is folded into the section's mt only when
+              this heading is the section's first element; behind a response
+              list it is an ordinary sibling and keeps its own margin. */}
+          <h2
+            className={`${responses ? "mt-[0.5rem]" : "mt-0"} mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]`}
+          >
             Leave a Reply
           </h2>
           <form className="flex flex-col gap-[2rem]">
