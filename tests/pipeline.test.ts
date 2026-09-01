@@ -40,7 +40,7 @@ import {
   runStage,
   type StageId,
 } from '../src/pipeline/stages'
-import type { ResearchOutput } from '../src/pipeline/schemas'
+import { ConditionSchema, ResearchSchema, type ResearchOutput } from '../src/pipeline/schemas'
 import { postSlugs } from '../src/data/posts'
 import { blogCards } from '../src/data/blog'
 import { posts as recentPosts } from '../src/data/recent-posts'
@@ -109,6 +109,42 @@ async function resetDraft(): Promise<void> {
   revalidateCity(KEY)
   await createDraft(stubFacts())
 }
+
+describe('ResearchSchema', () => {
+  it('accepts an area carrying subdivisions, housing character and conditions', () => {
+    const parsed = ResearchSchema.parse({
+      suburbs: [
+        {
+          name: 'Katy',
+          slug: 'katy',
+          subdivisions: ['Cinco Ranch', 'Firethorne', 'Cross Creek Ranch'],
+          housingCharacter: 'Master-planned, built 2000 onward, 2,400–3,400 sq ft, tile and LVP.',
+          conditions: [{ condition: 'Ongoing construction nearby', implication: 'Fine grit on sills and blinds', copySafe: true }],
+        },
+      ],
+      conditions: [{ condition: 'Gulf humidity', implication: 'Grout and shower glass discolour faster', copySafe: true }],
+      zips: ['77002'],
+      keywords: ['house cleaning katy tx'],
+    })
+    expect(parsed.suburbs[0].subdivisions).toHaveLength(3)
+  })
+
+  it('rejects landmarks, which no longer exist', () => {
+    expect(() =>
+      ResearchSchema.parse({
+        suburbs: [],
+        conditions: [],
+        zips: [],
+        keywords: [],
+        landmarks: ['Kemah Boardwalk'],
+      }),
+    ).toThrow()
+  })
+
+  it('requires copySafe on every condition', () => {
+    expect(() => ConditionSchema.parse({ condition: 'a', implication: 'b' })).toThrow()
+  })
+})
 
 describe('pipeline stages', () => {
   let citiesSnapshot: string
