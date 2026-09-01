@@ -467,6 +467,27 @@ describe('pipeline stages', () => {
       ])
     })
 
+    it('preserves subdivisions, housingCharacter and conditions even when the slug is rewritten', () => {
+      // A literal-rebuild ({ name, slug }) would drop everything below and
+      // this test would fail; only a spread ({ ...suburb, slug }) survives it.
+      const suburb: Suburb = {
+        name: 'Mixed Case Suburb',
+        slug: 'Mixed CASE_Suburb!',
+        subdivisions: ['Cinco Ranch', 'Firethorne'],
+        housingCharacter: 'Master-planned, 2000 onward.',
+        conditions: [{ condition: 'Construction nearby', implication: 'Grit on sills', copySafe: true }],
+      }
+      const research: ResearchOutput = { suburbs: [suburb], conditions: [], zips: [], keywords: [] }
+
+      const result = normalizeResearchSlugs(research, 'Ztest Stubville').suburbs[0]
+
+      expect(result.slug).toBe('mixed-case-suburb') // proves normalization actually ran
+      expect(result.slug).not.toBe(suburb.slug)
+      expect(result.subdivisions).toEqual(suburb.subdivisions)
+      expect(result.housingCharacter).toBe(suburb.housingCharacter)
+      expect(result.conditions).toEqual(suburb.conditions)
+    })
+
     it('reservedSlugs is the static sibling routes, every blog post URL, and this city\'s two computed service slugs', () => {
       // Enumerated from src/app/(sites)/[city]/(front)/ and .../(inner)/ — see
       // that comment on reservedSlugs for the folder-by-folder citation.
@@ -543,6 +564,49 @@ describe('pipeline stages', () => {
     it('scores whitespace-only housing character as absent, not present', () => {
       const whitespaceHousing: Suburb = { ...thin(), housingCharacter: '   ' }
       expect(scoreSuburb(whitespaceHousing)).toBe(0)
+    })
+
+    // These three pin the comparison operators exactly. Without them, mutating
+    // `>= BUILD_THRESHOLD` to `> BUILD_THRESHOLD`, or shifting REVIEW_THRESHOLD
+    // by one, would pass every other test in this file — an off-by-one here
+    // silently changes which pages exist.
+    it('scores exactly 8 as build, not review', () => {
+      const buildFloor: Suburb = {
+        name: 'Build Floor',
+        slug: 'build-floor',
+        subdivisions: ['A', 'B', 'C', 'D'],
+        housingCharacter: 'Present.',
+        conditions: [
+          { condition: 'a', implication: 'a', copySafe: true },
+          { condition: 'b', implication: 'b', copySafe: true },
+        ],
+      }
+      expect(scoreSuburb(buildFloor)).toBe(8) // 4 + 2 + 2
+      expect(scoreSuburbs(fixtureResearchWith([buildFloor]))[0].verdict).toBe('build')
+    })
+
+    it('scores exactly 4 as review, not skip', () => {
+      const reviewFloor: Suburb = {
+        name: 'Review Floor',
+        slug: 'review-floor',
+        subdivisions: ['A', 'B', 'C', 'D'],
+        housingCharacter: '',
+        conditions: [],
+      }
+      expect(scoreSuburb(reviewFloor)).toBe(4) // 4 + 0 + 0
+      expect(scoreSuburbs(fixtureResearchWith([reviewFloor]))[0].verdict).toBe('review')
+    })
+
+    it('scores exactly 3 as skip, not review', () => {
+      const skipCeiling: Suburb = {
+        name: 'Skip Ceiling',
+        slug: 'skip-ceiling',
+        subdivisions: ['A', 'B', 'C'],
+        housingCharacter: '',
+        conditions: [],
+      }
+      expect(scoreSuburb(skipCeiling)).toBe(3) // 3 + 0 + 0
+      expect(scoreSuburbs(fixtureResearchWith([skipCeiling]))[0].verdict).toBe('skip')
     })
 
     it('drops skip-verdict areas from research.suburbs and keeps the rest', () => {

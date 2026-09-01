@@ -485,7 +485,13 @@ export function normalizeResearchSlugs(research: ResearchOutput, cityName: strin
     const slug = normalizeSlug(suburb.slug)
     if (slug === '' || seen.has(slug) || reserved.has(slug)) continue
     seen.add(slug)
-    suburbs.push({ name: suburb.name, slug })
+    // Spread the original suburb, not a hand-picked field list: subdivisions,
+    // housingCharacter and conditions are the entire reason this pipeline
+    // exists, and a literal-rebuild here would silently drop them the moment
+    // research completes — the same bug class Task 7 fixed in
+    // updateSuburbsLogic. Only slug is meant to change; everything else must
+    // survive untouched.
+    suburbs.push({ ...suburb, slug })
   }
   return { ...research, suburbs }
 }
