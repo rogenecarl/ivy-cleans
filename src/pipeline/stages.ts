@@ -36,64 +36,26 @@ import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
-import { suburbSlots } from '../content/slots'
+import { STAGES, STAGE_IDS, stageSlots, suburbSlots, type StageId } from '../content/slots'
 import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
 
-export const STAGES = [
-  { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
-  { id: 'front', label: 'Writing the front page — hero and services' },
-  { id: 'deep', label: 'Writing the deep-cleaning page' },
-  { id: 'suburb', label: 'Writing the area pages' },
-] as const
-
-export type StageId = (typeof STAGES)[number]['id']
-
-export const STAGE_IDS: readonly StageId[] = STAGES.map((s) => s.id)
-
 /**
- * Re-exported from src/content/slots.ts, which is the single source of
- * truth (Task 17): that module has no pipeline dependencies, so
- * src/data/suburb.ts — the render-time reader — can import the slot-id
- * contract without pulling in this file's model client, draft store, and
- * progress-log machinery. Used below by stageSlots, regenerateStage's
- * clearing loop, and executeStage's suburb case.
+ * STAGES, STAGE_IDS, StageId and stageSlots all moved to
+ * src/content/slots.ts in Task 18, alongside suburbSlots which already lived
+ * there (Task 17): src/content/drafts.ts needs stageSlots for
+ * requiredSlotsFor, and this module imports loadDraft/saveDraft FROM
+ * drafts.ts — so drafts.ts importing any of these from here would be a
+ * genuine ESM import cycle. It worked only by accident before (every
+ * cycle-imported binding was used inside a function body, never at
+ * module-eval time); the first top-level `const X = stageSlots(...)` would
+ * have turned that accident into a TypeError at import with a stack trace
+ * pointing nowhere useful. Re-exported here so every other importer of this
+ * module (admin-logic.ts, the admin console pages, the test suite) keeps
+ * compiling against the same public surface untouched.
  */
-export { suburbSlots }
-
-/**
- * Section slots each stage owns. regenerateStage() deletes exactly these
- * before re-running, so a regenerate never leaves half of an older draft
- * mixed into a newer one. `research` owns no section slots — it owns the
- * `draft.research` object instead (see clearStageOutputs).
- *
- * A function of the research rather than a static map: the suburb stage
- * writes three slots PER AREA, and how many areas there are isn't known
- * until research has run. With `research` undefined (research hasn't run
- * yet), `suburb` is `[]` — there is nothing yet to own or to clear.
- *
- * The union of stageSlots(research) across all stages must equal
- * drafts.ts requiredSlotsFor(research) exactly: any slot a stage does not
- * own could never be regenerated, and any slot no stage writes would block
- * finalizeDraft forever. Pinned by a test.
- */
-export function stageSlots(research: ResearchOutput | undefined): Record<StageId, readonly string[]> {
-  return {
-    research: [],
-    front: [
-      'services.heroParagraphs',
-      'services.serviceIntro',
-      'services.cards.dusting',
-      'services.cards.vacuuming',
-      'services.cards.bathroom',
-      'services.cards.window',
-      'services.cards.upholstery',
-    ],
-    deep: ['deep.whatIs'],
-    suburb: research ? research.suburbs.flatMap((s) => suburbSlots(s.slug)) : [],
-  }
-}
+export { STAGES, STAGE_IDS, stageSlots, suburbSlots, type StageId }
 
 /**
  * The four URL-slug shapes the live Minneapolis site uses for its area pages

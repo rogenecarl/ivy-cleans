@@ -5,6 +5,7 @@
  * (or the per-city build) — never the whole process (Plan 1 review #8).
  */
 import type { CityContent } from './types'
+import type { ResearchOutput } from '../pipeline/schemas'
 
 export function s(c: CityContent, id: string): string {
   const v = c.sections[id]
@@ -46,4 +47,60 @@ export function sOpt(c: CityContent, id: string): string | undefined {
  */
 export function suburbSlots(slug: string): readonly string[] {
   return [`suburb.${slug}.intro`, `suburb.${slug}.homes`, `suburb.${slug}.local`]
+}
+
+/**
+ * The four pipeline stages. Moved here from src/pipeline/stages.ts (Task 18)
+ * together with StageId/STAGE_IDS/stageSlots so that src/content/drafts.ts
+ * (which needs stageSlots for requiredSlotsFor) does not have to import
+ * src/pipeline/stages.ts — and src/pipeline/stages.ts imports loadDraft/
+ * saveDraft from drafts.ts, so that import would be a genuine ESM cycle.
+ * It worked only by accident (every binding pulled from it was used inside a
+ * function body, never at module-eval time); the first top-level use of a
+ * cycle-imported binding turns that accident into a TypeError at import.
+ * src/pipeline/stages.ts re-exports all four below so its public surface is
+ * unchanged for every other importer.
+ */
+export const STAGES = [
+  { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
+  { id: 'front', label: 'Writing the front page — hero and services' },
+  { id: 'deep', label: 'Writing the deep-cleaning page' },
+  { id: 'suburb', label: 'Writing the area pages' },
+] as const
+
+export type StageId = (typeof STAGES)[number]['id']
+
+export const STAGE_IDS: readonly StageId[] = STAGES.map((s) => s.id)
+
+/**
+ * Section slots each stage owns. regenerateStage() deletes exactly these
+ * before re-running, so a regenerate never leaves half of an older draft
+ * mixed into a newer one. `research` owns no section slots — it owns the
+ * `draft.research` object instead (see clearStageOutputs in stages.ts).
+ *
+ * A function of the research rather than a static map: the suburb stage
+ * writes three slots PER AREA, and how many areas there are isn't known
+ * until research has run. With `research` undefined (research hasn't run
+ * yet), `suburb` is `[]` — there is nothing yet to own or to clear.
+ *
+ * The union of stageSlots(research) across all stages must equal
+ * drafts.ts requiredSlotsFor(research) exactly: any slot a stage does not
+ * own could never be regenerated, and any slot no stage writes would block
+ * finalizeDraft forever. Pinned by a test.
+ */
+export function stageSlots(research: ResearchOutput | undefined): Record<StageId, readonly string[]> {
+  return {
+    research: [],
+    front: [
+      'services.heroParagraphs',
+      'services.serviceIntro',
+      'services.cards.dusting',
+      'services.cards.vacuuming',
+      'services.cards.bathroom',
+      'services.cards.window',
+      'services.cards.upholstery',
+    ],
+    deep: ['deep.whatIs'],
+    suburb: research ? research.suburbs.flatMap((s) => suburbSlots(s.slug)) : [],
+  }
 }

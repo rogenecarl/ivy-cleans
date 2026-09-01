@@ -18,7 +18,7 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '../pipeline/facts'
 import type { ResearchOutput } from '../pipeline/schemas'
-import { STAGES, stageSlots } from '../pipeline/stages'
+import { STAGES, stageSlots } from './slots'
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
 import { checkCity } from './similarity'
@@ -232,7 +232,7 @@ export async function finalizeDraft(key: string): Promise<void> {
 
   const missing: string[] = []
   if (!draft.research) missing.push('research')
-  for (const slot of REQUIRED_SLOTS) {
+  for (const slot of requiredSlotsFor(draft.research)) {
     if (draft.sections[slot] === undefined) missing.push(`sections.${slot}`)
   }
   if (missing.length > 0) {
@@ -243,7 +243,7 @@ export async function finalizeDraft(key: string): Promise<void> {
   const { facts } = draft
 
   const sections: Record<string, string | string[]> = {}
-  for (const slot of REQUIRED_SLOTS) {
+  for (const slot of requiredSlotsFor(research)) {
     sections[slot] = draft.sections[slot]
   }
 
