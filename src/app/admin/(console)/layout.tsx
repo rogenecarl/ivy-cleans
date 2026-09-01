@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ADMIN_DASHBOARD } from '@/lib/admin-routes'
 import { AdminNav } from '../nav'
 import { IdentityChip } from '../identity-chip'
-import { Toaster } from '@/components/ui/sonner'
+import { SignedInToast } from '../signed-in-toast'
 import { requireSession } from '@/lib/auth-server'
 
 /*
@@ -29,6 +29,16 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
 
   return (
     <>
+      {/*
+        * Raises the sign-in success toast on arrival. Suspense-wrapped because
+        * it calls useSearchParams, which Next requires a boundary around --
+        * without one, a page that could otherwise be static would be forced
+        * dynamic, and the build says so.
+        */}
+      <Suspense fallback={null}>
+        <SignedInToast role={user.role} />
+      </Suspense>
+
       <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <div className="flex h-16 items-center gap-4 sm:gap-8">
@@ -56,7 +66,6 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10">{children}</main>
-      <Toaster />
     </>
   )
 }

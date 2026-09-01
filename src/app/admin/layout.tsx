@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { Toaster } from '@/components/ui/sonner'
 import './admin.css'
 
 /*
@@ -17,6 +18,12 @@ import './admin.css'
  * (sites)/[city] precisely so it can never contribute a byte to a customer
  * page, and importing a site component would tie the two together again
  * through the shared CSS scan.
+ *
+ * The <Toaster/> lives HERE rather than in (console)/layout.tsx, where it used
+ * to be, because the login screen is outside that group and needs it too --
+ * without this, a toast fired on /admin/login would have nowhere to render.
+ * One mount for the whole of /admin also means a toast raised just before a
+ * redirect survives the navigation instead of being torn down with the page.
  */
 export const metadata: Metadata = {
   title: 'Ivy Cleans: Site Manager',
@@ -27,6 +34,7 @@ export default function AdminRootLayout({ children }: { children: ReactNode }) {
   return (
     <div data-admin-root className="min-h-screen bg-background text-foreground">
       {children}
+      <Toaster />
     </div>
   )
 }

@@ -97,5 +97,14 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
     await auth.api.signOut({ headers: headersList })
     return { error: CREDENTIALS_REJECTED }
   }
-  redirect(safeNext(next, role))
+  /*
+   * ?signedin=1 is picked up by <SignedInToast/> in the console layout, which
+   * raises the success toast and strips the param. It is appended AFTER
+   * safeNext() has validated and possibly replaced the target, so it can
+   * never influence where the redirect goes -- and the separator is computed
+   * because safeNext returns whatever `next` held, which may already carry a
+   * query string (e.g. /admin/leads?status=new).
+   */
+  const target = safeNext(next, role)
+  redirect(`${target}${target.includes('?') ? '&' : '?'}signedin=1`)
 }

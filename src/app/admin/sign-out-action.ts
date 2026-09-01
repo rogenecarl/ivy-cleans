@@ -13,5 +13,12 @@ import { ADMIN_LOGIN } from '@/lib/admin-routes'
  */
 export async function signOutAction(): Promise<void> {
   await auth.api.signOut({ headers: await headers() })
-  redirect(ADMIN_LOGIN)
+  /*
+   * ?signedout=1 is the whole flash mechanism, and it is enough because
+   * sign-out has exactly one destination. The login form toasts on it and
+   * strips it from the URL. Sign-IN cannot use the same trick -- it lands
+   * wherever safeNext() sends it -- which is why there is no matching
+   * success toast there.
+   */
+  redirect(`${ADMIN_LOGIN}?signedout=1`)
 }

@@ -18,9 +18,9 @@ export const dynamic = 'force-dynamic'
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; signedout?: string }>
 }) {
-  const { next } = await searchParams
+  const { next, signedout } = await searchParams
   const user = await getServerUser()
   if (user) redirect(safeNext(next, user.role))
 
@@ -45,7 +45,7 @@ export default async function LoginPage({
           This console is for Ivy Cleans staff.
         </p>
 
-        <LoginForm next={next ?? ''} />
+        <LoginForm next={next ?? ''} signedOut={signedout === '1'} />
       </div>
     </div>
   )
