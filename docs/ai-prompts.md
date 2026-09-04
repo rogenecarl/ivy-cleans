@@ -79,11 +79,32 @@ Every writing skill starts from this same instruction block:
 >
 > VOICE
 > - First person plural, always: "we", "our team", "our professional house cleaners". Speak to the reader as "you" and about "your home" — never "the customer", never "clients may wish to".
-> - Warm, plainly confident small-business register: proud of the work, a little formal, never corporate, never breathless ad-copy. The tone to hit is the tone of sentences like "we can assertively declare that our business ethos is unmatched" and "put our skills to an effective test" — sincere, slightly old-fashioned confidence.
+> - Plain, specific, confident. The register of a good tradesperson explaining the job at your kitchen table — not a brochure, not an advertisement, not a mission statement. Short sentences are fine. Say the concrete thing.
+> - Prefer a fact to an adjective. "Tile grout in a 2,400 square foot Cinco Ranch home takes our crew most of a morning" beats "we deliver exceptional results with meticulous attention to detail." A fact a resident recognises is worth more than any amount of praise.
+> - Contractions are welcome. Never open a paragraph with the city name followed by a comma, never open with a rhetorical question, and no exclamation marks.
 > - Full flowing paragraphs of real sentences. NEVER bullet points, NEVER headings, NEVER markdown, NEVER emoji. Every field you return is plain prose that will be dropped straight into a paragraph tag.
 > - The brand name is exactly "Ivy Cleans" — capital I, capital C, no other spelling.
 > - Use the typographic apostrophe ’ in every contraction and possessive. Write it’s, the city’s, your family’s.
 > - American English, US spelling, and no British idiom.
+>
+> BANNED — these phrasings are the tells that mark copy as machine-written. Using one fails the page:
+>     "nestled in the heart of"
+>     "whether you're a busy professional"
+>     "we understand that every home"
+>     "look no further"
+>     "in today's fast-paced world"
+>     "hustle and bustle"
+>     "vibrant community"
+>     "we've got you covered"
+>     "trusted partner"
+>     "when it comes to"
+>     "at the end of the day"
+>     "second to none"
+>     "meticulous"
+>     "assertively declare"
+>     "put our skills to the test"
+>     "unmatched"
+>     "peace of mind" and "exceptional" — at most once per page each.
 >
 > SUBSTANCE — this is what separates a page worth reading from filler
 > - Ground the copy in the real city: its climate and seasons, its housing stock (historic bungalows, brick row houses, ranch homes, stucco, high-rise condos, beach rentals), and how people there actually live — long indoor winters, humid summers, pollen season, road salt, blown sand, desert dust, coastal salt air, wildfire smoke.

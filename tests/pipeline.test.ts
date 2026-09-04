@@ -27,6 +27,7 @@ import {
   STAGES,
   stageSlots,
   suburbSlots,
+  BANNED_PHRASES,
   SYSTEM_BASE,
   FRONT_SYSTEM,
   DEEP_SYSTEM,
@@ -928,7 +929,63 @@ describe('pipeline stages', () => {
     })
   })
 
-  describe('buildResearchPrompt', () => {
+  describe('SYSTEM_BASE voice', () => {
+  it('no longer points the model at the copy that does not rank', () => {
+    // The old guide named two live Minneapolis sentences as the target
+    // register. The model followed it faithfully -- Houston came back as
+    // "we can assertively declare that our standard of work is unmatched"
+    // -- from a page sitting at position 33.
+    // The phrases still appear -- on the BANNED list. What must be gone is
+    // the framing that held them up as the register to imitate.
+    expect(SYSTEM_BASE).not.toMatch(/tone to hit is the tone of sentences/i)
+    expect(SYSTEM_BASE).not.toMatch(/business ethos is unmatched/i)
+    expect(SYSTEM_BASE).not.toMatch(/slightly old-fashioned confidence/i)
+
+    // and where they do appear, it is after the BANNED marker, not before it
+    const banned = SYSTEM_BASE.indexOf('BANNED')
+    expect(banned).toBeGreaterThan(-1)
+    expect(SYSTEM_BASE.toLowerCase().indexOf('assertively declare')).toBeGreaterThan(banned)
+  })
+
+  it('prefers a concrete fact to an adjective', () => {
+    expect(SYSTEM_BASE).toMatch(/Prefer a fact to an adjective/i)
+  })
+
+  it('carries the banned-phrase list, built from the shared constant', () => {
+    expect(SYSTEM_BASE).toMatch(/BANNED/)
+    for (const phrase of BANNED_PHRASES) {
+      expect(SYSTEM_BASE.toLowerCase()).toContain(phrase.toLowerCase())
+    }
+  })
+
+  it('bans the specific tells the old copy actually used', () => {
+    for (const p of ['assertively declare', 'unmatched', 'nestled in the heart of', 'look no further']) {
+      expect(BANNED_PHRASES).toContain(p)
+    }
+  })
+
+  // Regression guards: the rewrite must not drop rules the output depends on.
+  it('still forbids markdown, bullets and emoji — output goes straight into a <p>', () => {
+    expect(SYSTEM_BASE).toMatch(/NEVER bullet points/)
+    expect(SYSTEM_BASE).toMatch(/NEVER markdown/)
+  })
+
+  it('still pins the brand spelling and the typographic apostrophe', () => {
+    expect(SYSTEM_BASE).toMatch(/exactly "Ivy Cleans"/)
+    expect(SYSTEM_BASE).toMatch(/U\+2019/)
+  })
+})
+
+describe('structural examples', () => {
+  it('tell the model the example is shape, not voice', () => {
+    const facts = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
+    const p = buildFrontPrompt(facts, fixtureResearch())
+    expect(p).toMatch(/length and structure only/i)
+    expect(p).toMatch(/voice is not the target/i)
+  })
+})
+
+describe('buildResearchPrompt', () => {
     const facts = stubFacts()
 
     it('asks for subdivisions per area, not just areas', () => {
