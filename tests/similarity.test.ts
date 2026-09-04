@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { longestSharedRun, normalize, shingleSimilarity } from '../src/content/similarity'
-import { checkCity, flattenSections, type SectionMap } from '../src/content/similarity'
+import { checkCity, findInvisibleChars, flattenSections, type SectionMap } from '../src/content/similarity'
 
 describe('normalize', () => {
   it('folds case, curly quotes and runs of whitespace', () => {
@@ -95,5 +95,70 @@ describe('checkCity', () => {
       [],
     )
     expect(findings.filter((f) => f.detail.includes('sibling'))).toEqual([])
+  })
+})
+
+describe('findInvisibleChars', () => {
+  const ZWSP = '\u200B'
+  const RLO = '\u202E'
+  const BOM = '\uFEFF'
+  const SHY = '\u00AD'
+  const NBSP = '\u00A0'
+  const TAG = '\u{E0041}' // Unicode TAG block
+
+  it('passes clean copy', () => {
+    expect(findInvisibleChars({ 'deep.whatIs': 'Gulf humidity settles into grout.' })).toEqual([])
+  })
+
+  it('catches a zero-width space and names the slot and codepoint', () => {
+    const found = findInvisibleChars({ 'deep.whatIs': `Cinco${ZWSP} Ranch` })
+    expect(found).toHaveLength(1)
+    expect(found[0].slot).toBe('deep.whatIs')
+    expect(found[0].detail).toContain('U+200B')
+  })
+
+  it.each([
+    ['zero-width joiner', '\u200D'],
+    ['right-to-left override', RLO],
+    ['byte order mark', BOM],
+    ['soft hyphen', SHY],
+    ['non-breaking space', NBSP],
+    ['tag character', TAG],
+    ['variation selector', '\u{FE0F}'],
+    ['supplementary variation selector', '\u{E0141}'],
+  ])('catches %s', (_name, ch) => {
+    expect(findInvisibleChars({ 'deep.whatIs': `before${ch}after` })).toHaveLength(1)
+  })
+
+  it('reports the index for an array slot', () => {
+    const found = findInvisibleChars({ 'services.heroParagraphs': ['clean', `bad${ZWSP}`] })
+    expect(found).toHaveLength(1)
+    expect(found[0].slot).toBe('services.heroParagraphs[1]')
+  })
+
+  it('scans slots that the duplication check exempts', () => {
+    // hero indices 3 and 4 are exempt from cross-city comparison, but an
+    // invisible character there is still a defect — the guard must see them.
+    const hero = ['a', 'b', 'c', 'd', `e${ZWSP}`]
+    const found = findInvisibleChars({ 'services.heroParagraphs': hero })
+    expect(found).toHaveLength(1)
+    expect(found[0].slot).toBe('services.heroParagraphs[4]')
+  })
+
+  it('reports every occurrence across slots', () => {
+    const found = findInvisibleChars({
+      'deep.whatIs': `a${ZWSP}b`,
+      'services.serviceIntro': [`c${RLO}d`],
+    })
+    expect(found).toHaveLength(2)
+    expect(found.map((f) => f.slot).sort()).toEqual([
+      'deep.whatIs',
+      'services.serviceIntro[0]',
+    ])
+  })
+
+  it('does NOT flag ordinary punctuation the site really uses', () => {
+    // U+2019 apostrophes and en/em dashes are required by the style rules.
+    expect(findInvisibleChars({ 'deep.whatIs': 'It’s a deep clean — not a tidy – really.' })).toEqual([])
   })
 })

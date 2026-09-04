@@ -260,3 +260,119 @@ export function checkCity(
 
   return findings
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Invisible-character guard
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Characters that render as nothing (or as an ordinary space) but change the
+ * bytes of a string.
+ *
+ * WHY THIS GUARD EXISTS, and why it lives next to the duplication check
+ * rather than anywhere else: checkCity finds duplicates by comparing text. A
+ * single zero-width space inside an otherwise byte-identical paragraph makes
+ * two strings compare unequal, so the duplication check goes QUIET on a page
+ * that is still identical to every reader and every crawler. The guard exists
+ * to stop the safety net being defeated by something nobody can see.
+ *
+ * The smaller harms are real too: word counts drift (the suburb prompt asks
+ * for 60–130 words per paragraph), a reader's in-page search silently fails to
+ * match, and the characters surface in diffs as junk nobody can locate.
+ *
+ * NOT in this set: U+2019 apostrophes, en dashes and em dashes. Those are
+ * required by the project's style rules and appear throughout the reference
+ * copy — flagging them would make the guard unusable.
+ */
+const INVISIBLE_CHARS: ReadonlyMap<string, string> = new Map([
+  [' ', 'NO-BREAK SPACE'],
+  ['­', 'SOFT HYPHEN'],
+  ['᠎', 'MONGOLIAN VOWEL SEPARATOR'],
+  [' ', 'EN QUAD'],
+  [' ', 'EM QUAD'],
+  [' ', 'EN SPACE'],
+  [' ', 'EM SPACE'],
+  [' ', 'THREE-PER-EM SPACE'],
+  [' ', 'FOUR-PER-EM SPACE'],
+  [' ', 'SIX-PER-EM SPACE'],
+  [' ', 'FIGURE SPACE'],
+  [' ', 'PUNCTUATION SPACE'],
+  [' ', 'THIN SPACE'],
+  [' ', 'HAIR SPACE'],
+  ['​', 'ZERO WIDTH SPACE'],
+  ['‌', 'ZERO WIDTH NON-JOINER'],
+  ['‍', 'ZERO WIDTH JOINER'],
+  ['‎', 'LEFT-TO-RIGHT MARK'],
+  ['‏', 'RIGHT-TO-LEFT MARK'],
+  ['‪', 'LEFT-TO-RIGHT EMBEDDING'],
+  ['‫', 'RIGHT-TO-LEFT EMBEDDING'],
+  ['‬', 'POP DIRECTIONAL FORMATTING'],
+  ['‭', 'LEFT-TO-RIGHT OVERRIDE'],
+  ['‮', 'RIGHT-TO-LEFT OVERRIDE'],
+  [' ', 'NARROW NO-BREAK SPACE'],
+  [' ', 'MEDIUM MATHEMATICAL SPACE'],
+  ['⁠', 'WORD JOINER'],
+  ['⁡', 'FUNCTION APPLICATION'],
+  ['⁢', 'INVISIBLE TIMES'],
+  ['⁣', 'INVISIBLE SEPARATOR'],
+  ['⁤', 'INVISIBLE PLUS'],
+  ['⁦', 'LEFT-TO-RIGHT ISOLATE'],
+  ['⁧', 'RIGHT-TO-LEFT ISOLATE'],
+  ['⁨', 'FIRST STRONG ISOLATE'],
+  ['⁩', 'POP DIRECTIONAL ISOLATE'],
+  ['　', 'IDEOGRAPHIC SPACE'],
+  ['﻿', 'ZERO WIDTH NO-BREAK SPACE (BOM)'],
+])
+
+export interface InvisibleFinding {
+  slot: string
+  detail: string
+}
+
+/**
+ * Invisible characters that come in blocks rather than singly, so listing
+ * every codepoint would be noise. All three render as nothing.
+ */
+function rangeName(cp: number): string | undefined {
+  if (cp >= 0xe0000 && cp <= 0xe007f) return 'TAG CHARACTER'
+  if (cp >= 0xfe00 && cp <= 0xfe0f) return 'VARIATION SELECTOR'
+  if (cp >= 0xe0100 && cp <= 0xe01ef) return 'VARIATION SELECTOR SUPPLEMENT'
+  return undefined
+}
+
+function codepoint(ch: string): string {
+  return `U+${(ch.codePointAt(0) ?? 0).toString(16).toUpperCase().padStart(4, '0')}`
+}
+
+/** Every invisible character in one string, with its codepoint and name. */
+function scan(slot: string, text: string): InvisibleFinding[] {
+  const out: InvisibleFinding[] = []
+  for (const ch of text) {
+    const cp = ch.codePointAt(0) ?? 0
+    // The Unicode TAG block (U+E0000–U+E007F) is enumerated by range rather
+    // than listed: it is 128 codepoints and every one of them is invisible.
+    const name = INVISIBLE_CHARS.get(ch) ?? rangeName(cp)
+    if (name !== undefined) out.push({ slot, detail: `${codepoint(ch)} ${name}` })
+  }
+  return out
+}
+
+/**
+ * Scan every generated slot for invisible characters.
+ *
+ * Unlike flattenSections this applies NO exemptions. Hero paragraphs 4 and 5
+ * are exempt from CROSS-CITY comparison because they are fixed brand lines,
+ * but an invisible character in one is still a defect, so the guard sees
+ * every slot.
+ */
+export function findInvisibleChars(sections: SectionMap): InvisibleFinding[] {
+  const out: InvisibleFinding[] = []
+  for (const [slot, value] of Object.entries(sections)) {
+    if (Array.isArray(value)) {
+      value.forEach((text, i) => out.push(...scan(`${slot}[${i}]`, text)))
+    } else {
+      out.push(...scan(slot, value))
+    }
+  }
+  return out
+}

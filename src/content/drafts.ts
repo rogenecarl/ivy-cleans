@@ -21,7 +21,7 @@ import type { ResearchOutput } from '../pipeline/schemas'
 import { STAGES, isWrittenSlot, stageSlots } from './slots'
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
-import { checkCity } from './similarity'
+import { checkCity, findInvisibleChars } from './similarity'
 import { validateCityContent } from './validate'
 import { getCity, listLiveCityKeys, revalidateCity } from './store'
 
@@ -313,6 +313,21 @@ export async function publishCity(key: string, domain?: string): Promise<void> {
    * can see, and blocking on one would make the order two operators happen
    * to work in decide whose copy is "the duplicate".
    */
+  /*
+   * Invisible characters are refused BEFORE the duplication check, because
+   * they can defeat it: checkCity compares text, and a single zero-width
+   * space inside an otherwise byte-identical paragraph makes two strings
+   * compare unequal, so the duplication check goes quiet on a page that is
+   * still identical to every reader and every crawler.
+   */
+  const invisible = findInvisibleChars(doc.sections)
+  if (invisible.length > 0) {
+    const lines = invisible.map((f) => `  ${f.slot}: ${f.detail}`)
+    throw new Error(
+      `cannot publish "${key}": ${invisible.length} invisible character(s)\n${lines.join('\n')}`,
+    )
+  }
+
   const liveKeys = (await listLiveCityKeys()).filter((k) => k !== key)
   const published = await Promise.all(
     liveKeys.map(async (k) => {
