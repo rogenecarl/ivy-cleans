@@ -102,6 +102,45 @@ export type NewCityFields = {
   phone: string
   address?: string
   notes?: string
+  /*
+   * The ops block. All optional — a brand-new market has none of it — but a
+   * prompt that receives one of these facts is required to use it, so an
+   * empty field is a page that reads like a description of a town rather
+   * than a business working in it.
+   *
+   * Arrive as raw strings from the form and are parsed here, in the one
+   * place that already owns turning form text into facts.
+   */
+  /** Comma, space or newline separated. "77002, 77003" or one per line. */
+  zips?: string
+  /** "2024-03". */
+  servingSince?: string
+  /** First name only. */
+  crewLead?: string
+  crewSize?: string
+  homesCleaned?: string
+}
+
+/**
+ * Splits an operator's ZIP paste into five-digit codes.
+ *
+ * Deliberately forgiving about separators — commas, spaces, newlines, a
+ * pasted column from a spreadsheet — and deliberately strict about what
+ * counts, because a malformed ZIP is a visible error on a live page. Anything
+ * that is not exactly five digits is dropped rather than guessed at.
+ */
+export function parseZips(raw: string | undefined): string[] {
+  if (!raw) return []
+  const found = raw.split(/[^0-9]+/).filter((t) => /^\d{5}$/.test(t))
+  return [...new Set(found)].sort()
+}
+
+/** Parses a positive integer field, or undefined when blank or unusable. */
+function parseCount(raw: string | undefined): number | undefined {
+  const digits = (raw ?? '').replace(/[^0-9]/g, '')
+  if (digits === '') return undefined
+  const n = Number(digits)
+  return Number.isSafeInteger(n) && n >= 0 ? n : undefined
 }
 
 /**
@@ -118,12 +157,29 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
     const address = fields.address?.trim()
     const notes = fields.notes?.trim()
 
+    // Build the ops block from whatever the operator actually filled in, and
+    // omit it entirely when they filled in nothing — an empty object would
+    // satisfy `!== undefined` and put a meaningless `ops: {}` on every draft.
+    const zips = parseZips(fields.zips)
+    const servingSince = fields.servingSince?.trim()
+    const crewLead = fields.crewLead?.trim()
+    const crewSize = parseCount(fields.crewSize)
+    const homesCleaned = parseCount(fields.homesCleaned)
+    const ops = {
+      ...(zips.length ? { zips } : {}),
+      ...(servingSince ? { servingSince } : {}),
+      ...(crewLead ? { crewLead } : {}),
+      ...(crewSize ? { crewSize } : {}),
+      ...(homesCleaned !== undefined ? { homesCleaned } : {}),
+    }
+
     const facts = deriveFacts({
       city: fields.city,
       state: fields.state.trim(),
       phoneDigits: digits,
       ...(address ? { address } : {}),
       ...(notes ? { notes } : {}),
+      ...(Object.keys(ops).length ? { ops } : {}),
     })
     const key = await createDraft(facts)
     return { ok: true, key }

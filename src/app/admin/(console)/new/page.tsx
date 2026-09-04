@@ -135,6 +135,94 @@ export default async function NewCityPage({
               />
             </div>
 
+            {/*
+              * The ops block. Every field is optional -- a brand-new market
+              * has none of it -- but they are shown here rather than hidden
+              * behind an "advanced" toggle on purpose: this is the only input
+              * a competitor cannot reproduce, and a collapsed section stays
+              * empty forever. A page that receives one of these facts is
+              * required to use it.
+              */}
+            <div className="rounded-md border border-border/60 p-4">
+              <p className="text-[0.95rem] font-semibold">What we know about this market</p>
+              <p className="mt-1 text-[0.8rem] text-muted-foreground">
+                All optional, and you can add them later. Pages that carry these outrank pages that
+                don&rsquo;t &mdash; a competitor can describe the town, but only you can say who
+                cleans there.
+              </p>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Label htmlFor="zips" className="mb-1.5">
+                    ZIP codes you serve
+                  </Label>
+                  <Textarea
+                    id="zips"
+                    name="zips"
+                    rows={2}
+                    placeholder="77002, 77003, 77004 — commas, spaces or one per line"
+                  />
+                  <p className="mt-1 text-[0.75rem] text-muted-foreground">
+                    Printed as a list on the home page. Anything that isn&rsquo;t five digits is
+                    ignored rather than guessed at.
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="crewLead" className="mb-1.5">
+                    Crew lead
+                  </Label>
+                  <Input
+                    id="crewLead"
+                    name="crewLead"
+                    className="min-h-11 sm:min-h-9"
+                    placeholder="First name only — Maria"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="servingSince" className="mb-1.5">
+                    Serving since
+                  </Label>
+                  <Input
+                    id="servingSince"
+                    name="servingSince"
+                    className="min-h-11 sm:min-h-9"
+                    placeholder="2024-03"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="crewSize" className="mb-1.5">
+                    Crew size
+                  </Label>
+                  <Input
+                    id="crewSize"
+                    name="crewSize"
+                    inputMode="numeric"
+                    className="min-h-11 sm:min-h-9"
+                    placeholder="4"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="homesCleaned" className="mb-1.5">
+                    Homes cleaned here
+                  </Label>
+                  <Input
+                    id="homesCleaned"
+                    name="homesCleaned"
+                    inputMode="numeric"
+                    className="min-h-11 sm:min-h-9"
+                    placeholder="340"
+                  />
+                  <p className="mt-1 text-[0.75rem] text-muted-foreground">
+                    Round down to a number you could defend.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="flex flex-wrap items-center gap-3">
               <Button type="submit" size="lg" className="min-h-11 sm:min-h-9">
                 Create &amp; generate

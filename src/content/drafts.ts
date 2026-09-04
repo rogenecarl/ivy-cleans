@@ -291,7 +291,16 @@ export async function finalizeDraft(key: string): Promise<void> {
     maps: { front: null, home: null, contact: null },
     research: {
       suburbs: research.suburbs,
-      zips: research.zips,
+      /*
+       * ZIPs are what this branch SERVES, which is an operator decision, not
+       * a search result — so ops.zips wins when the operator has supplied it.
+       *
+       * research.zips is the fallback and must stay one: Minneapolis carries
+       * 25 ZIPs recovered from prose during the migration, and its operator
+       * has never filled the new field. Preferring ops unconditionally would
+       * blank the ZIP list on the only live site.
+       */
+      zips: facts.ops?.zips?.length ? facts.ops.zips : research.zips,
       conditions: research.conditions,
       mapEmbedUrl: null,
     },

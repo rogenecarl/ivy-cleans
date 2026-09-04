@@ -27,6 +27,7 @@ import {
   isStageId,
   listCities,
   normalizeSuburbs,
+  parseZips,
   pendingSuburbsLogic,
   publishLogic,
   regenerateLogic,
@@ -532,6 +533,86 @@ describe('updateSuburbsLogic — merge behaviour (feature 9 fix)', () => {
     const after = await loadDraft(KEY)
     expect(after.research!.suburbs[0].name).toBe('Cypress')
     expect(after.research!.suburbs[0].subdivisions).toEqual(KATY_RESEARCH.suburbs[0].subdivisions)
+  })
+})
+
+describe('parseZips', () => {
+  it('accepts the separators an operator actually pastes', () => {
+    expect(parseZips('77002, 77003 77004\n77005')).toEqual(['77002', '77003', '77004', '77005'])
+  })
+
+  it('drops anything that is not exactly five digits rather than guessing', () => {
+    // A malformed ZIP is a visible error on a live page.
+    expect(parseZips('77002, 7700, 770021, abcde, 77003')).toEqual(['77002', '77003'])
+  })
+
+  it('deduplicates and sorts', () => {
+    expect(parseZips('77003 77002 77003')).toEqual(['77002', '77003'])
+  })
+
+  it('returns [] for blank or missing input', () => {
+    expect(parseZips(undefined)).toEqual([])
+    expect(parseZips('   ')).toEqual([])
+  })
+})
+
+describe('the ops block through the form', () => {
+  const KEY = 'ztest-opsville'
+
+  beforeEach(async () => {
+    await wipe(KEY)
+  })
+
+  it('carries what the operator filled in onto the draft', async () => {
+    const r = await createDraftFromFields({
+      city: 'Ztest Opsville',
+      state: 'MN',
+      phone: '(612) 555-0142',
+      zips: '55401, 55402',
+      servingSince: '2024-03',
+      crewLead: 'Maria',
+      homesCleaned: '340',
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+
+    const draft = await loadDraft(r.key)
+    expect(draft.facts.ops).toEqual({
+      zips: ['55401', '55402'],
+      servingSince: '2024-03',
+      crewLead: 'Maria',
+      homesCleaned: 340,
+    })
+    await wipe(r.key)
+  })
+
+  it('omits ops entirely when the operator filled in none of it', async () => {
+    // An empty object would satisfy `!== undefined` and put a meaningless
+    // `ops: {}` on every draft that never used the fields.
+    const r = await createDraftFromFields({
+      city: 'Ztest Opsville',
+      state: 'MN',
+      phone: '(612) 555-0142',
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect((await loadDraft(r.key)).facts.ops).toBeUndefined()
+    await wipe(r.key)
+  })
+
+  it('keeps the fields that were filled and skips the ones that were not', async () => {
+    const r = await createDraftFromFields({
+      city: 'Ztest Opsville',
+      state: 'MN',
+      phone: '(612) 555-0142',
+      crewLead: 'Maria',
+      crewSize: '',
+      homesCleaned: 'not a number',
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect((await loadDraft(r.key)).facts.ops).toEqual({ crewLead: 'Maria' })
+    await wipe(r.key)
   })
 })
 

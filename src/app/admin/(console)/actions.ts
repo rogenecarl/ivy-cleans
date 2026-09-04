@@ -70,6 +70,13 @@ export async function createDraftAction(formData: FormData): Promise<void> {
     phone: field(formData, 'phone'),
     address: field(formData, 'address'),
     notes: field(formData, 'notes'),
+    // The ops block. Parsed in createDraftFromFields, which already owns
+    // turning form text into facts — this just forwards the raw strings.
+    zips: field(formData, 'zips'),
+    servingSince: field(formData, 'servingSince'),
+    crewLead: field(formData, 'crewLead'),
+    crewSize: field(formData, 'crewSize'),
+    homesCleaned: field(formData, 'homesCleaned'),
   })
 
   if (!result.ok) {
