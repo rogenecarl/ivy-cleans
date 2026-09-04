@@ -27,6 +27,19 @@ import { getCity, listLiveCityKeys, revalidateCity } from './store'
 
 export type DraftDoc = {
   facts: Facts
+  /**
+   * The raw web-search findings the research stage produced, kept verbatim.
+   *
+   * The structuring pass turns this into `research` and, before this field
+   * existed, the findings were then discarded. That made a whole class of
+   * failure undiagnosable: when a generated city came back with zero ZIP
+   * codes and zero metro conditions there was no way to tell whether the
+   * research never found them or the transcriber dropped them, and those two
+   * faults have different fixes in different prompts.
+   *
+   * Never rendered. It exists to be read by a human debugging a bad city.
+   */
+  findings?: string
   research?: ResearchOutput
   sections: Record<string, string | string[]>
   done: string[]

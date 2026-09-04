@@ -29,6 +29,22 @@ export interface ModelClient {
   research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string>
   /** Schema-validated structured generation. */
   generate<T>(args: GenerateArgs<T>): Promise<T>
+  /**
+   * Running token tally for this client instance.
+   *
+   * Generating one city is ~16 calls and the suburb stage scales with the
+   * area count, so "what does a city cost" is a question with an operational
+   * answer rather than an estimate — and at a hundred sites it is the
+   * difference between a budget and a guess. The SDK hands back `usage` on
+   * every response and this used to drop it on the floor.
+   */
+  readonly usage: UsageTally
+}
+
+export interface UsageTally {
+  calls: number
+  inputTokens: number
+  outputTokens: number
 }
 
 const MODEL = 'claude-opus-5'
@@ -54,6 +70,14 @@ function concatText(content: Array<{ type: string; text?: string }>): string {
 
 export class AnthropicModelClient implements ModelClient {
   private readonly client: Anthropic
+  readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0 }
+
+  /** Fold one response's usage into the running tally. */
+  private count(message: { usage?: { input_tokens?: number; output_tokens?: number } }): void {
+    this.usage.calls += 1
+    this.usage.inputTokens += message.usage?.input_tokens ?? 0
+    this.usage.outputTokens += message.usage?.output_tokens ?? 0
+  }
 
   constructor(apiKey: string | undefined = process.env.ANTHROPIC_API_KEY) {
     if (!apiKey) {
@@ -90,6 +114,7 @@ export class AnthropicModelClient implements ModelClient {
       fallbacks: 'default',
     })
     const message = await stream.finalMessage()
+    this.count(message)
     if (message.stop_reason === 'refusal') {
       throw refusalError(message.stop_details)
     }
@@ -156,6 +181,7 @@ export class AnthropicModelClient implements ModelClient {
       })
     }
     const message = await stream.finalMessage()
+    this.count(message)
     if (message.stop_reason === 'refusal') {
       throw refusalError(message.stop_details)
     }
@@ -164,6 +190,9 @@ export class AnthropicModelClient implements ModelClient {
 }
 
 export class StubModelClient implements ModelClient {
+  /** Calls are counted; tokens stay zero because the stub spends nothing. */
+  readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0 }
+
   constructor(
     private readonly fixtures: {
       research: Record<string, string>

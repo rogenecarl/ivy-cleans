@@ -295,6 +295,8 @@ export function buildResearchStructuringPrompt(
 
   return `Below are research findings for ${facts.city}, ${facts.stateName}. Convert them into the required JSON.
 
+FOUR ARRAYS, ALL OF THEM. The findings are written in lettered parts and every part has somewhere to go: (a) and (b) become suburbs and their subdivisions, (c) becomes housingCharacter plus the two condition arrays, (d) becomes zips. Work through the findings part by part and fill each array from its part. A field left empty because you stopped reading is the one failure this task can produce — you are transcribing, and everything present in the findings must come out the other side.
+
 suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 they contain). A named subdivision inside an area is never its own entry; it goes in that area's subdivisions array. Each entry has:
   name: the place name exactly as the findings write it, e.g. "St. Louis Park", "Sugar Land".
   slug: that name lowercased, with spaces and punctuation replaced by single hyphens — "St. Louis Park" gives "st-louis-park". Nothing else: no prefix, no suffix. Unique, lowercase, a-z 0-9 and hyphens only.
@@ -302,9 +304,13 @@ suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 t
   housingCharacter: one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
   conditions: the local conditions the findings give for THIS area specifically, each with what it means for cleaning.
 
-conditions — the metro-wide conditions from the findings, each with its cleaning implication and its copySafe flag.
+conditions — the METRO-WIDE conditions, the ones true across ${facts.city} rather than of one area. The findings report these in part (c), the first half, before the per-area breakdown. Each needs its condition, its cleaning implication, and its copySafe flag.
+  This array is separate from the per-area conditions above and is NOT optional when the findings contain metro-wide material. Climate, humidity, seasons, air conditioning, pollen, hard water, road salt, dust, the dominant construction and flooring of the metro — all of it belongs here.
+  Returning [] tells every downstream page that ${facts.city} has no city-wide character. If the findings genuinely contain none, return [] — but re-read part (c) first, because the brief asks for it explicitly and its absence is unusual.
 
 zips — the five-digit ZIP codes from the findings, as strings, ascending, deduplicated.
+  The findings report these in part (d). Extract every one of them; the brief asks for 15 to 25.
+  Returning [] removes the ZIP list from the site entirely. If the findings genuinely contain no five-digit codes, return [] — but check part (d) before you do.
 
 ${keywordsSection}
 
@@ -706,10 +712,17 @@ async function executeStage(
         // Sync callback — cannot await. Task 1's per-key chain serializes these writes.
         void appendProgress(key, { stage: 'research', kind: e.kind, label: e.label }).catch(() => {})
       })
+      // Persist the raw findings BEFORE structuring. If the structuring call
+      // fails or returns a thin object, this is the only evidence of what the
+      // research actually found — and it is what tells you whether to fix the
+      // search brief or the transcriber prompt.
+      draft.findings = findings
+      await saveDraft(key, draft)
+
       await appendProgress(key, {
         stage: 'research',
         kind: 'found',
-        label: 'Collected findings — structuring into suburbs, ZIPs, conditions',
+        label: `Collected ${findings.length.toLocaleString()} chars of findings — structuring`,
       })
       const structured = await client.generate({
         schema: ResearchSchema,

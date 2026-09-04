@@ -826,7 +826,19 @@ describe('drafts store', () => {
         try {
           const draft = await loadDraft(key)
           expect(draft.research).toBeDefined()
-          expect(draft.research!.suburbs.every((s) => s.subdivisions.length === 0)).toBe(true)
+          // Assert the migrated SHAPE, not a snapshot of its contents. These
+          // sidecars started with empty researched fields, but a city can be
+          // re-researched at any time -- Houston has been -- and this test is
+          // about whether a migrated sidecar loads and finalizes, not about
+          // what a particular run happened to find.
+          expect(draft.research!.suburbs.length).toBeGreaterThan(0)
+          for (const s of draft.research!.suburbs) {
+            expect(Array.isArray(s.subdivisions)).toBe(true)
+            expect(typeof s.housingCharacter).toBe('string')
+            expect(Array.isArray(s.conditions)).toBe(true)
+          }
+          expect(Array.isArray(draft.research!.conditions)).toBe(true)
+          expect('landmarks' in draft.research!).toBe(false)
 
           draft.research!.suburbs = []
           await saveDraft(key, draft)
@@ -839,10 +851,11 @@ describe('drafts store', () => {
           // suburbs missing subdivisions/housingCharacter/conditions) would
           // have failed validateCityContent before this line -- reaching it
           // is most of the proof that the migration actually worked.
-          expect(validated.research.conditions).toEqual([])
-          for (const suburb of validated.research.suburbs) {
-            expect(suburb.conditions).toEqual([])
-          }
+          // suburbs were emptied above, so the published document carries the
+          // migrated shape with no areas -- the point is that it VALIDATES.
+          expect(Array.isArray(validated.research.conditions)).toBe(true)
+          expect(validated.research.suburbs).toEqual([])
+          expect('landmarks' in validated.research).toBe(false)
         } finally {
           await writeFile(cityPath(key), before, 'utf-8')
           await writeFile(draftPath(key), draftBefore, 'utf-8')

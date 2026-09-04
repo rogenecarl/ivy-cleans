@@ -7,177 +7,208 @@
     "phoneDisplay": "(786) 460-6564",
     "phoneHref": "tel:7864606564"
   },
-  "sections": {
-    "services.heroParagraphs": [
-      "As a local and insured business, Ivy Cleans is proud to provide residential cleaning and commercial janitorial services throughout Houston and the communities that ring it. Our experienced team understands what this city does to a home — the Gulf humidity, the pollen, the clay tracked in off a driveway — and we clean with that knowledge in hand. We attend to every surface, every baseboard, every corner behind a door, and our customers receive a home that feels genuinely cared for. Having built our reputation one house at a time, we can assertively declare that our standard of work is unmatched.",
-      "That is why we hold fast to the belief that our house cleaning services stand among the finest in the Houston area. The foundation of our work is honest effort, plain and open communication, and results you can see the moment you walk through the door. A studio near the loop or a five-bedroom home out on the west side receives the same care and the same thoroughness. Examine any part of how we operate, and you will find nothing we would hesitate to show you.",
-      "Do you have a mess that needs cleaning? Or are you hoping for a fresher household or workplace? Is there a cleaning project sitting on your list?",
-      "Whether it’s your home or your business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
-      "Reach out to Ivy Cleans today, ask us for an estimate, and let us show you what a proper clean looks like!"
-    ],
-    "services.serviceIntro": [
-      "Ivy Cleans provides a full range of professional cleaning services across Houston and the surrounding cities, from recurring home cleaning and dependable maid service to move-in and move-out work, top-to-bottom deep cleaning, post-renovation cleanup, short-term-rental turnovers, and steady office upkeep for small businesses. Our professional house cleaners bring years of experience along with quality products and commercial-grade equipment suited to each surface. We know Houston keeps long hours and longer commutes, so we schedule weekly, biweekly, monthly, or one-time visits around the way you actually live.",
-      "Houston homes take in a remarkable amount of dust, from the yellow film of live oak pollen every spring to the fine grit that rides in on humid air and settles across ceiling fans, blinds, and vents that run nearly year-round. Our dusting service clears those surfaces properly so the air in your home feels lighter to breathe.",
-      "Between the heavy gumbo clay that clings to shoes after a downpour and the many months when the heat keeps everyone indoors with the air conditioning humming, Houston floors work hard. Our vacuuming service lifts embedded grit from carpet and hard flooring alike, leaving rooms that feel clean underfoot rather than merely tidy.",
-      "Few cities test a bathroom like ours. Gulf humidity lingers in tile grout and around tubs, mildew takes hold in a shower that never fully dries, and mineral deposits cloud glass and fixtures. Our bathroom cleaning removes that buildup along with the germs and bacteria behind it, giving your family a safe, healthy space.",
-      "Houston windows rarely stay clear for long. Pollen sticks to the glass in spring, driving summer rain leaves muddy spatter along the sills, and the haze of traffic and industry dulls whatever is left. Our professional window cleaning removes the film and the streaks, and the difference in daylight through your rooms is immediate."
-    ],
-    "services.cards.dusting": "Dusting matters more here than most people expect. Warm air moves through Houston homes for the better part of the year, carrying pollen, mold spores, and fine outdoor particles onto shelves, plantation shutters, and the tops of door frames where they quietly accumulate. Our dusting service works through those overlooked places with proper cloths and care, so your rooms look settled and the air inside your home is kinder to allergy sufferers.",
-    "services.cards.vacuuming": "Vacuuming is a service Houston households cannot skip. Wet lawns and dark clay soil come inside on shoes and paws after every storm, and long stretches of triple-digit heat mean families live almost entirely indoors, working the carpet daily. Our professional cleaners vacuum thoroughly along edges, beneath furniture, and across every traffic path, so your floors are free of grit and your home feels fresh again.",
-    "services.cards.bathroom": "Bathroom cleaning is the task Houston homeowners dread most, and with good reason. Damp coastal air keeps showers from drying out, so mildew shadows the grout while hard water leaves chalky rings on faucets and glass doors. Our team scrubs tile, tubs, toilets, and fixtures down to the surface and disinfects as we go, handing back a bathroom that is sanitary, bright, and safe for everyone in the house.",
-    "services.cards.window": "Window cleaning transforms a Houston home, whether it’s a bungalow with original wood sashes or a high-rise unit facing the skyline. Oak pollen, mud from summer thunderstorms, and the gray haze that hangs over the freeways build a film that dims every room behind the glass. Our window cleaners leave panes, frames, and sills clear and streak-free, so your home fills with the daylight you are paying for.",
-    "services.cards.upholstery": "Upholstery holds onto Houston in ways you can smell before you see it. Humidity settles into sofa cushions and dining chairs, sunscreen and sweat transfer on hot afternoons, and pollen works deep into the weave each spring. Our upholstery cleaning draws out that trapped soil and odor with methods matched to the fabric, so your furniture looks refreshed, feels dry, and no longer carries the season indoors with it.",
-    "deep.whatIs": "Deep cleaning is a comprehensive service that reaches well past the tidying of a routine visit. We work through every surface, floor, carpet, and piece of furniture in your home, drawing out the dirt, dust, and allergens an ordinary clean leaves sitting in baseboards, grout, vents, and upholstery. Houston gives us plenty to find. Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds. The result is a healthier, more comfortable home for your family."
-  },
+  "sections": {},
   "done": [
-    "research",
-    "front",
-    "deep"
+    "research"
   ],
   "createdAt": "2026-08-12T04:03:30.265Z",
+  "findings": "I'll research this market systematically. Let me start with searches on Houston suburbs, neighborhoods, and climate.Good foundation. Now let me research subdivisions per area and housing stock details.I ran seven web searches before the search tool hit its usage limit for this session. Below is everything the pages actually supported. **Two of the five sections — (d) ZIP codes and (e) keywords — I could not research at all, and I have deliberately left them empty rather than reconstruct them from memory.** Several areas also came back with no verifiable subdivision names; those are flagged as such.\n\nSources used: click2houston.com, brookfieldresidential.com, texasrealestatesource.com, extraspace.com, houstonproperties.com, compass.com, har.com, sugarlandtxhome.com, vantagerec.com, txpremiermortgage.com, thewoodlands.guide, houstonmethodist.org, mcgovernallergy.com, abc13.com, pollen.day, en.wikipedia.org.\n\n---\n\n## (a) AREAS — 11 places, all municipalities or recognized neighborhoods\n\n**Suburbs / separate cities**\n\n| Area | Position relative to Houston | Source support |\n|---|---|---|\n| **Katy** | 30 miles west of downtown; ~40 min to downtown, 15 min to the Energy Corridor | click2houston |\n| **Sugar Land** | Southwest of Houston | Brookfield Residential |\n| **Pearland** | 15 miles south of downtown along Highway 288 | texasrealestatesource |\n| **The Woodlands** | About 28 miles north of Houston | Brookfield Residential |\n| **League City** | Southeast, on Galveston Bay with boating and beach access | texasrealestatesource |\n| **Missouri City** | Southwest, adjacent to Sugar Land — the First Colony community overlaps into it | vantagerec, har.com |\n| **Fulshear** | West/far-west, described as the \"country living\" end of the metro | texasrealestatesource |\n\n**Neighborhoods inside the City of Houston**\n\n| Area | Position | Source support |\n|---|---|---|\n| **The Heights** (also written *Greater Heights*) | Inner Loop, northwest of downtown; one of Houston's oldest neighborhoods | diggz, cubesmart |\n| **Montrose** | Inner Loop, between downtown and the Museum District; adjoins River Oaks | houstonproperties, cubesmart |\n| **River Oaks** | Inner Loop, ~4 miles from downtown, between The Galleria and Montrose; bounded roughly Shepherd Dr to Willowick Rd and Buffalo Bayou to Westheimer Rd | houstonproperties, Compass |\n| **Memorial** (the Memorial Corridor) | West side, home of the CityCentre mixed-use development | cubesmart, Compass |\n\n*Deliberately excluded as sub-parts, not peers:* Cinco Ranch (inside Katy), First Colony and Telfair (inside Sugar Land), Shadow Creek Ranch (inside Pearland), Alden Bridge and the other villages (inside The Woodlands), Rice Military, Upper Kirby, Tanglewood, Museum District, Eastwood and Midtown appeared in results as Houston neighborhoods and are legitimate candidates, but I did not get enough on them to write pages and left them off rather than pad the list.\n\n---\n\n## (b) SUBDIVISIONS AND DEVELOPMENTS\n\n**Katy** — verified: **Cinco Ranch**, **Cane Island**, **Firethorne**, **Pine Mill Ranch** (click2houston); **Elyson** (Brookfield, har.com, texasrealestatesource); **Cross Creek Ranch** (texasrealestatesource, described as a Katy-area community). Cinco Ranch is the largest residential development in the Katy area, sitting on both sides of the Grand Parkway south of I-10, almost entirely in Fort Bend County. HAR lists 50 subdivisions *within* Cinco Ranch alone.\n\n**Sugar Land** — verified: **First Colony**, **Sweetwater** / **Sweetwater Estates**, **Telfair**, **Riverstone**, **New Territory**, **Sugar Creek**, **Commonwealth** (which itself contains **Sutton Forest**, **Sutton Park** and **Oxford**), and **Avalon** (sugarlandtxhome, har.com, vantagerec, byjoandco). First Colony is an umbrella master plan with more than 61 subdivisions under it.\n\n**Pearland** — verified: **Shadow Creek Ranch**, **Silverlake** (also written Silver Lake), **Silvercreek**, **Southern Trails**, **Green Tee Terrace**, **City Park** (houstonproperties, har.com, Wikipedia). Shadow Creek Ranch is west of SH-288 and south of Beltway 8. Note: **Pomona** and **Sedona Lakes** turned up on the same page but are in **Manvel**, not Pearland — don't file them under Pearland.\n\n**The Woodlands** — verified, and the local vocabulary is \"villages,\" not subdivisions: **Grogan's Mill**, **Panther Creek**, **Cochran's Crossing**, **Indian Springs**, **Alden Bridge**, **Sterling Ridge**, **College Park**, **Creekside Park**, **Carlton Woods**, plus **Town Center** (txpremiermortgage, sharonhartrealty, thewoodlandsrelocationguide, thewoodlands.guide). Nine residential villages in total. (Note: the two \"village order\" sources disagree on which village opened first, so don't publish founding order.)\n\n**Missouri City** — only one verified name: **Lakes of Brightwater** (har.com), plus the portion of **First Colony** that overlaps the city. Thin — needs another pass before it gets a page.\n\n**River Oaks** — **no subdivision names verified.** Compass listed \"Avalon Place\" and \"Briar Hollow\" as adjacent search areas, not as subdivisions inside River Oaks, so I am not reporting them as such.\n\n**The Heights, Montrose, Memorial, League City, Fulshear** — **no subdivision or sub-neighborhood names verified.** For The Heights I saw the neighborhood named only as a whole; for Memorial I found only **CityCentre**, which the source describes as a mixed-use development, not a residential subdivision. These five areas need a dedicated search round before any development names go on a website.\n\n---\n\n## (c) HOUSING AND LOCAL CONDITIONS\n\n### Houston as a whole\n\n**Climate.** Houston is subtropical, with most of Greater Houston in USDA plant hardiness zone 9 — long, hot, often muggy summers and mild winter lows that barely fall below freezing (Houston Methodist). There is no hard freeze season and no dry season to speak of.\n\n**Humidity and mold — the single biggest cleaning driver.** The Houston Methodist allergist quoted describes the humid environment as making Houston \"a hotspot for dust mite and mold allergens,\" and calls them perennial, year-round allergens. McGovern Allergy adds that high humidity, frequent rainfall and warm temperatures let mold thrive, that it grows in hidden places rather than only obvious ones, and that air conditioners themselves can harbor mold without regular maintenance; they recommend holding indoor humidity at 30–50%. ABC13 reported mold spore counts across southeast Texas hitting the extreme category at the end of January, driven by damp, foggy mornings — i.e. mold peaks in *winter* here, not summer.\n\n> **What it means for cleaning:** bathrooms never fully dry out, so grout, caulk lines, shower glass and window tracks discolour faster than owners expect and need scrubbing on a shorter cycle than in a dry climate. Closets, under-sink cabinets and any room behind a closed door hold moisture. Dust-mite load in soft surfaces is a year-round problem, not seasonal — mattresses, upholstery and drapes matter more here. Because AC runs nearly all year and the units themselves can hold mold, supply and return vents, registers and the surrounding ceiling get visibly dirty and are worth listing as an add-on. Winter is not a slow, clean season in Houston — late January is a mold peak.\n\n**Pollen.** Houston's season runs nearly the whole year (pollen.day). Tree pollen starts as early as December; mountain cedar drives \"cedar fever\" in January; oak, pine, ash, elm, pecan and mulberry peak February through April, and oak alone can visibly blanket the city in yellow. Grass pollen — Bermuda, Johnson, Bahia, ryegrass — takes over from late April through summer into early fall, with Bermuda producing symptoms into October. Alternaria and Cladosporium moulds run year-round alongside dust mites and urban ozone.\n\n> **What it means for cleaning:** February–April is the visible-yellow-film season on sills, entry floors, ceiling fans and anything near a door. Allergy-driven demand is real and it is not confined to spring — sell recurring service on the basis that there is no month without an airborne load.\n\n**Not found — do not publish these.** I found **nothing** in these searches on: typical Houston foundation type (slab-on-grade is widely assumed but I did not verify it), typical flooring, the age and construction of the city's general housing stock, hard-water/mineral-scale conditions, or coastal salt air. All of that is genuinely useful copy and all of it needs its own search round. Road salt, desert dust, blowing sand and wildfire smoke did not appear in any result and I would not expect them to apply here.\n\n### Area by area\n\n**Katy.** Cinco Ranch opened in 1991 and has held its appeal for 30-plus years; most homes there have four to five bedrooms and brick construction is the norm (texasrealestatesource). Elyson is a 3,600-acre development of roughly 1,500 new-construction homes around private lakes and greenbelts, with typical floorplans around 2,800 sq ft and lots big enough for backyard pools. Firethorne has been building since 2005 with construction still ongoing, on 1,400 acres with 150 acres of parks and lakes. → *Large, HOA-governed, gate-and-amenity communities; 2,800 sq ft and up with four to five bedrooms means multi-bathroom, multi-storey jobs and longer crew hours. Backyard pools and lake/greenbelt frontage mean tracked-in grass and pool water at back doors. Newer stock means fewer deferred-maintenance surprises but more glass and more hard-surface floor.*\n\n**Sugar Land.** First Colony spans 9,700 acres with over 60,000 residents and nearly 14,000 homes, 1,700 apartments, 750 townhomes and 169 condos, across 61-plus subdivisions (vantagerec). Sweetwater is an upscale golf-course neighborhood of roughly 570 households, built around Sweetwater Country Club, and belongs to the First Colony HOA with its ten pools (sugarlandtxhome). Telfair is one of Sugar Land's newest neighborhoods with 250-plus acres of parks and lakes. → *A single HOA umbrella covering tens of thousands of homes is a referral network — one satisfied street in First Colony reaches a lot of similar households. Housing type ranges from condo and townhome to golf-course estate, so quote ranges have to be wide. Golf-course frontage means turf chemicals and clippings at entryways.*\n\n**Pearland.** Most residential areas sit inside planned communities governed by HOAs that maintain neighborhood standards (houstonproperties). Shadow Creek Ranch covers 3,500 acres on a lake theme, roughly 10 miles from the Texas Medical Center, and was built out by a long roster of production builders including Perry, Meritage, Coventry, Westin, Ashton Woods and D.R. Horton (har.com, Wikipedia). → *Production-builder stock means repeating floorplans — a crew that learns one Shadow Creek plan can price the next one accurately. The lake-and-canal layout across 3,500 acres adds standing water and humidity right at the property line. Proximity to the Medical Center points at shift-working medical households, which favours keyed/coded access and flexible scheduling.*\n\n**The Woodlands.** Nine villages of very different ages: Grogan's Mill was founded in 1974 and now holds over 12,000 residents, while College Park and Creekside Park are among the newer sections (txpremiermortgage). The area is known for heavy tree cover, parks and nature trails (Brookfield). → *Age spread matters — a 1970s Grogan's Mill house and a Creekside Park house are different cleaning jobs. The defining local condition is the tree canopy: dense shade keeps exteriors, patios and north-facing rooms damp, and leaf litter and pollen come in on shoes from the trail network. Sell the villages by name; residents identify by village, not by \"The Woodlands.\"*\n\n**River Oaks.** Described as Houston's first master-planned community, spanning more than 1,100 acres, built around River Oaks Boulevard and the country club, with oversized traditional American homes by architects including John Staub and Birdsall P. Briscoe, alongside gated condos and townhouses (houstonproperties, cubesmart, diggz). → *Large historic estates with period detail — this is detail-cleaning work, not square-footage work: original millwork, stone, wood floors and antique surfaces that need specified products. Expect gated access and staff coordination. The mature oak canopy the neighborhood is named for drops constant leaf and pollen litter.*\n\n**The Heights.** One of Houston's oldest neighborhoods (diggz); demand and prices for homes there and in Montrose are consistently rising (cubesmart). → *Old inner-Loop housing implies renovation dust, original wood floors and small-lot street parking — but I did not verify the era, size or construction of Heights housing, so nothing more specific should be written yet.*\n\n**Montrose.** Inner Loop, high-demand, mixed housing described only in general terms in what I found. → *Insufficient verified detail for area-specific copy.*\n\n**Memorial.** The Memorial Corridor is on the west side and has been redeveloping toward more residential use, with CityCentre producing a range of new residential options (cubesmart). → *Suggests a newer condo/townhome component alongside established housing, but the established housing itself was not described in any result I got.*\n\n**League City.** Waterfront living with boating, fishing and beach access on Galveston Bay (texasrealestatesource). → *Bay-front and boat-owning households mean salt exposure on glass and exterior surfaces and sand tracked indoors — though note the coastal-salt-air point is my inference from the waterfront description, not something a source stated. Verify before it goes on a page.*\n\n**Missouri City / Fulshear.** Fulshear is characterised only as the \"country living\" end of the metro. Neither area produced housing-stock detail. → *No area-specific conditions verified.*\n\n### Background only — never for the website\n\nUS News 2025–2026 rankings placed Pearland #3 and League City #6 in the US (texasrealestatesource). Most Houston suburbs show median home prices between $300K and $600K, with the range running from the $200s to over $2 million; Cinco Ranch homes list from the $400s to the $800s with some above $1–2 million (texasrealestatesource). One older roundup cites a Katy median of $208,700 (extraspace) — that conflicts with the figures above and looks stale. Pearland's combined property tax rate is about 2.13%; Katy-area community rates were quoted at 2.71%–3.54% (houstonproperties, har.com). This says the market can carry recurring residential service at professional rates across all eleven areas. **I found no flood, crime or poverty data in these searches.**\n\n---\n\n## (d) ZIP CODES — NOT DELIVERED\n\n**I could not research this and am not supplying it.** My search budget was exhausted before I could reach an authoritative postal or municipal listing, and Houston ZIP codes are exactly the kind of item that looks plausible when invented and is wrong. The only ZIP that appeared anywhere in my results was **77584**, cited repeatedly as Shadow Creek Ranch — and that is **Pearland, not the City of Houston**, so it does not belong in a Houston list.\n\nThis needs one clean search against a USPS or City of Houston source, filtering out PO-box-only and non-residential codes.\n\n## (e) KEYWORDS — NOT DELIVERED\n\n**I ran no searches on this and have nothing sourced to report.** I could write out the obvious families — house cleaning, maid service, deep cleaning, move-out cleaning — but the whole point of the item is to capture the *local* phrasing that actually shows up in Houston search results and competitor page titles, and I have no evidence of what that is. Guessing here would defeat the purpose.\n\n---\n\n### To close the gaps, the next session needs\n1. An authoritative Houston ZIP listing (USPS / City of Houston) — section (d).\n2. A competitor-title and search-suggestion sweep for Houston cleaning terms — section (e).\n3. Subdivision names for **The Heights, Montrose, Memorial, River Oaks, League City, Fulshear**, and more than one for **Missouri City**.\n4. Houston housing-stock basics: foundation type, flooring, typical build era, plus water hardness and any coastal salt-air effect — the missing half of the citywide conditions section.",
   "research": {
     "suburbs": [
       {
         "name": "Katy",
-        "slug": "house-cleaning-katy",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "The Woodlands",
-        "slug": "cleaning-services-the-woodlands",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "slug": "katy",
+        "subdivisions": [
+          "Cinco Ranch",
+          "Cane Island",
+          "Firethorne",
+          "Pine Mill Ranch",
+          "Elyson",
+          "Cross Creek Ranch"
+        ],
+        "housingCharacter": "Large HOA-governed master-planned communities: Cinco Ranch opened in 1991 with most homes having four to five bedrooms and brick construction the norm; Elyson is a 3,600-acre development of roughly 1,500 new-construction homes with typical floorplans around 2,800 sq ft, and Firethorne has been building since 2005 on 1,400 acres with construction still ongoing.",
+        "conditions": [
+          {
+            "condition": "Homes of 2,800 sq ft and up with four to five bedrooms in gate-and-amenity communities",
+            "implication": "Multi-bathroom, multi-storey jobs that require longer crew hours",
+            "copySafe": true
+          },
+          {
+            "condition": "Backyard pools and lake/greenbelt frontage",
+            "implication": "Tracked-in grass and pool water at back doors",
+            "copySafe": true
+          },
+          {
+            "condition": "Newer housing stock with lots of glass and hard-surface floor",
+            "implication": "Fewer deferred-maintenance surprises but more glass and hard floor to clean",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Sugar Land",
-        "slug": "cleaning-service-sugar-land",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Cinco Ranch",
-        "slug": "cinco-ranch-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Missouri City",
-        "slug": "house-cleaning-missouri-city",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Spring",
-        "slug": "cleaning-services-spring",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "slug": "sugar-land",
+        "subdivisions": [
+          "First Colony",
+          "Sweetwater",
+          "Sweetwater Estates",
+          "Telfair",
+          "Riverstone",
+          "New Territory",
+          "Sugar Creek",
+          "Commonwealth",
+          "Sutton Forest",
+          "Sutton Park",
+          "Oxford",
+          "Avalon"
+        ],
+        "housingCharacter": "First Colony is an umbrella master plan spanning 9,700 acres with over 60,000 residents and nearly 14,000 homes, 1,700 apartments, 750 townhomes and 169 condos across 61-plus subdivisions; Sweetwater is an upscale golf-course neighborhood of roughly 570 households built around Sweetwater Country Club, and Telfair is one of Sugar Land's newest neighborhoods with 250-plus acres of parks and lakes.",
+        "conditions": [
+          {
+            "condition": "A single HOA umbrella covering tens of thousands of similar households",
+            "implication": "Strong referral network — one satisfied street in First Colony reaches many comparable homes",
+            "copySafe": true
+          },
+          {
+            "condition": "Housing ranges from condo and townhome to golf-course estate",
+            "implication": "Quote ranges have to be wide to cover the spread of home types",
+            "copySafe": true
+          },
+          {
+            "condition": "Golf-course frontage",
+            "implication": "Turf chemicals and clippings tracked in at entryways",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Pearland",
-        "slug": "cleaning-service-pearland",
-        "subdivisions": [],
-        "housingCharacter": "",
+        "slug": "pearland",
+        "subdivisions": [
+          "Shadow Creek Ranch",
+          "Silverlake",
+          "Silvercreek",
+          "Southern Trails",
+          "Green Tee Terrace",
+          "City Park"
+        ],
+        "housingCharacter": "Most residential areas sit inside planned communities governed by HOAs that maintain neighborhood standards; Shadow Creek Ranch covers 3,500 acres on a lake theme and was built out by production builders including Perry, Meritage, Coventry, Westin, Ashton Woods and D.R. Horton.",
+        "conditions": [
+          {
+            "condition": "Production-builder stock with repeating floorplans",
+            "implication": "A crew that learns one Shadow Creek plan can price the next one accurately",
+            "copySafe": true
+          },
+          {
+            "condition": "Lake-and-canal layout across 3,500 acres",
+            "implication": "Standing water and added humidity right at the property line",
+            "copySafe": true
+          },
+          {
+            "condition": "Roughly 10 miles from the Texas Medical Center, with shift-working medical households",
+            "implication": "Favours keyed or coded access and flexible scheduling",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "The Woodlands",
+        "slug": "the-woodlands",
+        "subdivisions": [
+          "Grogan's Mill",
+          "Panther Creek",
+          "Cochran's Crossing",
+          "Indian Springs",
+          "Alden Bridge",
+          "Sterling Ridge",
+          "College Park",
+          "Creekside Park",
+          "Carlton Woods",
+          "Town Center"
+        ],
+        "housingCharacter": "Nine residential villages of very different ages — Grogan's Mill was founded in 1974 and now holds over 12,000 residents, while College Park and Creekside Park are among the newer sections. The area is known for heavy tree cover, parks and nature trails.",
+        "conditions": [
+          {
+            "condition": "Wide age spread between villages",
+            "implication": "A 1970s Grogan's Mill house and a Creekside Park house are different cleaning jobs",
+            "copySafe": true
+          },
+          {
+            "condition": "Dense tree canopy and shade",
+            "implication": "Exteriors, patios and north-facing rooms stay damp",
+            "copySafe": true
+          },
+          {
+            "condition": "Extensive trail network and leaf litter",
+            "implication": "Leaf litter and pollen come in on shoes",
+            "copySafe": true
+          },
+          {
+            "condition": "Residents identify by village, not by \"The Woodlands\"",
+            "implication": "Sell and market the villages by name",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Missouri City",
+        "slug": "missouri-city",
+        "subdivisions": [
+          "Lakes of Brightwater",
+          "First Colony"
+        ],
+        "housingCharacter": "Southwest of Houston and adjacent to Sugar Land, with the First Colony community overlapping into the city; no further housing-stock detail was verified.",
         "conditions": []
       },
       {
-        "name": "Pecan Grove",
-        "slug": "pecan-grove-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Fulshear",
-        "slug": "house-cleaning-fulshear",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "The Heights",
-        "slug": "cleaning-services-the-heights",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "River Oaks",
-        "slug": "cleaning-service-river-oaks",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Montrose",
-        "slug": "montrose-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "name": "Memorial",
+        "slug": "memorial",
+        "subdivisions": [
+          "CityCentre"
+        ],
+        "housingCharacter": "The Memorial Corridor on the west side has been redeveloping toward more residential use, with CityCentre — a mixed-use development — producing a range of new residential options; the established housing itself was not described.",
+        "conditions": [
+          {
+            "condition": "A newer condo and townhome component alongside established housing",
+            "implication": "Mixed job types between compact new units and older established homes",
+            "copySafe": true
+          }
+        ]
       }
     ],
-    "zips": [
-      "77002",
-      "77003",
-      "77004",
-      "77005",
-      "77006",
-      "77007",
-      "77008",
-      "77009",
-      "77019",
-      "77023",
-      "77024",
-      "77025",
-      "77027",
-      "77035",
-      "77036",
-      "77055",
-      "77056",
-      "77057",
-      "77063",
-      "77070",
-      "77077",
-      "77079",
-      "77080",
-      "77084",
-      "77095",
-      "77096",
-      "77098"
+    "conditions": [
+      {
+        "condition": "Subtropical climate, with most of Greater Houston in USDA plant hardiness zone 9 — long, hot, muggy summers and mild winter lows barely below freezing, with no hard freeze season and no dry season",
+        "implication": "No seasonal break in soil load; cleaning demand and moisture conditions run all twelve months",
+        "copySafe": true
+      },
+      {
+        "condition": "High humidity makes Houston a hotspot for dust mite and mold allergens, which are perennial and year-round; high humidity, frequent rainfall and warm temperatures let mold thrive in hidden places, and indoor humidity is best held at 30–50%",
+        "implication": "Bathrooms never fully dry out, so grout, caulk lines, shower glass and window tracks discolour faster than owners expect and need scrubbing on a shorter cycle than in a dry climate; closets, under-sink cabinets and any room behind a closed door hold moisture; dust-mite load in mattresses, upholstery and drapes is a year-round problem",
+        "copySafe": true
+      },
+      {
+        "condition": "Air conditioning runs nearly all year and the units themselves can harbor mold without regular maintenance",
+        "implication": "Supply and return vents, registers and the surrounding ceiling get visibly dirty and are worth listing as an add-on service",
+        "copySafe": true
+      },
+      {
+        "condition": "Mold spore counts across southeast Texas hit the extreme category at the end of January, driven by damp, foggy mornings — mold peaks in winter here, not summer",
+        "implication": "Winter is not a slow, clean season in Houston; late January is a mold peak and should be worked accordingly",
+        "copySafe": true
+      },
+      {
+        "condition": "Pollen season runs nearly the whole year: tree pollen starts as early as December, mountain cedar drives cedar fever in January, oak, pine, ash, elm, pecan and mulberry peak February through April with oak visibly blanketing the city in yellow, and grass pollen — Bermuda, Johnson, Bahia, ryegrass — takes over from late April through summer into early fall, with Bermuda producing symptoms into October",
+        "implication": "February–April is the visible-yellow-film season on sills, entry floors, ceiling fans and anything near a door; sell recurring service on the basis that there is no month without an airborne load",
+        "copySafe": true
+      },
+      {
+        "condition": "Alternaria and Cladosporium moulds run year-round alongside dust mites and urban ozone",
+        "implication": "Allergy-driven demand is real and is not confined to spring, supporting year-round recurring plans",
+        "copySafe": true
+      }
     ],
-    "keywords": [
-      "house cleaning services houston",
-      "house cleaning services houston, tx",
-      "maid service houston",
-      "maid services houston",
-      "house cleaning houston tx",
-      "cleaning company houston tx",
-      "home cleaners houston tx",
-      "home cleaning services houston",
-      "deep cleaning",
-      "deep cleaning services",
-      "top-to-bottom deep clean",
-      "move-out cleaning",
-      "move-in cleaning",
-      "move-in/move-out cleaning",
-      "make ready for sale cleaning",
-      "home sale prep cleaning",
-      "post-renovation cleaning",
-      "post-construction cleanup",
-      "recurring cleaning",
-      "weekly, biweekly, or monthly",
-      "one-time cleaning",
-      "appliance and cabinet deep cleaning",
-      "office cleaning",
-      "small business cleaning",
-      "short-term-rental turnover cleaning"
-    ],
-    "conditions": []
+    "zips": [],
+    "keywords": []
   }
 }
