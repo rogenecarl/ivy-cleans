@@ -176,7 +176,8 @@ SUBSTANCE — this is what separates a page worth reading from filler
 - Write about cleaning, always. The local detail is the reason a room gets dirty; the sentence still has to end up at what we do about it.
 
 HARD LIMITS — inventing any of these is a failure, not a stylistic slip
-- NEVER state or invent a phone number, street address, email address, website, price, rate, hourly figure, discount, number of years in business, staff count, employee names, award, certification, license number, review count, or star rating. The website inserts the real phone number itself. If a sentence seems to need a number, write the sentence without one.
+- NEVER state or invent a phone number, street address, email address, website, price, rate, hourly figure, discount, number of years in business, staff count, employee names, award, certification, license number, review count, or star rating.
+- The one exception: anything given to you under FACTS ABOUT THIS BRANCH. Those were entered by the owner, they are true, and you use them exactly as written. The prohibition above exists to stop invention, not to stop you stating a fact you were handed. The website inserts the real phone number itself. If a sentence seems to need a number, write the sentence without one.
 - NEVER promise a specific response time, arrival window, availability, or money-back guarantee.
 - NEVER name a competitor, and never claim a verdict that would have to come from outside the company — a ranking, an award, a certification, a vote, a "best of" listing. Confident claims about our OWN standards and how we work are welcome and wanted; claims that someone else judged us are not.
 - Use only the facts given to you in the user message. Do not add suburbs, ZIP codes, or landmarks that were not supplied to you, and never alter the spelling of the ones that were.
@@ -220,6 +221,35 @@ Mark a condition copySafe: false when it is background for deciding whether to w
  * Prompt builders
  * ──────────────────────────────────────────────────────────────────────────── */
 
+
+/**
+ * Renders the operator's market facts, or '' when there are none.
+ *
+ * Unlike notesBlock, which is DATA the model may use, this is a set of facts
+ * the model is REQUIRED to use. That distinction is the whole value of the
+ * block: anyone can generate a description of Katy, and only this branch can
+ * say that Maria's crew has cleaned 340 homes there since March 2024.
+ *
+ * Nothing here is invented, so nothing here needs hedging — the instruction
+ * is to use the numbers as given, not to round them up, and not to invent a
+ * companion fact to sit beside a real one.
+ */
+function opsBlock(facts: Facts): string {
+  const o = facts.ops
+  if (!o) return ''
+  const lines: string[] = []
+  if (o.servingSince) lines.push(`- We have served ${facts.city} since ${o.servingSince}. Say it once, plainly.`)
+  if (o.crewLead) lines.push(`- The crew here is led by ${o.crewLead}. Use the first name once, naturally — never invent a surname.`)
+  if (o.crewSize) lines.push(`- The crew is ${o.crewSize} people.`)
+  if (o.homesCleaned) lines.push(`- We have cleaned ${o.homesCleaned.toLocaleString()} homes in this market. Use the number as written; do not round it up.`)
+  if (o.reviews?.length) {
+    lines.push('- Real reviews from customers in this market. Quote at most two, VERBATIM, attributed by first name and area:')
+    for (const r of o.reviews) lines.push(`    "${r.quote}" — ${r.firstName}, ${r.area}`)
+  }
+  if (lines.length === 0) return ''
+  return `\nFACTS ABOUT THIS BRANCH — every one of these is true, and you must use each one that appears here. Do not embellish them, do not round them, and do not invent a companion fact to sit beside them.\n${lines.join('\n')}\n`
+}
+
 /** Renders the operator's free-text notes, or '' when there are none. */
 function notesBlock(facts: Facts): string {
   const notes = facts.notes?.trim()
@@ -236,7 +266,7 @@ function numberedExample(paragraphs: string[]): string {
 // DataForSEO supplies them would empty both prompts' steering. Delete this
 // part, and this comment, in Phase 5.
 function keywordsPart(city: string): string {
-  return `(e) KEYWORDS — the search phrases people in this area actually type when they are looking to hire a cleaner, in the family of "cleaning services ${city}": house cleaning, maid service, deep cleaning, move-out cleaning, and any local phrasing that shows up in search results or competitor titles.`
+  return `(d) KEYWORDS — the search phrases people in this area actually type when they are looking to hire a cleaner, in the family of "cleaning services ${city}": house cleaning, maid service, deep cleaning, move-out cleaning, and any local phrasing that shows up in search results or competitor titles.`
 }
 
 /**
@@ -246,8 +276,8 @@ function keywordsPart(city: string): string {
  */
 export function buildResearchPrompt(facts: Facts): string {
   return `Research the local market for a residential cleaning company that serves ${facts.city}, ${facts.stateName}. Search the web for each part below and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
-${notesBlock(facts)}
-Report these five things:
+${opsBlock(facts)}${notesBlock(facts)}
+Report these four things:
 
 (a) AREAS — 8 to 12 real, named places a cleaning company based in ${facts.city} would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to ${facts.city}.
 
@@ -264,8 +294,6 @@ Report these five things:
   For every condition you report, say what it MEANS for cleaning a home. "Humid subtropical climate" on its own is not useful; "humidity keeps bathrooms damp enough that grout and shower glass discolour faster than owners expect" is.
 
   Report income, poverty, flood or crime data ONLY if it is relevant to whether this is a workable market, and mark anything of that kind clearly as background — it will never appear on the website.
-
-(d) ZIP CODES — the main residential ZIP codes of ${facts.city} itself, about 15 to 25 of them, as five-digit strings. Use an authoritative listing (a postal-service or municipal source), not a guess, and skip PO-box-only and non-residential codes.
 
 ${keywordsPart(facts.city)}
 
@@ -295,7 +323,7 @@ export function buildResearchStructuringPrompt(
 
   return `Below are research findings for ${facts.city}, ${facts.stateName}. Convert them into the required JSON.
 
-FOUR ARRAYS, ALL OF THEM. The findings are written in lettered parts and every part has somewhere to go: (a) and (b) become suburbs and their subdivisions, (c) becomes housingCharacter plus the two condition arrays, (d) becomes zips. Work through the findings part by part and fill each array from its part. A field left empty because you stopped reading is the one failure this task can produce — you are transcribing, and everything present in the findings must come out the other side.
+EVERY ARRAY, ALL OF THEM. The findings are written in lettered parts and every part has somewhere to go: (a) and (b) become suburbs and their subdivisions, (c) becomes housingCharacter plus the two condition arrays. Work through the findings part by part and fill each array from its part. A field left empty because you stopped reading is the one failure this task can produce — you are transcribing, and everything present in the findings must come out the other side.
 
 suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 they contain). A named subdivision inside an area is never its own entry; it goes in that area's subdivisions array. Each entry has:
   name: the place name exactly as the findings write it, e.g. "St. Louis Park", "Sugar Land".
@@ -308,10 +336,6 @@ conditions — the METRO-WIDE conditions, the ones true across ${facts.city} rat
   This array is separate from the per-area conditions above and is NOT optional when the findings contain metro-wide material. Climate, humidity, seasons, air conditioning, pollen, hard water, road salt, dust, the dominant construction and flooring of the metro — all of it belongs here.
   Returning [] tells every downstream page that ${facts.city} has no city-wide character. If the findings genuinely contain none, return [] — but re-read part (c) first, because the brief asks for it explicitly and its absence is unusual.
 
-zips — the five-digit ZIP codes from the findings, as strings, ascending, deduplicated.
-  The findings report these in part (d). Extract every one of them; the brief asks for 15 to 25.
-  Returning [] removes the ZIP list from the site entirely. If the findings genuinely contain no five-digit codes, return [] — but check part (d) before you do.
-
 ${keywordsSection}
 
 FINDINGS
@@ -321,13 +345,17 @@ ${findings}`
 /** Front page: hero paragraphs, service intro, five cards. */
 export function buildFrontPrompt(facts: Facts, research: ResearchOutput): string {
   const suburbList = research.suburbs.map((s) => s.name).join(', ')
-  const keywordList = research.keywords.map((k) => `- ${k}`).join('\n')
+  // Omit the section entirely when empty rather than emitting a header with
+  // nothing under it — a bare heading reads to the model as missing data it
+  // should fill in, which is how invention starts.
+  const keywordSection =
+    research.keywords.length === 0
+      ? ''
+      : `\nSEARCH PHRASES people here use to find a cleaner. Write copy that would genuinely answer these searches — never quote or list them:\n${research.keywords.map((k) => `- ${k}`).join('\n')}\n`
 
   return `Write the front-page copy for the Ivy Cleans website serving ${facts.city}, ${facts.stateName}.
-${notesBlock(facts)}
-SEARCH PHRASES people here use to find a cleaner. Write copy that would genuinely answer these searches — never quote or list them:
-${keywordList}
-
+${opsBlock(facts)}${notesBlock(facts)}
+${keywordSection}
 AREAS this branch serves, for your awareness only — do not list them in this copy, they have their own section on the page:
 ${suburbList}
 
@@ -366,13 +394,13 @@ ${numberedExample(MPLS_SERVICE_INTRO)}
 
 /** Deep-cleaning page: the "What is Deep House Cleaning?" paragraph. */
 export function buildDeepPrompt(facts: Facts, research: ResearchOutput): string {
-  const keywordList = research.keywords.slice(0, 8).map((k) => `- ${k}`).join('\n')
+  const keywordSection =
+    research.keywords.length === 0
+      ? ''
+      : `\nSearch phrases for context — never quote them:\n${research.keywords.slice(0, 8).map((k) => `- ${k}`).join('\n')}\n`
 
   return `Write the "What is Deep House Cleaning?" paragraph for the Ivy Cleans website serving ${facts.city}, ${facts.stateName}.
-${notesBlock(facts)}
-Search phrases for context — never quote them:
-${keywordList}
-
+${opsBlock(facts)}${notesBlock(facts)}${keywordSection}
 whatIs — a single paragraph of 80 to 110 words that explains what a deep clean actually is: how it goes beyond a regular visit, that it reaches every surface, floor, carpet and piece of furniture, and that it lifts out the dirt, dust and allergens an ordinary clean leaves behind — ending on a healthier, more comfortable home.
 
 Give it one angle that belongs to ${facts.city}: the local reason homes there accumulate what a deep clean removes — the humidity and mold pressure, the months sealed up against the cold, the pollen or desert dust or blown sand, the age and construction of the housing stock. One or two sentences of that, woven in, not bolted on.
@@ -446,7 +474,7 @@ export function buildSuburbPrompt(
       : `\n\nLOCAL CONDITIONS, and what each one means for cleaning a house. The ones listed first are specific to ${suburb.name}; the rest are true across ${facts.city}. Lead with the specific ones:\n${conditionLines}`
 
   return `Write the area-page copy for ${suburb.name}, which this ${facts.city} branch serves.
-${notesBlock(facts)}
+${opsBlock(facts)}${notesBlock(facts)}
 NAMED DEVELOPMENTS AND NEIGHBORHOODS in ${suburb.name}. Use at least three of these by name. Use only these — never add one:
 ${suburb.subdivisions.map((s) => `- ${s}`).join('\n')}${housingSection}${conditionsSection}
 

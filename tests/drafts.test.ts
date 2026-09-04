@@ -840,7 +840,13 @@ describe('drafts store', () => {
           expect(Array.isArray(draft.research!.conditions)).toBe(true)
           expect('landmarks' in draft.research!).toBe(false)
 
+          // Supply the copy this test needs rather than depending on whatever
+          // state the real draft happens to be in. These sidecars are live
+          // working files -- regenerating a stage legitimately clears the ones
+          // downstream of it -- so a test that assumed a complete draft would
+          // break every time someone actually used the pipeline.
           draft.research!.suburbs = []
+          draft.sections = { ...fullSections(), ...draft.sections }
           await saveDraft(key, draft)
 
           await finalizeDraft(key)

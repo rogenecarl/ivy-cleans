@@ -26,6 +26,60 @@ import { z } from 'zod'
  * to build a market, and grotesque in cleaning copy. Every prompt that
  * receives conditions filters on this flag before rendering.
  */
+/**
+ * Per-market operations facts. Entered by a human in the admin form, never
+ * researched, never generated.
+ *
+ * This is the one input a competitor cannot reproduce. Anyone can generate a
+ * good description of Katy; nobody else can state that Maria's crew has
+ * cleaned 340 homes there since March 2024. That is the difference between a
+ * page about a town and a business that works in it.
+ *
+ * Every field is optional because a new market has none of them yet — but a
+ * page that RECEIVED a fact and did not use it is a failed page, and the
+ * quality validator enforces that. Optional means "may be absent", never
+ * "may be ignored".
+ *
+ * `zips` sits here rather than in ResearchSchema because it is not a research
+ * question. "Which ZIP codes exist near Houston" is answerable by search;
+ * "which ZIP codes does this branch serve" is a decision only the owner can
+ * make, and a wrong one is a checkable error on a live page. Same reasoning
+ * as facts.ts deriving the phone number in code rather than through a prompt.
+ *
+ * EXEMPT from this file's no-min/max rule, and safe to be: that rule exists
+ * because the structured-output API rejects those constraints, and this
+ * schema is never sent as an output format. It validates what a human typed.
+ * If it is ever reused as a model output format, strip the constraints first.
+ */
+export const MarketOpsSchema = z
+  .object({
+    /** ZIP codes this branch actually serves. Operator-entered, never modelled. */
+    zips: z.array(z.string()).optional(),
+    /** "2024-03" — the month you started serving this market. */
+    servingSince: z.string().optional(),
+    /** First name only. "Maria". Never a surname. */
+    crewLead: z.string().optional(),
+    crewSize: z.number().int().positive().optional(),
+    /** Rounded DOWN to a number you can defend if asked. */
+    homesCleaned: z.number().int().nonnegative().optional(),
+    /** Real reviews from customers IN this market. */
+    reviews: z
+      .array(
+        z
+          .object({
+            quote: z.string(),
+            firstName: z.string(),
+            /** The area they live in, e.g. "Cinco Ranch". */
+            area: z.string(),
+            date: z.string().optional(),
+          })
+          .strict()
+      )
+      .optional(),
+  })
+  .strict()
+export type MarketOps = z.infer<typeof MarketOpsSchema>
+
 export const ConditionSchema = z
   .object({
     condition: z.string(),

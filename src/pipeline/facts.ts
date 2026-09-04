@@ -14,6 +14,8 @@
  * out of step. Keyed on a normalised form (lowercased, whitespace collapsed)
  * so "florida", "FLORIDA" and " Florida " all land on the same entry.
  */
+import type { MarketOps } from './schemas'
+
 const CODE_BY_NAME: Record<string, string> = {}
 
 /** Lowercase, collapse internal runs of whitespace, trim. "  new   MEXICO "
@@ -112,6 +114,8 @@ export interface DeriveFactsInput {
   phoneDigits: string
   address?: string
   notes?: string
+  /** Operator-entered market facts. Passes through untouched — see Facts.ops. */
+  ops?: MarketOps
 }
 
 export interface Facts {
@@ -123,6 +127,17 @@ export interface Facts {
   phoneHref: string
   address?: string
   notes?: string
+  /**
+   * Operator-entered facts about this market: who leads the crew, how long
+   * we have served it, how many homes we have cleaned, real reviews, and the
+   * ZIP codes we actually serve.
+   *
+   * Travels the same road as the phone number — a human typed it, so it is
+   * fact and the model never touches it. Prompts are REQUIRED to use every
+   * field that is present; the quality validator fails a page that received
+   * one and ignored it.
+   */
+  ops?: MarketOps
 }
 
 /** Formats a validated 10-digit string as `305-555-0142`. */
@@ -136,7 +151,7 @@ function formatDisplay(digits: string): string {
 }
 
 export function deriveFacts(input: DeriveFactsInput): Facts {
-  const { phoneDigits, address, notes } = input
+  const { phoneDigits, address, notes, ops } = input
   const city = input.city.trim()
 
   if (!/^\d{10}$/.test(phoneDigits)) {
@@ -165,6 +180,7 @@ export function deriveFacts(input: DeriveFactsInput): Facts {
 
   if (address !== undefined) facts.address = address
   if (notes !== undefined) facts.notes = notes
+  if (ops !== undefined) facts.ops = ops
 
   return facts
 }

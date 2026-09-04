@@ -945,7 +945,89 @@ describe('pipeline stages', () => {
     })
   })
 
-  describe('SYSTEM_BASE voice', () => {
+  describe('the ops block', () => {
+  const withOps = () =>
+    deriveFacts({
+      city: 'Ztest Stubville',
+      state: 'MN',
+      phoneDigits: '6125550142',
+      ops: {
+        servingSince: '2024-03',
+        crewLead: 'Maria',
+        homesCleaned: 340,
+        zips: ['55401', '55402'],
+        reviews: [{ quote: 'They got the grout back.', firstName: 'Dana', area: 'North Stubville' }],
+      },
+    })
+
+  it('is absent entirely when the operator supplied nothing', () => {
+    const bare = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
+    expect(buildFrontPrompt(bare, fixtureResearch())).not.toMatch(/FACTS ABOUT THIS BRANCH/)
+  })
+
+  it('reaches every content prompt, not just one', () => {
+    const f = withOps()
+    const r = fixtureResearch()
+    const suburb = r.suburbs.find((s) => s.subdivisions.length > 0)!
+    for (const prompt of [
+      buildFrontPrompt(f, r),
+      buildDeepPrompt(f, r),
+      buildSuburbPrompt(f, r, suburb),
+    ]) {
+      expect(prompt).toMatch(/FACTS ABOUT THIS BRANCH/)
+      expect(prompt).toContain('Maria')
+      expect(prompt).toContain('340')
+    }
+  })
+
+  it('quotes a real review verbatim, attributed by first name and area', () => {
+    const p = buildFrontPrompt(withOps(), fixtureResearch())
+    expect(p).toContain('They got the grout back.')
+    expect(p).toContain('Dana, North Stubville')
+  })
+
+  it('tells the model not to round the numbers it was given', () => {
+    const p = buildFrontPrompt(withOps(), fixtureResearch())
+    expect(p).toMatch(/do not round/i)
+  })
+
+  it('does NOT put ZIP codes in a content prompt — they render as a list, not prose', () => {
+    // ops.zips exists so the operator can state coverage; it is page DATA,
+    // and the home page renders it directly. Feeding it to a writing prompt
+    // would invite the 27-ZIP sentence the home stage was deleted for.
+    const p = buildFrontPrompt(withOps(), fixtureResearch())
+    expect(p).not.toContain('55401')
+  })
+
+  it('SYSTEM_BASE carves the ops block out of the hard limits', () => {
+    // The limits forbid stating staff names and years in business, to stop
+    // invention. A fact the owner typed is not invented.
+    expect(SYSTEM_BASE).toMatch(/FACTS ABOUT THIS BRANCH/)
+    expect(SYSTEM_BASE).toMatch(/exists to stop invention/i)
+  })
+})
+
+describe('research brief no longer asks for ZIP codes', () => {
+  it('drops part (d) — a served-ZIP list is an operator decision, not a search result', () => {
+    const f = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
+    const p = buildResearchPrompt(f)
+    expect(p).not.toMatch(/ZIP/i)
+    expect(p).toMatch(/Report these four things/)
+  })
+})
+
+describe('empty keyword list', () => {
+  it('omits the search-phrase section rather than emitting a bare header', () => {
+    const f = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
+    const noKeywords = { ...fixtureResearch(), keywords: [] }
+    expect(buildFrontPrompt(f, noKeywords)).not.toMatch(/SEARCH PHRASES/)
+    expect(buildDeepPrompt(f, noKeywords)).not.toMatch(/Search phrases for context/)
+    // and still present when there ARE keywords
+    expect(buildFrontPrompt(f, fixtureResearch())).toMatch(/SEARCH PHRASES/)
+  })
+})
+
+describe('SYSTEM_BASE voice', () => {
   it('no longer points the model at the copy that does not rank', () => {
     // The old guide named two live Minneapolis sentences as the target
     // register. The model followed it faithfully -- Houston came back as
