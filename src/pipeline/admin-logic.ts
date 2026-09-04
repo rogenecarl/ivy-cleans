@@ -31,6 +31,7 @@ import {
   publishCity,
   saveDraft,
 } from '../content/drafts'
+import { isWrittenSlot, suburbSlots } from '../content/slots'
 import { getCity, revalidateCity } from '../content/store'
 import { validateCityContent } from '../content/validate'
 import type { CityContent } from '../content/types'
@@ -140,8 +141,40 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
  * than running the pipeline in a single request: each stage is its own short
  * request, which survives a serverless duration cap, a reload, and a retry.
  */
-export async function runStageLogic(key: string, stage: StageId): Promise<ActionResult> {
-  return attempt(() => runStage(makeClient(), key, stage))
+export async function runStageLogic(
+  key: string,
+  stage: StageId,
+  only?: string
+): Promise<ActionResult> {
+  return attempt(() => runStage(makeClient(), key, stage, only))
+}
+
+/**
+ * The areas the suburb stage still has to write, in order.
+ *
+ * The admin drives the suburb loop one area per request: twelve model calls
+ * inside a single request runs three to six minutes and a serverless function
+ * is killed long before that. The client needs the list to drive that loop,
+ * and it cannot know it before research has run.
+ *
+ * Already-written and un-writable areas are omitted, so the returned length is
+ * exactly the number of model calls left to pay for.
+ */
+export async function pendingSuburbsLogic(
+  key: string
+): Promise<{ ok: true; areas: { slug: string; name: string }[] } | { ok: false; error: string }> {
+  try {
+    const draft = await loadDraft(key)
+    const research = draft.research
+    if (!research) return { ok: true, areas: [] }
+    const areas = research.suburbs
+      .filter((s) => s.subdivisions.length > 0)
+      .filter((s) => !suburbSlots(s.slug).every((slot) => isWrittenSlot(draft.sections[slot])))
+      .map((s) => ({ slug: s.slug, name: s.name }))
+    return { ok: true, areas }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
 }
 
 /** Force a stage to run again. Research also clears front/home/deep — see stages.ts. */

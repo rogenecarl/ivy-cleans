@@ -38,6 +38,7 @@ import {
   listCities,
   publishLogic,
   regenerateLogic,
+  pendingSuburbsLogic,
   runStageLogic,
   updateSuburbsLogic,
   type ActionResult,
@@ -77,10 +78,24 @@ export async function createDraftAction(formData: FormData): Promise<void> {
   redirect(`${ADMIN_BASE}/generate/${result.key}`)
 }
 
-export async function runStageAction(key: string, stage: string): Promise<ActionResult> {
+export async function runStageAction(
+  key: string,
+  stage: string,
+  only?: string
+): Promise<ActionResult> {
   await requireAdmin()
   if (!isStageId(stage)) return { ok: false, error: `unknown stage "${stage}"` }
-  return runStageLogic(key, stage)
+  return runStageLogic(key, stage, only)
+}
+
+/**
+ * Which areas the suburb stage still owes, so the client can drive that loop
+ * one request per area. See pendingSuburbsLogic for why the loop is not
+ * server-side.
+ */
+export async function pendingSuburbsAction(key: string) {
+  await requireAdmin()
+  return pendingSuburbsLogic(key)
 }
 
 export async function regenerateAction(key: string, stage: string): Promise<ActionResult> {

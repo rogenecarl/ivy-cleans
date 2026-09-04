@@ -27,6 +27,7 @@ import {
   isStageId,
   listCities,
   normalizeSuburbs,
+  pendingSuburbsLogic,
   publishLogic,
   regenerateLogic,
   runStageLogic,
@@ -531,6 +532,42 @@ describe('updateSuburbsLogic — merge behaviour (feature 9 fix)', () => {
     const after = await loadDraft(KEY)
     expect(after.research!.suburbs[0].name).toBe('Cypress')
     expect(after.research!.suburbs[0].subdivisions).toEqual(KATY_RESEARCH.suburbs[0].subdivisions)
+  })
+})
+
+describe('pendingSuburbsLogic', () => {
+  const KEY = 'ztest-editville'
+
+  it('lists the areas the suburb stage still owes, so the client can drive one request each', async () => {
+    await freshDraft(KEY)
+    await runStageLogic(KEY, 'research')
+
+    const before = await pendingSuburbsLogic(KEY)
+    expect(before.ok).toBe(true)
+    if (!before.ok) return
+    expect(before.areas.length).toBeGreaterThan(0)
+    // every entry carries what the progress display needs
+    for (const a of before.areas) {
+      expect(typeof a.slug).toBe('string')
+      expect(typeof a.name).toBe('string')
+    }
+
+    // writing one area removes exactly that area from the list, so a resume
+    // pays for only what is left
+    const first = before.areas[0]
+    await runStageLogic(KEY, 'suburb', first.slug)
+
+    const after = await pendingSuburbsLogic(KEY)
+    expect(after.ok).toBe(true)
+    if (!after.ok) return
+    expect(after.areas.map((a) => a.slug)).not.toContain(first.slug)
+    expect(after.areas).toHaveLength(before.areas.length - 1)
+  })
+
+  it('returns an empty list before research has run rather than failing', async () => {
+    await freshDraft(KEY)
+    const r = await pendingSuburbsLogic(KEY)
+    expect(r).toEqual({ ok: true, areas: [] })
   })
 })
 

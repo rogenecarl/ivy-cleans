@@ -1169,6 +1169,48 @@ describe('pipeline stages', () => {
       expect(draft.sections[`suburb.${NORTH}.local`]).toBe(fixture.local)
     })
 
+    it('runs ONE area when given a slug, leaving the others untouched', async () => {
+      const client = newClient()
+      await runStage(client, KEY, 'suburb', NORTH)
+      const draft = await loadDraft(KEY)
+
+      for (const slot of suburbSlots(NORTH)) expect(draft.sections[slot]).toBeTruthy()
+      for (const slot of suburbSlots(MOCK_HOLLOW)) expect(draft.sections[slot]).toBeUndefined()
+      expect(client.calls).toEqual([`generate:${MODEL_KEYS.suburb(NORTH)}`])
+    })
+
+    it('does NOT mark the stage done until every area is written', async () => {
+      await runStage(newClient(), KEY, 'suburb', NORTH)
+      expect((await loadDraft(KEY)).done).not.toContain('suburb')
+
+      await runStage(newClient(), KEY, 'suburb', MOCK_HOLLOW)
+      expect((await loadDraft(KEY)).done).toContain('suburb')
+    })
+
+    it('rejects an area slug this city does not have', async () => {
+      await expect(runStage(newClient(), KEY, 'suburb', 'not-a-real-area')).rejects.toThrow(
+        /not-a-real-area/,
+      )
+    })
+
+    it('per-area runs and a whole-stage run reach the same result', async () => {
+      await runStage(newClient(), KEY, 'suburb', NORTH)
+      await runStage(newClient(), KEY, 'suburb', MOCK_HOLLOW)
+      const perArea = await loadDraft(KEY)
+
+      await resetDraft()
+      await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'suburb')
+      const wholeStage = await loadDraft(KEY)
+
+      for (const slug of [NORTH, MOCK_HOLLOW]) {
+        for (const slot of suburbSlots(slug)) {
+          expect(perArea.sections[slot]).toBe(wholeStage.sections[slot])
+        }
+      }
+      expect(perArea.done).toEqual(wholeStage.done)
+    })
+
     it('writes genuinely different copy per area, not one blob repeated', async () => {
       await runStage(newClient(), KEY, 'suburb')
       const draft = await loadDraft(KEY)

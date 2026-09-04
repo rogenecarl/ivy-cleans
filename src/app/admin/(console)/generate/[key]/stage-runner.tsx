@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import { finalizeAction, getProgressAction, runStageAction } from '../../actions'
+import { finalizeAction, getProgressAction, pendingSuburbsAction, runStageAction } from '../../actions'
 import { ADMIN_BASE } from '@/lib/admin-routes'
 import { SKILL_META } from '../../../skills-meta'
 import { ErrorText, Pill } from '../../../ui'
@@ -68,6 +68,12 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
   const [finalizePhase, setFinalizePhase] = useState<Phase | 'done'>('idle')
   const [finalizeError, setFinalizeError] = useState<string | null>(null)
   const [snapshot, setSnapshot] = useState<ProgressSnapshot | null>(null)
+  /*
+   * Per-area progress for the suburb stage. That stage makes one model call
+   * per area, and the client drives that loop (see below), so it is the only
+   * place that knows "8 of 12, writing Sugar Land" while it is happening.
+   */
+  const [areaProgress, setAreaProgress] = useState<{ done: number; total: number; name: string } | null>(null)
 
   /*
    * A single in-flight guard for the whole runner. React 19's dev-mode double
@@ -90,6 +96,29 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
     }
   }, [cityKey])
 
+  /*
+   * Walk the areas the suburb stage still owes, one request each. The list
+   * comes from the server because it depends on research, which has only just
+   * run. Areas already written are excluded, so a resume after a failure pays
+   * for exactly what is left.
+   */
+  const runSuburbAreas = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
+    const pending = await pendingSuburbsAction(cityKey)
+    if (!pending.ok) return { ok: false, error: pending.error }
+
+    const total = pending.areas.length
+    for (const [i, area] of pending.areas.entries()) {
+      setAreaProgress({ done: i, total, name: area.name })
+      const r = await runStageAction(cityKey, 'suburb', area.slug)
+      if (!r.ok) return r
+    }
+    setAreaProgress({ done: total, total, name: '' })
+
+    // No pending areas still has to reach the server: it is what marks the
+    // stage done when every area was already written on an earlier attempt.
+    return runStageAction(cityKey, 'suburb')
+  }, [cityKey])
+
   const run = useCallback(
     async (from: string[]) => {
       if (busy.current) return
@@ -101,12 +130,27 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
         for (const stage of stages) {
           if (completed.includes(stage.id)) continue
           setCurrent(stage.id)
-          const result = await runStageAction(cityKey, stage.id)
+
+          /*
+           * The suburb stage is driven ONE AREA PER REQUEST. Twelve areas is
+           * twelve sequential model calls; done server-side that is three to
+           * six minutes in a single request, and a serverless function is
+           * killed long before that. One area per request is ~20s, inside any
+           * platform limit, and it is also the only way the client can show
+           * which area is being written.
+           */
+          const result =
+            stage.id === 'suburb'
+              ? await runSuburbAreas()
+              : await runStageAction(cityKey, stage.id)
+
           if (!result.ok) {
             setCurrent(null)
+            setAreaProgress(null)
             setFailed({ stage: stage.id, message: result.error })
             return
           }
+          setAreaProgress(null)
           completed = [...completed, stage.id]
           setDone(completed)
         }
@@ -172,6 +216,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
         {stages.map((stage) => {
           const isDone = done.includes(stage.id)
           const isRunning = current === stage.id
+          const areas = isRunning && stage.id === 'suburb' ? areaProgress : null
           const isFailed = failed?.stage === stage.id
           const icon = isDone ? '✓' : isRunning ? '⏳' : isFailed ? '✗' : '•'
           const tone = isDone
@@ -231,6 +276,31 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                       </span>
                     </div>
                     <p className="text-[0.75rem] text-muted-foreground">{meta.tagline}</p>
+
+                    {/*
+                      The suburb stage is the only one that takes minutes, and
+                      before this it showed a spinner with no sign of movement
+                      for its whole run. The count comes from the client's own
+                      per-area loop, so it is accurate the moment it changes.
+                    */}
+                    {areas && areas.total > 0 && (
+                      <div className="mt-2" data-role="area-progress">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-[0.75rem] text-foreground/80">
+                            {areas.name ? `Writing ${areas.name}` : 'Finishing up'}
+                          </span>
+                          <span className="font-mono text-[0.7rem] text-muted-foreground tabular-nums">
+                            {areas.done} of {areas.total}
+                          </span>
+                        </div>
+                        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-blue-600 transition-[width] duration-300"
+                            style={{ width: `${Math.round((areas.done / areas.total) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     {isRunning && recentEvents.length > 0 && (
                       <ScrollArea className="mt-2 max-h-24">

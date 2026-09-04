@@ -640,7 +640,12 @@ function requireResearch(draft: DraftDoc, key: string, stage: StageId): Research
   return draft.research
 }
 
-async function executeStage(client: ModelClient, key: string, stage: StageId): Promise<void> {
+async function executeStage(
+  client: ModelClient,
+  key: string,
+  stage: StageId,
+  only?: string
+): Promise<void> {
   const draft = await loadDraft(key)
   const { facts } = draft
 
@@ -756,13 +761,33 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
       // areas one through eight, and redoing eleven good areas to recover
       // the twelfth is both slow and expensive.
       const research = requireResearch(draft, key, stage)
-      await appendProgress(key, {
-        stage: 'suburb',
-        kind: 'start',
-        label: `Writing ${research.suburbs.length} area pages for ${facts.city}`,
-      })
 
-      for (const suburb of research.suburbs) {
+      /*
+       * `only` runs a SINGLE area. The admin drives the loop from the client
+       * one area at a time, because twelve model calls inside one request is
+       * three to six minutes and a serverless function is killed long before
+       * that. Passing no slug still runs every area, which is what the tests
+       * and any script want.
+       */
+      const targets = only === undefined ? research.suburbs : research.suburbs.filter((s) => s.slug === only)
+      if (only !== undefined && targets.length === 0) {
+        throw new Error(`cannot write area "${only}" for "${key}": no such area in this city's research`)
+      }
+
+      // Announce once per stage, not once per area: with a client-driven loop
+      // this case is entered N times and N "starting" lines is noise.
+      const anyWritten = research.suburbs.some((s) =>
+        suburbSlots(s.slug).some((slot) => isWrittenSlot(draft.sections[slot]))
+      )
+      if (!anyWritten) {
+        await appendProgress(key, {
+          stage: 'suburb',
+          kind: 'start',
+          label: `Writing ${research.suburbs.length} area pages for ${facts.city}`,
+        })
+      }
+
+      for (const suburb of targets) {
         const [introSlot, homesSlot, localSlot] = suburbSlots(suburb.slug)
 
         // Already written on an earlier attempt — skip, do not pay for it
@@ -783,7 +808,7 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
         // try/catch around it) would also swallow real API errors, timeouts
         // and schema-parse failures that resumability depends on surfacing,
         // so this checks the exact precondition instead of catching a throw.
-        if (suburb.subdivisions.length === 0) {
+        if (!isWritableArea(suburb)) {
           await appendProgress(key, {
             stage: 'suburb',
             kind: 'found',
@@ -813,11 +838,13 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
         })
       }
 
-      await appendProgress(key, {
-        stage: 'suburb',
-        kind: 'done',
-        label: `${research.suburbs.length} area pages written`,
-      })
+      if (stageComplete(draft, stage)) {
+        await appendProgress(key, {
+          stage: 'suburb',
+          kind: 'done',
+          label: `${research.suburbs.length} area pages written`,
+        })
+      }
       break
     }
     default: {
@@ -826,8 +853,45 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
     }
   }
 
-  if (!draft.done.includes(stage)) draft.done.push(stage)
+  /*
+   * A stage is done when every slot it owns holds real copy — not merely
+   * because executeStage returned. The suburb stage can be run one area at a
+   * time, so returning after area three must NOT mark it complete: finalize
+   * would then demand slots nothing is going to write.
+   */
+  if (!draft.done.includes(stage) && stageComplete(draft, stage)) draft.done.push(stage)
   await saveDraft(key, draft)
+}
+
+/**
+ * Can this area ever get a page? An area with no researched subdivisions
+ * cannot: buildSuburbPrompt refuses it, because the homes paragraph must name
+ * at least three real developments and there is nothing honest to put there.
+ * The uniqueness gate normally drops these at research time; this is the
+ * backstop for one that arrives another way, such as a row an operator typed
+ * into the suburbs editor by hand.
+ *
+ * The suburb loop skips on exactly this predicate, and stageComplete excludes
+ * on exactly this predicate. They must stay in lockstep: if the loop skips an
+ * area the completeness check still demands, the stage never marks done and
+ * every retry re-runs forever.
+ */
+function isWritableArea(suburb: Suburb): boolean {
+  return suburb.subdivisions.length > 0
+}
+
+/**
+ * Every slot this stage owns holds real copy.
+ *
+ * For `suburb`, slots belonging to un-writable areas are excluded — nothing
+ * is ever going to fill them, so requiring them would deadlock the stage.
+ */
+function stageComplete(draft: DraftDoc, stage: StageId): boolean {
+  const slots =
+    stage === 'suburb' && draft.research
+      ? draft.research.suburbs.filter(isWritableArea).flatMap((s) => suburbSlots(s.slug))
+      : stageSlots(draft.research)[stage]
+  return slots.every((slot) => isWrittenSlot(draft.sections[slot]))
 }
 
 /**
@@ -835,11 +899,16 @@ async function executeStage(client: ModelClient, key: string, stage: StageId): P
  * the admin progress screen calls this once per stage, and a reload, a
  * serverless timeout or a retry after an error re-enters here safely.
  */
-export async function runStage(client: ModelClient, key: string, stage: StageId): Promise<void> {
+export async function runStage(
+  client: ModelClient,
+  key: string,
+  stage: StageId,
+  only?: string
+): Promise<void> {
   const draft = await loadDraft(key)
   if (draft.done.includes(stage)) return
   try {
-    await executeStage(client, key, stage)
+    await executeStage(client, key, stage, only)
   } catch (err) {
     const label = err instanceof Error ? err.message : String(err)
     await appendProgress(key, { stage, kind: 'error', label }).catch(() => {})
