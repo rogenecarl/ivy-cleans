@@ -199,7 +199,11 @@ describe('pipeline stages', () => {
       // real (multi-suburb) research fixture so the suburb slots are exercised
       // too, not just the eight research-free ones.
       //
-      // EXPECTED is written out by hand from the fixture's three suburbs
+      // Fixture Heights is deliberately ABSENT: it has no subdivisions, so
+      // the suburb loop always skips it and stageSlots excludes it. If it
+      // were listed here, finalize would demand three slots nothing is ever
+      // going to write and the city could never be published.
+      // EXPECTED is written out by hand from the fixture's suburbs
       // (house-cleaning-north-stubville, cleaning-services-mock-hollow,
       // fixture-heights-cleaning-services) rather than derived by calling
       // stageSlots/requiredSlotsFor — requiredSlotsFor's own body is
@@ -222,9 +226,6 @@ describe('pipeline stages', () => {
         'suburb.cleaning-services-mock-hollow.intro',
         'suburb.cleaning-services-mock-hollow.homes',
         'suburb.cleaning-services-mock-hollow.local',
-        'suburb.fixture-heights-cleaning-services.intro',
-        'suburb.fixture-heights-cleaning-services.homes',
-        'suburb.fixture-heights-cleaning-services.local',
       ]
       const owned = STAGES.flatMap((stage) => stageSlots(research)[stage.id])
       expect(owned).toHaveLength(new Set(owned).size)
@@ -232,11 +233,21 @@ describe('pipeline stages', () => {
       expect([...requiredSlotsFor(research)].sort()).toEqual([...EXPECTED].sort())
     })
 
-    it('emits exactly three suburb slots per area', () => {
-      const katy: Suburb = { name: 'Katy', slug: 'katy', subdivisions: [], housingCharacter: '', conditions: [] }
-      const sugarLand: Suburb = { name: 'Sugar Land', slug: 'sugar-land', subdivisions: [], housingCharacter: '', conditions: [] }
+    it('emits exactly three suburb slots per WRITABLE area', () => {
+      // Non-empty subdivisions matter: stageSlots excludes areas that can
+      // never be written, so finalize does not demand slots the suburb loop
+      // will always skip.
+      const katy: Suburb = { name: 'Katy', slug: 'katy', subdivisions: ['Cinco Ranch'], housingCharacter: '', conditions: [] }
+      const sugarLand: Suburb = { name: 'Sugar Land', slug: 'sugar-land', subdivisions: ['Riverstone'], housingCharacter: '', conditions: [] }
       const research: ResearchOutput = { suburbs: [katy, sugarLand], conditions: [], zips: [], keywords: [] }
       expect(stageSlots(research).suburb).toHaveLength(6)
+    })
+
+    it('emits no slots for an area with no subdivisions — nothing will ever write them', () => {
+      const thin: Suburb = { name: 'Thin', slug: 'thin', subdivisions: [], housingCharacter: '', conditions: [] }
+      const research: ResearchOutput = { suburbs: [thin], conditions: [], zips: [], keywords: [] }
+      expect(stageSlots(research).suburb).toEqual([])
+      expect(requiredSlotsFor(research)).not.toContain('suburb.thin.intro')
     })
 
     it('emits no suburb slots when research has not run', () => {
@@ -1224,6 +1235,33 @@ describe('buildResearchPrompt', () => {
       expect(draft.sections[`suburb.${NORTH}.intro`]).toBe(fixture.intro)
       expect(draft.sections[`suburb.${NORTH}.homes`]).toBe(fixture.homes)
       expect(draft.sections[`suburb.${NORTH}.local`]).toBe(fixture.local)
+    })
+
+    it('an un-writable area is excluded from the slots finalize demands, not just from the loop', async () => {
+      // The reachable path: an operator adds a suburb row by hand in the
+      // editor. mergeSuburbRows gives it subdivisions: [], and nothing
+      // re-runs the uniqueness gate afterwards. The suburb loop skips it
+      // forever. If requiredSlotsFor still demanded its three slots,
+      // finalizeDraft would refuse the city permanently with no way out.
+      const draft = await loadDraft(KEY)
+      const research = draft.research!
+      const handAdded: Suburb = {
+        name: 'Hand Added',
+        slug: 'hand-added',
+        subdivisions: [],
+        housingCharacter: '',
+        conditions: [],
+      }
+      draft.research = { ...research, suburbs: [...research.suburbs, handAdded] }
+      await saveDraft(KEY, draft)
+
+      const slots = stageSlots(draft.research).suburb
+      for (const slot of suburbSlots('hand-added')) expect(slots).not.toContain(slot)
+      expect(requiredSlotsFor(draft.research)).not.toContain('suburb.hand-added.intro')
+
+      // and the stage still completes for the areas that CAN be written
+      await runStage(newClient(), KEY, 'suburb')
+      expect((await loadDraft(KEY)).done).toContain('suburb')
     })
 
     it('runs ONE area when given a slug, leaving the others untouched', async () => {

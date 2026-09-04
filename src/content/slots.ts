@@ -110,6 +110,28 @@ export const STAGE_IDS: readonly StageId[] = STAGES.map((s) => s.id)
  * own could never be regenerated, and any slot no stage writes would block
  * finalizeDraft forever. Pinned by a test.
  */
+/**
+ * Can this area ever get a page?
+ *
+ * An area with no researched subdivisions cannot: buildSuburbPrompt refuses
+ * it, because the homes paragraph must name at least three real developments
+ * and there is nothing honest to put there. The uniqueness gate normally
+ * drops these at research time; this is the backstop for one that arrives
+ * another way — a row an operator typed into the suburbs editor by hand,
+ * which never re-runs the gate.
+ *
+ * THIS PREDICATE HAS THREE CONSUMERS AND THEY MUST ALL AGREE:
+ *   - the suburb loop's skip          (src/pipeline/stages.ts)
+ *   - stageComplete, which marks done (src/pipeline/stages.ts)
+ *   - stageSlots below, which feeds requiredSlotsFor and therefore finalize
+ * If any one of them disagrees, an area is either demanded by finalize and
+ * never written (finalize refuses forever) or written and never required.
+ * It lives here, in the dependency-free module all three can import.
+ */
+export function isWritableArea(suburb: { subdivisions: readonly string[] }): boolean {
+  return suburb.subdivisions.length > 0
+}
+
 export function stageSlots(research: ResearchOutput | undefined): Record<StageId, readonly string[]> {
   return {
     research: [],
@@ -123,6 +145,6 @@ export function stageSlots(research: ResearchOutput | undefined): Record<StageId
       'services.cards.upholstery',
     ],
     deep: ['deep.whatIs'],
-    suburb: research ? research.suburbs.flatMap((s) => suburbSlots(s.slug)) : [],
+    suburb: research ? research.suburbs.filter(isWritableArea).flatMap((s) => suburbSlots(s.slug)) : [],
   }
 }

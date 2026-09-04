@@ -36,7 +36,15 @@ import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
-import { STAGES, STAGE_IDS, isWrittenSlot, stageSlots, suburbSlots, type StageId } from '../content/slots'
+import {
+  STAGES,
+  STAGE_IDS,
+  isWritableArea,
+  isWrittenSlot,
+  stageSlots,
+  suburbSlots,
+  type StageId,
+} from '../content/slots'
 import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
@@ -400,7 +408,7 @@ export function buildSuburbPrompt(
   // instruction honestly with none. The uniqueness gate (scoreSuburbs) is
   // supposed to have already skipped an area like this; this throw is what
   // makes the contradiction unbuildable even if some future path bypasses it.
-  if (suburb.subdivisions.length === 0) {
+  if (!isWritableArea(suburb)) {
     throw new Error(
       `cannot write the area page for "${suburb.name}": no subdivisions were researched for it, and the homes paragraph must name real ones rather than invent one. The uniqueness gate should have dropped this area before it reached generation.`
     )
@@ -634,7 +642,7 @@ export function scoreSuburbs(research: ResearchOutput): ScoredSuburb[] {
     // for developments it cannot supply — the exact setup that invites the
     // model to invent one. So this overrides the threshold ladder outright,
     // regardless of how high the rest of the score runs.
-    if (suburb.subdivisions.length === 0) {
+    if (!isWritableArea(suburb)) {
       return {
         suburb,
         score,
@@ -902,34 +910,15 @@ async function executeStage(
 }
 
 /**
- * Can this area ever get a page? An area with no researched subdivisions
- * cannot: buildSuburbPrompt refuses it, because the homes paragraph must name
- * at least three real developments and there is nothing honest to put there.
- * The uniqueness gate normally drops these at research time; this is the
- * backstop for one that arrives another way, such as a row an operator typed
- * into the suburbs editor by hand.
- *
- * The suburb loop skips on exactly this predicate, and stageComplete excludes
- * on exactly this predicate. They must stay in lockstep: if the loop skips an
- * area the completeness check still demands, the stage never marks done and
- * every retry re-runs forever.
- */
-function isWritableArea(suburb: Suburb): boolean {
-  return suburb.subdivisions.length > 0
-}
-
-/**
  * Every slot this stage owns holds real copy.
  *
  * For `suburb`, slots belonging to un-writable areas are excluded — nothing
  * is ever going to fill them, so requiring them would deadlock the stage.
  */
 function stageComplete(draft: DraftDoc, stage: StageId): boolean {
-  const slots =
-    stage === 'suburb' && draft.research
-      ? draft.research.suburbs.filter(isWritableArea).flatMap((s) => suburbSlots(s.slug))
-      : stageSlots(draft.research)[stage]
-  return slots.every((slot) => isWrittenSlot(draft.sections[slot]))
+  // stageSlots already excludes un-writable areas, so this and finalize's
+  // requiredSlotsFor now demand exactly the same set — the whole point.
+  return stageSlots(draft.research)[stage].every((slot) => isWrittenSlot(draft.sections[slot]))
 }
 
 /**

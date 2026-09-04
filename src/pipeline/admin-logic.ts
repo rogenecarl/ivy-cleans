@@ -31,7 +31,7 @@ import {
   publishCity,
   saveDraft,
 } from '../content/drafts'
-import { isWrittenSlot, suburbSlots } from '../content/slots'
+import { isWritableArea, isWrittenSlot, suburbSlots } from '../content/slots'
 import { getCity, revalidateCity } from '../content/store'
 import { validateCityContent } from '../content/validate'
 import type { CityContent } from '../content/types'
@@ -168,7 +168,7 @@ export async function pendingSuburbsLogic(
     const research = draft.research
     if (!research) return { ok: true, areas: [] }
     const areas = research.suburbs
-      .filter((s) => s.subdivisions.length > 0)
+      .filter(isWritableArea)
       .filter((s) => !suburbSlots(s.slug).every((slot) => isWrittenSlot(draft.sections[slot])))
       .map((s) => ({ slug: s.slug, name: s.name }))
     return { ok: true, areas }
