@@ -7,15 +7,14 @@ Written to hand the generator work to a fresh session. Read this first, then
 
 ## The one-line state
 
-The seven handoff changes are merged and pushed. The pipeline has been run
-against the **real model once** — Houston, $1.18 — and the output is good but
-has one located flaw. Content-strategy item **B (voice) is done**; item **A
-(ops block) is half done** on an unpushed branch.
+The seven handoff changes are merged and pushed. Content-strategy items
+**B (voice) and A (ops block) are both DONE**. Houston has been generated
+against the real model twice, and the flaw the first run exposed is fixed and
+verified — see "The real Houston run" below. **D (validators) is next.**
 
 ```
-origin/main   cd4034e
-local branch  feat/ops-block   3 commits ahead, UNPUSHED
-suite         653 tests, 0 failures     pnpm test
+origin/main   89e75bc   (everything pushed, nothing local-only)
+suite         660 tests, 0 failures     pnpm test
 typecheck     clean in src/             pnpm tsc --noEmit
 duplication   0 live findings           node scripts/check-duplication.mjs
 ```
@@ -56,40 +55,24 @@ armed simultaneously. `updateSuburbsLogic` (`91125df`), `normalizeResearchSlugs`
 
 ---
 
-## The unpushed branch — `feat/ops-block`
+## A is complete
 
-```
-c76a2f1  feat: carry operator market facts into every content prompt
-2d59e22  fix: persist research findings, and rebalance the structuring prompt
-55b1f46  docs: add the content strategy and task 9 to the handoff
-```
+`MarketOpsSchema`, `Facts.ops`, `opsBlock` in all four content prompts, the
+`SYSTEM_BASE` carve-out, five form fields on the new-site screen, `parseZips`,
+and `finalizeDraft` preferring `ops.zips` with `research.zips` as the fallback.
 
-### Done in `c76a2f1`
+That fallback must stay: Minneapolis carries 25 ZIPs recovered from prose
+during the migration and its operator has never filled the new field.
 
-- `MarketOpsSchema` in `schemas.ts` — `zips`, `servingSince`, `crewLead`,
-  `crewSize`, `homesCleaned`, `reviews`
-- `Facts.ops` + `DeriveFactsInput.ops`, carried by `deriveFacts` like the phone
-- `opsBlock(facts)` in `stages.ts`, injected into all four content prompts
-- `SYSTEM_BASE` hard limits carved out for supplied facts
-- **ZIPs removed from the research brief** (part (d)) and from the structuring
-  prompt — they are now an operator field
-- front/deep prompts omit the SEARCH PHRASES section when keywords are empty
+**ZIPs are out of research entirely** — part (d) is gone from the brief and
+`zips` from the structuring prompt. "Which ZIPs exist near Houston" is a search
+result; "which ZIPs does this branch serve" is a decision only the owner can
+make. The research pass said so itself, in the persisted findings:
 
-### NOT done — this is where to pick up
+> "(d) ZIP codes and (e) keywords — I could not research at all, and I have
+> deliberately left them empty rather than reconstruct them from memory."
 
-1. **The admin form.** `zips`, `servingSince`, `crewLead`, `crewSize`,
-   `homesCleaned`, `reviews` as fields on
-   `src/app/admin/(console)/new/page.tsx` and
-   `src/app/admin/(console)/sites/[key]/settings-form.tsx`. All optional —
-   a new market has none of them — but visible, not hidden behind "advanced".
-2. **`finalizeDraft` must carry `facts.ops.zips`** into the published
-   `research.zips`, or the home page's ZIP list goes empty for any newly
-   generated city. `CityContent.research.zips` stays where it is; only its
-   source changes. Minneapolis's existing 25 ZIPs must not regress.
-3. **`CityContent` may need `ops`** if the review screen or validators are to
-   show it.
-
----
+Keywords keep their part in the brief, relettered (d), until DataForSEO lands.
 
 ## The real Houston run — what it proved
 
@@ -113,19 +96,34 @@ At 100 sites that is ~$120.
   $750 to $1,900 per year" and "Median sales price of $370,000", marked both
   `copySafe: false`, and neither reached the copy.
 
-### The flaw, and it is not fixed
+### The flaw — found, fixed, and verified
 
-**Both `local` paragraphs close on the same three facts — humidity, air
-conditioning, spring pollen — and the model invented them.** Those words appear
-in no researched condition. `research.conditions` was empty, so the model
-filled the gap from general Houston knowledge, which is identical for every
-area, so the pages converged. It slipped past the similarity check because the
-wording differs.
+The FIRST run closed every area page on the same three facts — humidity, air
+conditioning, spring pollen — and none of those words appeared in any
+researched condition. `research.conditions` was empty, so the model filled the
+gap from general Houston knowledge, which is identical for every area, so the
+pages converged.
 
-The structuring fix in `2d59e22` addresses the root cause — metro conditions
-went 0 → 6 on a re-run — but **the suburb pages have not been regenerated since**,
-so the flaw is still visible in the current Houston draft. Regenerating is the
-test of whether it is fixed.
+The structuring fix (`2d59e22`) addressed the root cause and the SECOND run
+(`89e75bc`, $0.63) confirms it. Research now supplies six real metro
+conditions and every closing fact traces to one: mold spore counts hitting the
+extreme category in late January, tree pollen from February, air conditioning
+running nearly all year. The model stopped inventing because it no longer had
+a gap to fill.
+
+The pages also lead with what only that area has, as the prompt asks — Katy on
+backyard pools and greenbelt frontage making the back door the dirtiest door;
+Sugar Land on clippings and turf chemistry from the Sweetwater course.
+
+**Six areas now, not three.** The Woodlands, Pearland, Memorial and Missouri
+City clear the gate because the structuring fix surfaced 37 subdivisions where
+there had been 16. Worst sibling similarity across all six areas and all three
+paragraph kinds: **0.068**, against a 0.75 threshold.
+
+**Still untested: the ops block.** Houston predates it and has no ops data.
+Testing it needs real facts for a real market — a crew lead's first name, a
+homes-cleaned count, two reviews. Inventing them to exercise the feature is
+the failure this project exists to prevent.
 
 ### The measured effect of `2d59e22`
 
@@ -218,11 +216,7 @@ legitimately changed — assert shape, not snapshots.
 
 ## What to do next, in order
 
-1. **Finish A** — the admin form and `finalizeDraft` carrying `ops.zips`.
-2. **Regenerate Houston** (~$1.20) and read Katy against Sugar Land again. The
-   question: do the `local` paragraphs still converge on invented Houston-wide
-   facts now that research supplies six real metro conditions?
-3. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
+1. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
    ops-facts-used, banned phrases. This is what turns A from advisory into
    enforced. `BANNED_PHRASES` is already exported from `stages.ts` for it.
 4. **C — service local sections** (1 day).
@@ -230,7 +224,8 @@ legitimately changed — assert shape, not snapshots.
 6. **Change 2 — DataForSEO** whenever credentials exist. The seam is built:
    `buildResearchStructuringPrompt` takes a keywords argument and branches on
    it, so it is one call-site change plus deleting part (d) of the brief.
-7. **Task 9 — domains.** Hold until step 2 answers. It automates publishing.
+5. **Task 9 — domains.** It automates publishing; the pages are now worth
+   publishing, so this is no longer blocked on evidence — only on priority.
 
 ---
 
