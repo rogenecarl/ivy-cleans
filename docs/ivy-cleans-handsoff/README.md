@@ -1,6 +1,6 @@
 # ivy-cleans — engineering handoff
 
-Seven changes to the site generator, plus one infra task. Nothing here restructures the app; the architecture is sound and most of it stays untouched.
+Seven changes to the site generator, plus two infra tasks. Nothing here restructures the app; the architecture is sound and most of it stays untouched.
 
 ---
 
@@ -30,7 +30,9 @@ Copy is also already leaking between cities. Run `node scripts/check-duplication
 2. **`change-list.md`** — all seven changes, why each, and what's explicitly deferred.
 3. **`patches/`** — the code.
 4. **`stage-c-prompts.md`** — the page-type ownership rule and the banned-phrasings list. Background for the prompt work; not all of it applies yet.
-5. **`openseo-setup.md`** — task 8, standing up our SEO research tool. Independent of the seven changes; parallelisable.
+5. **`openseo-setup.md`** — task 8, standing up the SEO research tool. Independent of the seven changes.
+6. **`domain-automation.md`** — task 9, autonomous domain purchase + hosting. Registrar separate from host by design.
+7. **`content-strategy.md`** — the full content plan beyond the seven changes: ops block, voice, service local sections, validators, evals. **Read this before generating any production city.**
 
 ---
 
@@ -46,6 +48,7 @@ Copy is also already leaking between cities. Run `node scripts/check-duplication
 | 2 | Keywords from DataForSEO not the model | new `keywords.ts` + `stages.ts` · see `change-2-wiring.md` | half day |
 | 7 | One slug pattern, new cities only | `stages.ts` | 1 hour |
 | 8 | **Stand up OpenSEO + provision projects** (infra, no repo changes) | see `openseo-setup.md` | 1 day |
+| 9 | **Autonomous domain purchase + hosting** — Porkbun + Vercel + Global Config | see `domain-automation.md`, `patches/provision.ts`, `patches/provision-wiring.md` | 2 days |
 
 Do 1 before anything else — everything depends on the schema. Do 5 second because it's cheap and it catches regressions in 3. Task 8 touches no repo code and can run in parallel or go to someone else.
 
@@ -64,8 +67,11 @@ Do 1 before anything else — everything depends on the schema. Do 5 second beca
 | `keywords-probe.mjs` | New `scripts/keywords-probe.mjs`. Verifies credentials and prints real volumes before any wiring. Run it first. |
 | `change-2-wiring.md` | Change 2 end to end: credentials, where it plugs in, caching, and the geo-targeting decision |
 | `openseo-provision.mjs` | Bulk-creates OpenSEO projects + rank trackers from a markets file. `--dry-run` first — not yet run against a live instance |
+| `provision.ts` | New `src/pipeline/provision.ts` — Porkbun registrar, Vercel host, Global Config router, each with a stub. Orchestrator tested end to end against the stubs |
+| `provision-wiring.md` | The two repo edits: `resolve-rewrite.ts` reads the host map from Global Config; `publishCity()` provisions |
+| `provision-probe.mjs` | Verifies all three providers' credentials and the Vercel plan tier. Run before the first real publish |
 
-Plus **`openseo-setup.md`** at the top level — task 8, infra only.
+Plus **`openseo-setup.md`** and **`domain-automation.md`** at the top level — tasks 8 and 9, infra only.
 
 ---
 
@@ -114,7 +120,10 @@ These are right and were got right deliberately:
 - [ ] `content/minneapolis.json` migrated; `houston.json` and `miami.json` regenerated; `testville.json` updated
 - [ ] OpenSEO running, and `get_backlinks_overview` verified against a known domain before Ahrefs is cancelled
 - [ ] `openseo-provision.mjs --dry-run` reviewed, then one market provisioned by hand to confirm the MCP argument names before bulk-running it
-- [ ] Search Console property connected per project as each site launches — this is the kill-rule data source and it is manual
+- [ ] Search Console property connected per project as each site launches — the property itself is created and verified by `domain-provision.mjs`; only the OpenSEO connection is manual
+- [ ] `provision-probe.mjs` passes — Porkbun unlocked, Vercel on Pro, Global Config reachable
+- [ ] One real city published with `provisionDomain: true`, watched through to `live`, then re-published to confirm idempotency
+- [ ] Recovery drill run once on that test domain
 
 The last real test is not in that list: **generate Houston, then read the Katy and Sugar Land pages side by side.** If a paragraph would sit unchanged on either, the research isn't being used and the prompt needs another pass. That judgment can't be automated, and it's the one that decides whether this works.
 
