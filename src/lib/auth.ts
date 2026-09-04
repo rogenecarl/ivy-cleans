@@ -33,7 +33,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 12,
+    minPasswordLength: 8,
     /*
      * THE DOOR. Mounting better-auth's handler exposes /sign-up/email
      * whenever emailAndPassword is enabled, and sign-up.mjs:145 refuses only

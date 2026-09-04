@@ -59,7 +59,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { createLocalAccountIssuer } from 'better-auth/db'
 
 const ROLES = ['admin', 'manager']
-const MIN_PASSWORD_LENGTH = 12
+const MIN_PASSWORD_LENGTH = 8
 
 function arg(name) {
   const i = process.argv.indexOf(name)
