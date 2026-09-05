@@ -128,15 +128,15 @@ export default async function NewCityPage({
               * button were crowding out the three fields that actually have
               * answers on day one.
               *
-              * Kept here rather than moved out entirely: notes and ops feed
-              * the FIRST generation, so an operator who already knows these
-              * saves a full regeneration by typing them now.
+              * Kept here rather than moved out entirely: these feed the FIRST
+              * generation, so an operator who already knows them saves a full
+              * regeneration by typing them now.
               *
               * <details>, not a client-side toggle -- this page is a plain
               * server-rendered form on purpose (see the header) and works
               * before hydration.
               */}
-            <details className="rounded-md border border-border/60 p-4 [&[open]>summary]:mb-4">
+            <details className="rounded-md border border-border/60 p-4">
               <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
                 This market is already operating
                 <span className="ml-2 font-normal text-muted-foreground">optional</span>
@@ -147,25 +147,6 @@ export default async function NewCityPage({
                   generation.
                 </span>
               </summary>
-
-              <div>
-                <Label htmlFor="notes" className="mb-1.5">
-                  Notes
-                </Label>
-                {/* Placeholder only, by request -- no help text under this field.
-                  * Worth knowing if you are changing it: the hard limits in
-                  * src/pipeline/stages.ts strip prices, numbers, awards and
-                  * guarantees from the generated copy no matter what is typed
-                  * here (notesBlock wraps these with an instruction that they
-                  * cannot authorize anything those limits forbid). That is not
-                  * stated in the UI, so an operator will not know it. */}
-                <Textarea
-                  id="notes"
-                  name="notes"
-                  rows={4}
-                  placeholder="Additional Context for AI when generating a site"
-                />
-              </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">

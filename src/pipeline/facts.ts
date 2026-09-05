@@ -113,7 +113,6 @@ export interface DeriveFactsInput {
   /** PRE-STRIPPED: exactly 10 raw digits — the caller (admin form) removes all formatting first. */
   phoneDigits: string
   address?: string
-  notes?: string
   /** Operator-entered market facts. Passes through untouched — see Facts.ops. */
   ops?: MarketOps
 }
@@ -126,7 +125,6 @@ export interface Facts {
   phoneDisplay: string
   phoneHref: string
   address?: string
-  notes?: string
   /**
    * Operator-entered facts about this market: who leads the crew, how long
    * we have served it, how many homes we have cleaned, real reviews, and the
@@ -151,7 +149,7 @@ function formatDisplay(digits: string): string {
 }
 
 export function deriveFacts(input: DeriveFactsInput): Facts {
-  const { phoneDigits, address, notes, ops } = input
+  const { phoneDigits, address, ops } = input
   const city = input.city.trim()
 
   if (!/^\d{10}$/.test(phoneDigits)) {
@@ -179,7 +177,6 @@ export function deriveFacts(input: DeriveFactsInput): Facts {
   }
 
   if (address !== undefined) facts.address = address
-  if (notes !== undefined) facts.notes = notes
   if (ops !== undefined) facts.ops = ops
 
   return facts

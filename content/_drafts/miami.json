@@ -5,8 +5,7 @@
     "stateName": "Florida",
     "phone": "305-555-0142",
     "phoneDisplay": "(305) 555-0142",
-    "phoneHref": "tel:3055550142",
-    "notes": "Coastal humidity and salt air. Housing mix: high-rise condos, beach rentals, single-family homes; heavy snowbird season turnover cleans."
+    "phoneHref": "tel:3055550142"
   },
   "sections": {
     "services.heroParagraphs": [

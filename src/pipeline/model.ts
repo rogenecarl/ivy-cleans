@@ -56,7 +56,7 @@ const RESEARCH_SYSTEM =
 /** Shared refusal → Error mapping for both calls below. */
 function refusalError(stopDetails: { category: string | null } | null): Error {
   const category = stopDetails?.category ?? 'unknown'
-  return new Error(`Claude declined this request (category ${category}) — retry or adjust the notes`)
+  return new Error(`Claude declined this request (category ${category}) — retry, or adjust the market facts it was given`)
 }
 
 /** Concatenate the text blocks of a finished (non-streaming-consumer) message. */
@@ -94,7 +94,7 @@ export class AnthropicModelClient implements ModelClient {
     // No `temperature`: sampling params are rejected on claude-opus-5.
     // fallbacks: 'default' + the server-side-fallback beta reroutes classifier
     // declines to Anthropic's recommended fallback by refusal category, so a
-    // benign notes field that trips a classifier doesn't just dead-end.
+    // benign operator field that trips a classifier doesn't just dead-end.
     const stream = this.client.beta.messages.stream({
       model: MODEL,
       max_tokens: 64000,

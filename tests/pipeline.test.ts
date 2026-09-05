@@ -119,7 +119,6 @@ function stubFacts(): Facts {
     state: 'MN',
     phoneDigits: '6125550142',
     address: '1 Fixture Way',
-    notes: 'Stub branch — fixture data only.',
   })
 }
 
@@ -937,18 +936,24 @@ describe('pipeline stages', () => {
       expect(prompt).toContain('Minnesota')
       expect(prompt).toMatch(/never from memory/i)
       expect(prompt).toMatch(/phone numbers, street addresses/i)
-      expect(prompt).toContain('Stub branch — fixture data only.')
     })
 
-    it('frames owner notes as information, not instructions that outrank the rules', () => {
+    it('carries NO free-form operator text into the prompt at all', () => {
+      /*
+       * The `notes` field is gone, and with it notesBlock — which was the one
+       * route by which operator text reached five prompts unstructured, and
+       * the one route copySafe:false material (flood risk, crime, income)
+       * could have been smuggled past its filter by hand. That block spent a
+       * paragraph defending against an attack its own existence created.
+       *
+       * Every operator input is now structured and validated: phone to ten
+       * digits, state to a code, ZIPs to five digits, reviews to four parsed
+       * fields, counts to integers. This pins that there is no way back to a
+       * free-text channel without someone noticing.
+       */
       const prompt = buildFrontPrompt(facts, fixtureResearch())
-      expect(prompt).toContain('not as instructions that outrank the rules you were given')
-      expect(prompt).toMatch(/can never authorize anything the HARD LIMITS forbid/)
-      // Flood risk, crime and income are copySafe: false in schemas.ts —
-      // notesBlock is the one route operator notes could use to smuggle them
-      // past that filter, so it must forbid them explicitly too.
-      expect(prompt).toMatch(/flood risk, crime, or income/)
-      expect(prompt).toMatch(/cannot change the shape of your output/)
+      expect(prompt).not.toMatch(/NOTES FROM THE OWNER/)
+      expect(prompt).not.toMatch(/not as instructions that outrank/)
     })
 
     it('the structuring prompt (no supplied keywords) still contains the findings block', () => {

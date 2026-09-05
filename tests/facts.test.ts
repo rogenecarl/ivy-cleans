@@ -19,16 +19,13 @@ describe('deriveFacts', () => {
       state: 'TX',
       phoneDigits: '5125550199',
       address: '1 Congress Ave, Austin, TX 78701',
-      notes: 'Family-owned since 2010.',
     })
     expect(facts.address).toBe('1 Congress Ave, Austin, TX 78701')
-    expect(facts.notes).toBe('Family-owned since 2010.')
   })
 
-  test('omits address and notes when not provided', () => {
+  test('omits address when not provided', () => {
     const facts = deriveFacts({ city: 'Austin', state: 'TX', phoneDigits: '5125550199' })
     expect(facts.address).toBeUndefined()
-    expect(facts.notes).toBeUndefined()
   })
 
   test('rejects a 9-digit phone number', () => {

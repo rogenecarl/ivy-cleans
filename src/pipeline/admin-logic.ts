@@ -131,7 +131,6 @@ export type NewCityFields = OpsFields & {
   /** Any format — formatting characters are stripped here, not by the form. */
   phone: string
   address?: string
-  notes?: string
 }
 
 /**
@@ -311,7 +310,6 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
   try {
     const digits = fields.phone.replace(/\D/g, '')
     const address = fields.address?.trim()
-    const notes = fields.notes?.trim()
 
     const built = buildOps(fields)
     if (!built.ok) return { ok: false, error: built.error }
@@ -321,7 +319,6 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
       state: fields.state.trim(),
       phoneDigits: digits,
       ...(address ? { address } : {}),
-      ...(notes ? { notes } : {}),
       ...(built.ops ? { ops: built.ops } : {}),
     })
     const key = await createDraft(facts)

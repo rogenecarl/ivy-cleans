@@ -83,7 +83,6 @@ async function freshDraft(key: (typeof KEYS)[number]) {
     state: 'mn',
     phone: '(612) 555-0142',
     address: '1 Fixture Way',
-    notes: 'Stub branch — fixture data only.',
   })
 }
 
@@ -165,8 +164,7 @@ describe('createDraftFromFields', () => {
       state: 'mn',
       phone: '(612) 555-0142',
       address: '1 Fixture Way',
-      notes: 'Stub branch — fixture data only.',
-    })
+      })
     expect(result).toEqual({ ok: true, key: KEY })
 
     const draft = await loadDraft(KEY)
@@ -178,8 +176,7 @@ describe('createDraftFromFields', () => {
       phoneDisplay: '(612) 555-0142',
       phoneHref: 'tel:6125550142',
       address: '1 Fixture Way',
-      notes: 'Stub branch — fixture data only.',
-    })
+      })
     expect(draft.done).toEqual([])
     expect(draft.sections).toEqual({})
   })
@@ -200,11 +197,9 @@ describe('createDraftFromFields', () => {
       state: 'MN',
       phone: '6125550142',
       address: '   ',
-      notes: '',
     })
     const { facts } = await loadDraft(KEY)
     expect(facts.address).toBeUndefined()
-    expect(facts.notes).toBeUndefined()
   })
 
   it('returns the error instead of throwing it across the action boundary', async () => {
