@@ -410,19 +410,20 @@ try {
   const genHead = await text(page)
   check(
     'generate screen shows the derived facts',
-    genHead.includes(`Generating ${CITY}, ${STATE}`) && genHead.includes(PHONE_DISPLAY),
+    genHead.includes(`${CITY}, ${STATE}`) && genHead.includes(PHONE_DISPLAY),
     `phoneDisplay ${PHONE_DISPLAY} derived from typed "${PHONE_TYPED}"`,
   )
 
-  // Each <li> is a skill card: a status glyph (✓/⏳/✗/•) and the skill name
-  // from SKILL_META, both tagged with data-role so markup changes elsewhere
-  // in the card (activity lines, research chips) cannot shift which element
-  // these selectors land on.
+  // Each <li> is one pipeline step: a status glyph (✓/⏳/✗/•) and the stage
+  // name, both tagged with data-role so markup changes elsewhere in the row
+  // (progress bar, activity lines, research chips) cannot shift which element
+  // these selectors land on. The names come from src/app/admin/stage-names.ts,
+  // which replaced the SKILL_META personas.
   const stageStates = () =>
     page.$$eval('ol li', (items) =>
       items.map((li) => ({
         icon: li.querySelector('[data-role="status-icon"]')?.textContent?.trim() ?? '',
-        label: li.querySelector('[data-role="skill-name"]')?.textContent?.trim() ?? '',
+        label: li.querySelector('[data-role="stage-name"]')?.textContent?.trim() ?? '',
       })),
     )
 
@@ -441,8 +442,8 @@ try {
   }
   const finalStates = await stageStates()
   check(
-    'all four stages complete',
-    allDone && finalStates.length === 4,
+    'all five stages complete',
+    allDone && finalStates.length === 5,
     finalStates.map((s) => `${s.icon} ${s.label.slice(0, 28)}`).join(' | '),
   )
   await shot(page, 'stages-done')
@@ -450,14 +451,13 @@ try {
   /* 3a. Skill cards + activity feed (Task 4) ────────────────────────────── */
   const genScreenText = await text(page)
   check(
-    // 'Local Area Writer' was the retired 'home' stage's SKILL_META card
-    // (Task 10). The 'suburb' stage that replaced it has no SKILL_META entry
-    // of its own — src/app/admin/(console)/generate/[key]/stage-runner.tsx
-    // falls back to `{ icon: '•', name: stage.label, tagline: '' }`, and
-    // stage.label (src/content/slots.ts STAGES) is 'Writing the area pages'.
-    'generate screen shows the four skill names',
-    ['City Research', 'Front-Page Copywriter', 'Writing the area pages', 'Deep-Clean Copywriter'].every(
-      (name) => genScreenText.includes(name),
+    // src/app/admin/stage-names.ts. These replaced the SKILL_META personas
+    // ("Front-Page Copywriter" and friends) — the pipeline is five steps, not
+    // a cast of characters, and a tagline explaining what "Research" does is
+    // copy an operator reads once and scrolls past forever.
+    'generate screen names all five stages',
+    ['Research', 'Front page', 'Deep cleaning', 'Area pages', 'Service pages'].every((name) =>
+      genScreenText.includes(name),
     ),
   )
 

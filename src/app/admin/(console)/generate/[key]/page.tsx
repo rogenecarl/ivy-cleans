@@ -60,13 +60,17 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
           <ChevronLeft className="size-4" aria-hidden="true" />
           Sites
         </Link>
+        {/*
+          * The city, and the number that will end up on every page of it.
+          * The sentence that used to sit here explained that the stages run
+          * one at a time so a failure is retryable — architecture, read once
+          * and then scrolled past forever. The runner's own footer says what
+          * an operator needs while it is working.
+          */}
         <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">
-          Generating {draft.facts.city}, {draft.facts.state}
+          {draft.facts.city}, {draft.facts.state}
         </h1>
-        <p className="mt-1 text-[0.85rem] text-muted-foreground">
-          {draft.facts.phoneDisplay} · four stages, run one at a time so any single failure can be
-          retried on its own.
-        </p>
+        <p className="mt-1 text-[0.85rem] text-muted-foreground">{draft.facts.phoneDisplay}</p>
       </div>
 
       <StageRunner

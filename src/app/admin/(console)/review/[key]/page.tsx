@@ -4,6 +4,8 @@ import { loadDraft } from '@/content/drafts'
 import { getCity } from '@/content/store'
 import { errorMessage } from '@/pipeline/admin-logic'
 import { STAGES, scoreSuburbs } from '@/pipeline/stages'
+import { checkCity, findInvisibleChars } from '@/content/similarity'
+import { listLiveCityKeys } from '@/content/store'
 import type { ResearchOutput } from '@/pipeline/schemas'
 import { Button } from '@/components/ui/button'
 import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
@@ -85,6 +87,40 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
 
   const isLive = doc.status === 'live'
 
+  /*
+   * What publish would refuse, computed HERE so the operator can see it
+   * before clicking rather than after.
+   *
+   * These same two checks already ran — but only inside publishCity, which
+   * means their findings arrived as an error message on a button press. The
+   * handoff's own decision (change-list.md, decision 3) put the block at
+   * publish specifically "so an operator can look at findings in the review
+   * screen first"; that second half was never wired up. This is it.
+   *
+   * Live cities only, matching publishCity: a draft is not a page Google can
+   * see, and comparing against one would let the order two operators happen
+   * to work in decide whose copy is "the duplicate".
+   */
+  let duplication: Awaited<ReturnType<typeof checkCity>> = []
+  let duplicationUnavailable = false
+  try {
+    const otherKeys = (await listLiveCityKeys()).filter((k) => k !== key)
+    const published = await Promise.all(
+      otherKeys.map(async (k) => {
+        const other = await getCity(k)
+        return { city: other.city, sections: other.sections }
+      }),
+    )
+    duplication = checkCity(doc.city, doc.sections, published)
+  } catch {
+    // A live city that will not load is publishCity's problem to report, not
+    // a reason to withhold this whole screen.
+    duplicationUnavailable = true
+  }
+
+  const invisible = findInvisibleChars(doc.sections)
+  const thinAreas = scored.filter((entry) => entry.verdict !== 'build')
+
   return (
     <>
       <div className="mb-6">
@@ -113,6 +149,45 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
           <ExternalLink className="size-4" aria-hidden="true" />
         </a>
       </Button>
+
+      {/*
+        * The answer to "can I publish this?", before the button. Renders
+        * nothing at all when there is nothing wrong — a panel that always
+        * says READY is one nobody reads.
+        */}
+      {!isLive && (invisible.length > 0 || duplication.length > 0 || thinAreas.length > 0 || duplicationUnavailable) && (
+        <Panel title="Before you publish">
+          <ul className="space-y-2 text-[0.85rem]">
+            {invisible.length > 0 && (
+              <li>
+                <span className="font-medium text-destructive">Blocks publish.</span>{' '}
+                {invisible.length} invisible character
+                {invisible.length === 1 ? '' : 's'} in the copy — {invisible[0].slot}
+                {invisible.length > 1 ? ` and ${invisible.length - 1} more` : ''}.
+              </li>
+            )}
+            {duplication.map((finding) => (
+              <li key={`${finding.slot}-${finding.otherCity}-${finding.otherSlot}`}>
+                <span className="font-medium text-destructive">Blocks publish.</span>{' '}
+                {finding.slot} matches {finding.otherCity} {finding.otherSlot} — {finding.detail}
+              </li>
+            ))}
+            {duplicationUnavailable && (
+              <li className="text-muted-foreground">
+                Could not compare against the live cities, so publish may still refuse this copy as
+                duplicate.
+              </li>
+            )}
+            {thinAreas.length > 0 && (
+              <li className="text-muted-foreground">
+                {thinAreas.length} area{thinAreas.length === 1 ? '' : 's'} scored thin —{' '}
+                {thinAreas.map((entry) => entry.suburb.name).join(', ')}. They will publish, but
+                with less to say than the rest.
+              </li>
+            )}
+          </ul>
+        </Panel>
+      )}
 
       <Panel title="Service areas">
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />

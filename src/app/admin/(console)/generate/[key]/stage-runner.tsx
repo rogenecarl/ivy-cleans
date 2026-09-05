@@ -2,13 +2,10 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Loader2, MapPinned, PenLine, RotateCw, Search, Sparkles } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Loader2, RotateCw } from 'lucide-react'
 import type { ProgressSnapshot } from '@/pipeline/admin-logic'
 import type { ProgressEvent } from '@/pipeline/progress'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import {
@@ -19,7 +16,7 @@ import {
   runStageAction,
 } from '../../actions'
 import { ADMIN_BASE } from '@/lib/admin-routes'
-import { SKILL_META } from '../../../skills-meta'
+import { stageName } from '../../../stage-names'
 import { ErrorText, Pill } from '../../../ui'
 
 /*
@@ -57,16 +54,26 @@ type Props = {
 
 type Phase = 'idle' | 'running' | 'error'
 
-/** Per-stage icon, purely decorative (skill-icon is not asserted by the e2e
- * suite) — lucide instead of the SKILL_META emoji field, per the admin's
- * "no emoji" UX rule. */
-const STAGE_ICONS: Record<string, LucideIcon> = {
-  research: Search,
-  front: PenLine,
-  home: MapPinned,
-  deep: Sparkles,
-  suburb: MapPinned,
-  service: Sparkles,
+/**
+ * How long a stage took, measured in the browser as the runner drives it.
+ *
+ * Only stages run in THIS session appear here. A reload mid-pipeline knows
+ * from the draft which stages are done but not how long they took, and
+ * inventing a duration for them would be worse than leaving the cell blank.
+ *
+ * Deliberately NOT a model-call count. The client counts REQUESTS, and the
+ * two are not the same number — the research stage is one request and two
+ * model calls (search, then the structuring pass). Showing requests under a
+ * heading that reads as calls would understate what a run costs, so the only
+ * per-item number here is the one that is exactly right: how many areas or
+ * service pages the loop has left.
+ */
+type StageTiming = { ms: number }
+
+/** m:ss. Every stage is seconds-to-minutes; nothing here runs for an hour. */
+function duration(ms: number): string {
+  const total = Math.round(ms / 1000)
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
 export default function StageRunner({ cityKey, stages, initialDone }: Props) {
@@ -85,6 +92,25 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
    * -- suburb (per area) and service (per service page). One piece of state
    * because only one stage runs at a time. */
   const [itemProgress, setItemProgress] = useState<{ done: number; total: number; name: string } | null>(null)
+
+  /* Measured per stage as this session runs it — see StageTiming. */
+  const [timings, setTimings] = useState<Record<string, StageTiming>>({})
+  /* Ticks once a second so the running stage's elapsed time moves. */
+  const [now, setNow] = useState(() => Date.now())
+  /* When the CURRENT stage started, so its row counts its own time. */
+  const [stageStartedAt, setStageStartedAt] = useState<number | null>(null)
+  /* State, not refs: both are READ during render (the ledger line and each
+   * running row's elapsed time), and a ref read in render is a stale value
+   * React never re-renders for. */
+  const [runStartedAt, setRunStartedAt] = useState<number | null>(null)
+  /* Frozen when the run ends, so the total stops rather than counting on. */
+  const [runEndedAt, setRunEndedAt] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (current === null) return
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [current])
 
   /*
    * A single in-flight guard for the whole runner. React 19's dev-mode double
@@ -165,6 +191,11 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
         for (const stage of stages) {
           if (completed.includes(stage.id)) continue
           setCurrent(stage.id)
+          const stageStart = Date.now()
+          setRunStartedAt((v) => v ?? stageStart)
+          setRunEndedAt(null)
+          setStageStartedAt(stageStart)
+          setNow(stageStart)
 
           /*
            * suburb and service are driven ONE ITEM PER REQUEST. Twelve areas
@@ -188,10 +219,12 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
             return
           }
           setItemProgress(null)
+          setTimings((t) => ({ ...t, [stage.id]: { ms: Date.now() - stageStart } }))
           completed = [...completed, stage.id]
           setDone(completed)
         }
         setCurrent(null)
+        setRunEndedAt(Date.now())
         if (completed.length === stages.length) await finalize()
       } finally {
         busy.current = false
@@ -240,32 +273,35 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
 
   return (
     <>
-      <div className="mb-4">
-        <div className="mb-1.5 flex items-center justify-between text-[0.8rem] text-muted-foreground">
-          <span>
-            {done.length} of {stages.length} stages complete
-          </span>
-        </div>
-        <Progress value={(done.length / stages.length) * 100} />
-      </div>
-
-      <ol className="space-y-3">
+      {/*
+        * No headline progress bar. Five rows with their own state already say
+        * how far along the run is, and a second bar restating it is chrome
+        * competing with the content it summarises.
+        */}
+      <ol className="divide-y divide-border/40">
         {stages.map((stage) => {
           const isDone = done.includes(stage.id)
           const isRunning = current === stage.id
           const items =
             isRunning && (stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
           const isFailed = failed?.stage === stage.id
+          // The glyphs are load-bearing: scripts/admin-e2e.mjs polls
+          // [data-role="status-icon"] for '✓' to know the run finished.
           const icon = isDone ? '✓' : isRunning ? '⏳' : isFailed ? '✗' : '•'
-          const tone = isDone
-            ? 'text-green-700'
-            : isFailed
-              ? 'text-destructive'
-              : isRunning
-                ? 'text-blue-700'
-                : 'text-muted-foreground'
-          const meta = SKILL_META[stage.id] ?? { icon: '•', name: stage.label, tagline: '' }
-          const StageIcon = STAGE_ICONS[stage.id]
+          /*
+           * Colour ONLY where it changes what you would do. A finished stage
+           * is not green: when all five land, an all-green list carries no
+           * information at all, and the eye stops reading colour that is
+           * always there. Running and failed are the two states worth a hue.
+           */
+          const tone = isFailed
+            ? 'text-destructive'
+            : isRunning
+              ? 'text-blue-700'
+              : 'text-muted-foreground'
+          const name = stageName(stage.id, stage.label)
+          const timing = timings[stage.id]
+          const elapsed = timing?.ms
 
           // Every event this stage has logged so far, oldest first — 'error'
           // events are excluded here because the `isFailed` block above
@@ -283,117 +319,145 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
             [...stageEvents].reverse().find((e) => e.kind === 'done')
           const research = stage.id === 'research' && snapshot?.ok ? snapshot.research : null
 
+          // No background tint on the running row: it already carries a
+          // coloured glyph, a bolder name, a moving progress bar and a live
+          // timer. A fifth signal for one state is decoration.
           return (
-            <li key={stage.id}>
-              <Card
-                className={cn(
-                  'gap-0 py-4',
-                  isFailed && 'border-destructive/50 bg-destructive/5',
-                  isRunning && 'border-blue-600/40',
-                )}
-              >
-                <CardContent className="flex items-start gap-3 px-4">
-                  <span
-                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted"
-                    data-role="skill-icon"
-                    aria-hidden="true"
-                  >
-                    {StageIcon ? <StageIcon className="size-4 text-muted-foreground" /> : meta.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="text-[0.95rem] font-semibold" data-role="skill-name">
-                        {meta.name}
-                      </p>
-                      <span
-                        className={cn('w-4 shrink-0 text-[1rem] leading-6', tone)}
-                        data-role="status-icon"
-                        aria-hidden
-                      >
-                        {icon}
+            <li key={stage.id} className="py-2.5">
+              <div className="flex items-start gap-3 px-1">
+                {/* Fixed-width so every glyph, name and number lines up down
+                    the list without a table or a rule to guide the eye. */}
+                <span
+                  className={cn('w-4 shrink-0 text-center text-[0.9rem] leading-6', tone)}
+                  data-role="status-icon"
+                  aria-hidden
+                >
+                  {icon}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p
+                      className={cn(
+                        'text-[0.9rem]',
+                        isRunning ? 'font-semibold' : isDone ? 'font-medium' : 'text-muted-foreground',
+                      )}
+                      data-role="stage-name"
+                    >
+                      {name}
+                    </p>
+                    {/* The numeric column. Monospace and tabular so counts
+                        and timings form a straight edge down the list —
+                        the one place a mono face earns its keep here. Two
+                        spans with a gap, not one string with spaces in it:
+                        HTML collapses runs of whitespace. */}
+                    <span className="flex shrink-0 items-baseline gap-4 font-mono text-[0.75rem] tabular-nums text-muted-foreground">
+                      {items && items.total > 0 && (
+                        <span>
+                          {items.done} of {items.total}
+                        </span>
+                      )}
+                      {(isRunning || elapsed !== undefined) && (
+                        <span className="w-9 text-right">
+                          {isRunning && stageStartedAt !== null
+                            ? duration(now - stageStartedAt)
+                            : elapsed !== undefined
+                              ? duration(elapsed)
+                              : ''}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/*
+                    suburb and service each take minutes and, before this,
+                    showed a spinner with no sign of movement for the whole
+                    run. The count comes from the client's own per-item
+                    loop, so it is accurate the moment it changes — and it
+                    is printed once, in the numeric column above, rather
+                    than again beside the bar.
+                  */}
+                  {items && items.total > 0 && (
+                    <div className="mt-1.5 flex items-center gap-2" data-role="area-progress">
+                      <div className="h-[3px] w-32 shrink-0 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-blue-600 transition-[width] duration-300"
+                          style={{ width: `${Math.round((items.done / items.total) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="truncate text-[0.75rem] text-foreground/70">
+                        {items.name || 'Finishing up'}
                       </span>
                     </div>
-                    <p className="text-[0.75rem] text-muted-foreground">{meta.tagline}</p>
+                  )}
 
-                    {/*
-                      The suburb stage is the only one that takes minutes, and
-                      before this it showed a spinner with no sign of movement
-                      for its whole run. The count comes from the client's own
-                      per-area loop, so it is accurate the moment it changes.
-                    */}
-                    {items && items.total > 0 && (
-                      <div className="mt-2" data-role="area-progress">
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className="text-[0.75rem] text-foreground/80">
-                            {items.name ? `Writing ${items.name}` : 'Finishing up'}
-                          </span>
-                          <span className="font-mono text-[0.7rem] text-muted-foreground tabular-nums">
-                            {items.done} of {items.total}
-                          </span>
-                        </div>
-                        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-blue-600 transition-[width] duration-300"
-                            style={{ width: `${Math.round((items.done / items.total) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {isRunning && recentEvents.length > 0 && (
-                      <ScrollArea className="mt-2 max-h-24">
-                        <ul className="space-y-0.5">
-                          {recentEvents.map((event, index) => (
-                            <li
-                              key={`${event.at}-${index}`}
-                              className={cn(
-                                'font-mono text-[0.75rem] text-foreground/80',
-                                index === recentEvents.length - 1 && 'admin-pulse',
-                              )}
-                            >
-                              {event.label}
-                            </li>
-                          ))}
-                        </ul>
-                      </ScrollArea>
-                    )}
-
-                    {isDone && summaryEvent && (
-                      <p className="mt-2 text-[0.75rem] text-muted-foreground">{summaryEvent.label}</p>
-                    )}
-
-                    {research && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {research.suburbs.map((name) => (
-                          <Pill key={name}>{name}</Pill>
+                  {isRunning && recentEvents.length > 0 && (
+                    <ScrollArea className="mt-2 max-h-24">
+                      <ul className="space-y-0.5">
+                        {recentEvents.map((event, index) => (
+                          <li
+                            key={`${event.at}-${index}`}
+                            className={cn(
+                              'truncate text-[0.75rem] text-muted-foreground',
+                              index === recentEvents.length - 1 && 'admin-pulse text-foreground/80',
+                            )}
+                          >
+                            {event.label}
+                          </li>
                         ))}
-                        <Pill>{research.zips.length} ZIP codes</Pill>
-                        <Pill>{research.subdivisions} subdivisions</Pill>
-                      </div>
-                    )}
+                      </ul>
+                    </ScrollArea>
+                  )}
 
-                    {isFailed && (
-                      <>
-                        <ErrorText>{failed.message}</ErrorText>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 min-h-11 sm:min-h-8"
-                          onClick={() => void run(done)}
-                        >
-                          <RotateCw className="size-3.5" aria-hidden="true" />
-                          Retry this stage
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                  {isDone && summaryEvent && (
+                    <p className="mt-1 text-[0.75rem] text-muted-foreground">{summaryEvent.label}</p>
+                  )}
+
+                  {research && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {research.suburbs.map((name) => (
+                        <Pill key={name}>{name}</Pill>
+                      ))}
+                      <Pill>{research.zips.length} ZIP codes</Pill>
+                      <Pill>{research.subdivisions} subdivisions</Pill>
+                    </div>
+                  )}
+
+                  {isFailed && (
+                    <>
+                      <ErrorText>{failed.message}</ErrorText>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 min-h-11 sm:min-h-8"
+                        onClick={() => void run(done)}
+                      >
+                        <RotateCw className="size-3.5" aria-hidden="true" />
+                        Retry this stage
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
             </li>
           )
         })}
       </ol>
+
+      {/*
+        * The ledger. One rule, at the foot of the list, carrying the two
+        * numbers that describe the whole run rather than any one stage.
+        */}
+      <div className="mt-3 flex items-baseline justify-between border-t border-border pt-2.5">
+        <span className="text-[0.75rem] text-muted-foreground">
+          {done.length} of {stages.length} stages
+        </span>
+        {runStartedAt !== null && (
+          <span className="font-mono text-[0.75rem] tabular-nums text-muted-foreground">
+            {duration((runEndedAt ?? now) - runStartedAt)}
+          </span>
+        )}
+      </div>
 
       <div className="mt-6">
         {!allDone && !failed && (
