@@ -6,7 +6,9 @@
  * per-stage progress and the token/cost tally as it goes.
  *
  *   npx tsx scripts/generate-city.mjs houston
- *   npx tsx scripts/generate-city.mjs houston --dry-run   # auth + plan only, no spend
+ *   npx tsx scripts/generate-city.mjs houston --stage service   # just one stage
+ *   npx tsx scripts/generate-city.mjs houston --stage service --regenerate
+ *   npx tsx scripts/generate-city.mjs houston --dry-run         # plan only, no spend
  *
  * This exists because the admin UI drives generation from a browser, and the
  * decisive test for this whole project -- generate a city, then read two of
@@ -36,8 +38,38 @@ for (const f of ['.env.local', '.env']) {
 const KEY = process.argv[2]
 const DRY = process.argv.includes('--dry-run')
 
+/*
+ * --stage <id> runs exactly one stage and NEVER regenerates.
+ *
+ * Without it, a city whose research has already run is re-researched (see the
+ * loop below), which clears front/deep/suburb/service and pays for the whole
+ * pipeline again. That is the right default for "generate this city", and the
+ * wrong thing entirely when a new stage has been added and every other stage's
+ * output is still good.
+ */
+const stageFlag = process.argv.indexOf('--stage')
+const ONLY_STAGE = stageFlag === -1 ? null : process.argv[stageFlag + 1]
+
+/*
+ * --regenerate clears the named stage's slots before re-running, instead of
+ * skipping the ones already written. Needed after a PROMPT change: the stage
+ * itself is resumable by design and will happily skip every slot it already
+ * filled, which is right for a retry and wrong for a rewrite.
+ */
+const REGENERATE = process.argv.includes('--regenerate')
+
 if (!KEY) {
-  console.error('usage: node scripts/generate-city.mjs <city-key> [--dry-run]')
+  console.error('usage: node scripts/generate-city.mjs <city-key> [--stage <id>] [--dry-run]')
+  process.exit(1)
+}
+if (stageFlag !== -1 && !ONLY_STAGE) {
+  console.error('--stage needs a stage id, e.g. --stage service')
+  process.exit(1)
+}
+if (REGENERATE && ONLY_STAGE === null) {
+  // Guard, not a limitation: `--regenerate` with no stage would clear and
+  // rebuild the whole city, which is what running with no flags already does.
+  console.error('--regenerate needs --stage, e.g. --stage service --regenerate')
   process.exit(1)
 }
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -55,9 +87,18 @@ const IN_PER_MTOK = 5
 const OUT_PER_MTOK = 25
 
 const draft = await loadDraft(KEY)
+
+const plan = ONLY_STAGE === null ? STAGES : STAGES.filter((s) => s.id === ONLY_STAGE)
+if (plan.length === 0) {
+  console.error(`unknown stage "${ONLY_STAGE}" — expected one of ${STAGES.map((s) => s.id).join(', ')}`)
+  process.exit(1)
+}
+
 console.log(`city   : ${draft.facts.city}, ${draft.facts.state}`)
 console.log(`stages : ${STAGES.map((s) => s.id).join(' → ')}`)
 console.log(`done   : ${draft.done.length ? draft.done.join(', ') : '(nothing yet)'}`)
+const mode = ONLY_STAGE === null ? '' : REGENERATE ? '  (clearing first)' : '  (no regenerate)'
+console.log(`running: ${plan.map((s) => s.id).join(', ')}${mode}`)
 
 if (DRY) {
   console.log('\n--dry-run: auth and plan verified, no calls made.')
@@ -67,12 +108,16 @@ if (DRY) {
 const client = makeClient()
 
 const started = Date.now()
-for (const stage of STAGES) {
+for (const stage of plan) {
   console.log(`\n▶ ${stage.id} — ${stage.label}`)
   const before = Date.now()
   // research is regenerated deliberately: an existing draft's research may
   // predate the current brief, and everything downstream is built on it.
-  if (stage.id === 'research' && draft.done.includes('research')) {
+  // Suppressed under --stage, which is for topping up one stage without
+  // paying to rebuild the ones that are already good.
+  if (REGENERATE) {
+    await regenerateStage(client, KEY, stage.id)
+  } else if (ONLY_STAGE === null && stage.id === 'research' && draft.done.includes('research')) {
     await regenerateStage(client, KEY, 'research')
   } else {
     await runStage(client, KEY, stage.id)

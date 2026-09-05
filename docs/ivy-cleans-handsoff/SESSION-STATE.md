@@ -16,7 +16,7 @@ that C is in.**
 
 ```
 origin/main   6973e8a   (last pushed commit)
-suite         718 tests, 0 failures     pnpm test
+suite         719 tests, 0 failures     pnpm test
 typecheck     clean in src/             pnpm tsc --noEmit
 lint          0 errors, 14 warnings     pnpm lint   (all pre-existing)
 duplication   0 live findings           node scripts/check-duplication.mjs
@@ -136,6 +136,39 @@ changes about that job.
 - **One request per service**, like the suburb stage — `pendingServicesAction`
   plus a client loop. Six calls in one request is minutes and Vercel kills it.
 
+### The cap, and why it is load-bearing
+
+The first real run exposed the same convergence the area pages hit, one level
+up. Every service receives the IDENTICAL metro condition list — only the
+service name differs — so with no instruction to select, the safe move is to
+cover all of them:
+
+```
+                        before → after      (measured, $0.17 each)
+conditions used, per page  4,4,3,2,4,4 → 1,2,1,2,2,2
+worst sibling similarity      0.054 → 0.004
+longest shared verbatim run   61 ch → 24 ch
+```
+
+Sixty-one characters is over the 60-char floor `check-duplication.mjs` uses
+between cities. **Shingle similarity did not catch this**: 0.054 against a
+0.75 threshold, because the wording varied and only the substance repeated.
+The tell was that the two best sections were the two that used the fewest
+conditions.
+
+The fix is one line — "use AT MOST TWO of the conditions above and ignore the
+rest". Quality went UP, not down: each page now carries a service-specific
+CONSEQUENCE rather than a shared list. Post-construction on drywall dust
+pulling moisture out of the air and smearing under a damp cloth; pre-listing
+on timing the final wipe close to the first showing because pollen returns
+within days; standard on using a damp cloth rather than a duster because dry
+dusting moves pollen onto the floor you just did.
+
+Humidity still appears on all six, correctly — it is the dominant Houston
+condition for cleaning — but each page draws a different consequence from it.
+Using one condition six ways is the goal; using four conditions the same way
+six times was the defect.
+
 Two corrections to the handoff, both load-bearing:
 
 1. **`content-strategy.md` says to read the slot with `s(c, ...)`. That would
@@ -236,9 +269,9 @@ part (d) is gone, so the three remaining parts have the whole budget.
 
 ## Current draft state
 
-`content/_drafts/houston.json` — fully generated and committed (`89e75bc`).
-`done: ['research','front','deep','suburb']`, 6 areas, 6 metro conditions,
-37 subdivisions, 26 sections, 16,284 chars of persisted findings.
+`content/_drafts/houston.json` — fully generated, all five stages.
+`done: ['research','front','deep','suburb','service']`, 6 areas, 6 metro
+conditions, 37 subdivisions, 32 sections, 16,284 chars of persisted findings.
 
 This draft IS the evidence. Read `suburb.katy.local` against
 `suburb.sugar-land.local` to see what the pipeline now produces; every
@@ -327,10 +360,7 @@ would not have.
 
 ## What to do next, in order
 
-1. **Run the service stage on Houston** (~$0.40) — its draft cannot finalize
-   until then, and it is the first look at whether the local sections say
-   anything a resident would recognise.
-2. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
+1. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
    ops-facts-used, banned phrases. This is what turns A from advisory into
    enforced. `BANNED_PHRASES` is already exported from `stages.ts` for it.
    Note its ops check reads only `services.*` slots — widen it, or a fact used

@@ -520,6 +520,15 @@ Produce three paragraphs.
  * everywhere; that is the canonical text, and regenerating it per city would
  * make a hundred sites compete with each other for the same phrases.
  *
+ * THE CAP IS LOAD-BEARING. Every service receives the identical metro
+ * condition list — only the service name differs — so without an instruction
+ * to select, the safe move is to cover all of them, and six pages converge on
+ * the same facts in the same order. Measured on the first real Houston run:
+ * four of six used all four conditions, one pair shared a 61-character run,
+ * and the two best sections were the two that used the fewest. Shingle
+ * similarity did NOT catch it (0.054 against a 0.75 threshold) because the
+ * wording varied and only the substance repeated.
+ *
  * Throws for a slug the shared template does not render —
  * move-in-move-out-cleaning is the registry's one `bespoke` entry and owns no
  * slot, so copy written for it would never reach a page.
@@ -556,7 +565,9 @@ The page already explains what ${entry.name} is, what is included, and how it is
 
 Your section answers one question: what is different about ${entry.name} in ${facts.city} specifically, because of the homes here, the climate, or how people live?${conditionsSection}
 
-90 to 130 words. Lead with the most specific condition.
+90 to 130 words. Use AT MOST TWO of the conditions above — the two that change THIS job most — and ignore the rest. Lead with the more specific of the two.
+
+Working through every condition on the list is what makes six service pages read the same: they all get the same list, and only the service is different. The reader came for one service, not a weather report.
 
 If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.`
 }

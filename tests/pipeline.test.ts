@@ -1401,6 +1401,24 @@ describe('buildResearchPrompt', () => {
       expect(p).toMatch(/rather than padding/)
     })
 
+    it('CAPS how many conditions may be used, so six service pages do not converge', () => {
+      /*
+       * Measured on the first real Houston run: four of the six sections
+       * worked through all four metro conditions in the same order, with
+       * near-identical noun lists, and one shared a 61-character run — over
+       * the 60-char floor check-duplication.mjs uses between cities. Shingle
+       * similarity passed comfortably (0.054 against a 0.75 threshold),
+       * because the wording varied and the substance did not.
+       *
+       * The two best sections were the two that used the FEWEST conditions.
+       * Every service gets the identical metro list — only the service name
+       * differs — so without a cap the safe move is to cover everything.
+       */
+      const p = buildServiceLocalPrompt(facts, research, 'standard-cleaning')
+      expect(p).toMatch(/at most two/i)
+      expect(p).toMatch(/ignore the rest/i)
+    })
+
     it('refuses a service that does not render through the shared template', () => {
       // move-in-move-out-cleaning is the registry's bespoke entry and has no
       // slot; asking for one would write copy nothing ever renders.
