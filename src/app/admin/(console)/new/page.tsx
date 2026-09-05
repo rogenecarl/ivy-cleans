@@ -116,40 +116,56 @@ export default async function NewCityPage({
               />
             </div>
 
-            <div>
-              <Label htmlFor="notes" className="mb-1.5">
-                Notes
-              </Label>
-              {/* Placeholder only, by request -- no help text under this field.
-                * Worth knowing if you are changing it: the hard limits in
-                * src/pipeline/stages.ts strip prices, numbers, awards and
-                * guarantees from the generated copy no matter what is typed
-                * here (stages.ts:194 wraps these notes with an instruction that
-                * they cannot authorize anything those limits forbid). That is
-                * no longer stated in the UI, so an operator will not know it. */}
-              <Textarea
-                id="notes"
-                name="notes"
-                rows={5}
-                placeholder="Additional Context for AI when generating a site"
-              />
-            </div>
-
             {/*
-              * The ops block. Every field is optional -- a brand-new market
-              * has none of it -- but they are shown here rather than hidden
-              * behind an "advanced" toggle on purpose: this is the only input
-              * a competitor cannot reproduce, and a collapsed section stays
-              * empty forever. A page that receives one of these facts is
-              * required to use it.
+              * Owner knowledge and operating facts, collapsed.
+              *
+              * These WERE shown open, on the reasoning that a collapsed
+              * section stays empty forever. That argument no longer holds:
+              * every one of these is now editable afterwards at
+              * /admin/sites/<key>, which is their natural home, because they
+              * describe a market that is already running and this screen
+              * creates one that is not. Six always-empty boxes above the
+              * button were crowding out the three fields that actually have
+              * answers on day one.
+              *
+              * Kept here rather than moved out entirely: notes and ops feed
+              * the FIRST generation, so an operator who already knows these
+              * saves a full regeneration by typing them now.
+              *
+              * <details>, not a client-side toggle -- this page is a plain
+              * server-rendered form on purpose (see the header) and works
+              * before hydration.
               */}
-            <div className="rounded-md border border-border/60 p-4">
-              <p className="text-[0.95rem] font-semibold">What we know about this market</p>
-              <p className="mt-1 text-[0.8rem] text-muted-foreground">
-                All optional, and you can add them later. Pages that carry these outrank pages that
-                don&rsquo;t &mdash; a competitor can describe the town, but only you can say who
-                cleans there.
-              </p>
+            <details className="rounded-md border border-border/60 p-4 [&[open]>summary]:mb-4">
+              <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
+                This market is already operating
+                <span className="ml-2 font-normal text-muted-foreground">optional</span>
+                <span className="mt-1 block text-[0.8rem] font-normal text-muted-foreground">
+                  Who cleans there, since when, and what customers have said. A competitor can
+                  describe the town; only you can say this. All of it can be added later on the
+                  site&rsquo;s settings screen &mdash; but anything entered now is used by the first
+                  generation.
+                </span>
+              </summary>
+
+              <div>
+                <Label htmlFor="notes" className="mb-1.5">
+                  Notes
+                </Label>
+                {/* Placeholder only, by request -- no help text under this field.
+                  * Worth knowing if you are changing it: the hard limits in
+                  * src/pipeline/stages.ts strip prices, numbers, awards and
+                  * guarantees from the generated copy no matter what is typed
+                  * here (notesBlock wraps these with an instruction that they
+                  * cannot authorize anything those limits forbid). That is not
+                  * stated in the UI, so an operator will not know it. */}
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  rows={4}
+                  placeholder="Additional Context for AI when generating a site"
+                />
+              </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -249,6 +265,22 @@ export default async function NewCityPage({
                   </p>
                 </div>
               </div>
+            </details>
+
+            {/*
+              * What the button actually does. It starts a five-stage pipeline
+              * against a real model that runs for several minutes -- nothing
+              * on this screen said so, and the first thing an operator did
+              * with a long-running job they did not expect was close the tab.
+              */}
+            <div className="rounded-md bg-muted/50 px-4 py-3 text-[0.8rem] text-muted-foreground">
+              <p className="font-medium text-foreground">What happens next</p>
+              <p className="mt-1">
+                Research &rarr; front page &rarr; deep cleaning &rarr; area pages &rarr; service
+                pages. About seven minutes. You can close the tab &mdash; reopening the page picks
+                up from the last finished stage, and nothing is charged twice.
+              </p>
+              <p className="mt-1">Then you review it, and publish when it reads right.</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
