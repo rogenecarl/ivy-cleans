@@ -8,10 +8,12 @@ Written to hand the generator work to a fresh session. Read this first, then
 ## The one-line state
 
 The seven handoff changes are merged and pushed. Content-strategy items
-**A (ops block), B (voice), C (service local sections) and D (validators) are DONE**, and A's
+**A (ops block), B (voice), C (service local sections), D (validators) and
+E (evals) are DONE**, and A's
 three reachability holes are closed — see "A is complete" below. Houston has been generated
 against the real model twice, and the flaw the first run exposed is fixed and
-verified — see "The real Houston run" below. **E (evals) is next.**
+verified — see "The real Houston run" below. **The whole content strategy is
+in, less change 2 (needs credentials). Next is Minneapolis — see the bottom.**
 
 ```
 origin/main   6973e8a   (last pushed commit)
@@ -237,6 +239,110 @@ three of these by name"* while listing fewer than three. An impossible
 instruction is an invitation to invent the third. The prompt now asks for
 `min(3, n)`, and the validator checks the same number.
 
+## E is complete
+
+`evals/` — three fixtures, one runner, results committed per run.
+
+```
+npx tsx evals/run.mjs                 every fixture
+npx tsx evals/run.mjs houston-tx      one
+npx tsx evals/run.mjs --dry-run       plan and cost, no spend
+npx tsx evals/run.mjs --no-rubric     mechanical checks only
+```
+
+Exits non-zero on a failed check, so it can gate a merge. Run it before
+merging any prompt change.
+
+### Frozen research — the deliberate departure from the spec
+
+`content-strategy.md` says "runs the full pipeline against each fixture".
+This runs everything EXCEPT research, from research frozen into the fixtures.
+
+- **Cost.** Research is ~$1.06 of the $1.35 a city costs. Full-pipeline evals
+  are ~$7 a run; these are ~$1.50. An eval nobody runs has no value.
+- **Determinism.** Live web search returns different results week to week. A
+  suite whose inputs move cannot tell you whether the prompt improved or the
+  search did.
+- **It is not what changes.** Prompt work lands in front/deep/suburb/service.
+
+Re-freeze deliberately after a research-brief change: regenerate for real with
+`--stage research --regenerate`, then copy the draft's `research` into the
+fixture.
+
+### The fixtures
+
+All research is REAL, produced by the actual research stage against the actual
+web. Nothing about a place is invented.
+
+| Fixture | For |
+|---|---|
+| `houston-tx` | the rich case — 6 areas, 37 subdivisions, 6 conditions |
+| `miami-fl` | the thin case — 11 areas, ZERO subdivisions; the gate must drop all of them |
+| `houston-ops` | Houston's research plus an ops block, to test the one thing no real run has: does a supplied operator fact reach the copy |
+
+**`houston-ops` carries invented ops facts, and that is the point.** Inventing
+operator facts about a market that really operates is the failure this project
+exists to prevent — and no market being generated is operating yet. A fixture
+that is obviously a fixture, under `zeval-` keys the runner deletes, is the
+only honest way to exercise the ops block against a real model.
+
+### The rubric is the reason this exists
+
+Every mechanical check in the harness would have PASSED the six converged
+service sections. Entity coverage fine, no banned phrases, similarity 0.054
+against a 0.75 threshold — four of six pages running the same four facts in
+the same order. Only reading them found it.
+
+So a second model call grades each area page 1-5 on *"would a resident
+recognise their own neighbourhood?"*, and anything under 4 fails the run. It
+is deliberately NOT given the research: a resident does not know what the
+pipeline was told. Handing the grader the source material turns it into
+"did this use its inputs", which `quality.ts` already answers.
+
+Not checked: reading level, for the same reason it is out of `quality.ts`.
+
+### The first real run found two defects
+
+`$2.13, 48 calls, 3 fixtures.` Above the $1.50 estimate — the rubric adds
+twelve calls whose reasoning output is long.
+
+```
+houston-tx    ✓ gate  ✓ entities+ops  ✓ banned  ✓ siblings 0.047   ✗ rubric 4.5
+houston-ops   ✓ gate  ✓ entities+ops  ✓ banned  ✓ siblings         ✗ rubric 4.2
+miami-fl      ✓ gate (0 of 11 built)  ✓ all mechanical checks
+cross-fixture ✗ six shared runs of 60+ chars
+```
+
+**1 · Missouri City scores 3 in both runs, and the reason is research, not
+prose.** The grader:
+
+> "Two real names (Lakes of Brightwater, the First Colony sections) dropped
+> into copy that is otherwise pure Houston-metro boilerplate … the page
+> ignores what actually distinguishes Missouri City (Sienna, Quail Valley's
+> older golf-course homes, Hunters Glen/Fondren Park, the Fort Bend–Harris
+> split)."
+
+And a factual error it caught that nothing else could:
+
+> "First Colony is generally understood as Sugar Land, not inside Missouri
+> City limits, which a resident would flag."
+
+**`entity-coverage` counts names; it cannot tell you they are the RIGHT
+names.** Missouri City passed every mechanical check with subdivisions that
+are thin and partly misattributed. This is precisely the gap the rubric was
+added for, and it found it on the first run.
+
+**2 · The front page still shares long verbatim runs across cities.**
+`services.heroParagraphs` 83 chars, `services.serviceIntro` 82,
+`deep.whatIs` 73 — all Houston ↔ Miami. `check-duplication.mjs` reports zero
+on LIVE cities only because Minneapolis is the only live one. The front-page
+and deep prompts were never part of changes 1–7, and `content-strategy.md`
+section F explicitly deferred the front page. This is that deferral, measured.
+
+**One harness flaw the run exposed in itself**, now fixed: houston-ops is
+houston-tx's research with an ops block, so cross-comparing them was
+comparing a city to itself. Same-city fixtures are now skipped.
+
 ## The real Houston run — what it proved
 
 `npx tsx scripts/generate-city.mjs houston` — 7 calls, 122K in / 22K out,
@@ -411,10 +517,13 @@ would not have.
 
 ## What to do next, in order
 
-1. **E — evals** (1 day). The one check nothing mechanical can do: a rubric
-   call scoring "would a resident recognise their own neighbourhood?". D
-   passes Houston cleanly, and D would ALSO have passed the six converged
-   service sections that had to be caught by reading them.
+1. **Minneapolis.** It is the ONLY live site, it has sixteen months of Search
+   Console data, and it can receive none of this work: 8 sections, no area
+   copy, no service copy, and `publishCity` deleted the sidecar it would need
+   to regenerate from. **There is no path today to rebuild a live city.**
+   That is the biggest remaining lever and it is not on Abdi's list.
+2. **Miami** — 11 areas, zero subdivisions, so the gate refuses all of them.
+   Needs research re-run (~$1.20) before it can produce anything.
 6. **Change 2 — DataForSEO** whenever credentials exist. The seam is built:
    `buildResearchStructuringPrompt` takes a keywords argument and branches on
    it, so it is one call-site change plus deleting part (d) of the brief.

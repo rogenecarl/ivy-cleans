@@ -1,0 +1,47 @@
+{
+  "at": "2026-09-05T03:47:31.625Z",
+  "rubric": false,
+  "usage": {
+    "calls": 8,
+    "inputTokens": 23030,
+    "outputTokens": 8204,
+    "costUsd": 0.32
+  },
+  "crossFindings": [],
+  "fixtures": [
+    {
+      "name": "miami-fl",
+      "key": "zeval-miami-fl",
+      "city": "Miami",
+      "elapsedMs": 141976,
+      "areasResearched": 11,
+      "areasBuilt": 0,
+      "built": [],
+      "quality": [],
+      "siblings": [],
+      "rubric": [],
+      "checks": [
+        {
+          "label": "uniqueness gate",
+          "ok": true,
+          "detail": "0 of 11 areas built"
+        },
+        {
+          "label": "entity coverage + ops used",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "banned phrases",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "sibling similarity",
+          "ok": true,
+          "detail": "worst 0.000 (— )"
+        }
+      ]
+    }
+  ]
+}

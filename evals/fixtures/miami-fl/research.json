@@ -1,0 +1,89 @@
+{
+  "suburbs": [
+    {
+      "name": "Coconut Grove",
+      "slug": "house-cleaning-coconut-grove",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Brickell",
+      "slug": "cleaning-services-brickell",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Coral Gables",
+      "slug": "cleaning-service-coral-gables",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Miami Beach",
+      "slug": "miami-beach-cleaning-services",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Key Biscayne",
+      "slug": "house-cleaning-key-biscayne",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Hialeah",
+      "slug": "cleaning-services-hialeah",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Doral",
+      "slug": "cleaning-service-doral",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Kendall",
+      "slug": "kendall-cleaning-services",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "West Kendall",
+      "slug": "house-cleaning-west-kendall",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "South Miami",
+      "slug": "cleaning-services-south-miami",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    },
+    {
+      "name": "Homestead",
+      "slug": "cleaning-service-homestead",
+      "subdivisions": [],
+      "housingCharacter": "",
+      "conditions": []
+    }
+  ],
+  "zips": [
+    "33012",
+    "33125",
+    "33133",
+    "33186"
+  ],
+  "keywords": [],
+  "conditions": []
+}
