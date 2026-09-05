@@ -42,6 +42,7 @@ import { getCity, revalidateCity } from '../content/store'
 import { validateCityContent } from '../content/validate'
 import type { CityContent } from '../content/types'
 import { serviceBySlug } from '../data/services/registry'
+import { buildProvisioners, checkDomainLive } from './provision'
 import { deriveFacts } from './facts'
 import { makeClient } from './model'
 import { readProgress, type ProgressEvent } from './progress'
@@ -444,10 +445,60 @@ export async function finalizeLogic(key: string): Promise<ActionResult> {
   return attempt(() => finalizeDraft(key))
 }
 
-/** Flip status to 'live', optionally map a host, retire the sidecar. */
-export async function publishLogic(key: string, domain?: string): Promise<ActionResult> {
+/**
+ * Flip status to 'live', map or BUY a host, retire the sidecar.
+ *
+ * `provision` spends real money, so it is an explicit argument rather than a
+ * default: the publish screen's toggle is off unless the operator turns it on
+ * for that city.
+ */
+export async function publishLogic(
+  key: string,
+  domain?: string,
+  provision?: boolean,
+): Promise<ActionResult> {
   const host = domain?.trim()
-  return attempt(() => publishCity(key, host ? host : undefined))
+  return attempt(() =>
+    publishCity(key, {
+      ...(host ? { domain: host } : {}),
+      ...(provision ? { provisionDomain: true } : {}),
+    }),
+  )
+}
+
+/**
+ * Is a provisioned domain actually serving yet?
+ *
+ * publishCity routes the domain and returns without waiting: DNS and TLS take
+ * minutes, and a server action does not get minutes. So the wait lives in the
+ * browser, which polls this — one config call per poll, no loop on the server.
+ *
+ * Clears `doc.provisioning` once the answer is yes, which is what makes the
+ * "waiting for DNS" banner disappear on its own.
+ */
+export async function checkProvisioningLogic(
+  key: string,
+): Promise<{ ok: true; live: boolean; domain: string | null } | { ok: false; error: string }> {
+  try {
+    const doc = await readCityDoc(key)
+    if (!doc) return { ok: false, error: `no published document found for "${key}"` }
+    if (!doc.provisioning) return { ok: true, live: true, domain: doc.domain ?? null }
+
+    const { host } = buildProvisioners()
+    const live = await checkDomainLive(host, doc.provisioning.domain)
+    if (live) {
+      delete doc.provisioning
+      await writeFile(
+        path.join(CONTENT_DIR, `${key}.json`),
+        JSON.stringify(validateCityContent(doc), null, 2),
+        'utf-8',
+      )
+      revalidateCity(key)
+    }
+    return { ok: true, live, domain: doc.provisioning?.domain ?? doc.domain ?? null }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
 }
 
 /** Removes an in-progress draft sidecar (dashboard housekeeping). */

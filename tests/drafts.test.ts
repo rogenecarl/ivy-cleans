@@ -56,6 +56,7 @@ const ALL_TEST_KEYS = [
   'ztest-dupe-a',
   'ztest-dupe-b',
   'ztest-quality',
+  'ztest-provision',
 ]
 
 function progressPath(key: string): string {
@@ -517,7 +518,7 @@ describe('drafts store', () => {
       // Sidecar still present right after finalize.
       await expect(readFile(draftPath(key), 'utf-8')).resolves.toBeTruthy()
 
-      await publishCity(key, 'Ztest-Domain.example:3000')
+      await publishCity(key, { domain: 'Ztest-Domain.example:3000' })
 
       const raw = JSON.parse(await readFile(cityPath(key), 'utf-8'))
       const validated = validateCityContent(raw)
@@ -535,6 +536,93 @@ describe('drafts store', () => {
 
       const resolved = await getCity(key)
       expect(resolved.status).toBe('live')
+    })
+  })
+
+  describe('publishCity provisioning', () => {
+    const KEY = 'ztest-provision'
+
+    /*
+     * STUB_MODEL=1 is the single stub switch this repo uses, and task 9
+     * follows it: buildProvisioners() returns the stub registrar, host and
+     * router under it, so the whole buy -> attach -> DNS -> route flow runs
+     * with no network and no spend. Without it the real clients demand
+     * PORKBUN_API_KEY and throw, which is correct behaviour and is itself
+     * asserted by the manual-domain test below.
+     */
+    let priorStub: string | undefined
+    beforeAll(() => {
+      priorStub = process.env.STUB_MODEL
+      process.env.STUB_MODEL = '1'
+    })
+    afterAll(() => {
+      if (priorStub === undefined) delete process.env.STUB_MODEL
+      else process.env.STUB_MODEL = priorStub
+    })
+
+    afterEach(async () => {
+      await rm(draftPath(KEY), { force: true })
+      await rm(cityPath(KEY), { force: true })
+      revalidateCity(KEY)
+    })
+
+    async function ready() {
+      const facts = deriveFacts({ city: 'Ztest Provision', state: 'MN', phoneDigits: '6125550199' })
+      await createDraft(facts)
+      const draft = await loadDraft(KEY)
+      draft.research = fullResearch()
+      draft.sections = fullSections()
+      draft.done = [...STAGE_IDS]
+      await saveDraft(KEY, draft)
+      await finalizeDraft(KEY)
+    }
+
+    it('publishes with a manually typed domain even though no registrar is configured', async () => {
+      /*
+       * The case every deployment is in today, and the one the handoff's
+       * wiring breaks: it calls buildProvisioners() for a manual domain too,
+       * and that THROWS when PORKBUN_API_KEY is unset. Typing a domain you
+       * already own must never require a registrar account.
+       */
+      await ready()
+      await expect(publishCity(KEY, { domain: 'Ztest-Provision.com' })).resolves.toBeUndefined()
+
+      const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
+      expect(doc.status).toBe('live')
+      expect(doc.domain).toBe('ztest-provision.com')
+      expect(doc.provisioning).toBeUndefined()
+
+      const domains = JSON.parse(await readFile(DOMAINS_JSON, 'utf-8'))
+      expect(domains.hosts['ztest-provision.com']).toBe(KEY)
+    })
+
+    it('still accepts the bare-key call shape used everywhere else', async () => {
+      await ready()
+      await expect(publishCity(KEY)).resolves.toBeUndefined()
+      expect(JSON.parse(await readFile(cityPath(KEY), 'utf-8')).status).toBe('live')
+    })
+
+    it('buys and routes a domain when asked, and records that it is not observed live yet', async () => {
+      // STUB_MODEL=1 gives the stub registrar/host/router: the whole flow,
+      // no network, no spend. The stub host reports live only on its second
+      // config call, and provisionDomain makes exactly one — so a first
+      // publish always lands in the provisioning state, as a real one does.
+      await ready()
+      await publishCity(KEY, { provisionDomain: true })
+
+      const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
+      expect(doc.status).toBe('live')
+      expect(doc.domain).toMatch(/\.com$/)
+      expect(doc.provisioning).toMatchObject({ domain: doc.domain })
+      expect(typeof doc.provisioning.since).toBe('string')
+    })
+
+    it('threads a progress log out, so the publish screen can show the steps', async () => {
+      await ready()
+      const lines: string[] = []
+      await publishCity(KEY, { provisionDomain: true }, (m) => lines.push(m))
+      expect(lines.join('\n')).toMatch(/buying/)
+      expect(lines.join('\n')).toMatch(/routed/)
     })
   })
 
@@ -699,7 +787,7 @@ describe('drafts store', () => {
 
     it('refreshes the copy without demoting the city or dropping its domain', async () => {
       const doc = await loadDraft(key)
-      await publishCity(key, 'ztest-republish.example')
+      await publishCity(key, { domain: 'ztest-republish.example' })
       // publishCity retires the sidecar; restore it so the city is in the
       // partial-publish shape this guard exists for (live doc + live sidecar).
       await saveDraft(key, doc)
@@ -748,11 +836,11 @@ describe('drafts store', () => {
       await saveDraft(key, doc)
       await finalizeDraft(key)
 
-      await publishCity(key, 'ztest-drift-a.example')
+      await publishCity(key, { domain: 'ztest-drift-a.example' })
       expect(hosts(await readFile(DOMAINS_JSON, 'utf-8'))['ztest-drift-a.example']).toBe(key)
 
       await saveDraft(key, doc) // sidecar back, as the admin flow would have it
-      await publishCity(key, 'ztest-drift-b.example')
+      await publishCity(key, { domain: 'ztest-drift-b.example' })
 
       const after = hosts(await readFile(DOMAINS_JSON, 'utf-8'))
       // The old host is gone — left behind it would keep routing to this city
@@ -775,7 +863,7 @@ describe('drafts store', () => {
       domains.hosts['ztest-someone-else.example'] = 'minneapolis'
       await writeFile(DOMAINS_JSON, JSON.stringify(domains, null, 2), 'utf-8')
 
-      await publishCity(key, 'ztest-drift-c.example')
+      await publishCity(key, { domain: 'ztest-drift-c.example' })
 
       const after = hosts(await readFile(DOMAINS_JSON, 'utf-8'))
       expect(after['ztest-someone-else.example']).toBe('minneapolis')

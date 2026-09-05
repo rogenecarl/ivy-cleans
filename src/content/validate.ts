@@ -62,6 +62,20 @@ export function validateCityContent(raw: unknown): CityContent {
     errors.push('contactAddress must be a string when present')
   }
 
+  // -- provisioning (optional) --
+  const provisioning = doc.provisioning
+  if (provisioning !== undefined) {
+    const pr = provisioning as Record<string, unknown>
+    if (
+      provisioning === null ||
+      typeof provisioning !== 'object' ||
+      !isString(pr.since) ||
+      !isString(pr.domain)
+    ) {
+      errors.push('provisioning must be { since: string, domain: string } when present')
+    }
+  }
+
   /*
    * -- ops (optional) --
    *

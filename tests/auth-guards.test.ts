@@ -92,6 +92,7 @@ const finalizeLogic = vi.fn()
 const updateSuburbsLogic = vi.fn()
 const updateOpsLogic = vi.fn()
 const pendingServicesLogic = vi.fn()
+const checkProvisioningLogic = vi.fn()
 const publishLogic = vi.fn()
 const listCities = vi.fn(async () => [])
 const getProgressLogic = vi.fn()
@@ -108,6 +109,7 @@ vi.mock('@/pipeline/admin-logic', async () => {
     updateSuburbsLogic,
     updateOpsLogic,
     pendingServicesLogic,
+    checkProvisioningLogic,
     publishLogic,
     listCities,
     getProgressLogic,
@@ -172,6 +174,7 @@ describe('admin-only pipeline actions', () => {
     ['updateSuburbsAction', (m) => m.updateSuburbsAction('miami', [])],
     ['pendingServicesAction', (m) => m.pendingServicesAction('miami')],
     ['publishAction', (m) => m.publishAction('miami')],
+    ['checkProvisioningAction', (m) => m.checkProvisioningAction('miami')],
     ['listCitiesAction', (m) => m.listCitiesAction()],
     ['getProgressAction', (m) => m.getProgressAction('miami')],
   ]
@@ -191,6 +194,7 @@ describe('admin-only pipeline actions', () => {
     expect(finalizeLogic).not.toHaveBeenCalled()
     expect(updateSuburbsLogic).not.toHaveBeenCalled()
     expect(pendingServicesLogic).not.toHaveBeenCalled()
+    expect(checkProvisioningLogic).not.toHaveBeenCalled()
     expect(publishLogic).not.toHaveBeenCalled()
     expect(listCities).not.toHaveBeenCalled()
     expect(getProgressLogic).not.toHaveBeenCalled()

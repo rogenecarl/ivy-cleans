@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie, getCookieCache } from "better-auth/cookies";
-import { isMappedHost, resolveRewrite } from "@/content/resolve-rewrite";
+import { isMappedHost, loadRouting, resolveRewrite } from "@/content/resolve-rewrite";
 import { resolveAdminRedirect } from "@/content/resolve-admin";
 import { isUnder } from "@/lib/access";
 import { ADMIN_BASE } from "@/lib/admin-routes";
@@ -25,6 +25,19 @@ export async function proxy(req: NextRequest) {
   const host = req.headers.get("host") ?? "";
 
   /*
+   * Task 9: the host map is read at request time from Global Config, with the
+   * build-time JSON as the fallback, so a newly provisioned domain routes
+   * without a redeploy. loadRouting() never throws and consults the store only
+   * when EDGE_CONFIG is set, so a deployment without one behaves exactly as it
+   * did — same tables, no extra request.
+   *
+   * Read ONCE and passed to both pure functions below. They already took these
+   * as optional arguments, so neither changes; only where the data comes from
+   * does.
+   */
+  const { domains, cityKeys } = await loadRouting();
+
+  /*
    * Console paths, on the operator's own host only. The host test is not
    * incidental: it is the same scoping resolveRewrite applies to its own
    * admin passthrough, and hoisting this branch above it without the test
@@ -41,7 +54,7 @@ export async function proxy(req: NextRequest) {
    * client-held; see resolve-admin.ts for why that is acceptable here and
    * nowhere else.
    */
-  if (!isMappedHost(host) && isUnder(pathname, ADMIN_BASE)) {
+  if (!isMappedHost(host, domains) && isUnder(pathname, ADMIN_BASE)) {
     const hasSession = !!getSessionCookie(req);
     let cached = null;
     if (hasSession) {
@@ -66,7 +79,7 @@ export async function proxy(req: NextRequest) {
     return;
   }
 
-  const target = resolveRewrite(host, pathname);
+  const target = resolveRewrite(host, pathname, domains, cityKeys);
   if (target === null) return;
   const url = req.nextUrl.clone();
   url.pathname = target;

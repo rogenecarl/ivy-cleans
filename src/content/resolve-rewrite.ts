@@ -21,6 +21,57 @@ import cityKeys from "../../content/_cities.json";
 export type DomainsIndex = { default: string; hosts: Record<string, string> };
 
 /**
+ * The routing tables, Global Config first and the deployed JSON second.
+ *
+ * WHY THIS EXISTS (task 9): both indexes above are inlined at build time, so
+ * mapping a new domain in the admin does nothing until the app is redeployed.
+ * That single import is the ONLY thing in the whole pipeline that forces a
+ * rebuild — city content is already Blob-backed. Moving the host map into
+ * Vercel Global Config, which is readable from the proxy at the edge, is what
+ * makes a new site live the moment publishCity returns.
+ *
+ * MERGED, NEVER REPLACED. Minneapolis keeps routing from the deployed JSON
+ * while every new city routes from Global Config, so turning this on changes
+ * nothing that already works.
+ *
+ * NEVER THROWS. This runs on every request for every host: a routing read
+ * that throws is the whole site, on every domain. A Global Config outage — or
+ * an environment where it was never configured, which is every deployment
+ * today — degrades to the last deployed map, never to nothing.
+ *
+ * The store is only consulted when EDGE_CONFIG is set (Vercel sets it when
+ * you connect the store to the project), so an unconfigured deployment pays
+ * nothing at all for this: no import, no request, no timeout.
+ */
+export async function loadRouting(): Promise<{ domains: DomainsIndex; cityKeys: string[] }> {
+  const fallback = {
+    domains: domainsJson as DomainsIndex,
+    cityKeys: cityKeys as string[],
+  };
+
+  if (!process.env.EDGE_CONFIG) return fallback;
+
+  try {
+    // Imported lazily so a deployment without the store never loads the
+    // client, and so a missing package degrades like any other failure.
+    const { get } = await import("@vercel/edge-config");
+    const [hosts, keys] = await Promise.all([
+      get<Record<string, string>>("hosts"),
+      get<string[]>("cityKeys"),
+    ]);
+    return {
+      domains: {
+        default: fallback.domains.default,
+        hosts: { ...fallback.domains.hosts, ...(hosts ?? {}) },
+      },
+      cityKeys: [...new Set([...fallback.cityKeys, ...(keys ?? [])])],
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+/**
  * Strips a port and case-folds a `Host` header down to the bare hostname
  * used as the key into `_domains.hosts` everywhere in this file.
  *

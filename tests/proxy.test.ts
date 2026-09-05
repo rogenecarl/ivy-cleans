@@ -19,7 +19,7 @@
  * content/_domains.json, which is empty — no host is mapped yet — in every
  * environment this suite runs in).
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 import { proxy } from '../src/proxy'
 
@@ -154,5 +154,64 @@ describe('proxy — console branch, wired end to end', () => {
 
     expect(getSessionCookie).not.toHaveBeenCalled()
     expect(getCookieCache).not.toHaveBeenCalled()
+  })
+})
+
+describe('loadRouting', () => {
+  /*
+   * Task 9. The host map moves from a build-time JSON import into Vercel
+   * Global Config so a new site routes without a redeploy — content is
+   * already Blob-backed, and that single import was the last thing forcing a
+   * rebuild (see resolve-rewrite.ts's own header).
+   *
+   * These tests are about the FALLBACK, because that is what protects the
+   * live site: a Global Config outage, or an unconfigured environment, must
+   * degrade to the last deployed map rather than to nothing.
+   */
+  const priorEdgeConfig = process.env.EDGE_CONFIG
+
+  afterEach(() => {
+    if (priorEdgeConfig === undefined) delete process.env.EDGE_CONFIG
+    else process.env.EDGE_CONFIG = priorEdgeConfig
+  })
+
+  it('returns the build-time JSON when Global Config is not configured at all', async () => {
+    // The state every deployment is in today, and the one this must not break.
+    delete process.env.EDGE_CONFIG
+    const { loadRouting } = await import('../src/content/resolve-rewrite')
+    const routing = await loadRouting()
+
+    expect(routing.domains.default).toBe('minneapolis')
+    expect(routing.cityKeys).toContain('minneapolis')
+  })
+
+  it('never throws, whatever the store does', async () => {
+    // A routing read that throws is every page on every domain, so this is
+    // the one behaviour worth pinning above all others.
+    process.env.EDGE_CONFIG = 'https://edge-config.vercel.com/nonexistent?token=nope'
+    const { loadRouting } = await import('../src/content/resolve-rewrite')
+    await expect(loadRouting()).resolves.toBeDefined()
+  })
+
+  it('degrades to the deployed map, not to nothing, when the store is unreachable', async () => {
+    process.env.EDGE_CONFIG = 'https://edge-config.vercel.com/nonexistent?token=nope'
+    const { loadRouting } = await import('../src/content/resolve-rewrite')
+    const routing = await loadRouting()
+
+    expect(routing.domains.default).toBe('minneapolis')
+    expect(routing.cityKeys.length).toBeGreaterThan(0)
+  })
+
+  it('feeds resolveRewrite unchanged — the pure functions keep their contract', async () => {
+    delete process.env.EDGE_CONFIG
+    const { loadRouting, resolveRewrite } = await import('../src/content/resolve-rewrite')
+    const { domains, cityKeys } = await loadRouting()
+
+    // Same answers the default-argument form gives, which is what makes the
+    // proxy's switch to loadRouting() a no-op for every existing host.
+    expect(resolveRewrite('example.com', '/home', domains, cityKeys)).toBe(resolveRewrite('example.com', '/home'))
+    expect(resolveRewrite('example.com', '/minneapolis/home', domains, cityKeys)).toBe(
+      resolveRewrite('example.com', '/minneapolis/home'),
+    )
   })
 })

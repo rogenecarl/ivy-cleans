@@ -23,6 +23,7 @@ import type { CityContent } from './types'
 import { citySlug } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
 import { checkQuality } from './quality'
+import { buildProvisioners, buildRouter, provisionDomain } from '../pipeline/provision'
 import { validateCityContent } from './validate'
 import { getCity, listLiveCityKeys, revalidateCity } from './store'
 
@@ -334,7 +335,23 @@ export async function finalizeDraft(key: string): Promise<void> {
   revalidateCity(key)
 }
 
-export async function publishCity(key: string, domain?: string): Promise<void> {
+/**
+ * Draft -> live, and (optionally) a domain bought, pointed and routed.
+ *
+ * `opts.domain` is a host the operator already owns: it is mapped, never
+ * bought, and needs no registrar account. `opts.provisionDomain` is task 9 —
+ * it picks a name, BUYS it, attaches it to the host, writes the DNS records
+ * and routes it. That spends real money, which is why it is opt-in and why
+ * the admin defaults it off.
+ *
+ * `log` is threaded through to the provisioner so the publish screen can show
+ * "buying … → attached → A @ → routed" the way the generation stages do.
+ */
+export async function publishCity(
+  key: string,
+  opts: { domain?: string; provisionDomain?: boolean } = {},
+  log: (msg: string) => void = () => {},
+): Promise<void> {
   assertKeyShape(key)
   const raw = await readFile(cityPath(key), 'utf-8')
   const doc = validateCityContent(JSON.parse(raw))
@@ -399,8 +416,28 @@ export async function publishCity(key: string, domain?: string): Promise<void> {
   doc.status = 'live'
 
   let host: string | undefined
-  if (domain !== undefined) {
-    host = domain.toLowerCase().split(':')[0]
+  if (opts.provisionDomain) {
+    /*
+     * Buys, attaches, points DNS and routes — then RETURNS, without waiting
+     * for DNS and TLS. That wait is minutes and this is reached through a
+     * server action, so waiting here is the serverless-timeout failure the
+     * suburb stage already taught us. `provisioning` records that the domain
+     * is routed but not yet observed serving; the admin polls from there.
+     */
+    const { registrar, host: hostClient, router } = buildProvisioners()
+    const result = await provisionDomain(
+      { cityKey: key, city: doc.city, state: doc.state },
+      registrar,
+      hostClient,
+      router,
+      log,
+    )
+    host = result.domain
+    doc.domain = host
+    if (result.live) delete doc.provisioning
+    else doc.provisioning = { since: new Date().toISOString(), domain: result.domain }
+  } else if (opts.domain !== undefined) {
+    host = opts.domain.toLowerCase().split(':')[0]
     doc.domain = host
   }
 
@@ -422,6 +459,20 @@ export async function publishCity(key: string, domain?: string): Promise<void> {
     }
     domains.hosts[host] = key
     await writeFile(DOMAINS_JSON, JSON.stringify(domains, null, 2), 'utf-8')
+
+    /*
+     * And into Global Config, when there is one. _domains.json above is still
+     * written and is still the deploy-time fallback — merged, never replaced
+     * (see resolve-rewrite.ts loadRouting), so a store outage degrades to the
+     * last deployed map. buildRouter() returns null when Global Config is not
+     * configured, which is every deployment until task 9's accounts exist;
+     * publishing must not require them.
+     */
+    const router = buildRouter()
+    if (router) {
+      await router.setHost(host, key)
+      await router.addCityKey(key)
+    }
   }
 
   revalidateCity(key)

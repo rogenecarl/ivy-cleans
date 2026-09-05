@@ -70,6 +70,15 @@ export type CityContent = {
   /** Suburb pages exist only for Minneapolis; false renders Areas We Serve unlinked. */
   hasSuburbPages: boolean
   /**
+   * Set when a domain has been bought, pointed and routed but NOT yet
+   * observed serving — DNS and TLS take minutes and publishCity does not wait
+   * for them (that wait is a serverless timeout; see publishCity).
+   *
+   * The site is live from the host's side either way; this only records that
+   * nobody has confirmed it answers. Cleared once a liveness check succeeds.
+   */
+  provisioning?: { since: string; domain: string }
+  /**
    * FACTS — typed by a human, never through a model. Carried here so they
    * survive publish: publishCity deletes the draft sidecar that held them,
    * and nothing can research or regenerate who leads a crew.

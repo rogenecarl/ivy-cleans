@@ -341,7 +341,21 @@ try {
         rubric: !NO_RUBRIC,
         usage: { calls, inputTokens, outputTokens, costUsd: Number(cost.toFixed(2)) },
         crossFindings,
-        fixtures: results.map(({ sections, ...rest }) => rest),
+        // Copy exactly what is worth keeping. The generated `sections` are
+        // deliberately NOT written: a results file is a score history, and
+        // burying six cities of prose in each one makes the trend unreadable.
+        fixtures: results.map((r) => ({
+          name: r.name,
+          city: r.city,
+          elapsedMs: r.elapsedMs,
+          areasResearched: r.areasResearched,
+          areasBuilt: r.areasBuilt,
+          built: r.built,
+          quality: r.quality,
+          siblings: r.siblings,
+          rubric: r.rubric,
+          checks: r.checks,
+        })),
       },
       null,
       2,

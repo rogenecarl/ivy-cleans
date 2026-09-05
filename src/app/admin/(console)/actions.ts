@@ -38,6 +38,7 @@ import {
   listCities,
   publishLogic,
   regenerateLogic,
+  checkProvisioningLogic,
   pendingServicesLogic,
   pendingSuburbsLogic,
   runStageLogic,
@@ -141,12 +142,28 @@ export async function updateSuburbsAction(key: string, suburbs: SuburbRow[]): Pr
   return result
 }
 
-export async function publishAction(key: string, domain?: string): Promise<ActionResult> {
+/**
+ * Publish, and optionally BUY a domain on the way.
+ *
+ * `provision` spends real money, so it crosses the boundary as an explicit
+ * flag rather than a default — the publish screen's toggle is off unless the
+ * operator turns it on for that city.
+ */
+export async function publishAction(
+  key: string,
+  domain?: string,
+  provision?: boolean,
+): Promise<ActionResult> {
   await requireAdmin()
-  const result = await publishLogic(key, domain)
-  if (result.ok) revalidatePath('/', 'layout')
-  return result
+  return publishLogic(key, domain, provision)
 }
+
+/** Poll a provisioned domain until DNS and TLS answer. See checkProvisioningLogic. */
+export async function checkProvisioningAction(key: string) {
+  await requireAdmin()
+  return checkProvisioningLogic(key)
+}
+
 
 export async function listCitiesAction(): Promise<CityRow[]> {
   await requireAdmin()

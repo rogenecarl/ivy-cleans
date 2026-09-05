@@ -11,6 +11,7 @@ import type { ResearchOutput } from '@/pipeline/schemas'
 import { Button } from '@/components/ui/button'
 import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
 import { ErrorText, Panel, StatusChip } from '../../../ui'
+import { ProvisioningPoll } from './provisioning-poll'
 import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
@@ -230,11 +231,16 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
             <p>
               <StatusChip status="live" />{' '}
               <span className="ml-1">
-                {doc.domain
-                  ? `Serving ${doc.domain}. If it does not answer, the domain still has to be attached to the Vercel project.`
-                  : 'Live with no domain mapped yet.'}
+                {doc.provisioning
+                  ? `${doc.provisioning.domain} was bought and routed. Waiting for DNS and TLS to answer — usually a few minutes.`
+                  : doc.domain
+                    ? `Serving ${doc.domain}.`
+                    : 'Live with no domain mapped yet.'}
               </span>
             </p>
+            {doc.provisioning && (
+              <ProvisioningPoll cityKey={key} domain={doc.provisioning.domain} />
+            )}
             <Button asChild variant="outline" className="mt-3 min-h-11 sm:min-h-9">
               <a href={`/${key}`} target="_blank" rel="noreferrer">
                 Open preview
