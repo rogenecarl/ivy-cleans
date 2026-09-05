@@ -217,6 +217,30 @@ legitimately changed — assert shape, not snapshots.
 
 ---
 
+## The question that picks the next task
+
+**Is any market being generated actually operating yet?**
+
+The ops block asks for a crew lead's first name, months served, homes cleaned,
+real reviews. Ivy Cleans operates in Minneapolis — that is the live site.
+Houston is a target market. If nobody is cleaning houses in Houston yet, there
+is no crew lead there, and filling the block in would be inventing precisely
+what this project refuses to invent.
+
+- **A market IS operating** → get its real facts (ten minutes) and regenerate
+  that city (~$0.80). That answers whether the model uses supplied facts
+  naturally or bolts them on. Then build **D**, which enforces them.
+- **No market is operating yet** → skip A's test and skip D. Both are
+  machinery for facts that do not exist. Do **C — service local sections**
+  instead (1 day, ~$0.50/city): six of the seven service pages are currently
+  identical in every city, which is a real differentiation gap needing no
+  input from the owner.
+
+Do not build D before seeing the ops block work. It turns an unused supplied
+fact into a failed page; building that enforcement for something never
+observed risks a validator that fails everything and teaches nothing $0.80
+would not have.
+
 ## What to do next, in order
 
 1. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
