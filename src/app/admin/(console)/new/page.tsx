@@ -221,7 +221,7 @@ export default async function NewCityPage({
                     placeholder="340"
                   />
                   <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                    Round down to a number you could defend.
+                    Printed on the page exactly as typed, so round down rather than up.
                   </p>
                 </div>
 

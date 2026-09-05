@@ -116,10 +116,16 @@ export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsField
             placeholder="340"
           />
           <p className="mt-1 text-[0.75rem] text-muted-foreground">
-            Round down to a number you could defend.
+            Printed on the page exactly as typed, so round down rather than up.
           </p>
         </div>
       </div>
+
+      <p className="text-[0.75rem] text-muted-foreground">
+        A crew lead or a homes-cleaned figure entered here <strong>must</strong> appear in the
+        copy. If a page is given one and ignores it, publishing that city is refused &mdash; the
+        whole point of these facts is that they end up on the page.
+      </p>
 
       <div>
         <Label htmlFor="reviews" className="mb-1.5">
