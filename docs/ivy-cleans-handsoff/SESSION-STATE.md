@@ -343,6 +343,61 @@ section F explicitly deferred the front page. This is that deferral, measured.
 houston-tx's research with an ops block, so cross-comparing them was
 comparing a city to itself. Same-city fixtures are now skipped.
 
+### A failed fix, kept as a finding — do not repeat it
+
+Missouri City's page is weak because its RESEARCH is weak, not its prose. The
+diagnosis is settled: the persisted `findings` never mention Sienna, Quail
+Valley, Hunters Glen, Fondren Park, Hunters Creek, Piney Point or Bunker Hill.
+The structuring pass transcribed faithfully. Subdivisions per area, in list
+order, were:
+
+```
+Katy 6 · Sugar Land 12 · Pearland 6 · The Woodlands 10 · Missouri City 2 · Memorial 1
+```
+
+That is budget exhaustion down the list, not a bad area.
+
+**The attempted fix, and its measured result.** The brief already said "aim for
+3 to 6 per area" — an aim with no accounting is an average, and an average
+hides the tail. So part (b) was strengthened: three as a floor for EVERY area,
+search each area separately, give the eighth the same effort as the first, and
+report a per-area count with "FEWER THAN THREE FOUND" where it fell short.
+
+Re-running Houston research cost **$1.45** (199K input tokens) and produced:
+
+```
+                subdivisions        metro conditions
+Katy             6 →  7
+Sugar Land      12 → 10
+Pearland         6 → 12
+The Woodlands   10 → 21
+Cypress          — →  6     (new; Memorial gone)
+Missouri City    2 →  2     ← the thing the change was for
+total           37 → 58              6 → 0
+```
+
+**Net negative, and reverted.** Subdivisions improved substantially and metro
+conditions went to ZERO — the exact state that caused the original convergence,
+where every area page closed on invented humidity, A/C and pollen. Per-area
+conditions rose (Katy 3→5, Sugar Land 3→5) while metro-level emptied, which
+also starves the service local sections: they read ONLY `research.conditions`,
+so all six would have had no conditions section at all.
+
+**The lesson, which is the durable part: emphasis in this brief is zero-sum.**
+It asks four things of one search budget, and strengthening one part takes from
+another — the same finding that removed ZIPs ("the brief asked for five things
+on a budget that covered three"). Adding matching emphasis to part (c) would
+be expected to steal it straight back.
+
+**The structurally correct fix is to SPLIT research into two passes** — one for
+areas and subdivisions, one for conditions — the way research and structuring
+are already split. Roughly half a day, and research cost per city roughly
+doubles to ~$2.50. Not attempted; a second $1.45 coin flip was worse value
+than doing it properly later.
+
+Houston's committed research and pages are the pre-experiment ones. Nothing on
+disk carries the failed change.
+
 ## The real Houston run — what it proved
 
 `npx tsx scripts/generate-city.mjs houston` — 7 calls, 122K in / 22K out,
