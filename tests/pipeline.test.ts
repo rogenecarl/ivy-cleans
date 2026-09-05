@@ -1271,6 +1271,22 @@ describe('buildResearchPrompt', () => {
       expect(p).not.toContain('Barker Reservoir')
     })
 
+    it('asks for only as many subdivisions as were actually researched', () => {
+      /*
+       * Katy has two. Asking for "at least three of these by name" while
+       * listing two is an impossible instruction, and an impossible
+       * instruction is an invitation to invent the third — the exact failure
+       * this whole change exists to close off. scoreSuburbs only rejects an
+       * area with ZERO subdivisions outright, so one- and two-subdivision
+       * areas do reach this prompt.
+       */
+      expect(buildSuburbPrompt(facts, research, katy)).toMatch(/at least two of these by name/)
+      const rich = { ...katy, subdivisions: ['Cinco Ranch', 'Firethorne', 'Seven Meadows'] }
+      expect(buildSuburbPrompt(facts, { ...research, suburbs: [rich, sugarLand] }, rich)).toMatch(
+        /at least three of these by name/,
+      )
+    })
+
     it('names the sibling areas and forbids copy that would fit them', () => {
       const p = buildSuburbPrompt(facts, research, katy)
       expect(p).toContain('Sugar Land')

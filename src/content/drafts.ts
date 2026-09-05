@@ -22,6 +22,7 @@ import { SERVICE_LOCAL_SLUGS, STAGES, isWrittenSlot, serviceSlots, stageSlots } 
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
+import { checkQuality } from './quality'
 import { validateCityContent } from './validate'
 import { getCity, listLiveCityKeys, revalidateCity } from './store'
 
@@ -375,6 +376,23 @@ export async function publishCity(key: string, domain?: string): Promise<void> {
     const lines = findings.map((f) => `  ${f.slot} ↔ ${f.otherCity} ${f.otherSlot}: ${f.detail}`)
     throw new Error(
       `cannot publish "${key}": ${findings.length} duplication finding(s)\n${lines.join('\n')}`,
+    )
+  }
+
+  /*
+   * Quality last, because it is the cheapest to fix: a missing subdivision or
+   * an unused operator fact is one stage regenerated, where a duplication
+   * finding may mean the city should not exist at all.
+   *
+   * Only BLOCKING findings refuse. Banned phrasings are surfaced on the review
+   * screen and let through — a stock phrase is worth an operator's judgement,
+   * not an automatic refusal of a whole city.
+   */
+  const quality = checkQuality(doc).filter((f) => f.blocking)
+  if (quality.length > 0) {
+    const lines = quality.map((f) => `  ${f.slot}: ${f.detail}`)
+    throw new Error(
+      `cannot publish "${key}": ${quality.length} quality finding(s)\n${lines.join('\n')}`,
     )
   }
 

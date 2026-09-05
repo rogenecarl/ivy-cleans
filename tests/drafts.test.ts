@@ -9,7 +9,7 @@
  * and _domains.json are snapshotted before the suite runs and restored
  * byte-identical afterward, since finalize/publish mutate both files in place.
  */
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
@@ -28,6 +28,7 @@ import { deriveFacts } from '../src/pipeline/facts'
 import { getCity, listLiveCityKeys, revalidateCity } from '../src/content/store'
 import { validateCityContent } from '../src/content/validate'
 import type { ResearchOutput } from '../src/pipeline/schemas'
+import { STAGE_IDS } from '../src/content/slots'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -54,6 +55,7 @@ const ALL_TEST_KEYS = [
   'ztest-progressme',
   'ztest-dupe-a',
   'ztest-dupe-b',
+  'ztest-quality',
 ]
 
 function progressPath(key: string): string {
@@ -95,7 +97,12 @@ function fullSections(): Record<string, string | string[]> {
     'services.cards.upholstery': 'Upholstery copy.',
     'deep.whatIs': 'Deep cleaning is...',
     'suburb.house-cleaning-north-ztest.intro': 'North Ztest is a quiet area we clean often.',
-    'suburb.house-cleaning-north-ztest.homes': 'Homes in North Ztest are split-level ranches from the 1970s.',
+    // Names both researched subdivisions: checkQuality (content-strategy D)
+    // requires an area page to name min(3, subdivisions.length) of its own,
+    // so a fixture that named none would stand for a city publish correctly
+    // refuses.
+    'suburb.house-cleaning-north-ztest.homes':
+      'Ztest Commons and Ztest Heights are split-level ranches from the 1970s.',
     'suburb.house-cleaning-north-ztest.local': 'Ztest winters mean salt and grit track in all season.',
     'service.standard-cleaning.local': 'A standard visit in Ztest starts with the entry mats.',
     'service.deep-cleaning.local': 'Deep cleans in Ztest begin in the bathrooms.',
@@ -263,7 +270,7 @@ describe('drafts store', () => {
         'North Ztest is a quiet area we clean often.',
       )
       expect(validated.sections['suburb.house-cleaning-north-ztest.homes']).toBe(
-        'Homes in North Ztest are split-level ranches from the 1970s.',
+        'Ztest Commons and Ztest Heights are split-level ranches from the 1970s.',
       )
       expect(validated.sections['suburb.house-cleaning-north-ztest.local']).toBe(
         'Ztest winters mean salt and grit track in all season.',
@@ -277,7 +284,7 @@ describe('drafts store', () => {
       // Round-trips through validateCityContent a second time via the store's
       // own read path, not just the raw JSON this test parsed directly.
       expect(resolved.sections['suburb.house-cleaning-north-ztest.homes']).toBe(
-        'Homes in North Ztest are split-level ranches from the 1970s.',
+        'Ztest Commons and Ztest Heights are split-level ranches from the 1970s.',
       )
     })
 
@@ -528,6 +535,64 @@ describe('drafts store', () => {
 
       const resolved = await getCity(key)
       expect(resolved.status).toBe('live')
+    })
+  })
+
+  describe('publishCity quality guard', () => {
+    const KEY = 'ztest-quality'
+
+    afterEach(async () => {
+      await rm(draftPath(KEY), { force: true })
+      await rm(cityPath(KEY), { force: true })
+      revalidateCity(KEY)
+    })
+
+    /** A draft that would finalize and publish cleanly, before we spoil it. */
+    async function goodDraft(ops?: Record<string, unknown>) {
+      const facts = deriveFacts({
+        city: 'Ztest Quality',
+        state: 'MN',
+        phoneDigits: '6125550198',
+        ...(ops ? { ops } : {}),
+      })
+      await createDraft(facts)
+      const draft = await loadDraft(KEY)
+      draft.research = fullResearch()
+      draft.sections = fullSections()
+      draft.done = [...STAGE_IDS]
+      await saveDraft(KEY, draft)
+      await finalizeDraft(KEY)
+    }
+
+    it('refuses a city whose area page never names its own subdivisions', async () => {
+      await goodDraft()
+      // Replace the one paragraph that names them. The prompt required at
+      // least two of the two researched here; nothing verified it until now.
+      const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
+      doc.sections['suburb.house-cleaning-north-ztest.homes'] =
+        'The homes here are lovely and we clean them well.'
+      await writeFile(cityPath(KEY), JSON.stringify(doc, null, 2), 'utf-8')
+      revalidateCity(KEY)
+
+      await expect(publishCity(KEY)).rejects.toThrow(/names 0 of 2 researched subdivisions/)
+    })
+
+    it('refuses a city that was given a crew lead and never mentioned them', async () => {
+      // The rule that gives the ops block teeth: a page that received a real
+      // fact and ignored it is a failed page.
+      await goodDraft({ crewLead: 'Maria' })
+      await expect(publishCity(KEY)).rejects.toThrow(/crew lead "Maria"/)
+    })
+
+    it('does NOT refuse a banned phrase — it is surfaced, not blocking', async () => {
+      await goodDraft()
+      const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
+      doc.sections['deep.whatIs'] = 'Look no further: deep cleaning is a thorough service.'
+      await writeFile(cityPath(KEY), JSON.stringify(doc, null, 2), 'utf-8')
+      revalidateCity(KEY)
+
+      await expect(publishCity(KEY)).resolves.toBeUndefined()
+      expect(JSON.parse(await readFile(cityPath(KEY), 'utf-8')).status).toBe('live')
     })
   })
 

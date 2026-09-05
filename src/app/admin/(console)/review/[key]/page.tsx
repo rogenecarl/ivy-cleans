@@ -5,6 +5,7 @@ import { getCity } from '@/content/store'
 import { errorMessage } from '@/pipeline/admin-logic'
 import { STAGES, scoreSuburbs } from '@/pipeline/stages'
 import { checkCity, findInvisibleChars } from '@/content/similarity'
+import { checkQuality } from '@/content/quality'
 import { listLiveCityKeys } from '@/content/store'
 import type { ResearchOutput } from '@/pipeline/schemas'
 import { Button } from '@/components/ui/button'
@@ -119,6 +120,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
   }
 
   const invisible = findInvisibleChars(doc.sections)
+  const quality = checkQuality(doc)
   const thinAreas = scored.filter((entry) => entry.verdict !== 'build')
 
   return (
@@ -155,7 +157,12 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         * nothing at all when there is nothing wrong — a panel that always
         * says READY is one nobody reads.
         */}
-      {!isLive && (invisible.length > 0 || duplication.length > 0 || thinAreas.length > 0 || duplicationUnavailable) && (
+      {!isLive &&
+        (invisible.length > 0 ||
+          duplication.length > 0 ||
+          quality.length > 0 ||
+          thinAreas.length > 0 ||
+          duplicationUnavailable) && (
         <Panel title="Before you publish">
           <ul className="space-y-2 text-[0.85rem]">
             {invisible.length > 0 && (
@@ -170,6 +177,16 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
               <li key={`${finding.slot}-${finding.otherCity}-${finding.otherSlot}`}>
                 <span className="font-medium text-destructive">Blocks publish.</span>{' '}
                 {finding.slot} matches {finding.otherCity} {finding.otherSlot} — {finding.detail}
+              </li>
+            ))}
+            {quality.map((finding) => (
+              <li key={`${finding.rule}-${finding.slot}-${finding.detail}`}>
+                {finding.blocking ? (
+                  <span className="font-medium text-destructive">Blocks publish.</span>
+                ) : (
+                  <span className="font-medium text-muted-foreground">Worth a look.</span>
+                )}{' '}
+                {finding.slot} {finding.detail}
               </li>
             ))}
             {duplicationUnavailable && (

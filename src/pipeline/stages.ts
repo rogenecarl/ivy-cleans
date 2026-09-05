@@ -37,6 +37,7 @@ import type { ModelClient } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
+import { BANNED_PHRASES, SUBDIVISIONS_REQUIRED } from '../content/quality'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -67,6 +68,15 @@ import { posts as recentPosts } from '../data/recent-posts'
  * module (admin-logic.ts, the admin console pages, the test suite) keeps
  * compiling against the same public surface untouched.
  */
+/*
+ * BANNED_PHRASES is re-exported, not defined here. It lives in
+ * src/content/quality.ts because the validator that CHECKS the list has to
+ * import it, and this module cannot be that home: stages.ts imports
+ * loadDraft/saveDraft from content/drafts.ts, and drafts.ts imports the
+ * validator to run it at publish — content -> pipeline would close the loop.
+ * One definition, imported downhill.
+ */
+export { BANNED_PHRASES }
 export { SERVICE_LOCAL_SLUGS, STAGES, STAGE_IDS, serviceSlots, stageSlots, suburbSlots, type StageId }
 
 /**
@@ -139,24 +149,6 @@ const MPLS_WHAT_IS =
  * target. Houston came back as "we can assertively declare that our standard
  * of work is unmatched" from a page sitting at position 33.
  */
-export const BANNED_PHRASES: readonly string[] = [
-  'nestled in the heart of',
-  "whether you're a busy professional",
-  'we understand that every home',
-  'look no further',
-  "in today's fast-paced world",
-  'hustle and bustle',
-  'vibrant community',
-  "we've got you covered",
-  'trusted partner',
-  'when it comes to',
-  'at the end of the day',
-  'second to none',
-  'meticulous',
-  'assertively declare',
-  'put our skills to the test',
-  'unmatched',
-]
 
 export const SYSTEM_BASE = `You write website copy for Ivy Cleans, a local, insured residential and commercial cleaning company. Each Ivy Cleans website serves one specific city, and you are writing that city's copy. Everything you write must read as though the people who actually clean houses in that city wrote it about their own city.
 
@@ -462,6 +454,15 @@ export function buildSuburbPrompt(
     )
   }
 
+  /*
+   * Ask for what exists, never for more. scoreSuburbs rejects an area with
+   * ZERO subdivisions outright, but one and two both clear the gate — and
+   * "use at least three of these" over a list of two is an impossible
+   * instruction, which is an invitation to invent the third. Same number the
+   * quality validator then checks for (content/quality.ts).
+   */
+  const nameCount = numberWord(Math.min(SUBDIVISIONS_REQUIRED, suburb.subdivisions.length))
+
   const safe = suburb.conditions.filter((c) => c.copySafe)
   const metroSafe = research.conditions.filter((c) => c.copySafe)
   const conditionLines = [...safe, ...metroSafe]
@@ -489,7 +490,7 @@ export function buildSuburbPrompt(
 
   return `Write the area-page copy for ${suburb.name}, which this ${facts.city} branch serves.
 ${opsBlock(facts)}${notesBlock(facts)}
-NAMED DEVELOPMENTS AND NEIGHBORHOODS in ${suburb.name}. Use at least three of these by name. Use only these — never add one:
+NAMED DEVELOPMENTS AND NEIGHBORHOODS in ${suburb.name}. Use at least ${nameCount} of these by name. Use only these — never add one:
 ${suburb.subdivisions.map((s) => `- ${s}`).join('\n')}${housingSection}${conditionsSection}
 
 OTHER AREAS this branch serves, each with its own page. Do NOT write anything that would sit equally well on one of theirs:
@@ -505,6 +506,11 @@ Produce three paragraphs.
 
    STRUCTURAL EXAMPLE — note only the movement, condition to what it does indoors to the cleaning. Write entirely different sentences and carry over no Houston detail:
    ${EXEMPLAR_LOCAL}`
+}
+
+/** Prompts read as prose to the model, so a small count is spelled out. */
+function numberWord(n: number): string {
+  return ['zero', 'one', 'two', 'three'][n] ?? String(n)
 }
 
 /**

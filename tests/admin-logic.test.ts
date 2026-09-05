@@ -1057,13 +1057,21 @@ describe('ops survive publish', () => {
       city: CITY_NAMES[KEY],
       state: 'mn',
       phone: '(612) 555-0142',
-      crewLead: 'Maria',
       servingSince: '2024-03',
-      homesCleaned: '340',
+      zips: '55401, 55402',
       reviews: 'Spotless, every time. | Dan | Edina',
     })
     expect(created.ok).toBe(true)
 
+    /*
+     * Deliberately NOT crewLead or homesCleaned. Those two are ENFORCED by
+     * checkQuality (content-strategy D), and the stub client returns canned
+     * copy that ignores every prompt — so a stub city supplied with either
+     * would be refused at publish for not using it, which is the validator
+     * working, not a bug. The refusal has its own test in tests/drafts.ts;
+     * this one is about ops surviving the sidecar's deletion, and any field
+     * proves that equally.
+     */
     await runAllStages(KEY)
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
     expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
@@ -1071,9 +1079,8 @@ describe('ops survive publish', () => {
 
     const finalized = validateCityContent(JSON.parse(await readFile(cityPath(KEY), 'utf-8')))
     expect(finalized.ops).toEqual({
-      crewLead: 'Maria',
       servingSince: '2024-03',
-      homesCleaned: 340,
+      zips: ['55401', '55402'],
       reviews: [{ quote: 'Spotless, every time.', firstName: 'Dan', area: 'Edina' }],
     })
 
@@ -1081,7 +1088,7 @@ describe('ops survive publish', () => {
     expect(await publishLogic(KEY)).toEqual({ ok: true })
     const published = await getCity(KEY)
     expect(published.status).toBe('live')
-    expect(published.ops?.crewLead).toBe('Maria')
+    expect(published.ops?.servingSince).toBe('2024-03')
     // and the sidecar really is gone, which is what made this necessary
     await expect(loadDraft(KEY)).rejects.toThrow()
 

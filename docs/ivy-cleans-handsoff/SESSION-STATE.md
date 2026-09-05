@@ -8,15 +8,14 @@ Written to hand the generator work to a fresh session. Read this first, then
 ## The one-line state
 
 The seven handoff changes are merged and pushed. Content-strategy items
-**A (ops block), B (voice) and C (service local sections) are DONE**, and A's
+**A (ops block), B (voice), C (service local sections) and D (validators) are DONE**, and A's
 three reachability holes are closed — see "A is complete" below. Houston has been generated
 against the real model twice, and the flaw the first run exposed is fixed and
-verified — see "The real Houston run" below. **D (validators) is next, now
-that C is in.**
+verified — see "The real Houston run" below. **E (evals) is next.**
 
 ```
 origin/main   6973e8a   (last pushed commit)
-suite         719 tests, 0 failures     pnpm test
+suite         744 tests, 0 failures     pnpm test
 typecheck     clean in src/             pnpm tsc --noEmit
 lint          0 errors, 14 warnings     pnpm lint   (all pre-existing)
 duplication   0 live findings           node scripts/check-duplication.mjs
@@ -185,6 +184,58 @@ correct, and `npx tsx scripts/generate-city.mjs houston` will do it.
 
 `StubModelClient` now counts `usage.calls`. It never did, so every
 "a resumed stage does not pay twice" assertion had been holding at 0 === 0.
+
+## D is complete
+
+`src/content/quality.ts` — three mechanical checks on a finished document,
+run at publish and shown on the review screen.
+
+| Rule | Blocks publish | Catches |
+|---|---|---|
+| `entity-coverage` | yes | an area page that never named its own subdivisions |
+| `ops-unused` | yes | a supplied crew lead or homes-cleaned count the copy ignored |
+| `banned-phrase` | no | the sixteen tells from `SYSTEM_BASE`, checked mechanically |
+
+Run against the real cities:
+
+```
+houston (draft)      0 findings
+minneapolis (LIVE)   3 warnings — "meticulous", "assertively declare", "unmatched"
+                                  all in services.heroParagraphs
+```
+
+Those three are the live Minneapolis hero — the page at position 33 that
+content-strategy.md names as the wrong exemplar. The validator found them
+independently.
+
+### Four decisions that differ from the sketch
+
+1. **`checkQuality(doc)` takes only the document.** `ops` lives on
+   `CityContent` now, so no `facts` argument is needed — which is what lets it
+   run at publish, where the sidecar is already deleted.
+2. **Ops facts are checked across the WHOLE document**, not the `services.*`
+   slots the sketch reads. A crew lead named on an area page has been used,
+   and a validator that cries wolf is one an operator clicks past.
+3. **Only `crewLead` and `homesCleaned` are enforced.** `servingSince` arrives
+   as "2024-03" and the prompt asks for it plainly, so a correct page writes
+   "March 2024"; `crewSize` can be spelled as a word; reviews are quoted "at
+   most two", so none is inside the instruction. All three would false-alarm.
+4. **Reading level and the "once per page" rules are omitted**, with reasons in
+   the file header: an inaccurate Flesch score is noise, and "per page" has no
+   honest definition against a slot model.
+
+**`BANNED_PHRASES` moved to `quality.ts`**, and `stages.ts` imports it from
+there. It could not stay: stages.ts imports `drafts.ts`, and `drafts.ts` now
+imports the validator — content → pipeline would close the loop. One
+definition, imported downhill.
+
+### A prompt defect found while building it
+
+`scoreSuburbs` only rejects an area with ZERO subdivisions, so one- and
+two-subdivision areas reach `buildSuburbPrompt` — which said *"use at least
+three of these by name"* while listing fewer than three. An impossible
+instruction is an invitation to invent the third. The prompt now asks for
+`min(3, n)`, and the validator checks the same number.
 
 ## The real Houston run — what it proved
 
@@ -360,12 +411,10 @@ would not have.
 
 ## What to do next, in order
 
-1. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
-   ops-facts-used, banned phrases. This is what turns A from advisory into
-   enforced. `BANNED_PHRASES` is already exported from `stages.ts` for it.
-   Note its ops check reads only `services.*` slots — widen it, or a fact used
-   on an area page still reads as unused.
-3. **E — evals** (1 day).
+1. **E — evals** (1 day). The one check nothing mechanical can do: a rubric
+   call scoring "would a resident recognise their own neighbourhood?". D
+   passes Houston cleanly, and D would ALSO have passed the six converged
+   service sections that had to be caught by reading them.
 6. **Change 2 — DataForSEO** whenever credentials exist. The seam is built:
    `buildResearchStructuringPrompt` takes a keywords argument and branches on
    it, so it is one call-site change plus deleting part (d) of the brief.
