@@ -31,6 +31,7 @@ import {
   normalizeSuburbs,
   parseReviews,
   parseZips,
+  pendingServicesLogic,
   pendingSuburbsLogic,
   publishLogic,
   regenerateLogic,
@@ -86,11 +87,11 @@ async function freshDraft(key: (typeof KEYS)[number]) {
   })
 }
 
-// The suburb stage's generation is Task 16's work (see stages.ts executeStage)
-// — until it lands, running "every stage" here means every stage that
-// actually generates something, same as tests/pipeline.test.ts's
-// RUNNABLE_STAGES.
-const RUNNABLE_STAGE_IDS = STAGE_IDS.filter((id) => id !== 'suburb')
+// "Every stage" here means every SINGLE-CALL stage. suburb and service each
+// make one model call per item, are resumable inside themselves, and are
+// driven one item per request by the admin — the tests that need them run
+// them explicitly. Same split as tests/pipeline.test.ts's RUNNABLE_STAGES.
+const RUNNABLE_STAGE_IDS = STAGE_IDS.filter((id) => id !== 'suburb' && id !== 'service')
 
 async function runAllStages(key: string): Promise<void> {
   for (const stage of RUNNABLE_STAGE_IDS) {
@@ -260,8 +261,9 @@ describe('stage run → finalize → publish', () => {
   // suburb.<slug>.* slots, so the shared KEY draft the rest of this describe
   // builds on needs the suburb stage run too, not just the three
   // RUNNABLE_STAGE_IDS above.
-  it('runs the suburb stage too, completing every stage the pipeline defines', async () => {
+  it('runs the suburb and service stages too, completing every stage the pipeline defines', async () => {
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     const draft = await loadDraft(KEY)
     expect(draft.done).toEqual(STAGE_IDS)
   })
@@ -396,6 +398,7 @@ describe('updateSuburbsLogic', () => {
     // Task 18: finalizeLogic now requires every surviving area's suburb
     // slots, so the suburb stage has to run before finalize can succeed.
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     expect(await updateSuburbsLogic(KEY, EDITED)).toEqual({ ok: true })
@@ -795,6 +798,62 @@ describe('pendingSuburbsLogic', () => {
   })
 })
 
+describe('pendingServicesLogic', () => {
+  const KEY = 'ztest-editville'
+
+  it('lists the service pages the stage still owes, so the client can drive one request each', async () => {
+    /*
+     * Same reason as pendingSuburbsLogic: six model calls inside one server
+     * action is minutes, and a serverless function is killed long before
+     * that. The client needs the list to drive the loop.
+     */
+    await freshDraft(KEY)
+    await runStageLogic(KEY, 'research')
+
+    const before = await pendingServicesLogic(KEY)
+    expect(before.ok).toBe(true)
+    if (!before.ok) return
+    expect(before.services).toHaveLength(6)
+    for (const svc of before.services) {
+      expect(typeof svc.slug).toBe('string')
+      // the display name, so the progress line reads "Airbnb & Short-Term
+      // Rental Cleaning" rather than a slug
+      expect(svc.name.length).toBeGreaterThan(0)
+      expect(svc.name).not.toBe(svc.slug)
+    }
+
+    // writing one removes exactly that one, so a resume pays only for what
+    // is left
+    const first = before.services[0]
+    await runStageLogic(KEY, 'service', first.slug)
+
+    const after = await pendingServicesLogic(KEY)
+    expect(after.ok).toBe(true)
+    if (!after.ok) return
+    expect(after.services.map((x) => x.slug)).not.toContain(first.slug)
+    expect(after.services).toHaveLength(before.services.length - 1)
+  })
+
+  it('never offers the bespoke move-out page, which owns no slot', async () => {
+    await freshDraft(KEY)
+    const r = await pendingServicesLogic(KEY)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.services.map((x) => x.slug)).not.toContain('move-in-move-out-cleaning')
+  })
+
+  it('lists every service before research has run, unlike the suburb loop', async () => {
+    // Service slots do not depend on research -- the same seven services
+    // exist in every city -- so the list is known from creation. (The stage
+    // itself still needs research for the conditions it writes from.)
+    await freshDraft(KEY)
+    const r = await pendingServicesLogic(KEY)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.services).toHaveLength(6)
+  })
+})
+
 describe('regenerateLogic', () => {
   const KEY = 'ztest-editville'
 
@@ -848,6 +907,7 @@ describe('regenerateLogic', () => {
     // Task 18: finalizeLogic now requires every surviving area's suburb
     // slots, so the suburb stage has to run before finalize can succeed.
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const sidecar = await loadDraft(KEY)
@@ -941,21 +1001,23 @@ describe('listCities', () => {
   it('merges the two sources once finalized: document status wins, sidecar flagged', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
-    // Task 18: finalizeLogic now requires every surviving area's suburb
-    // slots, so the suburb stage has to run before finalize can succeed —
-    // which also brings doneCount to 4, not 3.
+    // finalizeLogic requires every surviving area's suburb slots AND every
+    // template service's local slot, so both multi-call stages have to run
+    // before finalize can succeed — which brings doneCount to 5, not 3.
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const rows = await listCities()
     expect(rows.filter((r) => r.key === KEY)).toHaveLength(1)
-    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 4 })
+    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 5 })
   })
 
   it('shows a published city as LIVE with no sidecar left', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
     expect(await publishLogic(KEY)).toEqual({ ok: true })
 
@@ -1004,6 +1066,7 @@ describe('ops survive publish', () => {
 
     await runAllStages(KEY)
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const finalized = validateCityContent(JSON.parse(await readFile(cityPath(KEY), 'utf-8')))
@@ -1030,6 +1093,7 @@ describe('ops survive publish', () => {
     expect((await freshDraft(KEY)).ok).toBe(true)
     await runAllStages(KEY)
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8')) as Record<string, unknown>
@@ -1072,6 +1136,7 @@ describe('editing the ops block after creation', () => {
     await draftOnly()
     await runAllStages(KEY)
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
     for (const other of KEYS) if (other !== KEY) await wipe(other)
     expect(await publishLogic(KEY)).toEqual({ ok: true })
@@ -1100,6 +1165,7 @@ describe('editing the ops block after creation', () => {
     await draftOnly()
     await runAllStages(KEY)
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })

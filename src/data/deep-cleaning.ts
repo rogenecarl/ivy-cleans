@@ -13,7 +13,7 @@
 // whatIs.text is this page's one AI-class slot (see below).
 
 import type { CityContent } from '../content/types'
-import { s } from '../content/slots'
+import { s, sOpt, serviceSlots } from '../content/slots'
 import { t } from '../content/interpolate'
 import type { ServiceContent } from './service-types'
 
@@ -43,6 +43,7 @@ export function deepCleaningData(c: CityContent): ServiceContent {
       // AI-class slot — part of the Plan 3 writer-schema contract.
       text: s(c, 'deep.whatIs'),
       image: "/images/deep-img1.jpg",
+      local: sOpt(c, serviceSlots('deep-cleaning')[0]),
     },
 
     // Right-column background image in the Benefits section (elementor-element-2c321bb,

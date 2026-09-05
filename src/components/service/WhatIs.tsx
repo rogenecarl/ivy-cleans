@@ -62,6 +62,24 @@ export default function WhatIs({
                 <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
                   {whatIs.text}
                 </p>
+                {/*
+                  * The one per-city paragraph on a service page: what these
+                  * homes, this climate or these habits change about the job
+                  * (content-strategy C). Same <p> as the canonical text above
+                  * rather than a section of its own -- the surrounding layout
+                  * is traced byte-for-byte to the live Elementor design, and
+                  * a new section would mean deriving spacing that has no
+                  * reference to derive it from.
+                  *
+                  * Rendered only when present. A city that never ran the
+                  * service stage -- Minneapolis, which is live -- renders
+                  * exactly what it renders today, with no empty <p>.
+                  */}
+                {whatIs.local && (
+                  <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
+                    {whatIs.local}
+                  </p>
+                )}
               </div>
             </div>
           </div>

@@ -72,6 +72,44 @@ export function suburbSlots(slug: string): readonly string[] {
 }
 
 /**
+ * The template services that get a generated "what changes here" paragraph.
+ *
+ * DECLARED HERE rather than imported from src/data/services/registry.ts, and
+ * that is deliberate: registry.ts imports every service builder, and those
+ * builders import `s`/`sOpt` from this file — slots -> registry ->
+ * deep-cleaning -> slots is a genuine ESM cycle, the same class that forced
+ * STAGES out of src/pipeline/stages.ts (see the note below). A local list
+ * plus a test pinning it to the registry costs one test and no cycle.
+ *
+ * move-in-move-out-cleaning is absent on purpose. It is the registry's one
+ * `bespoke` entry — its own five components, live on Minneapolis today — so
+ * it does not render through the shared template these slots feed.
+ */
+export const SERVICE_LOCAL_SLUGS = [
+  'standard-cleaning',
+  'deep-cleaning',
+  'apartment-cleaning',
+  'airbnb-cleaning',
+  'post-construction-cleaning',
+  'pre-listing-cleaning',
+] as const
+
+/**
+ * The slot a service page's local section lives in.
+ *
+ * One per service, same contract shape as suburbSlots above: the writer
+ * (src/pipeline/stages.ts executeStage's service case) and the reader (the
+ * six builders under src/data/) both go through this, so a rename cannot
+ * drift between them.
+ *
+ * The reader must use `sOpt`, never `s` — Minneapolis is live with none of
+ * these slots, and `s` throws on a missing one.
+ */
+export function serviceSlots(slug: string): readonly string[] {
+  return [`service.${slug}.local`]
+}
+
+/**
  * The four pipeline stages. Moved here from src/pipeline/stages.ts (Task 18)
  * together with StageId/STAGE_IDS/stageSlots so that src/content/drafts.ts
  * (which needs stageSlots for requiredSlotsFor) does not have to import
@@ -88,6 +126,7 @@ export const STAGES = [
   { id: 'front', label: 'Writing the front page — hero and services' },
   { id: 'deep', label: 'Writing the deep-cleaning page' },
   { id: 'suburb', label: 'Writing the area pages' },
+  { id: 'service', label: 'Writing the local section of each service page' },
 ] as const
 
 export type StageId = (typeof STAGES)[number]['id']
@@ -146,5 +185,8 @@ export function stageSlots(research: ResearchOutput | undefined): Record<StageId
     ],
     deep: ['deep.whatIs'],
     suburb: research ? research.suburbs.filter(isWritableArea).flatMap((s) => suburbSlots(s.slug)) : [],
+    // Not a function of research, unlike suburb: the services are the same
+    // seven in every city, so all six are owed from the moment a draft exists.
+    service: SERVICE_LOCAL_SLUGS.flatMap((slug) => serviceSlots(slug)),
   }
 }

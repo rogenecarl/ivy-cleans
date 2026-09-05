@@ -1,8 +1,12 @@
 // Placeholder-grade copy, expected to be rewritten with real marketing copy.
-// Structure and token placement follow src/data/deep-cleaning.ts exactly. No
-// AI slot: whatIs.text is a plain static string, not s(c, ...).
+// Structure and token placement follow src/data/deep-cleaning.ts exactly.
+// whatIs.text is a plain static string and stays canonical in every city;
+// whatIs.local is the one generated field (content-strategy C) and is read
+// with sOpt, not s, because a city that never ran the service stage has no
+// such slot and s() would throw on every one of its service pages.
 
 import type { CityContent } from '../../content/types'
+import { sOpt, serviceSlots } from '../../content/slots'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -31,6 +35,7 @@ export function standardCleaningData(c: CityContent): ServiceContent {
       h2: "What is Standard Cleaning?",
       text: "Standard cleaning is our recurring maintenance service, the regular upkeep that keeps a home looking its best between deeper cleans. Instead of the wider scope of a deep clean, standard cleaning focuses on the everyday spaces that get used the most, including kitchens, bathrooms, living areas, and bedrooms. It follows a repeatable checklist, so every visit brings the same dependable results, whether it is your first appointment or your fiftieth.",
       image: "/images/deep-img1.jpg",
+      local: sOpt(c, serviceSlots('standard-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

@@ -1,8 +1,12 @@
 // Placeholder-grade copy, expected to be rewritten with real marketing copy.
-// Structure and token placement follow src/data/deep-cleaning.ts exactly. No
-// AI slot: whatIs.text is a plain static string, not s(c, ...).
+// Structure and token placement follow src/data/deep-cleaning.ts exactly.
+// whatIs.text is a plain static string and stays canonical in every city;
+// whatIs.local is the one generated field (content-strategy C) and is read
+// with sOpt, not s, because a city that never ran the service stage has no
+// such slot and s() would throw on every one of its service pages.
 
 import type { CityContent } from '../../content/types'
+import { sOpt, serviceSlots } from '../../content/slots'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -34,6 +38,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
       h2BreakAfter: 4,
       text: "Airbnb and short term rental cleaning is a turnover service built around the gap between one guest checking out and the next checking in. It goes beyond a standard tidy up. Beds are stripped and remade with fresh linens, bathrooms and kitchens are reset to a hotel-level standard, host-provided amenities like toiletries, coffee, and paper products are checked and restocked, and every room is inspected against a consistent checklist so the space looks exactly as advertised for the next guest.",
       image: "/images/deep-img1.jpg",
+      local: sOpt(c, serviceSlots('airbnb-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

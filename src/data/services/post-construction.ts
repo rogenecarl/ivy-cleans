@@ -1,8 +1,12 @@
 // Placeholder-grade copy, expected to be rewritten with real marketing copy.
-// Structure and token placement follow src/data/deep-cleaning.ts exactly. No
-// AI slot: whatIs.text is a plain static string, not s(c, ...).
+// Structure and token placement follow src/data/deep-cleaning.ts exactly.
+// whatIs.text is a plain static string and stays canonical in every city;
+// whatIs.local is the one generated field (content-strategy C) and is read
+// with sOpt, not s, because a city that never ran the service stage has no
+// such slot and s() would throw on every one of its service pages.
 
 import type { CityContent } from '../../content/types'
+import { sOpt, serviceSlots } from '../../content/slots'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -34,6 +38,7 @@ export function postConstructionCleaningData(c: CityContent): ServiceContent {
       h2BreakAfter: 4,
       text: "Post construction and renovation cleaning is a heavy duty service for the aftermath of a build or remodel, made for the fine drywall dust, sawdust, and paint residue that a regular cleaning is not equipped to handle. It covers wiping dust from every surface, including window sills, vents, and light fixtures where it settles, scraping paint or adhesive overspray off floors and glass, vacuuming and mopping floors multiple times as dust continues to resettle, and clearing away loose trash and light packaging generated during the cleaning itself.",
       image: "/images/deep-img1.jpg",
+      local: sOpt(c, serviceSlots('post-construction-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

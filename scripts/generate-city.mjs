@@ -12,9 +12,16 @@
  * decisive test for this whole project -- generate a city, then read two of
  * its area pages side by side -- needs to be runnable from a terminal.
  *
- * EVERY RUN SPENDS REAL MONEY. Roughly $0.60 for a twelve-area city on
- * claude-opus-5 ($5/MTok in, $25/MTok out). The tally at the end is measured,
- * not estimated.
+ * EVERY RUN SPENDS REAL MONEY. Budget $1.50-2.00 per city on claude-opus-5
+ * ($5/MTok in, $25/MTok out): a measured Houston run came to $1.18 before the
+ * service stage existed, and that stage adds six more calls. Research alone is
+ * ~106K input tokens, because web search pulls page content into context.
+ * The tally at the end is measured, not estimated.
+ *
+ * This script runs each stage in ONE call, including the two that make a call
+ * per item. That is fine here and NOT fine in the admin: a serverless function
+ * is killed long before six-to-twelve sequential model calls finish, which is
+ * why the console drives those two stages one item per request.
  */
 // Same layering the test setup uses: .env.local wins, .env fills the gaps.
 // loadEnvFile throws on a missing file, and either may legitimately be absent.

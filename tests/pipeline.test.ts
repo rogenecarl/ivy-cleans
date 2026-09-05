@@ -25,6 +25,8 @@ import * as stagesModule from '../src/pipeline/stages'
 import {
   SLUG_PATTERN,
   STAGES,
+  SERVICE_LOCAL_SLUGS,
+  serviceSlots,
   stageSlots,
   suburbSlots,
   BANNED_PHRASES,
@@ -36,6 +38,7 @@ import {
   buildFrontPrompt,
   buildResearchPrompt,
   buildResearchStructuringPrompt,
+  buildServiceLocalPrompt,
   buildSuburbPrompt,
   applyUniquenessGate,
   normalizeResearchSlugs,
@@ -64,7 +67,13 @@ const KEY = 'ztest-stubville'
 // lands, "run every stage" in these fixtures means every stage that actually
 // generates something. STAGES itself still lists all four; this is only
 // about which ones the stub client can be asked to run end to end.
-const RUNNABLE_STAGES = STAGES.filter((s) => s.id !== 'suburb')
+/*
+ * The single-call stages. `suburb` and `service` are the two that make N model
+ * calls, are resumable inside themselves, and are driven one item per request
+ * by the admin — each has its own describe below. Excluding them here keeps
+ * "calls the model once per stage" meaning exactly what it says.
+ */
+const RUNNABLE_STAGES = STAGES.filter((s) => s.id !== 'suburb' && s.id !== 'service')
 
 function draftPath(key: string): string {
   return path.join(DRAFTS_DIR, `${key}.json`)
@@ -192,7 +201,7 @@ describe('pipeline stages', () => {
     // — its generation isn't implemented until Task 16, but the stage id,
     // label and slot ownership are structural and land here.
     it('the home stage no longer exists and the suburb stage does', () => {
-      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'deep', 'suburb'])
+      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'deep', 'suburb', 'service'])
       for (const stage of STAGES) expect(stage.label.length).toBeGreaterThan(10)
     })
 
@@ -230,11 +239,58 @@ describe('pipeline stages', () => {
         'suburb.cleaning-services-mock-hollow.intro',
         'suburb.cleaning-services-mock-hollow.homes',
         'suburb.cleaning-services-mock-hollow.local',
+        'service.standard-cleaning.local',
+        'service.deep-cleaning.local',
+        'service.apartment-cleaning.local',
+        'service.airbnb-cleaning.local',
+        'service.post-construction-cleaning.local',
+        'service.pre-listing-cleaning.local',
       ]
       const owned = STAGES.flatMap((stage) => stageSlots(research)[stage.id])
       expect(owned).toHaveLength(new Set(owned).size)
       expect([...owned].sort()).toEqual([...EXPECTED].sort())
       expect([...requiredSlotsFor(research)].sort()).toEqual([...EXPECTED].sort())
+    })
+
+    it('owns one local slot per template service, whether or not research has run', () => {
+      // Unlike suburb slots these do not depend on research: the seven
+      // services are the same in every city, so the six are owed from the
+      // moment a draft exists.
+      const withResearch = stageSlots(fixtureResearch()).service
+      const without = stageSlots(undefined).service
+      expect(withResearch).toEqual(without)
+      expect(withResearch).toEqual([
+        'service.standard-cleaning.local',
+        'service.deep-cleaning.local',
+        'service.apartment-cleaning.local',
+        'service.airbnb-cleaning.local',
+        'service.post-construction-cleaning.local',
+        'service.pre-listing-cleaning.local',
+      ])
+    })
+
+    it('serviceSlots() is the slot-id contract both the writer and the reader use', () => {
+      expect(serviceSlots('airbnb-cleaning')).toEqual(['service.airbnb-cleaning.local'])
+    })
+
+    it('SERVICE_LOCAL_SLUGS matches the registry exactly, minus the bespoke page', async () => {
+      /*
+       * slots.ts declares the six slugs LOCALLY rather than importing the
+       * registry: slots -> registry -> deep-cleaning -> slots is a genuine
+       * ESM cycle, the same class this file's own header warns about. This
+       * test is what keeps the local copy honest — register a seventh
+       * template service and it fails here rather than silently never
+       * generating that page's local section.
+       *
+       * move-in-move-out-cleaning is `bespoke`: its own five components, live
+       * on Minneapolis today, and deliberately out of scope for this stage.
+       */
+      const { allServices } = await import('../src/data/services/registry')
+      const template = allServices()
+        .filter((e) => e.kind === 'template')
+        .map((e) => e.slug)
+      expect([...SERVICE_LOCAL_SLUGS]).toEqual(template)
+      expect(SERVICE_LOCAL_SLUGS).not.toContain('move-in-move-out-cleaning')
     })
 
     it('emits exactly three suburb slots per WRITABLE area', () => {
@@ -324,6 +380,7 @@ describe('pipeline stages', () => {
       // stage itself, on a fresh client so it doesn't disturb the earlier
       // "calls the model once per stage" assertion's call log.
       await runStage(newClient(), KEY, 'suburb')
+      await runStage(newClient(), KEY, 'service')
       await finalizeDraft(KEY)
 
       const raw = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
@@ -1281,18 +1338,150 @@ describe('buildResearchPrompt', () => {
   })
 
   describe('stage id typing', () => {
-    it('runStage accepts only the four known ids', async () => {
-      const ids: StageId[] = ['research', 'front', 'deep', 'suburb']
+    it('runStage accepts only the five known ids', async () => {
+      const ids: StageId[] = ['research', 'front', 'deep', 'suburb', 'service']
       expect(ids).toEqual(STAGES.map((s) => s.id))
     })
   })
 
-  // The suburb stage is the only one that makes more than one model call —
-  // one per kept area — so it is the only one that must be resumable INSIDE
-  // itself rather than just at the runStage/regenerateStage level tested
-  // above. These tests run 'research' first (real stage, real gate) so the
-  // two kept Stubville areas (Fixture Heights is a 'skip' verdict — see
-  // 'full stub run' above) drive the loop under test.
+  // suburb and service are the two stages that make more than one model call
+  // — one per kept area, one per template service — so they are the two that
+  // must be resumable INSIDE themselves rather than just at the runStage/
+  // regenerateStage level tested above. These tests run 'research' first
+  // (real stage, real gate) so the two kept Stubville areas (Fixture Heights
+  // is a 'skip' verdict — see 'full stub run' above) drive the loop.
+  describe('buildServiceLocalPrompt', () => {
+    const facts = stubFacts()
+
+    const research: ResearchOutput = {
+      suburbs: [],
+      conditions: [
+        { condition: 'Gulf humidity', implication: 'Grout and shower glass discolour faster', copySafe: true },
+        { condition: 'Barker Reservoir flood pool', implication: 'Background only — never for customer copy', copySafe: false },
+      ],
+      zips: [],
+      keywords: [],
+    }
+
+    it('names the service and the city, and forbids repeating the shared copy', () => {
+      const p = buildServiceLocalPrompt(facts, research, 'airbnb-cleaning')
+      expect(p).toContain('Airbnb')
+      expect(p).toContain(facts.city)
+      expect(p).toMatch(/Do not repeat/i)
+    })
+
+    it('never leaks a copySafe:false condition into the prompt', () => {
+      // Same load-bearing rule as buildSuburbPrompt: flood risk, crime and
+      // income are collected to judge a market, never to print on a page.
+      const p = buildServiceLocalPrompt(facts, research, 'airbnb-cleaning')
+      expect(p).not.toContain('Barker Reservoir')
+      expect(p).toContain('Gulf humidity')
+    })
+
+    it('OMITS the conditions section entirely when none are copySafe', () => {
+      /*
+       * A header with nothing under it reads to the model as missing data it
+       * should supply. That is exactly what made the first real Houston run
+       * close every area page on invented humidity and pollen. Same rule as
+       * buildSuburbPrompt's housingSection/conditionsSection.
+       */
+      const bare: ResearchOutput = { ...research, conditions: [] }
+      const p = buildServiceLocalPrompt(facts, bare, 'airbnb-cleaning')
+      expect(p).not.toMatch(/LOCAL CONDITIONS/)
+    })
+
+    it('carries the operator market facts in', () => {
+      const withOps = { ...facts, ops: { crewLead: 'Maria' } }
+      expect(buildServiceLocalPrompt(withOps, research, 'deep-cleaning')).toContain('Maria')
+    })
+
+    it('asks for an honest short answer rather than padding', () => {
+      const p = buildServiceLocalPrompt(facts, research, 'standard-cleaning')
+      expect(p).toMatch(/90 to 130 words/)
+      expect(p).toMatch(/rather than padding/)
+    })
+
+    it('refuses a service that does not render through the shared template', () => {
+      // move-in-move-out-cleaning is the registry's bespoke entry and has no
+      // slot; asking for one would write copy nothing ever renders.
+      expect(() => buildServiceLocalPrompt(facts, research, 'move-in-move-out-cleaning')).toThrow(
+        /move-in-move-out-cleaning/,
+      )
+    })
+  })
+
+  describe('service stage', () => {
+    const AIRBNB = 'service.airbnb-cleaning.local'
+
+    beforeEach(async () => {
+      await resetDraft()
+      await runStage(newClient(), KEY, 'research')
+    })
+
+    it('writes one local slot per template service, matching stageSlots exactly', async () => {
+      await runStage(newClient(), KEY, 'service')
+      const draft = await loadDraft(KEY)
+
+      expect(draft.done).toContain('service')
+      for (const slot of stageSlots(draft.research).service) {
+        expect(draft.sections[slot]).toBeTruthy()
+      }
+      // Pin the literal id and its fixture text: the render side reads this
+      // id verbatim, and a mismatch there is silent (the paragraph simply
+      // never appears).
+      const fixture = fixtures.generated['service.airbnb-cleaning'] as { local: string }
+      expect(draft.sections[AIRBNB]).toBe(fixture.local)
+    })
+
+    it('writes a DIFFERENT paragraph for each service', async () => {
+      // A bug returning one shared string for all six would still satisfy
+      // "every slot is truthy".
+      await runStage(newClient(), KEY, 'service')
+      const draft = await loadDraft(KEY)
+      const written = stageSlots(draft.research).service.map((slot) => draft.sections[slot])
+      expect(new Set(written).size).toBe(written.length)
+    })
+
+    it('runs ONE service when given a slug, leaving the others untouched', async () => {
+      // The admin drives this loop one service per request: six model calls
+      // in a single request is minutes, and a serverless function is killed
+      // long before that. Same shape as the suburb stage.
+      const client = newClient()
+      await runStage(client, KEY, 'service', 'airbnb-cleaning')
+      const draft = await loadDraft(KEY)
+
+      expect(draft.sections[AIRBNB]).toBeTruthy()
+      expect(draft.sections['service.deep-cleaning.local']).toBeUndefined()
+      expect(client.usage.calls).toBe(1)
+    })
+
+    it('does not pay twice for a service already written', async () => {
+      await runStage(newClient(), KEY, 'service', 'airbnb-cleaning')
+      const second = newClient()
+      await runStage(second, KEY, 'service', 'airbnb-cleaning')
+      expect(second.usage.calls).toBe(0)
+    })
+
+    it('refuses a slug that is not a template service rather than silently doing nothing', async () => {
+      await expect(runStage(newClient(), KEY, 'service', 'move-in-move-out-cleaning')).rejects.toThrow(
+        /move-in-move-out-cleaning/,
+      )
+    })
+
+    it('regenerating research clears the service copy too', async () => {
+      // Every local section is built from research.conditions, so research
+      // that changed underneath them makes them stale in exactly the way
+      // front/deep/suburb are.
+      await runStage(newClient(), KEY, 'service')
+      expect((await loadDraft(KEY)).sections[AIRBNB]).toBeTruthy()
+
+      await regenerateStage(newClient(), KEY, 'research')
+      const draft = await loadDraft(KEY)
+      expect(draft.sections[AIRBNB]).toBeUndefined()
+      expect(draft.done).not.toContain('service')
+    })
+  })
+
   describe('suburb stage', () => {
     const NORTH = 'house-cleaning-north-stubville'
     const MOCK_HOLLOW = 'cleaning-services-mock-hollow'

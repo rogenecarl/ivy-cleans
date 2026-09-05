@@ -1,8 +1,12 @@
 // Placeholder-grade copy, expected to be rewritten with real marketing copy.
-// Structure and token placement follow src/data/deep-cleaning.ts exactly. No
-// AI slot: whatIs.text is a plain static string, not s(c, ...).
+// Structure and token placement follow src/data/deep-cleaning.ts exactly.
+// whatIs.text is a plain static string and stays canonical in every city;
+// whatIs.local is the one generated field (content-strategy C) and is read
+// with sOpt, not s, because a city that never ran the service stage has no
+// such slot and s() would throw on every one of its service pages.
 
 import type { CityContent } from '../../content/types'
+import { sOpt, serviceSlots } from '../../content/slots'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -34,6 +38,7 @@ export function apartmentCleaningData(c: CityContent): ServiceContent {
       h2BreakAfter: 4,
       text: "Apartment and condo cleaning is a cleaning service scaled to the way people actually live in multi unit buildings, with smaller square footage, in unit laundry closets, compact kitchens, and shared hallways or elevators to move through. It covers the same thorough cleaning of kitchens, bathrooms, floors, and living spaces as a house cleaning, adjusted for building access windows, HOA or property management guidelines, and the quieter, low odor approach that shared HVAC systems and close neighbors often call for.",
       image: "/images/deep-img1.jpg",
+      local: sOpt(c, serviceSlots('apartment-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

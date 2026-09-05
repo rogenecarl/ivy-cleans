@@ -8,15 +8,15 @@ Written to hand the generator work to a fresh session. Read this first, then
 ## The one-line state
 
 The seven handoff changes are merged and pushed. Content-strategy items
-**B (voice) and A (ops block) are both DONE**, and A's three reachability
-holes are now closed — see "A is complete" below. Houston has been generated
+**A (ops block), B (voice) and C (service local sections) are DONE**, and A's
+three reachability holes are closed — see "A is complete" below. Houston has been generated
 against the real model twice, and the flaw the first run exposed is fixed and
-verified — see "The real Houston run" below. **The next task still depends on
-the question at the bottom of this file.**
+verified — see "The real Houston run" below. **D (validators) is next, now
+that C is in.**
 
 ```
 origin/main   6973e8a   (last pushed commit)
-suite         695 tests, 0 failures     pnpm test
+suite         718 tests, 0 failures     pnpm test
 typecheck     clean in src/             pnpm tsc --noEmit
 lint          0 errors, 14 warnings     pnpm lint   (all pre-existing)
 duplication   0 live findings           node scripts/check-duplication.mjs
@@ -113,6 +113,45 @@ Two rules the parsers follow, both deliberate and both tested:
 Still true: `crewLead` etc. reach the copy only through `opsBlock`. Saving a
 fact changes what the NEXT generation is given — it does not rewrite pages
 already written. The screen says so.
+
+## C is complete
+
+Six of the seven service pages were byte-identical in every city — only
+`deep.whatIs` was generated, and `src/data/services/*.ts` said so in a comment.
+Each of the six now carries one 90–130 word paragraph saying what this city
+changes about that job.
+
+- **A fifth stage**, `service`, after `suburb`. Slots `service.<slug>.local`,
+  one per template service. Regenerating `research` clears it.
+- **`buildServiceLocalPrompt`** — Abdi's text, plus `opsBlock`/`notesBlock`,
+  fed the `copySafe` metro conditions. The conditions section is OMITTED when
+  empty, never emitted blank: that is what made the first Houston run invent
+  the same three facts for every area.
+- **Rendered as a second `<p>` inside `WhatIs`**, not a new section. The
+  layout is traced byte-for-byte to the live Elementor design and a new
+  section would mean deriving spacing with no reference to derive it from.
+- **`move-in-move-out-cleaning` is excluded.** It is the registry's one
+  `bespoke` entry, with its own five components, live on Minneapolis today.
+  `buildServiceLocalPrompt` throws if asked for it.
+- **One request per service**, like the suburb stage — `pendingServicesAction`
+  plus a client loop. Six calls in one request is minutes and Vercel kills it.
+
+Two corrections to the handoff, both load-bearing:
+
+1. **`content-strategy.md` says to read the slot with `s(c, ...)`. That would
+   500 every service page on Minneapolis**, which is live and has none of
+   these slots — `s()` throws on a missing slot. The builders use `sOpt`.
+2. The doc says "seven calls" in one place and "the six static builders" in
+   another. It is six; move-out is bespoke.
+
+**`REQUIRED_SLOTS` grew by six.** Service slots do not depend on research —
+the same seven services exist in every city — so they sit with the
+research-free base rather than with the suburb slots. Consequence: **Houston's
+committed draft is not finalizable until its service stage runs.** That is
+correct, and `npx tsx scripts/generate-city.mjs houston` will do it.
+
+`StubModelClient` now counts `usage.calls`. It never did, so every
+"a resumed stage does not pay twice" assertion had been holding at 0 === 0.
 
 ## The real Houston run — what it proved
 
@@ -288,11 +327,15 @@ would not have.
 
 ## What to do next, in order
 
-1. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
+1. **Run the service stage on Houston** (~$0.40) — its draft cannot finalize
+   until then, and it is the first look at whether the local sections say
+   anything a resident would recognise.
+2. **D — validators** (`src/content/quality.ts`, ½ day). Entity coverage,
    ops-facts-used, banned phrases. This is what turns A from advisory into
    enforced. `BANNED_PHRASES` is already exported from `stages.ts` for it.
-4. **C — service local sections** (1 day).
-5. **E — evals** (1 day).
+   Note its ops check reads only `services.*` slots — widen it, or a fact used
+   on an area page still reads as unused.
+3. **E — evals** (1 day).
 6. **Change 2 — DataForSEO** whenever credentials exist. The seam is built:
    `buildResearchStructuringPrompt` takes a keywords argument and branches on
    it, so it is one call-site change plus deleting part (d) of the brief.

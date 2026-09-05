@@ -31,10 +31,17 @@ import {
   publishCity,
   saveDraft,
 } from '../content/drafts'
-import { isWritableArea, isWrittenSlot, suburbSlots } from '../content/slots'
+import {
+  SERVICE_LOCAL_SLUGS,
+  isWritableArea,
+  isWrittenSlot,
+  serviceSlots,
+  suburbSlots,
+} from '../content/slots'
 import { getCity, revalidateCity } from '../content/store'
 import { validateCityContent } from '../content/validate'
 import type { CityContent } from '../content/types'
+import { serviceBySlug } from '../data/services/registry'
 import { deriveFacts } from './facts'
 import { makeClient } from './model'
 import { readProgress, type ProgressEvent } from './progress'
@@ -365,6 +372,34 @@ export async function pendingSuburbsLogic(
     return { ok: true, areas }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+
+/**
+ * The service pages the service stage still has to write, in order.
+ *
+ * The admin drives this loop one service per request, for the same reason the
+ * suburb loop is driven that way: six model calls inside a single server
+ * action runs for minutes and a serverless function is killed long before
+ * that.
+ *
+ * UNLIKE pendingSuburbsLogic this does not need research to have run — the
+ * same seven services exist in every city, so the list is known from the
+ * moment a draft exists. (The stage itself still needs research, for the
+ * local conditions it writes from.) Already-written services are omitted, so
+ * the returned length is exactly the number of model calls left to pay for.
+ */
+export async function pendingServicesLogic(
+  key: string
+): Promise<{ ok: true; services: { slug: string; name: string }[] } | { ok: false; error: string }> {
+  try {
+    const draft = await loadDraft(key)
+    const services = SERVICE_LOCAL_SLUGS.filter(
+      (slug) => !serviceSlots(slug).every((slot) => isWrittenSlot(draft.sections[slot]))
+    ).map((slug) => ({ slug, name: serviceBySlug(slug)?.name ?? slug }))
+    return { ok: true, services }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
   }
 }
 

@@ -23,7 +23,10 @@
         {
           "name": "Mock Hollow",
           "slug": "cleaning-services-mock-hollow",
-          "subdivisions": ["Mock Hollow Commons", "Mock Hollow Terrace"],
+          "subdivisions": [
+            "Mock Hollow Commons",
+            "Mock Hollow Terrace"
+          ],
           "housingCharacter": "Stub-frame duplexes built close together along the fixture line.",
           "conditions": []
         },
@@ -47,7 +50,10 @@
           "copySafe": false
         }
       ],
-      "zips": ["00001", "00002"],
+      "zips": [
+        "00001",
+        "00002"
+      ],
       "keywords": [
         "cleaning services stubville",
         "house cleaning stubville",
@@ -90,13 +96,40 @@
       "intro": "Mock Hollow's stub-frame duplexes sit close enough together that a cleaning crew has to work quietly, and we've built our schedule there around that. It's a smaller footprint than North Stubville, but the shared walls and tight setbacks mean the little things — a scuffed shared entry, a dusty shared vent — matter more to how the whole street looks.",
       "homes": "Mock Hollow Commons and Mock Hollow Terrace are both built to the same duplex pattern: narrow galley kitchens, laminate counters original to the fixture era, and shared stairwells that see twice the foot traffic of a single-family entry. Bedrooms upstairs run small, so closets and under-bed space get used hard, and that's where lint and fixture dust collect fastest. Because the units share a wall, sound and vibration from one side loosens dust into the other, which is not something North Stubville's detached bungalows ever have to deal with.",
       "local": "The shared walls and stairwells in Mock Hollow Commons and Mock Hollow Terrace mean dust and fixture-season grit move between units in a way a standalone house never sees, so a clean on one side doesn't hold if the shared entry is neglected. We treat the shared stairwells and vents as part of every job rather than an extra, and we work the narrow galley kitchens with brushes that fit between the original laminate counters and the wall, which a wider tool just skips over."
+    },
+    "service.standard-cleaning": {
+      "local": "A standard visit in Fixture City is shaped by the test season, which runs six months and drags fine assertion grit in through every door. Crews here spend longer on entry mats, sills and the tops of baseboards than they would in a drier fixture, and less time on the kitchens, which stay comparatively clean. The stub-frame construction common across the district means skirting gaps collect that grit rather than shedding it, so a standard clean here always includes a pass along the base of every wall."
+    },
+    "service.deep-cleaning": {
+      "local": "Deep cleans in Fixture City almost always start in the bathrooms. Six months of test season keeps indoor humidity high enough that grout darkens between visits, and the single-pane windows most of the older stock still carries sweat through the assertion months, leaving frames that need scraping rather than wiping. Crews budget most of a morning for a three-bathroom house here. In a drier fixture the same house would be an afternoon."
+    },
+    "service.apartment-cleaning": {
+      "local": "Apartment work in Fixture City is dominated by shared stairwells. The duplex pattern through Mock Hollow puts two front doors on one landing, so grit tracked in by one household lands on both mats, and the carpeted common runs hold it. Crews here carry a second vacuum head for stair edges, which is not standard in fixtures with detached stock. Kitchens in these units are small and stay tidy; the floors and the entry are where the time goes."
+    },
+    "service.airbnb-cleaning": {
+      "local": "Turnovers in Fixture City run tight against the test season, when arrivals cluster and the same fine grit that settles on sills settles on every surface a guest photographs. Crews strip and remake first, then work the windows, because the single-pane stock through North Stubville shows streaks in the low assertion light that a guest will notice and a host will hear about. A same-day turnover here needs two people rather than one."
+    },
+    "service.post-construction-cleaning": {
+      "local": "Post-construction work in Fixture City is a dust problem before it is a cleaning problem. The stub-frame builds going up across the district shed a fine assertion grit that stays airborne for days and settles again after the first pass, so crews here work the ceilings and light fittings, wait, then work them again. Budget two visits rather than one. Fixtures with slab-and-brick construction rarely need the second."
+    },
+    "service.pre-listing-cleaning": {
+      "local": "A pre-listing clean in Fixture City is aimed at the windows. Six months of test season leaves the original single-pane glass through North Stubville hazed enough to grey a listing photograph, and buyers here read that as neglect rather than weather. Crews do the glass first, inside and out, then the floors. The kitchens in this stock photograph well with very little work, so the time goes where the camera goes."
     }
   },
   "events": {
     "research": [
-      { "kind": "search", "label": "Searching: Stubville Texas suburbs and neighborhoods" },
-      { "kind": "search", "label": "Searching: Stubville TX residential ZIP codes" },
-      { "kind": "reading", "label": "Reading search results…" }
+      {
+        "kind": "search",
+        "label": "Searching: Stubville Texas suburbs and neighborhoods"
+      },
+      {
+        "kind": "search",
+        "label": "Searching: Stubville TX residential ZIP codes"
+      },
+      {
+        "kind": "reading",
+        "label": "Reading search results…"
+      }
     ]
   }
 }

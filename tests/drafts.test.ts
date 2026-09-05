@@ -78,9 +78,12 @@ function fullResearch(): ResearchOutput {
 }
 
 // Every finalizeDraft-based test below uses fullResearch() paired with
-// fullSections(): requiredSlotsFor(fullResearch()) is the static 8 PLUS the
-// three suburb.house-cleaning-north-ztest.* slots (Task 18), so this must
-// carry all of them or finalizeDraft's missing-slot check refuses the draft.
+// fullSections(): requiredSlotsFor(fullResearch()) is the static 8, PLUS the
+// three suburb.house-cleaning-north-ztest.* slots (Task 18), PLUS one
+// service.<slug>.local per template service (content-strategy C) -- so this
+// must carry all of them or finalizeDraft's missing-slot check refuses the
+// draft. The service slots do NOT depend on research: the same seven services
+// exist in every city, so all six are owed from the moment a draft exists.
 function fullSections(): Record<string, string | string[]> {
   return {
     'services.heroParagraphs': ['Hero one.', 'Hero two.'],
@@ -94,6 +97,12 @@ function fullSections(): Record<string, string | string[]> {
     'suburb.house-cleaning-north-ztest.intro': 'North Ztest is a quiet area we clean often.',
     'suburb.house-cleaning-north-ztest.homes': 'Homes in North Ztest are split-level ranches from the 1970s.',
     'suburb.house-cleaning-north-ztest.local': 'Ztest winters mean salt and grit track in all season.',
+    'service.standard-cleaning.local': 'A standard visit in Ztest starts with the entry mats.',
+    'service.deep-cleaning.local': 'Deep cleans in Ztest begin in the bathrooms.',
+    'service.apartment-cleaning.local': 'Ztest apartment work is dominated by shared stairwells.',
+    'service.airbnb-cleaning.local': 'Ztest turnovers run tight against the winter arrivals.',
+    'service.post-construction-cleaning.local': 'Ztest post-construction work is a dust problem first.',
+    'service.pre-listing-cleaning.local': 'A Ztest pre-listing clean is aimed at the windows.',
   }
 }
 
@@ -321,7 +330,7 @@ describe('drafts store', () => {
       }
     })
 
-    it('finalizes a city with no researched areas at all, degenerating to the static 8 slots', async () => {
+    it('finalizes a city with no researched areas at all, degenerating to the research-free slots', async () => {
       const noAreasKey = 'ztest-noareas'
       try {
         const facts = deriveFacts({ city: 'Ztest Noareas', state: 'MN', phoneDigits: '6125550197' })
@@ -338,8 +347,16 @@ describe('drafts store', () => {
           'services.cards.window': 'Window copy.',
           'services.cards.upholstery': 'Upholstery copy.',
           'deep.whatIs': 'Deep cleaning is...',
+          // Research-independent, like the eight above: the same seven
+          // services exist in a city with no areas at all.
+          'service.standard-cleaning.local': 'A standard visit here starts with the entry mats.',
+          'service.deep-cleaning.local': 'Deep cleans here begin in the bathrooms.',
+          'service.apartment-cleaning.local': 'Apartment work here is dominated by shared stairwells.',
+          'service.airbnb-cleaning.local': 'Turnovers here run tight against winter arrivals.',
+          'service.post-construction-cleaning.local': 'Post-construction work here is a dust problem first.',
+          'service.pre-listing-cleaning.local': 'A pre-listing clean here is aimed at the windows.',
         }
-        doc.done = ['research', 'front', 'deep']
+        doc.done = ['research', 'front', 'deep', 'service']
         await saveDraft(noAreasKey, doc)
 
         await finalizeDraft(noAreasKey)

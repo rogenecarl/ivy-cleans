@@ -38,6 +38,7 @@ import {
   listCities,
   publishLogic,
   regenerateLogic,
+  pendingServicesLogic,
   pendingSuburbsLogic,
   runStageLogic,
   updateSuburbsLogic,
@@ -104,6 +105,16 @@ export async function runStageAction(
 export async function pendingSuburbsAction(key: string) {
   await requireAdmin()
   return pendingSuburbsLogic(key)
+}
+
+/**
+ * Which service pages the service stage still owes, so the client can drive
+ * that loop one request per service. See pendingServicesLogic for why the
+ * loop is not server-side.
+ */
+export async function pendingServicesAction(key: string) {
+  await requireAdmin()
+  return pendingServicesLogic(key)
 }
 
 export async function regenerateAction(key: string, stage: string): Promise<ActionResult> {

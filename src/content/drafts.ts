@@ -18,7 +18,7 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '../pipeline/facts'
 import type { ResearchOutput } from '../pipeline/schemas'
-import { STAGES, isWrittenSlot, stageSlots } from './slots'
+import { SERVICE_LOCAL_SLUGS, STAGES, isWrittenSlot, serviceSlots, stageSlots } from './slots'
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
@@ -168,9 +168,16 @@ export async function deleteDraft(key: string): Promise<void> {
 }
 
 /**
- * The 8 section slots every src/data builder reads (mirrors testville.json's
- * `sections` keys). finalizeDraft() requires every one of these to be present
- * in draft.sections before a draft can become a published CityContent.
+ * The section slots that do not depend on research at all — the eight the
+ * front and deep stages own, plus one local section per template service.
+ * finalizeDraft() requires every one of these before a draft can become a
+ * published CityContent.
+ *
+ * The service slots sit here rather than with the suburb slots because the
+ * same seven services exist in every city: how many area pages a city has is
+ * a property of its research, but how many service pages it has is not.
+ *
+ * INVARIANT, pinned by a test: this is exactly `requiredSlotsFor(undefined)`.
  */
 export const REQUIRED_SLOTS = [
   'services.heroParagraphs',
@@ -181,6 +188,7 @@ export const REQUIRED_SLOTS = [
   'services.cards.window',
   'services.cards.upholstery',
   'deep.whatIs',
+  ...SERVICE_LOCAL_SLUGS.flatMap((slug) => serviceSlots(slug)),
 ] as const
 
 /**

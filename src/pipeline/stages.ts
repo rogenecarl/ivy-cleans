@@ -27,6 +27,7 @@ import {
   DeepSchema,
   FrontSectionsSchema,
   ResearchSchema,
+  ServiceCopySchema,
   SuburbCopySchema,
   type Condition,
   type ResearchOutput,
@@ -37,14 +38,17 @@ import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
 import {
+  SERVICE_LOCAL_SLUGS,
   STAGES,
   STAGE_IDS,
   isWritableArea,
   isWrittenSlot,
+  serviceSlots,
   stageSlots,
   suburbSlots,
   type StageId,
 } from '../content/slots'
+import { serviceBySlug } from '../data/services/registry'
 import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
@@ -63,7 +67,7 @@ import { posts as recentPosts } from '../data/recent-posts'
  * module (admin-logic.ts, the admin console pages, the test suite) keeps
  * compiling against the same public surface untouched.
  */
-export { STAGES, STAGE_IDS, stageSlots, suburbSlots, type StageId }
+export { SERVICE_LOCAL_SLUGS, STAGES, STAGE_IDS, serviceSlots, stageSlots, suburbSlots, type StageId }
 
 /**
  * New cities get a bare `<area>` slug — the area name, lowercased and
@@ -202,6 +206,16 @@ YOU OWN THE PLACE, NOT THE SERVICE. Every service has its own page and the reade
 THE TEST. Read back what you wrote and ask whether a single paragraph of it would sit unchanged on the page for a neighbouring area. If it would, it is filler and you have not used the research. The named developments, the age and size of the houses, the way the streets and driveways work — those are what make this page about this place.
 
 DO NOT reuse sentence constructions from any example you were shown. Match what an example does, never how it says it. If an example paragraph is short enough that matching its shape would mean reproducing it, write something different instead.`
+
+export const SERVICE_SYSTEM = `${SYSTEM_BASE}
+
+STAGE: the local section of ONE service page. The page already explains what the service is, what it includes and how it is priced, and that copy is shared word-for-word by every city. You are writing the one part that is not shared.
+
+YOU OWN WHAT IS DIFFERENT HERE, NOT WHAT THE SERVICE IS. If you find yourself describing the service — what gets cleaned, what is included, how long it takes in general — stop. That is the copy above you on the same page, and repeating it makes both weaker. Your subject is this city: what its homes, its weather, or the way people live in it changes about doing this particular job.
+
+THE TEST. Read back what you wrote and ask whether it would sit unchanged on the same service page for a different city. If it would, you have not used the research and it is filler.
+
+An honest short answer beats a padded long one. If the conditions genuinely do not change how this service is done here, say so plainly and stop.`
 
 /**
  * The structuring call that turns raw web-research findings into
@@ -493,6 +507,60 @@ Produce three paragraphs.
    ${EXEMPLAR_LOCAL}`
 }
 
+/**
+ * The local section of one service page.
+ *
+ * Six of the seven service pages are static files rendered identically in
+ * every city — Airbnb cleaning in Houston is hurricane-season turnovers
+ * against nine thousand listings, in Minneapolis it is winter turnovers
+ * against a few hundred, and today the two pages cannot say so. This writes
+ * the one paragraph that can.
+ *
+ * DELIBERATELY NOT the whole page. What a deep clean IS should read the same
+ * everywhere; that is the canonical text, and regenerating it per city would
+ * make a hundred sites compete with each other for the same phrases.
+ *
+ * Throws for a slug the shared template does not render —
+ * move-in-move-out-cleaning is the registry's one `bespoke` entry and owns no
+ * slot, so copy written for it would never reach a page.
+ */
+export function buildServiceLocalPrompt(
+  facts: Facts,
+  research: ResearchOutput,
+  slug: string
+): string {
+  const entry = serviceBySlug(slug)
+  if (entry === undefined || entry.kind !== 'template') {
+    throw new Error(
+      `cannot write a local section for "${slug}": it is not a service that renders through the shared template, so nothing would ever display the result.`
+    )
+  }
+
+  const conditionLines = research.conditions
+    .filter((c) => c.copySafe)
+    .map((c) => `- ${c.condition} — ${c.implication}`)
+    .join('\n')
+
+  // Omitted entirely when empty, never emitted blank: a header with nothing
+  // under it reads as missing data the model should supply, which is what
+  // made the first real Houston run invent the same three facts for every
+  // area page. Same rule as buildSuburbPrompt.
+  const conditionsSection =
+    conditionLines === ''
+      ? ''
+      : `\n\nLOCAL CONDITIONS in ${facts.city}, with what each one means for cleaning:\n${conditionLines}`
+
+  return `Write the "In ${facts.city}" section for the ${entry.name} page.
+${opsBlock(facts)}${notesBlock(facts)}
+The page already explains what ${entry.name} is, what is included, and how it is priced. That copy is fixed and shared by every city. Do not repeat any of it.
+
+Your section answers one question: what is different about ${entry.name} in ${facts.city} specifically, because of the homes here, the climate, or how people live?${conditionsSection}
+
+90 to 130 words. Lead with the most specific condition.
+
+If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.`
+}
+
 /* ────────────────────────────────────────────────────────────────────────────
  * Stage execution
  * ──────────────────────────────────────────────────────────────────────────── */
@@ -510,6 +578,7 @@ export const MODEL_KEYS = {
   front: 'front',
   deep: 'deep',
   suburb: (slug: string) => `suburb.${slug}`,
+  service: (slug: string) => `service.${slug}`,
 } as const
 
 /**
@@ -934,6 +1003,79 @@ async function executeStage(
       }
       break
     }
+    case 'service': {
+      /*
+       * Six of the seven service pages are byte-identical in every city. This
+       * writes the one paragraph on each that is not — what the homes, the
+       * climate or the habits here change about doing that particular job.
+       *
+       * Like the suburb stage this makes more than one model call, so it is
+       * resumable inside itself and drivable one service at a time: six calls
+       * in a single request is minutes and a serverless function is killed
+       * long before that. Unlike the suburb stage the target list is fixed —
+       * the services are the same in every city — so there is no gate and no
+       * skipping, only "already written".
+       */
+      const research = requireResearch(draft, key, stage)
+
+      const targets =
+        only === undefined ? [...SERVICE_LOCAL_SLUGS] : SERVICE_LOCAL_SLUGS.filter((slug) => slug === only)
+      if (only !== undefined && targets.length === 0) {
+        throw new Error(
+          `cannot write the local section for "${only}": it is not a service that renders through the shared template. The seven services are fixed; move-in-move-out-cleaning is bespoke and owns no slot.`
+        )
+      }
+
+      // Announced once per stage, not once per service: with a client-driven
+      // loop this case is entered N times and N "starting" lines is noise.
+      const anyWritten = SERVICE_LOCAL_SLUGS.some((slug) =>
+        serviceSlots(slug).some((slot) => isWrittenSlot(draft.sections[slot]))
+      )
+      if (!anyWritten) {
+        await appendProgress(key, {
+          stage: 'service',
+          kind: 'start',
+          label: `Writing the ${facts.city} section of ${SERVICE_LOCAL_SLUGS.length} service pages`,
+        })
+      }
+
+      for (const slug of targets) {
+        const [localSlot] = serviceSlots(slug)
+
+        // Already written on an earlier attempt — skip, do not pay twice. A
+        // blank string counts as NOT written: it is `!== undefined` but it is
+        // not usable copy, and treating it as done would leave a permanently
+        // empty paragraph with no way to regenerate it.
+        if (isWrittenSlot(draft.sections[localSlot])) continue
+
+        const out = await client.generate({
+          schema: ServiceCopySchema,
+          key: MODEL_KEYS.service(slug),
+          system: SERVICE_SYSTEM,
+          prompt: buildServiceLocalPrompt(facts, research, slug),
+        })
+
+        draft.sections[localSlot] = out.local
+
+        // Save per service: this is what makes the loop resumable.
+        await saveDraft(key, draft)
+
+        await appendProgress(key, {
+          stage: 'service',
+          kind: 'found',
+          label: `${serviceBySlug(slug)?.name ?? slug} — local section written`,
+        })
+      }
+
+      if (stageComplete(draft, stage)) {
+        await appendProgress(key, {
+          stage: 'service',
+          kind: 'done',
+          label: `${SERVICE_LOCAL_SLUGS.length} service pages given a ${facts.city} section`,
+        })
+      }
+      break
+    }
     default: {
       const exhaustive: never = stage
       throw new Error(`unknown stage "${String(exhaustive)}"`)
@@ -1016,14 +1158,14 @@ export async function regenerateStage(
   const draft = await loadDraft(key)
 
   if (stage === 'research') {
-    for (const downstream of ['front', 'deep', 'suburb'] as const) {
+    for (const downstream of ['front', 'deep', 'suburb', 'service'] as const) {
       clearStageOutputs(draft, downstream)
     }
   }
   clearStageOutputs(draft, stage)
 
   if (stage === 'research') {
-    for (const downstream of ['front', 'deep', 'suburb'] as const) {
+    for (const downstream of ['front', 'deep', 'suburb', 'service'] as const) {
       await clearProgress(key, downstream)
     }
   }

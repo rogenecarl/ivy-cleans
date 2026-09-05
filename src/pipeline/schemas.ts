@@ -187,6 +187,26 @@ export const SuburbCopySchema = z
 export type SuburbCopyOutput = z.infer<typeof SuburbCopySchema>
 
 /**
+ * One service page's local section — the paragraph that answers "what is
+ * different about this service HERE".
+ *
+ * A single field rather than a bare string because the structured-output API
+ * returns an object, and because a named field leaves room for a second
+ * section later without a migration.
+ *
+ * NO length constraint, same as every schema in this file: the API rejects
+ * min/max and nothing in the suite catches it. The 90-130 word range lives in
+ * the prompt.
+ */
+export const ServiceCopySchema = z
+  .object({
+    /** 90-130 words. What this city's homes, climate or habits change. */
+    local: z.string(),
+  })
+  .strict()
+export type ServiceCopyOutput = z.infer<typeof ServiceCopySchema>
+
+/**
  * REMOVED: HomeProseSchema.
  *
  * It carried `zipParagraph` and `landmarksParagraph` — the two sentences the

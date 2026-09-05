@@ -30,4 +30,14 @@ export const SKILL_META: Record<string, { icon: string; name: string; tagline: s
     name: 'Deep-Clean Copywriter',
     tagline: 'The “what is deep cleaning” explainer with a local angle',
   },
+  suburb: {
+    icon: '🏘️',
+    name: 'Area-Page Writer',
+    tagline: 'Three paragraphs per area, built from that area’s own research',
+  },
+  service: {
+    icon: '🧽',
+    name: 'Service-Page Localiser',
+    tagline: 'What this city changes about each service — the rest stays shared',
+  },
 }

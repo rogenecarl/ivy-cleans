@@ -24,7 +24,14 @@ export type ServiceContent = {
    * which is what the live deep-cleaning heading needs. Rule of thumb when
    * setting it for a new service: break AFTER the ampersand, never before
    * it, and never inside a proper noun. */
-  whatIs: { h2: string; text: string; image: string; h2BreakAfter?: number }
+  /* `local` is the ONE generated field on a service page: what this city's
+   * homes, climate or habits change about doing this job (content-strategy
+   * C, `service.<slug>.local`). `text` above stays canonical and identical
+   * in every city -- regenerating it per city would make a hundred sites
+   * compete for the same phrases. Optional because a city that has not run
+   * the service stage, or was migrated before it existed, has no such slot:
+   * Minneapolis is live and has none. */
+  whatIs: { h2: string; text: string; image: string; h2BreakAfter?: number; local?: string }
   benefitsBgImage: string
   benefits: {
     h2: string

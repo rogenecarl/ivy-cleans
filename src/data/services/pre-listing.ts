@@ -1,8 +1,12 @@
 // Placeholder-grade copy, expected to be rewritten with real marketing copy.
-// Structure and token placement follow src/data/deep-cleaning.ts exactly. No
-// AI slot: whatIs.text is a plain static string, not s(c, ...).
+// Structure and token placement follow src/data/deep-cleaning.ts exactly.
+// whatIs.text is a plain static string and stays canonical in every city;
+// whatIs.local is the one generated field (content-strategy C) and is read
+// with sOpt, not s, because a city that never ran the service stage has no
+// such slot and s() would throw on every one of its service pages.
 
 import type { CityContent } from '../../content/types'
+import { sOpt, serviceSlots } from '../../content/slots'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -34,6 +38,7 @@ export function preListingCleaningData(c: CityContent): ServiceContent {
       h2BreakAfter: 5,
       text: "Real estate and pre listing cleaning is a detailed service that prepares a home for photos, showings, and open houses. Buyers form an impression within the first few minutes of a walk through, so this service targets streak free windows and mirrors, spotless kitchens and bathrooms, decluttered and wiped down surfaces, and fresh smelling, well presented rooms. These are the details that photograph well and hold up under a buyer’s close look, timed around your agent’s listing and showing schedule.",
       image: "/images/deep-img1.jpg",
+      local: sOpt(c, serviceSlots('pre-listing-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

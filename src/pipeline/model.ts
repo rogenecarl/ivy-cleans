@@ -203,6 +203,7 @@ export class StubModelClient implements ModelClient {
 
   async research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string> {
     void prompt
+    this.usage.calls += 1
     const value = this.fixtures.research[key]
     if (value === undefined) {
       throw new Error(`StubModelClient has no canned research for key "${key}"`)
@@ -214,6 +215,14 @@ export class StubModelClient implements ModelClient {
   }
 
   async generate<T>(args: GenerateArgs<T>): Promise<T> {
+    /*
+     * Counted even though the stub spends nothing. The tally is how tests
+     * assert that a resumed stage does not pay for work already done — an
+     * assertion that silently held at 0 === 0 for every stage until the
+     * service loop needed it, which is the shape of a test that passes for
+     * the wrong reason.
+     */
+    this.usage.calls += 1
     if (!(args.key in this.fixtures.generated)) {
       throw new Error(`StubModelClient has no canned generated output for key "${args.key}"`)
     }
