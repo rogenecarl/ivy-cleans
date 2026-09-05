@@ -13,7 +13,7 @@ against the real model twice, and the flaw the first run exposed is fixed and
 verified — see "The real Houston run" below. **D (validators) is next.**
 
 ```
-origin/main   89e75bc   (everything pushed, nothing local-only)
+origin/main   cf51936   (everything pushed, nothing local-only)
 suite         660 tests, 0 failures     pnpm test
 typecheck     clean in src/             pnpm tsc --noEmit
 duplication   0 live findings           node scripts/check-duplication.mjs
@@ -152,10 +152,13 @@ part (d) is gone, so the three remaining parts have the whole budget.
 
 ## Current draft state
 
-`content/_drafts/houston.json` — `done: ['research']`, 6 areas, 6 metro
-conditions, 37 subdivisions, 16,284 chars of persisted findings, **0 sections**.
-Regenerating research cleared front/deep/suburb, correctly. To see the fixed
-output, run the generator again (~$1.20).
+`content/_drafts/houston.json` — fully generated and committed (`89e75bc`).
+`done: ['research','front','deep','suburb']`, 6 areas, 6 metro conditions,
+37 subdivisions, 26 sections, 16,284 chars of persisted findings.
+
+This draft IS the evidence. Read `suburb.katy.local` against
+`suburb.sugar-land.local` to see what the pipeline now produces; every
+closing fact in both traces to a researched metro condition.
 
 `content/_drafts/miami.json` — still the migrated shape, all areas with zero
 subdivisions, so the gate refuses them all. Needs research re-run before it can
