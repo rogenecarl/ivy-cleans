@@ -90,6 +90,7 @@ const runStageLogic = vi.fn()
 const regenerateLogic = vi.fn()
 const finalizeLogic = vi.fn()
 const updateSuburbsLogic = vi.fn()
+const updateOpsLogic = vi.fn()
 const publishLogic = vi.fn()
 const listCities = vi.fn(async () => [])
 const getProgressLogic = vi.fn()
@@ -104,6 +105,7 @@ vi.mock('@/pipeline/admin-logic', async () => {
     regenerateLogic,
     finalizeLogic,
     updateSuburbsLogic,
+    updateOpsLogic,
     publishLogic,
     listCities,
     getProgressLogic,
@@ -216,6 +218,32 @@ describe('saveNotifyEmailsAction', () => {
     form.set('emails', 'x@y.com')
     await expect(mod.saveNotifyEmailsAction('miami', form)).rejects.toThrow(REDIRECTED)
     expect(upsertSiteSettings).not.toHaveBeenCalled()
+  })
+})
+
+describe('saveOpsAction', () => {
+  /*
+   * The ops block is the one input nobody can research or regenerate, and
+   * this action REPLACES it wholesale — a write that reaches the store
+   * before the guard does would overwrite a market's real facts with a
+   * hostile caller's, on a live city, with no draft left to recover from.
+   */
+  it('refuses a manager and never writes ops', async () => {
+    asManager()
+    const mod = await import('@/app/admin/(console)/sites/site-actions')
+    const form = new FormData()
+    form.set('crewLead', 'Maria')
+    await expect(mod.saveOpsAction('miami', form)).rejects.toThrow(REDIRECTED)
+    expect(updateOpsLogic).not.toHaveBeenCalled()
+  })
+
+  it('refuses a signed-out caller and never writes ops', async () => {
+    signedOut()
+    const mod = await import('@/app/admin/(console)/sites/site-actions')
+    const form = new FormData()
+    form.set('crewLead', 'Maria')
+    await expect(mod.saveOpsAction('miami', form)).rejects.toThrow(REDIRECTED)
+    expect(updateOpsLogic).not.toHaveBeenCalled()
   })
 })
 

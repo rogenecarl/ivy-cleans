@@ -8,14 +8,17 @@ Written to hand the generator work to a fresh session. Read this first, then
 ## The one-line state
 
 The seven handoff changes are merged and pushed. Content-strategy items
-**B (voice) and A (ops block) are both DONE**. Houston has been generated
+**B (voice) and A (ops block) are both DONE**, and A's three reachability
+holes are now closed — see "A is complete" below. Houston has been generated
 against the real model twice, and the flaw the first run exposed is fixed and
-verified — see "The real Houston run" below. **D (validators) is next.**
+verified — see "The real Houston run" below. **The next task still depends on
+the question at the bottom of this file.**
 
 ```
-origin/main   cf51936   (everything pushed, nothing local-only)
-suite         660 tests, 0 failures     pnpm test
+origin/main   6973e8a   (last pushed commit)
+suite         695 tests, 0 failures     pnpm test
 typecheck     clean in src/             pnpm tsc --noEmit
+lint          0 errors, 14 warnings     pnpm lint   (all pre-existing)
 duplication   0 live findings           node scripts/check-duplication.mjs
 ```
 
@@ -74,6 +77,43 @@ make. The research pass said so itself, in the persisted findings:
 
 Keywords keep their part in the brief, relettered (d), until DataForSEO lands.
 
+### The three holes in A, now closed
+
+A was specified and wired but not reachable. Three gaps, all found by reading
+the flow end to end rather than by a failing test:
+
+1. **`reviews` could not be entered anywhere.** `MarketOpsSchema` accepted
+   them and `opsBlock` prompted with them — *"quote at most two, verbatim"* —
+   and no form field existed. The single most valuable ops fact was
+   unreachable through the UI. Now a textarea on `/admin/new`, parsed by
+   `parseReviews`: `quote | first name | area | date?`, one per line. The
+   separator is a pipe because real reviews are full of commas and dashes.
+2. **Ops were create-time only.** `sites/[key]/settings-form.tsx` had no ops
+   fields at all, so a crew lead hired after launch had nowhere to be
+   recorded. Now `OpsForm` on `/admin/sites/<key>`, backed by
+   `readOpsLogic` / `updateOpsLogic` / `saveOpsAction`.
+3. **Ops were destroyed by publishing.** They lived only on the draft
+   sidecar, and `publishCity` deletes it. `CityContent.ops` now carries them
+   onto the published document, `finalizeDraft` writes it and
+   `validateCityContent` checks it — which is also what lets (2) work on a
+   live city, the only kind that has real ops facts to edit.
+
+Two rules the parsers follow, both deliberate and both tested:
+
+- **`parseReviews` REJECTS a bad line; `parseZips` DROPS one.** A malformed
+  ZIP is unambiguous junk among dozens and guessing would put a visible error
+  on a live page. A review is a paragraph a human typed once, from a real
+  customer — losing one silently is unrecoverable, so a bad line fails the
+  whole save with the line number the operator's cursor is on.
+- **`parseOpsForm` refuses an ABSENT field rather than reading it as
+  cleared.** The same line `parseNotifyEmails` draws, for a worse failure:
+  `saveOpsAction` replaces the whole ops block, and on a live city there is
+  no sidecar left to recover from.
+
+Still true: `crewLead` etc. reach the copy only through `opsBlock`. Saving a
+fact changes what the NEXT generation is given — it does not rewrite pages
+already written. The screen says so.
+
 ## The real Houston run — what it proved
 
 `npx tsx scripts/generate-city.mjs houston` — 7 calls, 122K in / 22K out,
@@ -120,10 +160,15 @@ City clear the gate because the structuring fix surfaced 37 subdivisions where
 there had been 16. Worst sibling similarity across all six areas and all three
 paragraph kinds: **0.068**, against a 0.75 threshold.
 
-**Still untested: the ops block.** Houston predates it and has no ops data.
-Testing it needs real facts for a real market — a crew lead's first name, a
-homes-cleaned count, two reviews. Inventing them to exercise the feature is
-the failure this project exists to prevent.
+**Still untested against a real model: the ops block.** Houston predates it
+and has no ops data. Every path into and out of it is now covered by the
+suite, but nothing has yet watched a model receive a supplied fact and use
+it. Testing that needs real facts for a real market — a crew lead's first
+name, a homes-cleaned count, two reviews. Inventing them to exercise the
+feature is the failure this project exists to prevent.
+
+Entering them now takes ten minutes at `/admin/sites/houston`, and
+regenerating is ~$0.80.
 
 ### The measured effect of `2d59e22`
 

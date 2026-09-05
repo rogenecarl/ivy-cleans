@@ -309,6 +309,11 @@ export async function finalizeDraft(key: string): Promise<void> {
   if (facts.address !== undefined) {
     doc.contactAddress = facts.address
   }
+  // Operator facts move onto the document because publishCity deletes the
+  // sidecar they arrived in. See CityContent.ops.
+  if (facts.ops !== undefined) {
+    doc.ops = facts.ops
+  }
   if (published?.domain !== undefined) {
     doc.domain = published.domain
   }

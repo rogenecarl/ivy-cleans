@@ -71,3 +71,54 @@ export function parseNotifyEmails(raw: unknown): ParseNotifyEmailsResult {
 
   return { ok: true, emails, invalidCount }
 }
+
+/*
+ * The ops editor's own bound. Each of the six inputs is capped separately
+ * rather than the body as a whole, so a legitimate paste of ten reviews is
+ * never rejected because the ZIP box also had something in it.
+ */
+export const MAX_OPS_FIELD_LENGTH = 8000
+
+/** The six raw strings the ops form submits. Mirrors OpsFields in admin-logic. */
+export const OPS_FIELD_NAMES = [
+  'zips',
+  'servingSince',
+  'crewLead',
+  'crewSize',
+  'homesCleaned',
+  'reviews',
+] as const
+
+export type OpsFormFields = Record<(typeof OPS_FIELD_NAMES)[number], string>
+
+export type ParseOpsFormResult =
+  | { ok: true; fields: OpsFormFields }
+  | { ok: false; reason: string }
+
+/**
+ * The submitted ops form in, six validated strings out.
+ *
+ * A field that is PRESENT and empty is the operator legitimately clearing
+ * that fact. A field that is ABSENT, or not a string, is a malformed request
+ * and is REJECTED — the same line parseNotifyEmails above draws for the
+ * inbox list, and it matters more here. saveOpsAction REPLACES the whole ops
+ * block, market facts cannot be researched or regenerated, and on a live
+ * city publishCity has already deleted the draft they could be recovered
+ * from. Collapsing "absent" into "empty" would let one malformed POST erase
+ * a market's crew lead, its homes-cleaned count and every real review it
+ * has, permanently.
+ */
+export function parseOpsForm(formData: FormData): ParseOpsFormResult {
+  const fields = {} as OpsFormFields
+  for (const name of OPS_FIELD_NAMES) {
+    const raw = formData.get(name)
+    if (typeof raw !== 'string') {
+      return { ok: false, reason: `missing or invalid "${name}" field` }
+    }
+    if (raw.length > MAX_OPS_FIELD_LENGTH) {
+      return { ok: false, reason: `"${name}" is too long (over ${MAX_OPS_FIELD_LENGTH} characters)` }
+    }
+    fields[name] = raw
+  }
+  return { ok: true, fields }
+}

@@ -26,12 +26,17 @@ import {
   getProgressLogic,
   isStageId,
   listCities,
+  MAX_REVIEWS,
+  MAX_REVIEWS_LENGTH,
   normalizeSuburbs,
+  parseReviews,
   parseZips,
   pendingSuburbsLogic,
   publishLogic,
   regenerateLogic,
   runStageLogic,
+  readOpsLogic,
+  updateOpsLogic,
   updateSuburbsLogic,
 } from '../src/pipeline/admin-logic'
 import { loadDraft } from '../src/content/drafts'
@@ -45,10 +50,11 @@ const CITIES_JSON = path.join(CONTENT_DIR, '_cities.json')
 const DOMAINS_JSON = path.join(CONTENT_DIR, '_domains.json')
 
 /** Every key this file may create; afterAll cleans all of them unconditionally. */
-const KEYS = ['ztest-adminville', 'ztest-editville'] as const
+const KEYS = ['ztest-adminville', 'ztest-editville', 'ztest-opsville'] as const
 const CITY_NAMES: Record<(typeof KEYS)[number], string> = {
   'ztest-adminville': 'Ztest Adminville',
   'ztest-editville': 'Ztest Editville',
+  'ztest-opsville': 'Ztest Opsville',
 }
 
 function draftPath(key: string): string {
@@ -556,6 +562,110 @@ describe('parseZips', () => {
   })
 })
 
+describe('parseReviews', () => {
+  it('parses one review per line, fields separated by pipes', () => {
+    const r = parseReviews('They got the grout white again. | Maria | Cinco Ranch')
+    expect(r).toEqual({
+      ok: true,
+      reviews: [{ quote: 'They got the grout white again.', firstName: 'Maria', area: 'Cinco Ranch' }],
+    })
+  })
+
+  it('accepts an optional fourth field as the date', () => {
+    const r = parseReviews('Best clean we have had. | Dan | Telfair | 2025-06')
+    expect(r).toEqual({
+      ok: true,
+      reviews: [
+        { quote: 'Best clean we have had.', firstName: 'Dan', area: 'Telfair', date: '2025-06' },
+      ],
+    })
+  })
+
+  it('strips one surrounding pair of quote marks, straight or typographic', () => {
+    // Operators paste reviews with the quotes already around them. The marks
+    // are presentation, not part of what the customer said.
+    const r = parseReviews('"On time, every time." | Ana | Katy\n\u201cWorth it.\u201d | Joe | Pearland')
+    expect(r).toEqual({
+      ok: true,
+      reviews: [
+        { quote: 'On time, every time.', firstName: 'Ana', area: 'Katy' },
+        { quote: 'Worth it.', firstName: 'Joe', area: 'Pearland' },
+      ],
+    })
+  })
+
+  it('keeps commas and dashes inside the quote', () => {
+    // Why the separator is a pipe and not a comma or an em dash: real reviews
+    // are full of both, and splitting on them would mangle the quote.
+    const r = parseReviews('Fast, thorough \u2014 and they came back. | Ana | Katy')
+    expect(r).toEqual({
+      ok: true,
+      reviews: [
+        { quote: 'Fast, thorough \u2014 and they came back.', firstName: 'Ana', area: 'Katy' },
+      ],
+    })
+  })
+
+  it('ignores blank lines and surrounding whitespace', () => {
+    const r = parseReviews('\n  Spotless. | Ana | Katy  \n\n')
+    expect(r).toEqual({ ok: true, reviews: [{ quote: 'Spotless.', firstName: 'Ana', area: 'Katy' }] })
+  })
+
+  it('returns no reviews for blank or missing input', () => {
+    expect(parseReviews(undefined)).toEqual({ ok: true, reviews: [] })
+    expect(parseReviews('   \n  ')).toEqual({ ok: true, reviews: [] })
+  })
+
+  it('REJECTS a line with a missing field instead of dropping it', () => {
+    // Unlike a malformed ZIP, a review is a paragraph a human typed once.
+    // Dropping it silently loses the one fact a competitor cannot reproduce.
+    const r = parseReviews('Spotless. | Ana | Katy\nGreat job. | Joe')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain('line 2')
+  })
+
+  it('REJECTS a line whose quote, name or area is empty', () => {
+    const r = parseReviews('Spotless. |  | Katy')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain('line 1')
+  })
+
+  it('REJECTS a line with an extra pipe rather than guessing which field it belongs to', () => {
+    const r = parseReviews('Spotless | and fast. | Ana | Katy | 2025-06')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain('line 1')
+  })
+
+  it('reports the line number of the FIRST bad line, counting blank lines', () => {
+    // The operator is looking at a textarea; the number has to match what
+    // their cursor is on, so blank lines count.
+    const r = parseReviews('Spotless. | Ana | Katy\n\nGreat job. | Joe')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain('line 3')
+  })
+
+  it('refuses more than MAX_REVIEWS rather than silently truncating', () => {
+    const many = Array.from({ length: MAX_REVIEWS + 1 }, (_, i) => `Quote ${i}. | Ana | Katy`).join('\n')
+    const r = parseReviews(many)
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain(String(MAX_REVIEWS))
+  })
+
+  it('refuses an oversized body, because this crosses an untrusted RPC boundary', () => {
+    // Same threat model sites/logic.ts states for MAX_RAW_LENGTH: any signed-in
+    // caller can post here directly with no page ever rendered.
+    const r = parseReviews('x'.repeat(MAX_REVIEWS_LENGTH + 1))
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain('too long')
+  })
+})
+
 describe('the ops block through the form', () => {
   const KEY = 'ztest-opsville'
 
@@ -598,6 +708,39 @@ describe('the ops block through the form', () => {
     if (!r.ok) return
     expect((await loadDraft(r.key)).facts.ops).toBeUndefined()
     await wipe(r.key)
+  })
+
+  it('carries pasted reviews onto the draft as structured facts', async () => {
+    const r = await createDraftFromFields({
+      city: 'Ztest Opsville',
+      state: 'MN',
+      phone: '(612) 555-0142',
+      reviews: '"They got the grout white again." | Maria | Linden Hills | 2025-06\nSpotless, every time. | Dan | Edina',
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+
+    expect((await loadDraft(r.key)).facts.ops).toEqual({
+      reviews: [
+        { quote: 'They got the grout white again.', firstName: 'Maria', area: 'Linden Hills', date: '2025-06' },
+        { quote: 'Spotless, every time.', firstName: 'Dan', area: 'Edina' },
+      ],
+    })
+    await wipe(r.key)
+  })
+
+  it('FAILS the whole create when a review line is malformed, rather than dropping it', async () => {
+    const r = await createDraftFromFields({
+      city: 'Ztest Opsville',
+      state: 'MN',
+      phone: '(612) 555-0142',
+      reviews: 'Spotless. | Dan',
+    })
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain('line 1')
+    // and nothing was written
+    await expect(loadDraft('ztest-opsville')).rejects.toThrow()
   })
 
   it('keeps the fields that were filled and skips the ones that were not', async () => {
@@ -823,5 +966,196 @@ describe('listCities', () => {
     const rows = await listCities()
     const names = rows.map((r) => r.city)
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
+  })
+})
+
+describe('ops survive publish', () => {
+  const KEY = 'ztest-opsville'
+
+  /*
+   * Publishing refuses a city that duplicates a LIVE one, and every
+   * STUB_MODEL city in this file generates byte-identical copy — so the
+   * fixtures published by earlier describes have to be retired before this
+   * one can publish at all. afterAll wipes all of KEYS and restores both
+   * indexes, so retiring them here costs nothing.
+   */
+  async function retireSiblings(): Promise<void> {
+    for (const other of KEYS) if (other !== KEY) await wipe(other)
+  }
+
+  it('carries the operator facts onto the published document', async () => {
+    /*
+     * publishCity deletes the draft sidecar, and the sidecar was the only
+     * place ops lived. Without this, every operator fact a market has is
+     * destroyed by the act of publishing it — and they are the one input
+     * that cannot be researched or regenerated.
+     */
+    await wipe(KEY)
+    const created = await createDraftFromFields({
+      city: CITY_NAMES[KEY],
+      state: 'mn',
+      phone: '(612) 555-0142',
+      crewLead: 'Maria',
+      servingSince: '2024-03',
+      homesCleaned: '340',
+      reviews: 'Spotless, every time. | Dan | Edina',
+    })
+    expect(created.ok).toBe(true)
+
+    await runAllStages(KEY)
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await finalizeLogic(KEY)).toEqual({ ok: true })
+
+    const finalized = validateCityContent(JSON.parse(await readFile(cityPath(KEY), 'utf-8')))
+    expect(finalized.ops).toEqual({
+      crewLead: 'Maria',
+      servingSince: '2024-03',
+      homesCleaned: 340,
+      reviews: [{ quote: 'Spotless, every time.', firstName: 'Dan', area: 'Edina' }],
+    })
+
+    await retireSiblings()
+    expect(await publishLogic(KEY)).toEqual({ ok: true })
+    const published = await getCity(KEY)
+    expect(published.status).toBe('live')
+    expect(published.ops?.crewLead).toBe('Maria')
+    // and the sidecar really is gone, which is what made this necessary
+    await expect(loadDraft(KEY)).rejects.toThrow()
+
+    await wipe(KEY)
+  })
+
+  it('omits ops from the document entirely when the market has none', async () => {
+    await wipe(KEY)
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    await runAllStages(KEY)
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await finalizeLogic(KEY)).toEqual({ ok: true })
+
+    const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8')) as Record<string, unknown>
+    expect('ops' in doc).toBe(false)
+    await wipe(KEY)
+  })
+})
+
+describe('editing the ops block after creation', () => {
+  const KEY = 'ztest-opsville'
+
+  const FILLED = {
+    zips: '55401, 55402',
+    servingSince: '2024-03',
+    crewLead: 'Maria',
+    crewSize: '4',
+    homesCleaned: '340',
+    reviews: '"They got the grout white again." | Dan | Edina | 2025-06',
+  }
+
+  const EXPECTED = {
+    zips: ['55401', '55402'],
+    servingSince: '2024-03',
+    crewLead: 'Maria',
+    crewSize: 4,
+    homesCleaned: 340,
+    reviews: [
+      { quote: 'They got the grout white again.', firstName: 'Dan', area: 'Edina', date: '2025-06' },
+    ],
+  }
+
+  /** Draft sidecar only — a city part-way through the pipeline. */
+  async function draftOnly(): Promise<void> {
+    await wipe(KEY)
+    expect((await freshDraft(KEY)).ok).toBe(true)
+  }
+
+  /** Published, sidecar deleted — the state every live city is in. */
+  async function liveOnly(): Promise<void> {
+    await draftOnly()
+    await runAllStages(KEY)
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await finalizeLogic(KEY)).toEqual({ ok: true })
+    for (const other of KEYS) if (other !== KEY) await wipe(other)
+    expect(await publishLogic(KEY)).toEqual({ ok: true })
+    await expect(loadDraft(KEY)).rejects.toThrow()
+  }
+
+  it('writes the facts onto a draft that has not been published yet', async () => {
+    await draftOnly()
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).facts.ops).toEqual(EXPECTED)
+    await wipe(KEY)
+  })
+
+  it('writes the facts onto a LIVE city, which has no sidecar left', async () => {
+    // This is the case the create-time-only form could not reach at all:
+    // hire a crew lead after launch and there was nowhere to record it.
+    await liveOnly()
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+    expect((await getCity(KEY)).ops).toEqual(EXPECTED)
+    await wipe(KEY)
+  })
+
+  it('updates BOTH copies when a city is finalized but not yet published', async () => {
+    // Same two-places-at-once problem updateSuburbsLogic documents: an edit
+    // that touched only one would be silently reverted by the other.
+    await draftOnly()
+    await runAllStages(KEY)
+    expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
+    expect(await finalizeLogic(KEY)).toEqual({ ok: true })
+
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).facts.ops).toEqual(EXPECTED)
+    expect((await getCity(KEY)).ops).toEqual(EXPECTED)
+    await wipe(KEY)
+  })
+
+  it('removes ops entirely when every field is cleared, rather than storing {}', async () => {
+    await draftOnly()
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+    expect(await updateOpsLogic(KEY, {})).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).facts.ops).toBeUndefined()
+    await wipe(KEY)
+  })
+
+  it('rejects a malformed review line and leaves the stored facts untouched', async () => {
+    await draftOnly()
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+
+    const bad = await updateOpsLogic(KEY, { ...FILLED, reviews: 'Spotless. | Dan' })
+    expect(bad.ok).toBe(false)
+    if (bad.ok) return
+    expect(bad.error).toContain('line 1')
+    expect((await loadDraft(KEY)).facts.ops).toEqual(EXPECTED)
+    await wipe(KEY)
+  })
+
+  it('fails loudly for a city that does not exist, instead of reporting success', async () => {
+    await wipe(KEY)
+    const r = await updateOpsLogic(KEY, FILLED)
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toContain(KEY)
+  })
+
+  it('reads the stored facts back as the exact text the form should show', async () => {
+    await draftOnly()
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+
+    const read = await readOpsLogic(KEY)
+    expect(read.ok).toBe(true)
+    if (!read.ok) return
+    // Round-trips: what comes out, put back in, stores the same facts.
+    expect(await updateOpsLogic(KEY, read.fields)).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).facts.ops).toEqual(EXPECTED)
+
+    expect(read.fields.crewLead).toBe('Maria')
+    expect(read.fields.zips).toBe('55401, 55402')
+    expect(read.fields.reviews).toBe('They got the grout white again. | Dan | Edina | 2025-06')
+    await wipe(KEY)
+  })
+
+  it('reads a live city with no ops as empty fields rather than failing', async () => {
+    await liveOnly()
+    expect(await readOpsLogic(KEY)).toEqual({ ok: true, fields: {} })
+    await wipe(KEY)
   })
 })

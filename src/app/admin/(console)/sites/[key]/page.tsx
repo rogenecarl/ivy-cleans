@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { ChevronLeft, TriangleAlert } from 'lucide-react'
 import { getSiteSettings } from '@/leads/store'
+import { readOpsLogic } from '@/pipeline/admin-logic'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { ADMIN_SITES } from '@/lib/admin-routes'
 import { ErrorText, Panel } from '../../../ui'
+import { OpsForm } from './ops-form'
 import { SettingsForm } from './settings-form'
 import { requireAdmin } from '@/lib/auth-server'
 
@@ -63,6 +65,16 @@ export default async function SiteSettingsPage({
     )
   }
 
+  /*
+   * The market's operator-entered facts. Unlike the notification inboxes
+   * above, a failure to read these is NOT a reason to hide the form: a city
+   * with no ops yet reads back as empty fields, which is the same thing an
+   * unreadable one would show, and this screen is the only place they can be
+   * entered at all. An unreachable city (neither draft nor document) is the
+   * one case worth saying out loud, because saving would fail too.
+   */
+  const ops = await readOpsLogic(key)
+
   return (
     <>
       <Link
@@ -99,6 +111,32 @@ export default async function SiteSettingsPage({
               With no address here, leads are still saved but nobody is notified.
             </p>
           </>
+        )}
+      </Panel>
+
+      <Panel title="What we know about this market">
+        {ops.ok ? (
+          <>
+            <p className="mb-4 text-[0.8rem] text-muted-foreground">
+              All optional. A competitor can describe the town; only you can say who cleans there,
+              since when, and what a customer actually said &mdash; and a page that is given one of
+              these facts is required to use it.
+            </p>
+            <OpsForm cityKey={key} fields={ops.fields} />
+            <p className="mt-3 text-[0.8rem] text-muted-foreground">
+              Saving changes what the NEXT generation is given. Pages already written still say what
+              they said &mdash; regenerate the city to put a new fact into its copy.
+            </p>
+          </>
+        ) : (
+          <Alert variant="destructive">
+            <TriangleAlert className="size-4" aria-hidden="true" />
+            <AlertTitle>This city has no draft or published document.</AlertTitle>
+            <AlertDescription>
+              There is nowhere to store market facts for &ldquo;{key}&rdquo; yet, so the form is
+              hidden rather than shown ready to fail on save. Generate the city first.
+            </AlertDescription>
+          </Alert>
         )}
       </Panel>
 

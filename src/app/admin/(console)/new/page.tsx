@@ -220,6 +220,34 @@ export default async function NewCityPage({
                     Round down to a number you could defend.
                   </p>
                 </div>
+
+                {/*
+                  * Reviews are the most valuable field on this screen and the
+                  * only one that can be REJECTED rather than quietly ignored
+                  * -- see parseReviews. A pasted quote is a real customer's
+                  * words about a real market, so a malformed line comes back
+                  * as an error the operator can fix instead of vanishing.
+                  */}
+                <div className="sm:col-span-2">
+                  <Label htmlFor="reviews" className="mb-1.5">
+                    Reviews from customers here
+                  </Label>
+                  <Textarea
+                    id="reviews"
+                    name="reviews"
+                    rows={4}
+                    placeholder={
+                      'One per line:  what they said | first name | area | month (optional)\n' +
+                      'They got the grout white again. | Maria | Cinco Ranch | 2025-06'
+                    }
+                  />
+                  <p className="mt-1 text-[0.75rem] text-muted-foreground">
+                    Separated by <code className="font-mono">|</code>, because real reviews are full
+                    of commas and dashes. Quoted at most two to a page, word for word, with the
+                    first name and area &mdash; which is what makes them checkable rather than
+                    decoration.
+                  </p>
+                </div>
               </div>
             </div>
 

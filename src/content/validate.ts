@@ -62,6 +62,64 @@ export function validateCityContent(raw: unknown): CityContent {
     errors.push('contactAddress must be a string when present')
   }
 
+  /*
+   * -- ops (optional) --
+   *
+   * Operator-entered market facts, carried onto the published document so
+   * they survive publish: the draft sidecar that held them is deleted there
+   * (drafts.ts publishCity), and these are the one input nobody can research
+   * or regenerate. Nothing renders them directly — the prompts consume them
+   * and the copy carries the result — so they are checked, not required.
+   *
+   * Checked strictly all the same: a prompt is REQUIRED to use every supplied
+   * ops field as given, so a number where a crew lead's name belongs reaches
+   * a live page written out verbatim.
+   */
+  const ops = doc.ops
+  if (ops !== undefined) {
+    if (ops === null || typeof ops !== 'object' || Array.isArray(ops)) {
+      errors.push('ops must be an object when present')
+    } else {
+      const o = ops as Record<string, unknown>
+      if (o.zips !== undefined && !isStringArray(o.zips)) {
+        errors.push('ops.zips must be an array of strings when present')
+      }
+      for (const field of ['servingSince', 'crewLead'] as const) {
+        if (o[field] !== undefined && !isString(o[field])) {
+          errors.push(`ops.${field} must be a string when present`)
+        }
+      }
+      for (const field of ['crewSize', 'homesCleaned'] as const) {
+        if (o[field] !== undefined && !Number.isInteger(o[field])) {
+          errors.push(`ops.${field} must be an integer when present`)
+        }
+      }
+      if (o.reviews !== undefined) {
+        if (!Array.isArray(o.reviews)) {
+          errors.push('ops.reviews must be an array when present')
+        } else {
+          o.reviews.forEach((review, i) => {
+            const r = review as Record<string, unknown>
+            if (
+              review === null ||
+              typeof review !== 'object' ||
+              !isString(r.quote) ||
+              !isString(r.firstName) ||
+              !isString(r.area) ||
+              (r.date !== undefined && !isString(r.date))
+            ) {
+              // firstName and area are what make a quote checkable rather
+              // than decorative; a review without them must not be published.
+              errors.push(
+                `ops.reviews[${i}] must be { quote: string, firstName: string, area: string, date?: string }`,
+              )
+            }
+          })
+        }
+      }
+    }
+  }
+
   // -- research --
   const research = doc.research
   if (research === null || typeof research !== 'object') {

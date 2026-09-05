@@ -57,6 +57,41 @@ describe('validateCityContent', () => {
     expect(validateCityContent(doc)).toEqual(doc)
   })
 
+  test('accepts an optional ops block when present', () => {
+    const doc = {
+      ...validDoc(),
+      ops: {
+        zips: ['00000'],
+        servingSince: '2024-03',
+        crewLead: 'Maria',
+        crewSize: 4,
+        homesCleaned: 340,
+        reviews: [{ quote: 'Spotless.', firstName: 'Dan', area: 'Suburbia', date: '2025-06' }],
+      },
+    }
+    expect(validateCityContent(doc)).toEqual(doc)
+  })
+
+  test('throws when ops is present but not an object', () => {
+    expect(() => validateCityContent({ ...validDoc(), ops: 'Maria' })).toThrow(/ops/)
+  })
+
+  test('throws when a supplied ops field has the wrong type', () => {
+    // The ops block is what the prompts are REQUIRED to use verbatim. A
+    // number where a name belongs would reach a live page as written.
+    expect(() => validateCityContent({ ...validDoc(), ops: { crewLead: 4 } })).toThrow(/ops\.crewLead/)
+    expect(() => validateCityContent({ ...validDoc(), ops: { homesCleaned: '340' } })).toThrow(
+      /ops\.homesCleaned/,
+    )
+    expect(() => validateCityContent({ ...validDoc(), ops: { zips: '00000' } })).toThrow(/ops\.zips/)
+  })
+
+  test('throws when a review is missing the attribution that makes it checkable', () => {
+    expect(() =>
+      validateCityContent({ ...validDoc(), ops: { reviews: [{ quote: 'Spotless.' }] } }),
+    ).toThrow(/ops\.reviews\[0\]/)
+  })
+
   test('throws when phone is missing', () => {
     expect(() => validateCityContent(omit(validDoc(), 'phone'))).toThrow(/phone/i)
   })

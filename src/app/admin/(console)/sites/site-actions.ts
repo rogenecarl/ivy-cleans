@@ -19,11 +19,11 @@
  */
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { listCities } from '@/pipeline/admin-logic'
+import { listCities, updateOpsLogic } from '@/pipeline/admin-logic'
 import { upsertSiteSettings } from '@/leads/store'
 import { ADMIN_BASE } from '@/lib/admin-routes'
 import { requireAdmin } from '@/lib/auth-server'
-import { parseNotifyEmails } from './logic'
+import { parseNotifyEmails, parseOpsForm } from './logic'
 
 export async function saveNotifyEmailsAction(cityKey: string, formData: FormData): Promise<void> {
   await requireAdmin()
@@ -73,4 +73,51 @@ export async function saveNotifyEmailsAction(cityKey: string, formData: FormData
       )}`,
     )
   }
+}
+
+/**
+ * Saves a market's operator-entered facts — crew lead, months served, homes
+ * cleaned, ZIPs, real reviews.
+ *
+ * WHY THIS EXISTS SEPARATELY from the create form: ops could previously be
+ * entered only at /admin/new, so a fact learned after creation — a crew lead
+ * hired, the hundredth home cleaned, the first real review — had nowhere to
+ * go. updateOpsLogic writes to the draft sidecar and the published document,
+ * whichever exist, which is what lets this work on a LIVE city where publish
+ * has already deleted the sidecar.
+ *
+ * The same untrusted-entry-point rules as saveNotifyEmailsAction above, and
+ * they bind harder: this REPLACES the whole ops block, and market facts
+ * cannot be researched or regenerated. cityKey is a bound argument that
+ * round-trips through the client, so it is checked against listCities()
+ * before any write; the fields go through parseOpsForm, which refuses an
+ * absent field rather than reading it as "cleared".
+ *
+ * Reviews are quoted verbatim into copy and can carry a customer's words, so
+ * nothing here is written to a log or put in the redirect — only the reason a
+ * save failed.
+ */
+export async function saveOpsAction(cityKey: string, formData: FormData): Promise<void> {
+  await requireAdmin()
+
+  const known = await listCities()
+  if (!known.some((city) => city.key === cityKey)) {
+    throw new Error(`unknown city "${cityKey}"`)
+  }
+
+  const parsed = parseOpsForm(formData)
+  if (!parsed.ok) {
+    throw new Error(parsed.reason)
+  }
+
+  const result = await updateOpsLogic(cityKey, parsed.fields)
+
+  if (!result.ok) {
+    // A malformed review line lands here. It is the operator's own typing, so
+    // it goes back to them on the screen rather than becoming a digest.
+    redirect(`${ADMIN_BASE}/sites/${cityKey}?error=${encodeURIComponent(result.error)}`)
+  }
+
+  revalidatePath(`${ADMIN_BASE}/sites/${cityKey}`)
+  revalidatePath(ADMIN_BASE)
 }

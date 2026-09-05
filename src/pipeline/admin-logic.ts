@@ -38,7 +38,7 @@ import type { CityContent } from '../content/types'
 import { deriveFacts } from './facts'
 import { makeClient } from './model'
 import { readProgress, type ProgressEvent } from './progress'
-import type { Suburb } from './schemas'
+import type { MarketOps, Suburb } from './schemas'
 import { STAGE_IDS, normalizeSlug, regenerateStage, reservedSlugs, runStage, type StageId } from './stages'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
@@ -95,22 +95,16 @@ export function isStageId(value: string): value is StageId {
  * Create
  * ──────────────────────────────────────────────────────────────────────────── */
 
-export type NewCityFields = {
-  city: string
-  state: string
-  /** Any format — formatting characters are stripped here, not by the form. */
-  phone: string
-  address?: string
-  notes?: string
-  /*
-   * The ops block. All optional — a brand-new market has none of it — but a
-   * prompt that receives one of these facts is required to use it, so an
-   * empty field is a page that reads like a description of a town rather
-   * than a business working in it.
-   *
-   * Arrive as raw strings from the form and are parsed here, in the one
-   * place that already owns turning form text into facts.
-   */
+/**
+ * The ops block as the form holds it: raw strings, one per input. All
+ * optional — a brand-new market has none of it — but a prompt that receives
+ * one of these facts is REQUIRED to use it, so an empty field is a page that
+ * reads like a description of a town rather than a business working in it.
+ *
+ * Parsing lives in buildOps below, in the one place that already owns turning
+ * form text into facts, so the create form and the ops editor cannot drift.
+ */
+export type OpsFields = {
   /** Comma, space or newline separated. "77002, 77003" or one per line. */
   zips?: string
   /** "2024-03". */
@@ -119,6 +113,17 @@ export type NewCityFields = {
   crewLead?: string
   crewSize?: string
   homesCleaned?: string
+  /** One per line: `quote | first name | area | date?`. See parseReviews. */
+  reviews?: string
+}
+
+export type NewCityFields = OpsFields & {
+  city: string
+  state: string
+  /** Any format — formatting characters are stripped here, not by the form. */
+  phone: string
+  address?: string
+  notes?: string
 }
 
 /**
@@ -135,12 +140,155 @@ export function parseZips(raw: string | undefined): string[] {
   return [...new Set(found)].sort()
 }
 
+/**
+ * Bounds on the reviews field. This parser sits behind a server action, which
+ * is an untrusted RPC boundary whether or not a page was ever rendered — the
+ * same threat model sites/logic.ts states for MAX_RAW_LENGTH. MAX_REVIEWS is
+ * generous against real use (the prompts quote at most two) and small enough
+ * that nobody can grow a draft without bound through this field.
+ */
+export const MAX_REVIEWS = 10
+export const MAX_REVIEWS_LENGTH = 8000
+
+export type MarketReview = NonNullable<MarketOps['reviews']>[number]
+
+export type ParseReviewsResult =
+  | { ok: true; reviews: MarketReview[] }
+  | { ok: false; error: string }
+
+/** Removes one matching pair of surrounding quote marks, straight or typographic. */
+function unquote(value: string): string {
+  const pairs: [string, string][] = [
+    ['"', '"'],
+    ['\u201c', '\u201d'],
+    ["'", "'"],
+    ['\u2018', '\u2019'],
+  ]
+  for (const [open, close] of pairs) {
+    if (value.length >= 2 && value.startsWith(open) && value.endsWith(close)) {
+      return value.slice(open.length, value.length - close.length).trim()
+    }
+  }
+  return value
+}
+
+/**
+ * An operator's pasted reviews into the structured form the prompts quote from.
+ *
+ *   quote | first name | area | date (optional)
+ *
+ * one per line. The separator is a pipe rather than a comma or a dash because
+ * real reviews are full of both — "Fast, thorough — and they came back" would
+ * be shredded by either.
+ *
+ * WHY THIS REJECTS RATHER THAN DROPS, unlike parseZips above: a malformed ZIP
+ * is unambiguous junk among dozens of good ones, and guessing at it would put
+ * a visible error on a live page. A review is a paragraph a human typed once,
+ * from a real customer in a real market — it is the one input a competitor
+ * cannot reproduce. Losing one silently is unrecoverable, so a bad line fails
+ * the whole submission with the line number the operator's cursor is on.
+ * Blank lines are skipped but still counted, so that number matches the
+ * textarea rather than the parser's idea of it.
+ */
+export function parseReviews(raw: string | undefined): ParseReviewsResult {
+  if (!raw || raw.trim() === '') return { ok: true, reviews: [] }
+  if (raw.length > MAX_REVIEWS_LENGTH) {
+    return { ok: false, error: `reviews are too long (over ${MAX_REVIEWS_LENGTH} characters)` }
+  }
+
+  const reviews: MarketReview[] = []
+  const lines = raw.split(/\r?\n/)
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i].trim()
+    if (line === '') continue
+
+    const shape = `line ${i + 1}: expected "quote | first name | area" with an optional " | date"`
+    const parts = line.split('|').map((part) => part.trim())
+    if (parts.length < 3 || parts.length > 4) {
+      return { ok: false, error: shape }
+    }
+
+    const quote = unquote(parts[0])
+    const [, firstName, area, date] = parts
+    if (quote === '' || firstName === '' || area === '') {
+      return { ok: false, error: shape }
+    }
+
+    reviews.push({ quote, firstName, area, ...(date ? { date } : {}) })
+    if (reviews.length > MAX_REVIEWS) {
+      return { ok: false, error: `at most ${MAX_REVIEWS} reviews can be saved at once` }
+    }
+  }
+
+  return { ok: true, reviews }
+}
+
 /** Parses a positive integer field, or undefined when blank or unusable. */
 function parseCount(raw: string | undefined): number | undefined {
   const digits = (raw ?? '').replace(/[^0-9]/g, '')
   if (digits === '') return undefined
   const n = Number(digits)
   return Number.isSafeInteger(n) && n >= 0 ? n : undefined
+}
+
+export type BuildOpsResult =
+  | { ok: true; ops: MarketOps | undefined }
+  | { ok: false; error: string }
+
+/**
+ * Raw form strings -> the validated ops block, or undefined when the operator
+ * filled in none of it.
+ *
+ * Undefined rather than {} on purpose: an empty object satisfies
+ * `!== undefined` and would put a meaningless `ops: {}` on every draft, and —
+ * once the ops editor exists — would make "cleared every field" indis-
+ * tinguishable from "supplied an empty record".
+ */
+export function buildOps(fields: OpsFields): BuildOpsResult {
+  const zips = parseZips(fields.zips)
+  const servingSince = fields.servingSince?.trim()
+  const crewLead = fields.crewLead?.trim()
+  const crewSize = parseCount(fields.crewSize)
+  const homesCleaned = parseCount(fields.homesCleaned)
+
+  // Reviews are the one ops field that can FAIL rather than come back empty,
+  // and the failure aborts the whole save — see parseReviews for why.
+  const parsed = parseReviews(fields.reviews)
+  if (!parsed.ok) return { ok: false, error: parsed.error }
+
+  const ops: MarketOps = {
+    ...(zips.length ? { zips } : {}),
+    ...(servingSince ? { servingSince } : {}),
+    ...(crewLead ? { crewLead } : {}),
+    ...(crewSize !== undefined ? { crewSize } : {}),
+    ...(homesCleaned !== undefined ? { homesCleaned } : {}),
+    ...(parsed.reviews.length ? { reviews: parsed.reviews } : {}),
+  }
+  return { ok: true, ops: Object.keys(ops).length ? ops : undefined }
+}
+
+/**
+ * The inverse of buildOps: stored facts back into the exact text the form
+ * shows. Round-trips — feeding this straight back to buildOps stores the same
+ * facts — which is what lets the editor prefill without a separate shape.
+ */
+export function formatOpsFields(ops: MarketOps | undefined): OpsFields {
+  if (!ops) return {}
+  return {
+    ...(ops.zips?.length ? { zips: ops.zips.join(', ') } : {}),
+    ...(ops.servingSince ? { servingSince: ops.servingSince } : {}),
+    ...(ops.crewLead ? { crewLead: ops.crewLead } : {}),
+    ...(ops.crewSize !== undefined ? { crewSize: String(ops.crewSize) } : {}),
+    ...(ops.homesCleaned !== undefined ? { homesCleaned: String(ops.homesCleaned) } : {}),
+    ...(ops.reviews?.length
+      ? {
+          reviews: ops.reviews
+            .map((r) => [r.quote, r.firstName, r.area, ...(r.date ? [r.date] : [])].join(' | '))
+            .join('\n'),
+        }
+      : {}),
+  }
 }
 
 /**
@@ -157,21 +305,8 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
     const address = fields.address?.trim()
     const notes = fields.notes?.trim()
 
-    // Build the ops block from whatever the operator actually filled in, and
-    // omit it entirely when they filled in nothing — an empty object would
-    // satisfy `!== undefined` and put a meaningless `ops: {}` on every draft.
-    const zips = parseZips(fields.zips)
-    const servingSince = fields.servingSince?.trim()
-    const crewLead = fields.crewLead?.trim()
-    const crewSize = parseCount(fields.crewSize)
-    const homesCleaned = parseCount(fields.homesCleaned)
-    const ops = {
-      ...(zips.length ? { zips } : {}),
-      ...(servingSince ? { servingSince } : {}),
-      ...(crewLead ? { crewLead } : {}),
-      ...(crewSize ? { crewSize } : {}),
-      ...(homesCleaned !== undefined ? { homesCleaned } : {}),
-    }
+    const built = buildOps(fields)
+    if (!built.ok) return { ok: false, error: built.error }
 
     const facts = deriveFacts({
       city: fields.city,
@@ -179,7 +314,7 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
       phoneDigits: digits,
       ...(address ? { address } : {}),
       ...(notes ? { notes } : {}),
-      ...(Object.keys(ops).length ? { ops } : {}),
+      ...(built.ops ? { ops: built.ops } : {}),
     })
     const key = await createDraft(facts)
     return { ok: true, key }
@@ -408,6 +543,101 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
 
     if (!touched) {
       return { ok: false, error: `no draft research or published document found for "${key}"` }
+    }
+
+    revalidateCity(key)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Ops editing
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The stored ops for a city, as the text the editor's form should show.
+ *
+ * The draft sidecar wins when both exist: between finalize and publish it is
+ * the newer of the two, and it is what a regenerate would rebuild from.
+ */
+export async function readOpsLogic(
+  key: string,
+): Promise<{ ok: true; fields: OpsFields } | { ok: false; error: string }> {
+  try {
+    let draft
+    try {
+      draft = await loadDraft(key)
+    } catch {
+      draft = null
+    }
+    if (draft) return { ok: true, fields: formatOpsFields(draft.facts.ops) }
+
+    const doc = await readCityDoc(key)
+    if (doc) return { ok: true, fields: formatOpsFields(doc.ops) }
+
+    return { ok: false, error: `no draft or published document found for "${key}"` }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+/**
+ * Writes edited market facts to wherever this city lives.
+ *
+ * The same two-places-at-once problem updateSuburbsLogic documents, for the
+ * same reason: between finalize and publish a city has BOTH a sidecar and a
+ * content/<key>.json, and an edit that touched only one would be silently
+ * reverted by the other. Both are updated when both exist, and it is not an
+ * error for only one to.
+ *
+ * A LIVE city has only the document — publishCity deletes the sidecar — and
+ * that is precisely the case this function exists for. Before it, ops could
+ * be entered only on the create form, so hiring a crew lead after launch had
+ * nowhere to be recorded.
+ *
+ * Nothing here regenerates copy. Changing a fact changes what the NEXT
+ * generation is given; the pages already written still say what they said.
+ */
+export async function updateOpsLogic(key: string, fields: OpsFields): Promise<ActionResult> {
+  try {
+    // Parse before touching anything, so a malformed review line leaves the
+    // stored facts exactly as they were rather than half-replacing them.
+    const built = buildOps(fields)
+    if (!built.ok) return { ok: false, error: built.error }
+
+    let draft
+    try {
+      draft = await loadDraft(key)
+    } catch {
+      draft = null
+    }
+    const doc = await readCityDoc(key)
+
+    if (!draft && !doc) {
+      return { ok: false, error: `no draft or published document found for "${key}"` }
+    }
+
+    if (draft) {
+      // Delete rather than assign undefined: the sidecar is serialized to
+      // JSON, where `ops: undefined` and an absent key are the same thing on
+      // the way out but not on the way in through a partial merge.
+      const facts = { ...draft.facts }
+      if (built.ops) facts.ops = built.ops
+      else delete facts.ops
+      draft.facts = facts
+      await saveDraft(key, draft)
+    }
+
+    if (doc) {
+      if (built.ops) doc.ops = built.ops
+      else delete doc.ops
+      await writeFile(
+        path.join(CONTENT_DIR, `${key}.json`),
+        JSON.stringify(validateCityContent(doc), null, 2),
+        'utf-8',
+      )
     }
 
     revalidateCity(key)
