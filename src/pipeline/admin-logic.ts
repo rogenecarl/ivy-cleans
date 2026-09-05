@@ -125,7 +125,17 @@ export type OpsFields = {
   reviews?: string
 }
 
-export type NewCityFields = OpsFields & {
+/**
+ * What /admin/new collects. Everything OpsFields carries EXCEPT reviews.
+ *
+ * A review cannot exist before a crew has cleaned a house in that market,
+ * so it is the one operator fact that is logically unanswerable on the
+ * screen that creates a market. It lives on /admin/sites/<key> instead,
+ * which is where it will actually be typed — months later, when a customer
+ * has said something. buildOps still parses it; only this form stops
+ * asking.
+ */
+export type NewCityFields = Omit<OpsFields, 'reviews'> & {
   city: string
   state: string
   /** Any format — formatting characters are stripped here, not by the form. */

@@ -78,7 +78,6 @@ export async function createDraftAction(formData: FormData): Promise<void> {
     crewLead: field(formData, 'crewLead'),
     crewSize: field(formData, 'crewSize'),
     homesCleaned: field(formData, 'homesCleaned'),
-    reviews: field(formData, 'reviews'),
   })
 
   if (!result.ok) {

@@ -708,39 +708,13 @@ describe('the ops block through the form', () => {
     await wipe(r.key)
   })
 
-  it('carries pasted reviews onto the draft as structured facts', async () => {
-    const r = await createDraftFromFields({
-      city: 'Ztest Opsville',
-      state: 'MN',
-      phone: '(612) 555-0142',
-      reviews: '"They got the grout white again." | Maria | Linden Hills | 2025-06\nSpotless, every time. | Dan | Edina',
-    })
-    expect(r.ok).toBe(true)
-    if (!r.ok) return
-
-    expect((await loadDraft(r.key)).facts.ops).toEqual({
-      reviews: [
-        { quote: 'They got the grout white again.', firstName: 'Maria', area: 'Linden Hills', date: '2025-06' },
-        { quote: 'Spotless, every time.', firstName: 'Dan', area: 'Edina' },
-      ],
-    })
-    await wipe(r.key)
-  })
-
-  it('FAILS the whole create when a review line is malformed, rather than dropping it', async () => {
-    const r = await createDraftFromFields({
-      city: 'Ztest Opsville',
-      state: 'MN',
-      phone: '(612) 555-0142',
-      reviews: 'Spotless. | Dan',
-    })
-    expect(r.ok).toBe(false)
-    if (r.ok) return
-    expect(r.error).toContain('line 1')
-    // and nothing was written
-    await expect(loadDraft('ztest-opsville')).rejects.toThrow()
-  })
-
+  /*
+   * Reviews are NOT part of this path any more. A review cannot exist before
+   * a crew has cleaned a house, so /admin/new stopped asking; the field lives
+   * on the settings screen. parseReviews has its own unit tests above, and
+   * 'editing the ops block after creation' covers both storing them and
+   * rejecting a malformed line.
+   */
   it('keeps the fields that were filled and skips the ones that were not', async () => {
     const r = await createDraftFromFields({
       city: 'Ztest Opsville',
@@ -1054,9 +1028,19 @@ describe('ops survive publish', () => {
       phone: '(612) 555-0142',
       servingSince: '2024-03',
       zips: '55401, 55402',
-      reviews: 'Spotless, every time. | Dan | Edina',
     })
     expect(created.ok).toBe(true)
+
+    // Reviews arrive through the settings screen, which is the only place
+    // that collects them — and the only place they COULD come from, since a
+    // market has none until it has cleaned a house.
+    expect(
+      await updateOpsLogic(KEY, {
+        servingSince: '2024-03',
+        zips: '55401, 55402',
+        reviews: 'Spotless, every time. | Dan | Edina',
+      }),
+    ).toEqual({ ok: true })
 
     /*
      * Deliberately NOT crewLead or homesCleaned. Those two are ENFORCED by

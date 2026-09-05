@@ -132,6 +132,13 @@ export default async function NewCityPage({
               * generation, so an operator who already knows them saves a full
               * regeneration by typing them now.
               *
+              * REVIEWS ARE NOT HERE. Every field left is one a market about to
+              * launch could answer -- a crew lead can be assigned before the
+              * first clean, the ZIPs can be decided. A review cannot exist
+              * until a house has been cleaned, so asking for one on the screen
+              * that CREATES a market is asking for something that cannot be
+              * true yet. It lives on /admin/sites/<key>.
+              *
               * <details>, not a client-side toggle -- this page is a plain
               * server-rendered form on purpose (see the header) and works
               * before hydration.
@@ -141,10 +148,10 @@ export default async function NewCityPage({
                 This market is already operating
                 <span className="ml-2 font-normal text-muted-foreground">optional</span>
                 <span className="mt-1 block text-[0.8rem] font-normal text-muted-foreground">
-                  Who cleans there, since when, and what customers have said. A competitor can
-                  describe the town; only you can say this. All of it can be added later on the
-                  site&rsquo;s settings screen &mdash; but anything entered now is used by the first
-                  generation.
+                  Who cleans there, since when, and where. A competitor can describe the town; only
+                  you can say this. All of it can be added later on the site&rsquo;s settings screen
+                  &mdash; along with customer reviews, which is where those go &mdash; but anything
+                  entered now is used by the first generation.
                 </span>
               </summary>
 
@@ -218,33 +225,6 @@ export default async function NewCityPage({
                   </p>
                 </div>
 
-                {/*
-                  * Reviews are the most valuable field on this screen and the
-                  * only one that can be REJECTED rather than quietly ignored
-                  * -- see parseReviews. A pasted quote is a real customer's
-                  * words about a real market, so a malformed line comes back
-                  * as an error the operator can fix instead of vanishing.
-                  */}
-                <div className="sm:col-span-2">
-                  <Label htmlFor="reviews" className="mb-1.5">
-                    Reviews from customers here
-                  </Label>
-                  <Textarea
-                    id="reviews"
-                    name="reviews"
-                    rows={4}
-                    placeholder={
-                      'One per line:  what they said | first name | area | month (optional)\n' +
-                      'They got the grout white again. | Maria | Cinco Ranch | 2025-06'
-                    }
-                  />
-                  <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                    Separated by <code className="font-mono">|</code>, because real reviews are full
-                    of commas and dashes. Quoted at most two to a page, word for word, with the
-                    first name and area &mdash; which is what makes them checkable rather than
-                    decoration.
-                  </p>
-                </div>
               </div>
             </details>
 
