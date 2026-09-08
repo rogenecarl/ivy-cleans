@@ -287,7 +287,16 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
           const isFailed = failed?.stage === stage.id
           // The glyphs are load-bearing: scripts/admin-e2e.mjs polls
           // [data-role="status-icon"] for '✓' to know the run finished.
-          const icon = isDone ? '✓' : isRunning ? '⏳' : isFailed ? '✗' : '•'
+          /*
+           * '⏳' is gone for the RUNNING row: it is a static emoji that does
+           * not move, which is most of what "this looks stuck" actually means
+           * at five seconds in. A real spinner replaces it below.
+           *
+           * The other three glyphs stay text, and are load-bearing:
+           * scripts/admin-e2e.mjs polls [data-role="status-icon"] for '✓' to
+           * know the run finished and breaks on '✗'.
+           */
+          const icon = isDone ? '✓' : isFailed ? '✗' : isRunning ? '' : '•'
           /*
            * Colour ONLY where it changes what you would do. A finished stage
            * is not green: when all five land, an all-green list carries no
@@ -310,6 +319,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
             ? snapshot.events.filter((e) => e.stage === stage.id && e.kind !== 'error')
             : []
           const recentEvents = stageEvents.slice(-3)
+          const searchCount = stageEvents.filter((e) => e.kind === 'search').length
           // The finished summary line: research logs a 'found' digest before
           // its generic 'done' marker ("Research complete"), so 'found' wins
           // when present; front/home/deep only ever log 'done', which already
@@ -332,7 +342,11 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                   data-role="status-icon"
                   aria-hidden
                 >
-                  {icon}
+                  {isRunning && !isFailed ? (
+                    <Loader2 className="mx-auto size-3.5 animate-spin" />
+                  ) : (
+                    icon
+                  )}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
@@ -351,6 +365,17 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                         spans with a gap, not one string with spaces in it:
                         HTML collapses runs of whitespace. */}
                     <span className="flex shrink-0 items-baseline gap-4 font-mono text-[0.75rem] tabular-nums text-muted-foreground">
+                      {/*
+                        Research has no honest denominator — how many searches
+                        it uses is the model's call, and a bar filling at an
+                        invented rate is a promise this screen cannot keep.
+                        The COUNT is real and it moves, so show that instead.
+                      */}
+                      {isRunning && searchCount > 0 && (
+                        <span>
+                          {searchCount} search{searchCount === 1 ? '' : 'es'}
+                        </span>
+                      )}
                       {items && items.total > 0 && (
                         <span>
                           {items.done} of {items.total}
