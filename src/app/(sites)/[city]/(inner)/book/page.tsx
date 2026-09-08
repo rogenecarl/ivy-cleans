@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
 import { cityFromParams, type CityParams } from "@/content/city-param";
 import { citySlug } from "@/content/interpolate";
 import { bookData } from "@/data/book";
@@ -28,14 +30,17 @@ export default async function BookPage({ params }: { params: CityParams }) {
   const { bookHeader, bookLeadIn, bookCallNow, bookFields, bookSubmitLabel, comingSoon } =
     bookData(c);
   return (
-    <BookSection
-      bookHeader={bookHeader}
-      bookLeadIn={bookLeadIn}
-      bookCallNow={bookCallNow}
-      bookFields={bookFields}
-      bookSubmitLabel={bookSubmitLabel}
-      comingSoon={comingSoon}
-      cityKey={citySlug(c.city)}
-    />
+    <>
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "page", label: "Book Now", path: "/book" })} />
+      <BookSection
+        bookHeader={bookHeader}
+        bookLeadIn={bookLeadIn}
+        bookCallNow={bookCallNow}
+        bookFields={bookFields}
+        bookSubmitLabel={bookSubmitLabel}
+        comingSoon={comingSoon}
+        cityKey={citySlug(c.city)}
+      />
+    </>
   );
 }

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
 import { csMeta, rooms } from "@/data/cleaning-services";
 import { cityFromParams, type CityParams } from "@/content/city-param";
 import { siteData } from "@/data/site";
@@ -12,9 +14,13 @@ export const metadata: Metadata = {
 };
 
 export default async function CleaningServicesPage({ params }: { params: CityParams }) {
-  const { innerSite } = siteData(await cityFromParams(params));
+  const c = await cityFromParams(params);
+  const { innerSite } = siteData(c);
   return (
     <>
+      <Breadcrumbs
+        trail={breadcrumbs(c, { kind: "page", label: "Cleaning Services", path: "/cleaning-services" })}
+      />
       <PlansHeader />
       <PackagesBar innerSite={innerSite} />
       {rooms.map((r, i) => (

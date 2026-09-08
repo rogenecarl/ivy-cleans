@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
 import { cityFromParams } from "@/content/city-param";
 import { blogMeta, blogCardsFor } from "@/data/blog";
 import BlogCardGrid from "@/components/blog/BlogCardGrid";
@@ -25,6 +27,7 @@ export default async function BlogPage({ params }: { params: Promise<{ city: str
   const blogCards = blogCardsFor(c);
   return (
     <>
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "page", label: "Blog", path: "/blog" })} />
       <section className="bg-[#EEF7F4] pt-[2rem] pb-[1rem] md:pt-[3rem] md:pb-[2rem] lg:pt-[8.6rem] lg:pb-[3.8rem]">
         <div className="ec">
           {/*

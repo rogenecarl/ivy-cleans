@@ -16,6 +16,12 @@ import WhyMoveOut from "@/components/move-out/WhyMoveOut";
 import IncludedServices from "@/components/move-out/IncludedServices";
 import WhyIvy from "@/components/move-out/WhyIvy";
 import Cost from "@/components/move-out/Cost";
+import ServiceArea from "@/components/ServiceArea";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
+import { areasData } from "@/data/areas";
+import { cityBits } from "@/content/store";
+import type { ServiceEntry } from "@/data/services/registry";
 
 /*
  * The shared-template home for all seven services. All seven are registered
@@ -74,8 +80,40 @@ export async function generateMetadata({
 
 export default async function ServicePage({ params }: { params: ServiceParams }) {
   const { c, entry } = await resolveService(params);
-  if (entry.kind === "template") return <TemplateService c={c} content={entry.content} />;
-  return <MoveOutPage c={c} />;
+  return (
+    <>
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "service", slug: entry.slug })} />
+      {entry.kind === "template" ? (
+        <TemplateService c={c} content={entry.content} />
+      ) : (
+        <MoveOutPage c={c} />
+      )}
+      <WhereWeDoIt c={c} entry={entry} />
+    </>
+  );
+}
+
+/*
+ * Abdi's Orlando review, item 15B. Until this, a service page linked to no
+ * area at all — Lake Mary had exactly one inbound link on the whole site,
+ * the front page's list. Rendering the same Areas We Serve block here, under
+ * its own heading, takes every area page from one inbound link to eight
+ * (seven service pages plus the front page), and it is deterministic: no
+ * prompt work, nothing to validate.
+ *
+ * Same component, same map, same hasSuburbPages rule as the front page, so a
+ * city whose area pages are not live renders the names unlinked here too.
+ */
+function WhereWeDoIt({ c, entry }: { c: CityContent; entry: ServiceEntry }) {
+  return (
+    <ServiceArea
+      areas={areasData(c).areas}
+      bits={cityBits(c)}
+      mapSrc={c.maps.front}
+      hasSuburbPages={c.hasSuburbPages}
+      heading={{ title: `Where we do ${entry.name} in ${c.city}` }}
+    />
+  );
 }
 
 /* Was DeepCleaningPage in the old [serviceSlug] route — JSX unchanged, now

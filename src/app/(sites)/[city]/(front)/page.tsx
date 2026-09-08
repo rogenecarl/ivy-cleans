@@ -55,7 +55,9 @@ export default async function Home({ params }: { params: CityParams }) {
       <ServiceTypes services={services} />
       <CtaBand site={site} bits={bits} />
       <Packages packagesIntro={packagesIntro} packages={packages} site={site} />
+      {/* id="areas": the target of every area page's "Service Areas" crumb */}
       <ServiceArea
+        id="areas"
         areas={areas}
         bits={bits}
         mapSrc={c.maps.front}

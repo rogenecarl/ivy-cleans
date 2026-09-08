@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cityFromParams } from "@/content/city-param";
 import { citySlug, cityHref } from "@/content/interpolate";
@@ -128,15 +130,18 @@ export async function generateMetadata({ params }: { params: SlugParams }): Prom
 
 export default async function InnerSlugPage({ params }: { params: SlugParams }) {
   const resolved = await resolveSlug(params);
-  if (resolved.kind === "post") return <PostPage post={resolved.post} />;
+  if (resolved.kind === "post") return <PostPage c={resolved.c} post={resolved.post} />;
   return <SuburbPage c={resolved.c} suburb={resolved.suburb} />;
 }
 
 /* The live blog-post template: article, then the comment widget, both inside
    the same Elementor column (see PostArticle / CommentFormDisplay). */
-function PostPage({ post }: { post: PostArticleData }) {
+function PostPage({ c, post }: { c: CityContent; post: PostArticleData }) {
   return (
     <>
+      <Breadcrumbs
+        trail={breadcrumbs(c, { kind: "post", title: post.h1, slug: post.slug })}
+      />
       <PostArticle post={post} />
       <CommentFormDisplay responses={post.responses} />
     </>
@@ -152,6 +157,7 @@ function SuburbPage({ c, suburb }: { c: CityContent; suburb: SuburbRef }) {
   const { innerSite } = siteData(c);
   return (
     <>
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "area", name: suburb.name, slug: suburb.slug })} />
       <SuburbHero hero={hero} bookHref={innerSite.bookUrl} />
       <HouseCleaning houseCleaning={houseCleaning} />
       <SuburbBenefits benefits={benefits} bookHref={innerSite.bookUrl} />

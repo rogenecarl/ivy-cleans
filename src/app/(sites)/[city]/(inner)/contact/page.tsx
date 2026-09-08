@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
 import { cityFromParams, type CityParams } from "@/content/city-param";
 import { citySlug } from "@/content/interpolate";
 import { contactData } from "@/data/contact";
@@ -67,6 +69,7 @@ export default async function ContactPage({ params }: { params: CityParams }) {
   } = contactData(c);
   return (
     <>
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "page", label: "Contact", path: "/contact" })} />
       <ContactHeader variant="banner" contactHeader={contactHeader} />
       <section className="bg-[linear-gradient(180deg,#EEF7F4_15%,#FFFFFF_15%)] px-[1rem] pb-[3rem] md:pb-[4rem] lg:px-0 lg:pb-[9.6rem]">
         <div className="mx-auto max-w-[119rem]">

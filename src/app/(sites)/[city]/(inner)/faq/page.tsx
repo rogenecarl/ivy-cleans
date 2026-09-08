@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Breadcrumbs from "@/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/data/breadcrumbs";
 import { Source_Serif_4 } from "next/font/google";
 import { faqPageMeta, faqPageHeader } from "@/data/faq-page";
 import FaqAccordion from "@/components/faq-page/FaqAccordion";
@@ -53,6 +55,7 @@ export default async function FaqPage({ params }: { params: CityParams }) {
   const c = await cityFromParams(params);
   return (
     <>
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "page", label: "FAQ", path: "/faq" })} />
       <section className="bg-[#EEF7F4] pt-[2rem] pb-[1rem] md:pt-[3rem] md:pb-[2rem] lg:pt-[8.6rem] lg:pb-[3.8rem]">
         <div className="ec">
           <h3 className="text-rust mb-[1.5rem] text-[1.6rem] leading-[1.2em] font-semibold uppercase">

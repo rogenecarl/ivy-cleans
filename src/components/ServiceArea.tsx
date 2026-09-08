@@ -9,12 +9,23 @@ export default function ServiceArea({
   bits,
   mapSrc,
   hasSuburbPages,
+  heading,
+  id,
 }: {
   areas: Area[];
   bits: TokenSource;
   mapSrc: string | null;
   /** False for a city whose suburb pages do not exist — names render unlinked. */
   hasSuburbPages: boolean;
+  /**
+   * The front page's own headings are the default. A service page passes its
+   * own h2 ("Where we do Deep Cleaning in Orlando") and gets no eyebrow — the
+   * "Near Me" line above the default title is front-page copy, not a caption
+   * for this list.
+   */
+  heading?: { title: string };
+  /** Fragment target; the front page sets "areas" so breadcrumbs can point here. */
+  id?: string;
 }) {
   /*
    * The 2-column icon list fills COLUMN-first (grid-flow-col), so the row count
@@ -41,17 +52,20 @@ export default function ServiceArea({
     "flex items-start gap-[0.5rem] text-[1.7rem] leading-[1.2em] font-semibold lg:text-[2rem]";
   return (
     <section
+      id={id}
       className="bg-cover bg-top py-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]"
       style={{ backgroundImage: "url(/images/pexels-la-miko-36167641.jpg)" }}
     >
       <div className="ec">
         {/* 39580fa: widget-container margin-bottom -1.5rem below 768px */}
-        <h3 className="mb-[0.5rem] text-center text-[1.8rem] leading-[1.2em] md:mb-[2rem] md:text-[2.2rem]">
-          {t("House Cleaning Services Near Me in {city}, {state}", bits)}
-        </h3>
+        {heading === undefined && (
+          <h3 className="mb-[0.5rem] text-center text-[1.8rem] leading-[1.2em] md:mb-[2rem] md:text-[2.2rem]">
+            {t("House Cleaning Services Near Me in {city}, {state}", bits)}
+          </h3>
+        )}
         {/* e140447: widget-container margin-bottom -1rem below 768px */}
         <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
-          Areas We Serve
+          {heading?.title ?? "Areas We Serve"}
         </h2>
         {/* live 8c1d4ea: inner section holding the map (80c999d, col-50) and the
             areas list (117763a, col-50); stacked below 768px, a row from 768px up.
