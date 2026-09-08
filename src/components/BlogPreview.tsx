@@ -1,7 +1,11 @@
 import Image from "next/image";
-import { posts } from "@/data/recent-posts";
+import type { CityContent } from "@/content/types";
+import { recentPostsFor } from "@/data/recent-posts";
 
-export default function BlogPreview() {
+export default function BlogPreview({ c }: { c: CityContent }) {
+  // Scoped to this city: the raw `posts` hrefs are root-relative and 404 on
+  // any tenant but the default one. See recentPostsFor.
+  const posts = recentPostsFor(c);
   return (
     <section className="bg-white py-[1rem] md:py-[2rem] lg:py-[5rem]">
       <div className="ec">

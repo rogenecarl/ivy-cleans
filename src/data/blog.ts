@@ -1,3 +1,6 @@
+import type { CityContent } from "../content/types";
+import { cityHref } from "../content/interpolate";
+
 // Verbatim copy from docs/superpowers/reference/ivycleans-live/blog.html (listing
 // cards, per-<article> parse) and blog-post.html / blog-post-content-dump.txt
 // (single post body). Typos, mid-sentence excerpt cutoffs, and the "Breakfrom
@@ -124,3 +127,21 @@ export const blogCards: BlogCard[] = [
  * every post the site links to renders through the same template instead of
  * one hardcoded route. See src/data/posts/index.ts.
  */
+
+/**
+ * The blog cards, with every href scoped to this city.
+ *
+ * `blogCards` above keeps the ROOT-relative hrefs, because that is what
+ * src/pipeline/stages.ts reserves slugs from — a slug is the same string in
+ * every tenant. Anything that RENDERS a link must use this instead.
+ *
+ * Orlando's homepage shipped linking to
+ * /do-i-need-to-be-home-during-a-deep-cleaning-service at the root, which
+ * 404s on the preview host and leaves the tenant entirely on a real domain.
+ * Every other link in src/data already went through cityHref; these were the
+ * exceptions because they were transcribed from the live site's markup
+ * rather than built.
+ */
+export function blogCardsFor(c: Pick<CityContent, 'city' | 'status'>): BlogCard[] {
+  return blogCards.map((card) => ({ ...card, href: cityHref(c, card.href) }))
+}

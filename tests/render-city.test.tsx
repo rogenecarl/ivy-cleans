@@ -24,6 +24,8 @@ import { areasData } from '@/data/areas'
 import { homeData } from '@/data/home'
 import { siteData } from '@/data/site'
 import { cityBits, getCity } from '@/content/store'
+import { blogCards, blogCardsFor } from '@/data/blog'
+import { recentPostsFor } from '@/data/recent-posts'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')
@@ -194,5 +196,37 @@ describe('cityHref-built navigation', () => {
     expect(site.bookingUrl).toBe('/book-now')
     expect(innerSite.bookUrl).toBe('/book')
     expect(areasData(minneapolis).areas[0].href).toBe('/house-cleaning-apple-valley')
+  })
+})
+
+describe('blog links stay inside the tenant', () => {
+  /*
+   * Orlando's homepage linked to /do-i-need-to-be-home-during-a-deep-cleaning-service
+   * at the ROOT, not /orlando/… — because src/data/blog.ts and
+   * src/data/recent-posts.ts carried root-relative hrefs that never went
+   * through cityHref(). On the preview host those 404; on a real domain
+   * they leave the tenant entirely.
+   *
+   * Every other link in src/data already goes through cityHref (serviceNav,
+   * bookUrl, servicesLinks). These two were the exceptions.
+   */
+  it('prefixes a draft city, and leaves the default city bare', () => {
+    for (const card of blogCardsFor(testville)) {
+      expect(card.href.startsWith('/testville/')).toBe(true)
+    }
+    for (const post of recentPostsFor(testville)) {
+      expect(post.href.startsWith('/testville/')).toBe(true)
+    }
+    // Minneapolis is the default host's city — its paths stay at the root.
+    expect(blogCardsFor(minneapolis)[0].href.startsWith('/how-to-')).toBe(true)
+    expect(recentPostsFor(minneapolis)[0].href.startsWith('/do-i-need-')).toBe(true)
+  })
+
+  it('changes only the href — titles, excerpts and images are untouched', () => {
+    const [raw] = blogCards
+    const [built] = blogCardsFor(testville)
+    expect(built.title).toBe(raw.title)
+    expect(built.excerpt).toBe(raw.excerpt)
+    expect(built.thumb).toEqual(raw.thumb)
   })
 })

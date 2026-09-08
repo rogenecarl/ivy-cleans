@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { blogMeta, blogCards } from "@/data/blog";
+import { cityFromParams } from "@/content/city-param";
+import { blogMeta, blogCardsFor } from "@/data/blog";
 import BlogCardGrid from "@/components/blog/BlogCardGrid";
 import Pagination from "@/components/blog/Pagination";
 
@@ -17,7 +18,11 @@ export const metadata: Metadata = {
  * top/bottom margin at tablet+desktop (dropped to 0 at mobile) and a
  * padding-bottom that steps 8.6rem -> 3rem -> 1rem (post-32.css).
  */
-export default function BlogPage() {
+export default async function BlogPage({ params }: { params: Promise<{ city: string }> }) {
+  // The cards' hrefs have to be scoped to this tenant — the raw list is
+  // root-relative and 404s anywhere but the default host. See blogCardsFor.
+  const c = await cityFromParams(params);
+  const blogCards = blogCardsFor(c);
   return (
     <>
       <section className="bg-[#EEF7F4] pt-[2rem] pb-[1rem] md:pt-[3rem] md:pb-[2rem] lg:pt-[8.6rem] lg:pb-[3.8rem]">

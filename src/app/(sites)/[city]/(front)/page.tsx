@@ -67,7 +67,7 @@ export default async function Home({ params }: { params: CityParams }) {
       <Reviews site={site} bits={bits} />
       <Faq />
       <CtaBand site={site} bits={bits} />
-      <BlogPreview />
+      <BlogPreview c={c} />
     </main>
   );
 }
