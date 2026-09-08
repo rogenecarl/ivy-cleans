@@ -64,7 +64,7 @@ export default async function Home({ params }: { params: CityParams }) {
       <Values bits={bits} />
       <CtaBand site={site} bits={bits} />
       <BeforeAfter site={site} />
-      <Reviews site={site} bits={bits} />
+      <Reviews reviews={c.ops?.reviews ?? []} />
       <Faq />
       <CtaBand site={site} bits={bits} />
       <BlogPreview c={c} />

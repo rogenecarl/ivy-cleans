@@ -19,6 +19,7 @@ import { SERVICE_SLUGS } from '@/data/services/registry'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import ServiceArea from '@/components/ServiceArea'
+import Reviews, { MIN_REVIEWS, reviewDate } from '@/components/Reviews'
 import Locations from '@/components/home/Locations'
 import { areasData } from '@/data/areas'
 import { homeData } from '@/data/home'
@@ -228,5 +229,58 @@ describe('blog links stay inside the tenant', () => {
     expect(built.title).toBe(raw.title)
     expect(built.excerpt).toBe(raw.excerpt)
     expect(built.thumb).toEqual(raw.thumb)
+  })
+})
+
+/*
+ * The front-page reviews section reads the market's OWN reviews from the ops
+ * block. It used to render a static snapshot of Minneapolis's Google widget —
+ * nine named customers and a one-star — on every city's front page.
+ */
+describe('Reviews', () => {
+  const three = [
+    { quote: 'They got the grout white again.', firstName: 'Maria', area: 'Cinco Ranch', date: '2025-06' },
+    { quote: 'On time, twice a month, for a year now.', firstName: 'Dan', area: 'Katy' },
+    { quote: 'The lanai has never looked like this.', firstName: 'Priya', area: 'Sugar Land', date: 'last spring' },
+  ]
+
+  it('renders every quote, first name and area once there are three', () => {
+    const html = renderToStaticMarkup(<Reviews reviews={three} />)
+    for (const r of three) {
+      expect(html).toContain(r.quote)
+      expect(html).toContain(r.firstName)
+      expect(html).toContain(r.area)
+    }
+    expect(html).toContain('What Our Satisfied Clients Are Saying')
+  })
+
+  it('renders nothing at all below three — not a thin section, not a fallback', () => {
+    expect(MIN_REVIEWS).toBe(3)
+    expect(renderToStaticMarkup(<Reviews reviews={[]} />)).toBe('')
+    expect(renderToStaticMarkup(<Reviews reviews={three.slice(0, 2)} />)).toBe('')
+  })
+
+  it('carries no Google chrome and nothing of Minneapolis', () => {
+    const html = renderToStaticMarkup(<Reviews reviews={three} />)
+    // an ops review has no rating, avatar or profile link, so none may be invented
+    expect(html).not.toMatch(/stars|Google|Based on|powered by|<img/i)
+    expect(html).not.toContain('Minneapolis')
+    expect(html).not.toContain('DO NOT')
+  })
+
+  it('formats a YYYY-MM date as a month name and leaves anything else verbatim', () => {
+    expect(reviewDate('2025-06')).toBe('June 2025')
+    expect(reviewDate('2024-12')).toBe('December 2024')
+    expect(reviewDate('2025-13')).toBe('2025-13')
+    expect(reviewDate('last spring')).toBe('last spring')
+    const html = renderToStaticMarkup(<Reviews reviews={three} />)
+    expect(html).toContain('June 2025')
+    expect(html).toContain('last spring')
+  })
+
+  it('a live city with no ops reviews has no reviews section', () => {
+    // Minneapolis's real Google reviews are not in its ops block — they were a
+    // widget snapshot, not operator-entered facts — so it has none to show.
+    expect(renderToStaticMarkup(<Reviews reviews={minneapolis.ops?.reviews ?? []} />)).toBe('')
   })
 })

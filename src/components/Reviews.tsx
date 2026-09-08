@@ -1,64 +1,49 @@
-"use client";
+import type { MarketReview } from "@/content/types";
 
-import { useState } from "react";
-import Image from "next/image";
-import { reviews, reviewsSummary } from "@/data/reviews";
-import type { SiteData } from "@/data/site";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+/*
+ * What people in THIS market said, from the ops block — not a Google widget.
+ *
+ * Until this component existed in this form, the front page rendered
+ * src/data/reviews.ts: a static snapshot of Minneapolis's Google widget —
+ * nine named Minneapolis customers with their avatars and profile links, a
+ * 4.6 / 85 summary, and a one-star opening "DO NOT use this company" — on
+ * EVERY city's front page. Orlando's own reviews, typed into the ops form,
+ * went to the prompts and nowhere else.
+ *
+ * Two rules follow from the data this now reads:
+ *
+ * 1. NO Google chrome. An ops review is a quote, a first name, an area and
+ *    an optional month. It has no star rating, no avatar, no profile URL and
+ *    no aggregate score, and dressing it in the widget's stars and wordmark
+ *    would be inventing a rating the business never received. Testimonials,
+ *    plainly presented, are what the data supports.
+ *
+ * 2. Nothing below three. One or two quotes under "What Our Satisfied Clients
+ *    Are Saying" reads as a business that has barely started; an absent
+ *    section reads as nothing. Until a market has three, the honest state of
+ *    its front page is no reviews section at all.
+ *
+ * Server component: there is no carousel, so no client state. The heading is
+ * the live site's, verbatim; the section's background and padding match the
+ * widget section it replaces so the page rhythm around it is unchanged.
+ */
+export const MIN_REVIEWS = 3;
 
-/* the live Google-reviews widget renders at fixed px sizes, so this snapshot
-   deliberately uses px rather than the rem scale of the rest of the page */
-
-function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
-  return (
-    <span className="inline-flex" aria-label={`${rating} stars`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <svg
-          key={i}
-          width={size}
-          height={size}
-          viewBox="0 0 24 24"
-          fill={i <= Math.round(rating) ? "#fb8e28" : "#d8d8d8"}
-        >
-          <path d="M12 2l2.9 6.26 6.6.63-5 4.45 1.5 6.66L12 16.9 5.9 20l1.5-6.66-5-4.45 6.6-.63L12 2z" />
-        </svg>
-      ))}
-    </span>
-  );
+/** "2025-06" -> "June 2025"; anything else is the operator's text, verbatim. */
+export function reviewDate(date: string): string {
+  const m = /^(\d{4})-(\d{2})$/.exec(date);
+  if (!m) return date;
+  const month = Number(m[2]);
+  if (month < 1 || month > 12) return date;
+  const name = new Date(Date.UTC(2000, month - 1, 1)).toLocaleString("en-US", {
+    month: "long",
+    timeZone: "UTC",
+  });
+  return `${name} ${m[1]}`;
 }
 
-function GoogleWord() {
-  const letters: [string, string][] = [
-    ["G", "#3c6df0"],
-    ["o", "#d93025"],
-    ["o", "#fb8e28"],
-    ["g", "#3c6df0"],
-    ["l", "#188038"],
-    ["e", "#d93025"],
-  ];
-  return (
-    <span className="font-semibold">
-      {letters.map(([c, col], i) => (
-        <span key={i} style={{ color: col }}>
-          {c}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-export default function Reviews({
-  site,
-  bits,
-}: {
-  site: SiteData["site"];
-  bits: TokenSource;
-}) {
-  const [start, setStart] = useState(0);
-  const prev = () => setStart((s) => (s - 1 + reviews.length) % reviews.length);
-  const next = () => setStart((s) => (s + 1) % reviews.length);
-  const visible = [0, 1, 2].map((o) => reviews[(start + o) % reviews.length]);
+export default function Reviews({ reviews }: { reviews: readonly MarketReview[] }) {
+  if (reviews.length < MIN_REVIEWS) return null;
 
   return (
     <section className="bg-[#fafafa] py-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]">
@@ -66,124 +51,19 @@ export default function Reviews({
         <h2 className="mb-[2rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:text-[4rem] lg:text-[4.5rem]">
           What Our Satisfied Clients Are Saying
         </h2>
-        {/*
-          Live `.wp-gr` sets font-size:16px / line-height:normal on the widget root;
-          without that the widget inherits globals.css `body{line-height:1.5em}`,
-          which computes to a fixed 12.48px and shrinks every line box inside.
-          `.grw-row` is a flex row (column below 768px) with 16px bottom padding.
-        */}
-        {/* the widget lays its header + review cards out in a row from 768 up
-            (live probe: avatars at x=30/424/768 @768 and 30/384/704/1024 @1024) */}
-        <div className="flex flex-col pb-[16px] text-[16px] leading-[25px] md:flex-row md:items-center">
-          {/* .grw-header — 25% of the widget width; .grw-header-inner: margin 4,
-              padding 16, gap 12, column gap 8 */}
-          <div className="shrink-0 md:w-1/4">
-            {/* live .grw-header-inner keeps its full 269.5px width despite the 4px
-                margin (it overflows the header), so only the vertical margin counts */}
-            <div className="my-[4px] ml-[4px] flex w-full gap-[12px] p-[16px]">
-              <Image
-                src={reviews[0].avatar}
-                alt=""
-                width={46}
-                height={46}
-                className="h-[46px] w-[46px] shrink-0 rounded-full"
-              />
-              <div className="flex min-w-0 flex-col gap-[8px]">
-                <div className="text-[#333]">
-                  <a
-                    href={site.googleMapsUrl}
-                    target="_blank"
-                    rel="nofollow noopener"
-                    className="text-[18px] leading-[21.6px] text-[#333]"
-                  >
-                    {t("Ivy Cleans {city}", bits)}
-                  </a>
-                </div>
-                <span className="flex h-[20px] items-center font-black text-[#fb8e28]">
-                  {reviewsSummary.rating}
-                  <Stars rating={reviewsSummary.rating} />
-                </span>
-                <div className="text-[#555]">Based on {reviewsSummary.count} reviews</div>
-                <div className="font-semibold text-[#777]">
-                  powered by <GoogleWord />
-                </div>
-                {/* .wp-google-wr is display:flex, so the pill does not add an
-                    inline-block descender to the column */}
-                <div className="flex">
-                  <a
-                    href={site.writeReviewUrl}
-                    target="_blank"
-                    rel="nofollow noopener"
-                    className="inline-block rounded-[27px] bg-[#1f67e7] px-[12px] pt-[4px] pb-[8px] leading-[19.2px] whitespace-nowrap text-white shadow-[0_0_2px_0_rgba(0,0,0,0.12),0_2px_4px_0_rgba(0,0,0,0.24)]"
-                  >
-                    review us on Google
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* .rpi-slides-root — 75% of the widget width, the 34px arrows sitting in
-              the 17px inline margin of .rpi-slides */}
-          {/* the 34px arrows overlay the 17px inline margin of .rpi-slides rather
-              than taking width from it */}
-          <div className="relative flex w-full min-w-0 items-center lg:w-3/4">
-            <button
-              onClick={prev}
-              aria-label="Previous reviews"
-              className="absolute left-0 z-10 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[#ccc] bg-[#f5f5f5] text-[#374151] shadow-[0_2px_6px_0_rgba(0,0,0,0.15)]"
-            >
-              &lsaquo;
-            </button>
-            <div className="mx-[17px] flex min-w-0 flex-1 gap-[4px]">
-              {visible.map((r, i) => (
-                /* .rpi-slide: 4px/3px padding; .grw-review-inner: margin 4,
-                   padding 16, gap 12, #f4f4f4 */
-                <article
-                  key={r.name}
-                  className={`h-[238px] min-w-0 flex-1 px-[3px] py-[4px] ${i > 0 ? "hidden lg:block" : ""}`}
-                >
-                  <div className="mx-[4px] flex h-full flex-col gap-[12px] bg-[#f4f4f4] p-[16px]">
-                    <div className="flex items-center gap-[12px]">
-                      <Image
-                        src={r.avatar}
-                        alt={`${r.name} profile picture`}
-                        width={46}
-                        height={46}
-                        className="h-[46px] w-[46px] shrink-0 rounded-full"
-                      />
-                      <div className="flex min-w-0 flex-col gap-[6px]">
-                        <a
-                          href={r.profileUrl}
-                          target="_blank"
-                          rel="nofollow noopener"
-                          className="block leading-[19.2px] font-bold text-[#154fc1]"
-                        >
-                          {r.name}
-                        </a>
-                        <div className="text-[13px] leading-[20px] text-[#555]">{r.time}</div>
-                      </div>
-                    </div>
-                    <span className="flex h-[20px] items-center">
-                      <Stars rating={r.rating} />
-                    </span>
-                    {/* live clips the review to a 100px scroll box rather than
-                        clamping it to a line count */}
-                    <div className="h-[100px] overflow-hidden">
-                      <span className="text-[15px] leading-[24px] text-[#222]">{r.text}</span>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <button
-              onClick={next}
-              aria-label="Next reviews"
-              className="absolute right-0 z-10 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[#ccc] bg-[#f5f5f5] text-[#374151] shadow-[0_2px_6px_0_rgba(0,0,0,0.15)]"
-            >
-              &rsaquo;
-            </button>
-          </div>
-        </div>
+        <ul className="grid list-none gap-[1.6rem] p-0 md:grid-cols-2 lg:grid-cols-3">
+          {reviews.map((r, i) => (
+            <li key={i} className="flex h-full flex-col gap-[1.2rem] bg-[#f4f4f4] p-[2.4rem]">
+              <blockquote className="m-0 flex-1 text-[1.6rem] leading-[1.6em] text-[#222]">
+                &ldquo;{r.quote}&rdquo;
+              </blockquote>
+              <p className="m-0 text-[1.4rem] leading-[1.5em] text-[#555]">
+                <span className="font-bold text-[#374151]">{r.firstName}</span>, {r.area}
+                {r.date ? ` · ${reviewDate(r.date)}` : ""}
+              </p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

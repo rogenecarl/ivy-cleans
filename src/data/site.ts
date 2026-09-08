@@ -9,8 +9,6 @@ export type SiteData = {
     phoneHref: string;
     email: string;
     bookingUrl: string;
-    googleMapsUrl: string;
-    writeReviewUrl: string;
     nav: { label: string; href: string }[];
     serviceNav: { label: string; href: string }[];
     socials: { label: string; href: string; icon: string }[];
@@ -40,11 +38,6 @@ export function siteData(c: CityContent): SiteData {
        * city gets the `/<cityKey>` prefix so its preview stays browsable.
        */
       bookingUrl: cityHref(c, "/book-now"),
-      // Business-profile URLs (cid/placeid): one physical Google listing shared by
-      // all cities for now — per-city listings are an open client question.
-      googleMapsUrl: "https://maps.google.com/?cid=6546505722522773891",
-      writeReviewUrl:
-        "https://search.google.com/local/writereview?placeid=ChIJT35locmWcKMRgykID0Xc2Vo",
       /*
        * TOP-LEVEL items only. The individual service pages are NOT in here —
        * they live in `serviceNav` below and hang off the "Cleaning Services"

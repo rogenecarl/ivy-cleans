@@ -674,7 +674,6 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
   "site": {
     "bookingUrl": "/book-now",
     "email": "Support@ivycleans.com",
-    "googleMapsUrl": "https://maps.google.com/?cid=6546505722522773891",
     "nav": [
       {
         "href": "/home",
@@ -761,7 +760,6 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
         "label": "TikTok",
       },
     ],
-    "writeReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJT35locmWcKMRgykID0Xc2Vo",
   },
 }
 `;
