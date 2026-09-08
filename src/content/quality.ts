@@ -82,7 +82,7 @@ export const BANNED_PHRASES: readonly string[] = [
  */
 export const SUBDIVISIONS_REQUIRED = 3
 
-export type QualityRule = 'entity-coverage' | 'ops-unused' | 'banned-phrase'
+export type QualityRule = 'entity-coverage' | 'ops-unused' | 'banned-phrase' | 'area-code'
 
 export interface QualityFinding {
   /** The slot, or the area prefix when the finding spans an area's three slots. */
@@ -186,6 +186,69 @@ function opsUsed(ops: MarketOps | undefined, sections: CityContent['sections']):
   return out
 }
 
+/**
+ * North American area codes by state, for the one check that matters: does
+ * this city's phone number plausibly belong to this city?
+ *
+ * Orlando shipped publicly with 346-644-6564 — a Houston code — on every
+ * page, because the number is typed by hand on the create form and nothing
+ * ever looked at it. The phone is the entire conversion path of a lead-gen
+ * site.
+ *
+ * DELIBERATELY NOT EXHAUSTIVE and deliberately not authoritative. It catches
+ * the obvious mismatch — a Texas number on a Florida city — and says nothing
+ * at all about a state it does not carry, because a check that fires on
+ * correct data is one an operator learns to ignore. Overlays and splits mean
+ * this will drift; a missing code produces a warning, never a refusal.
+ */
+const AREA_CODES: Record<string, readonly string[]> = {
+  AL: ['205', '251', '256', '334', '659', '938'],
+  AZ: ['480', '520', '602', '623', '928'],
+  CA: ['209', '213', '279', '310', '323', '341', '408', '415', '424', '442', '510', '530', '559', '562', '619', '626', '628', '650', '657', '661', '669', '707', '714', '747', '760', '805', '818', '820', '831', '840', '858', '909', '916', '925', '949', '951'],
+  CO: ['303', '719', '720', '970', '983'],
+  CT: ['203', '475', '860', '959'],
+  FL: ['239', '305', '321', '324', '352', '386', '407', '448', '561', '656', '689', '727', '754', '772', '786', '813', '850', '863', '904', '941', '954'],
+  GA: ['229', '404', '470', '478', '678', '706', '762', '770', '912', '943'],
+  IL: ['217', '224', '309', '312', '331', '447', '464', '618', '630', '708', '773', '779', '815', '847', '872'],
+  IN: ['219', '260', '317', '463', '574', '765', '812', '930'],
+  MA: ['339', '351', '413', '508', '617', '774', '781', '857', '978'],
+  MD: ['227', '240', '301', '410', '443', '667'],
+  MI: ['231', '248', '269', '313', '517', '586', '616', '679', '734', '810', '906', '947', '989'],
+  MN: ['218', '320', '507', '612', '651', '763', '924', '952'],
+  MO: ['235', '314', '417', '557', '573', '636', '660', '816', '975'],
+  NC: ['252', '336', '472', '704', '743', '828', '910', '919', '980', '984'],
+  NJ: ['201', '551', '609', '640', '732', '848', '856', '862', '908', '973'],
+  NV: ['702', '725', '775'],
+  NY: ['212', '315', '329', '332', '347', '363', '516', '518', '585', '607', '624', '631', '646', '680', '716', '718', '838', '845', '914', '917', '929', '934'],
+  OH: ['216', '220', '234', '283', '326', '330', '380', '419', '436', '440', '513', '567', '614', '740', '937'],
+  OR: ['458', '503', '541', '971'],
+  PA: ['215', '223', '267', '272', '412', '445', '484', '570', '582', '610', '717', '724', '814', '835', '878'],
+  SC: ['803', '839', '843', '854', '864'],
+  TN: ['423', '615', '629', '731', '865', '901', '931'],
+  TX: ['210', '214', '254', '281', '325', '346', '361', '409', '430', '432', '469', '512', '621', '682', '713', '726', '737', '806', '817', '830', '832', '903', '915', '936', '940', '945', '956', '972', '979'],
+  UT: ['385', '435', '801'],
+  VA: ['276', '434', '540', '571', '703', '757', '804', '826', '948'],
+  WA: ['206', '253', '360', '425', '509', '564'],
+  WI: ['262', '274', '353', '414', '534', '608', '715', '920'],
+}
+
+/** Warns when a city's phone plainly belongs to a different state. */
+function areaCode(doc: CityContent): QualityFinding[] {
+  const codes = AREA_CODES[doc.state]
+  if (!codes) return []
+  const digits = doc.phone.replace(/\D/g, '')
+  const code = digits.length === 11 ? digits.slice(1, 4) : digits.slice(0, 3)
+  if (code === '' || codes.includes(code)) return []
+  return [
+    {
+      slot: 'phone',
+      rule: 'area-code',
+      detail: `area code ${code} is not a ${doc.state} code — every page carries this number`,
+      blocking: false,
+    },
+  ]
+}
+
 function bannedPhrases(sections: CityContent['sections']): QualityFinding[] {
   const out: QualityFinding[] = []
   for (const [slot, value] of Object.entries(sections)) {
@@ -213,6 +276,7 @@ export function checkQuality(doc: CityContent): QualityFinding[] {
     ...entityCoverage(doc.research.suburbs, doc.sections),
     ...opsUsed(doc.ops, doc.sections),
     ...bannedPhrases(doc.sections),
+    ...areaCode(doc),
   ]
   return [...findings].sort((a, b) => Number(b.blocking) - Number(a.blocking))
 }

@@ -201,6 +201,45 @@ describe('ops facts used', () => {
   })
 })
 
+describe('area code against state', () => {
+  /*
+   * Orlando shipped on a public URL with 346-644-6564 — a Houston area code —
+   * on every page, because whoever created the city typed the wrong number
+   * and nothing looked at it. The phone is the whole point of a lead-gen
+   * site; a wrong one costs every call the pages would have earned.
+   *
+   * WARNS, never blocks. A market that has not opened yet legitimately has
+   * no local line, and refusing to publish over it would be wrong. This is
+   * "look at this before you commit to it", which is what the review panel
+   * is for.
+   */
+  function withPhone(phone: string, state: string) {
+    return { ...doc({ sections: { 'deep.whatIs': 'Fine.' } }), phone, state }
+  }
+
+  it('flags a number whose area code belongs to another state', () => {
+    const findings = checkQuality(withPhone('346-644-6564', 'FL'))
+    expect(findings).toHaveLength(1)
+    expect(findings[0].rule).toBe('area-code')
+    expect(findings[0].blocking).toBe(false)
+    expect(findings[0].detail).toContain('346')
+    expect(findings[0].detail).toContain('FL')
+  })
+
+  it('accepts a number whose area code belongs to the state', () => {
+    for (const phone of ['407-555-0142', '321-555-0142', '689-555-0142']) {
+      expect(checkQuality(withPhone(phone, 'FL'))).toEqual([])
+    }
+  })
+
+  it('says nothing for a state it has no area codes for', () => {
+    // The map only needs to catch the obvious mismatch. An absent state is a
+    // gap in the map, not a finding about the city — inventing one would
+    // teach an operator to ignore this check.
+    expect(checkQuality(withPhone('907-555-0142', 'ZZ'))).toEqual([])
+  })
+})
+
 describe('banned phrases', () => {
   it('flags a banned phrase and names both the slot and the phrase', () => {
     const c = doc({ sections: { 'deep.whatIs': 'Our home is nestled in the heart of Houston.' } })

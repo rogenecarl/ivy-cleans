@@ -167,6 +167,19 @@ describe('cityHref-built navigation', () => {
     )
     expect(site.bookingUrl).toBe('/testville/book-now')
     expect(innerSite.bookUrl).toBe('/testville/book')
+
+    /*
+     * Every phone on a city's pages is THAT city's number.
+     *
+     * innerSite.phone / phoneHref were literal 612-482-5001 — a second
+     * Minneapolis line, kept because "whether a new city gets one number or
+     * two is an open question for the client". Orlando shipped with a
+     * Minneapolis number on /orlando/home as a result. The question is
+     * answered: one number per city.
+     */
+    expect(innerSite.phone).toBe(testville.phone)
+    expect(innerSite.phoneHref).toBe(testville.phoneHref)
+    expect(innerSite.footerPhone).toBe(testville.phone)
     expect(areasData(testville).areas[0].href).toBe(
       '/testville/house-cleaning-north-testburg',
     )

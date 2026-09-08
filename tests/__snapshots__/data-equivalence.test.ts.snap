@@ -643,8 +643,8 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
       },
     ],
     "footerPhone": "612-424-0391",
-    "phone": "612-482-5001",
-    "phoneHref": "tel: +16124825001",
+    "phone": "612-424-0391",
+    "phoneHref": "tel:6124240391",
     "servicesLinks": [
       {
         "href": "/book",

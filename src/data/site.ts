@@ -87,13 +87,22 @@ export function siteData(c: CityContent): SiteData {
     },
     innerSite: {
       /*
-       * DELIBERATELY STILL LITERAL: the inner chrome's 612-482-5001 is a second
-       * phone line distinct from the main number. Whether a new city gets one
-       * number or two is an open question for the client — resolved in Plan 3's
-       * admin form. Do not tokenize until then.
+       * The live Minneapolis site ran a SECOND line here (612-482-5001),
+       * distinct from the hero's number, and this stayed literal because
+       * "whether a new city gets one number or two" was an open question for
+       * the client.
+       *
+       * THAT QUESTION IS ANSWERED: one number per city. It was answered the
+       * expensive way — Orlando shipped with a Minneapolis number on
+       * /orlando/home, on a public URL, because a literal here reaches every
+       * city that will ever be generated.
+       *
+       * The live site's trailing space in `tel: +1...` is not reproduced: it
+       * was verbatim fidelity to a hand-authored href, and a tel: link is a
+       * dialled number, not a design detail.
        */
-      phone: "612-482-5001",
-      phoneHref: "tel: +16124825001", // verbatim from live href, including the space
+      phone: c.phone,
+      phoneHref: c.phoneHref,
       /*
        * The inner footer's icon-list phone (d439f43 on both home.html and
        * cleaning-services.html) is a *different* number from the hero/CTA "Call
