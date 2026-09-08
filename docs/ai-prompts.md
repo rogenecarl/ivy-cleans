@@ -51,7 +51,7 @@ The brief:
 
 Landmarks are no longer requested. They fed one sentence that read identically on every city site, and named subdivisions do the same job of proving local knowledge far better.
 
-**A note on (e) KEYWORDS.** Keywords are meant to come from real search-volume data (a paid keyword-research provider), not from a model guessing at what people type — that data source isn't hooked up yet. Until it is, the brief still asks for keywords the old way, from the research itself, so the front-page and deep-cleaning copy keep getting *some* steering rather than none. Part (e) is a placeholder that will be removed once the real keyword data is wired in; nothing else in this document changes when that happens.
+**A note on (e) KEYWORDS.** Keywords are meant to come from real search-volume data (a paid keyword-research provider), not from a model guessing at what people type — that data source isn't hooked up yet. Until it is, the brief still asks for keywords the old way, from the research itself, so the front-page copy keeps getting *some* steering rather than none. Part (e) is a placeholder that will be removed once the real keyword data is wired in; nothing else in this document changes when that happens.
 
 ### Step 1b. Turning findings into data
 
@@ -145,11 +145,11 @@ The brief it receives:
 > 1. heroParagraphs — exactly 5 paragraphs, following this arc, one paragraph per step:
 >    1) Who we are and where we work: a local, insured business providing cleaning and janitorial services across [CITY]; our experienced team, our care for detail, what our customers get. Roughly 80 to 110 words.
 >    2) Confidence: why our work in [CITY] stands up to scrutiny — effort, clear communication, results, the same standard on every job regardless of size. Roughly 70 to 90 words.
->    3) Three short questions to the reader, one sentence each, in a single paragraph — the "do you have a mess that needs cleaning?" beat. Under 35 words in total.
+>    3) Three questions a homeowner in [CITY] might actually be asking themselves — about their own house, their schedule, or one specific room — one sentence each, in a single paragraph. Under 35 words in total. Every question must be one this city's conditions make likely; a question that could be asked anywhere is wrong here.
 >    4) One sentence: home or business, call our professional cleaning company today and request a quote.
 >    5) One sentence: call Ivy Cleans today and get an estimate. Similar in spirit to paragraph 4 but not a repeat of its wording.
 >
->    [THE REAL MINNEAPOLIS HERO PARAGRAPHS 1-3 ONLY ARE SHOWN HERE AS A STRUCTURAL EXAMPLE, WITH THE INSTRUCTION:] Match its SHAPE, its paragraph lengths, its rhythm and its voice; never copy its sentences, and never carry over a Minneapolis detail.
+>    [THE REAL MINNEAPOLIS HERO PARAGRAPHS 1-2 ONLY ARE SHOWN HERE AS A STRUCTURAL EXAMPLE, WITH THE INSTRUCTION:] Match its SHAPE, its paragraph lengths and its rhythm; never copy its sentences, and never carry over a Minneapolis detail. Paragraph 3 is deliberately NOT shown: every city that saw the Minneapolis questions wrote the same three.
 >
 >    Paragraphs 4 and 5 are one sentence each, so there is no shape left to imitate once you match it — write them to the spec in steps 4 and 5 above: a direct call to action, then a request for a quote or estimate close in spirit to it but not a repeat of its wording. Do not imitate a sample sentence for either. (Minneapolis's own paragraphs 4 and 5 are deliberately withheld as examples here — see src/content/similarity.ts for why.)
 >
@@ -166,26 +166,42 @@ The brief it receives:
 
 ---
 
-## Skill 3: Deep-Clean Copywriter 🫧
+## Skill 3: Service-Page Local Section ✍️
+
+Six of the seven service pages (standard, deep, apartment, Airbnb, post-construction, pre-listing) are the same in every city: what the service is, what it includes, how it is priced. That shared text is canonical on purpose — regenerating it per city would make a hundred sites compete for the same phrases. This skill writes the one paragraph on each of those pages that is NOT shared: what is different about doing that job here. It runs once per service.
 
 Added to the voice guide:
 
-> STAGE: the deep-cleaning page. You are writing the single paragraph that answers "What is Deep House Cleaning?" — an explanation, calmly given, of what a deep clean covers and why homes in this particular city need one.
+> STAGE: the local section of ONE service page. The page already explains what the service is, what it includes and how it is priced, and that copy is shared word-for-word by every city. You are writing the one part that is not shared.
+>
+> YOU OWN WHAT IS DIFFERENT HERE, NOT WHAT THE SERVICE IS. If you find yourself describing the service — what gets cleaned, what is included, how long it takes in general — stop. That is the copy above you on the same page, and repeating it makes both weaker. Your subject is this city: what its homes, its weather, or the way people live in it changes about doing this particular job.
+>
+> THE TEST. Read back what you wrote and ask whether it would sit unchanged on the same service page for a different city. If it would, you have not used the research and it is filler.
+>
+> An honest short answer beats a padded long one. If the conditions genuinely do not change how this service is done here, say so plainly and stop.
 
-The brief:
+The brief it receives, for one service at a time:
 
-> Write the "What is Deep House Cleaning?" paragraph for the Ivy Cleans website serving [CITY], [STATE NAME].
+> Write the "In [CITY]" section for the [SERVICE NAME] page.
 >
-> [OWNER NOTES, IF ANY]
+> [FACTS ABOUT THIS BRANCH, IF ANY — see below]
 >
-> Search phrases for context — never quote them:
-> [TOP 8 RESEARCHED KEYWORDS]
+> The page already explains what [SERVICE NAME] is, what is included, and how it is priced. That copy is fixed and shared by every city. Do not repeat any of it.
 >
-> whatIs — a single paragraph of 80 to 110 words that explains what a deep clean actually is: how it goes beyond a regular visit, that it reaches every surface, floor, carpet and piece of furniture, and that it lifts out the dirt, dust and allergens an ordinary clean leaves behind — ending on a healthier, more comfortable home.
+> Your section answers one question: what is different about [SERVICE NAME] in [CITY] specifically, because of the homes here, the climate, or how people live?
 >
-> Give it one angle that belongs to [CITY]: the local reason homes there accumulate what a deep clean removes — the humidity and mold pressure, the months sealed up against the cold, the pollen or desert dust or blown sand, the age and construction of the housing stock. One or two sentences of that, woven in, not bolted on.
+> LOCAL CONDITIONS in [CITY], with what each one means for cleaning:
+> [THE METRO-WIDE CONDITIONS, FILTERED TO copySafe: true]
 >
-> [THE MINNEAPOLIS VERSION SHOWN AS THE STRUCTURAL EXAMPLE]
+> 90 to 130 words. Use AT MOST TWO of the conditions above — the two that change THIS job most — and ignore the rest. Lead with the more specific of the two.
+>
+> Working through every condition on the list is what makes six service pages read the same: they all get the same list, and only the service is different. The reader came for one service, not a weather report.
+>
+> If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in [CITY] is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.
+
+**The two-condition cap is load-bearing.** Every service receives the identical condition list; without an instruction to choose, the safe move is to cover all of them, and six pages converge on the same facts in the same order. On the first real Houston run four of six sections used all four conditions before the cap was added.
+
+The deep-cleaning "What is" paragraph used to be generated per city by its own skill. It is now fixed, shared text like the other services, and this skill writes deep cleaning's local section instead.
 
 ---
 
@@ -237,6 +253,22 @@ The brief it receives, for one area at a time:
 The conditions list is built by filtering OUT anything marked `copySafe: false` — household income, poverty, crime, flood risk, property values, collected during research only to judge whether a market is worth working — before the list is ever turned into text. That filtering happens before this brief exists, not inside it, so there is no wording in this document that could leak one of those facts onto a page; the guarantee is structural, not a request the model is trusted to honour.
 
 The structural example is deliberately NOT the live Savage, Minnesota page that the original area-page template was built from — that page is one of the twenty-four that earned twenty-three clicks. It is instead the best paragraph this pipeline has actually generated (for a Houston-area page), shown only for its movement — name a real condition, say what it does inside a house, land on the cleaning — with an explicit instruction to carry over none of its Houston-specific detail.
+
+---
+
+## The facts about this branch
+
+The market facts typed into the admin (serving since, crew lead, crew size, homes cleaned, real reviews) are given to every writing skill as facts it must use, never as suggestions. A page that received one and ignored it fails the quality check at publish. They appear in a brief as:
+
+> FACTS ABOUT THIS BRANCH — every one of these is true, and you must use each one that appears here. Do not embellish them, do not round them, and do not invent a companion fact to sit beside them.
+> - We have served [CITY] since [MONTH]. Say it once, plainly.
+> - The crew here is led by [FIRST NAME]. Use the first name once, naturally — never invent a surname.
+> - The crew is [N] people.
+> - We have cleaned [N] homes in this market. Use the number as written; do not round it up.
+> - Real reviews from customers in this market. Quote at most two, VERBATIM, attributed by first name and area:
+>     "[QUOTE]" — [FIRST NAME], [AREA]
+
+Only the lines with a value appear; a market with none of them gets no block at all. Photos and ZIP codes are also entered there but never reach a prompt — they render directly.
 
 ---
 
