@@ -57,6 +57,7 @@ const ALL_TEST_KEYS = [
   'ztest-dupe-b',
   'ztest-quality',
   'ztest-provision',
+  'ztest-stale',
 ]
 
 function progressPath(key: string): string {
@@ -534,6 +535,46 @@ describe('drafts store', () => {
 
       const resolved = await getCity(key)
       expect(resolved.status).toBe('live')
+    })
+  })
+
+  describe('loadDraft prunes stages that no longer exist', () => {
+    const KEY = 'ztest-stale'
+
+    afterEach(async () => {
+      await rm(draftPath(KEY), { force: true })
+    })
+
+    it('drops a done entry for a stage the pipeline has since removed', async () => {
+      /*
+       * Removing the `deep` stage left every existing draft recording it as
+       * done. The generate screen counts done against STAGES and rendered
+       * "5 of 4 stages"; listCities compares the same length to decide
+       * whether a city is still generating. Both trusted a list that a
+       * pipeline change had made stale.
+       *
+       * Pruned on read rather than by a migration: a stage id that is not in
+       * STAGES cannot be run, cannot be regenerated and owns no slots, so
+       * carrying it forward has no meaning at all. saveDraft then persists
+       * the pruned list, so a draft heals itself the first time it is touched.
+       */
+      const facts = deriveFacts({ city: 'Ztest Stale', state: 'MN', phoneDigits: '6125550104' })
+      await createDraft(facts)
+      const raw = JSON.parse(await readFile(draftPath(KEY), 'utf-8'))
+      raw.done = ['research', 'deep', 'front', 'made-up']
+      await writeFile(draftPath(KEY), JSON.stringify(raw, null, 2), 'utf-8')
+
+      expect((await loadDraft(KEY)).done).toEqual(['research', 'front'])
+    })
+
+    it('keeps a valid done list in its original order', async () => {
+      const facts = deriveFacts({ city: 'Ztest Stale', state: 'MN', phoneDigits: '6125550104' })
+      await createDraft(facts)
+      const raw = JSON.parse(await readFile(draftPath(KEY), 'utf-8'))
+      raw.done = ['research', 'front', 'suburb']
+      await writeFile(draftPath(KEY), JSON.stringify(raw, null, 2), 'utf-8')
+
+      expect((await loadDraft(KEY)).done).toEqual(['research', 'front', 'suburb'])
     })
   })
 

@@ -18,7 +18,14 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '../pipeline/facts'
 import type { ResearchOutput } from '../pipeline/schemas'
-import { SERVICE_LOCAL_SLUGS, STAGES, isWrittenSlot, serviceSlots, stageSlots } from './slots'
+import {
+  SERVICE_LOCAL_SLUGS,
+  STAGES,
+  STAGE_IDS,
+  isWrittenSlot,
+  serviceSlots,
+  stageSlots,
+} from './slots'
 import type { CityContent } from './types'
 import { citySlug } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
@@ -125,7 +132,24 @@ export async function loadDraft(key: string): Promise<DraftDoc> {
   } catch {
     throw new Error(`unknown draft "${key}"`)
   }
-  return JSON.parse(raw) as DraftDoc
+  const doc = JSON.parse(raw) as DraftDoc
+
+  /*
+   * Drop `done` entries for stages the pipeline no longer has.
+   *
+   * Removing the `deep` stage left every existing draft still recording it as
+   * done. The generate screen counts `done` against STAGES and rendered
+   * "5 of 4 stages"; listCities compares the same two lengths to decide
+   * whether a city is still generating. Both trusted a list a pipeline change
+   * had quietly made stale.
+   *
+   * Pruned here rather than by a migration, because an unknown stage id has
+   * no meaning left: it cannot be run, cannot be regenerated, and owns no
+   * slots. saveDraft then writes the pruned list back, so a draft heals
+   * itself the first time anything touches it.
+   */
+  doc.done = doc.done.filter((id) => (STAGE_IDS as readonly string[]).includes(id))
+  return doc
 }
 
 export async function saveDraft(key: string, doc: DraftDoc): Promise<void> {
