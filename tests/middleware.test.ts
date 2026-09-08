@@ -12,6 +12,25 @@ import { resolveAdminRedirect } from '../src/content/resolve-admin'
 // The shipped defaults: default host is minneapolis, no mapped hosts yet.
 const DEFAULT_HOST = 'localhost:3100'
 
+describe('sitemap.xml and robots.txt reach their own route handlers', () => {
+  /*
+   * Both are served by src/app/sitemap.ts and src/app/robots.ts at the ROOT,
+   * and both must resolve the tenant from the Host header themselves. If the
+   * proxy rewrote them into a city tree they would 404, which is the state
+   * Orlando shipped in — except there the files did not exist at all.
+   *
+   * They pass through on INTERNAL's `\.\w+$` arm rather than a name of their
+   * own, so this pins the behaviour against a future tightening of that
+   * regex.
+   */
+  it('passes them through on every host', () => {
+    for (const host of [DEFAULT_HOST, 'miamicleans.com']) {
+      expect(resolveRewrite(host, '/sitemap.xml')).toBeNull()
+      expect(resolveRewrite(host, '/robots.txt')).toBeNull()
+    }
+  })
+})
+
 describe('resolveRewrite — default host (no _domains.hosts entry)', () => {
   it('sends the bare root to the default city', () => {
     expect(resolveRewrite(DEFAULT_HOST, '/')).toBe('/minneapolis')
