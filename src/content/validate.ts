@@ -1,9 +1,5 @@
 // src/content/validate.ts
-/*
- * Hand-rolled runtime validation for CityContent documents (no new deps).
- * One bad city document must 404 that city only — so this accumulates
- * EVERY problem before throwing, rather than failing on the first one.
- */
+// hand-rolled validation; accumulates every problem before throwing so one bad city 404s alone
 import type { CityContent } from './types'
 
 function isString(v: unknown): v is string {
@@ -52,21 +48,7 @@ export function validateCityContent(raw: unknown): CityContent {
     errors.push(`status must be 'draft' or 'live'`)
   }
 
-  /*
-   * A LIVE city may not carry the placeholder address.
-   *
-   * finalizeDraft writes "<City> — address pending" when the operator left
-   * the field blank, which is an honest interim state on a draft. Orlando
-   * then reached a public URL with it on /orlando/contact — and an address
-   * is the one fact a customer checks to decide whether a cleaning company
-   * is real. It also blocks the LocalBusiness JSON-LD and the map embed,
-   * both of which need a real one.
-   *
-   * Matched against the exact suffix finalizeDraft writes, not the word
-   * "pending" anywhere: a real street called Pending Lane is not a
-   * placeholder, and a check that refuses a genuine address would be worse
-   * than the placeholder it prevents.
-   */
+  // a live city may not carry the finalizeDraft placeholder address (exact suffix, not the word 'pending')
   if (doc.status === 'live' && isString(doc.address) && / — address pending$/.test(doc.address)) {
     errors.push(
       'address is still the placeholder finalizeDraft writes for a blank field; a live city needs a real one (or none — see the contact page)',
@@ -97,19 +79,7 @@ export function validateCityContent(raw: unknown): CityContent {
     }
   }
 
-  /*
-   * -- ops (optional) --
-   *
-   * Operator-entered market facts, carried onto the published document so
-   * they survive publish: the draft sidecar that held them is deleted there
-   * (drafts.ts publishCity), and these are the one input nobody can research
-   * or regenerate. Nothing renders them directly — the prompts consume them
-   * and the copy carries the result — so they are checked, not required.
-   *
-   * Checked strictly all the same: a prompt is REQUIRED to use every supplied
-   * ops field as given, so a number where a crew lead's name belongs reaches
-   * a live page written out verbatim.
-   */
+  // ops (optional): checked strictly since prompts use every field verbatim
   const ops = doc.ops
   if (ops !== undefined) {
     if (ops === null || typeof ops !== 'object' || Array.isArray(ops)) {

@@ -1,25 +1,5 @@
-/**
- * Everything the admin server actions actually DO, as plain async functions.
- *
- * WHY THIS FILE EXISTS, separate from actions.ts: a module carrying the
- * 'use server' directive is compiled by Next into a set of RPC endpoints, and
- * importing it from vitest pulls in the Next server runtime rather than the
- * functions themselves. Keeping the substance here means the pipeline's
- * behaviour is unit-testable in plain node (tests/admin-logic.test.ts), while
- * actions.ts stays a thin wrapper adding only the framework-specific bits
- * (redirect, revalidatePath).
- *
- * HARD RULE: nothing in this file may import from 'next/*'. The test suite
- * proves that indirectly — it imports this module in a bare node environment,
- * which would throw if a Next server-only module came along for the ride.
- *
- * Every function returns a serializable result instead of throwing, because
- * these values cross the server-action boundary to the browser: an Error
- * thrown in a server action reaches the client as a generic digest, which is
- * useless to an operator staring at a failed research stage. The one
- * exception is createDraftFromFields, which returns the new key on success so
- * the action can redirect.
- */
+// The admin server actions' substance, framework-free so tests run in plain node. Nothing here imports next/*.
+// Functions return results instead of throwing: a thrown Error reaches the browser as a useless digest.
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
@@ -55,13 +35,7 @@ const CITIES_JSON = path.join(CONTENT_DIR, '_cities.json')
 export type ActionResult = { ok: true } | { ok: false; error: string }
 export type CreateResult = { ok: true; key: string } | { ok: false; error: string }
 
-/**
- * Shape of a row the suburbs editor sends back — name and slug only. This is
- * NOT the researched `Suburb` (src/pipeline/schemas.ts): the editor never
- * sees subdivisions/housingCharacter/conditions, so this type must not grow
- * them. mergeSuburbRows below is what reconciles a row with the rich entity
- * it corresponds to.
- */
+// editor row: name and slug only, never the researched fields
 export type SuburbRow = { name: string; slug: string }
 
 /** Dashboard row states. See listCities() for how each is decided. */
@@ -99,19 +73,9 @@ export function isStageId(value: string): value is StageId {
   return (STAGE_IDS as readonly string[]).includes(value)
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Create
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Create ──
 
-/**
- * The ops block as the form holds it: raw strings, one per input. All
- * optional — a brand-new market has none of it — but a prompt that receives
- * one of these facts is REQUIRED to use it, so an empty field is a page that
- * reads like a description of a town rather than a business working in it.
- *
- * Parsing lives in buildOps below, in the one place that already owns turning
- * form text into facts, so the create form and the ops editor cannot drift.
- */
+// The ops block as the form holds it. Parsing is in buildOps so the create form and ops editor can't drift.
 export type OpsFields = {
   /** Comma, space or newline separated. "77002, 77003" or one per line. */
   zips?: string
@@ -125,16 +89,7 @@ export type OpsFields = {
   reviews?: string
 }
 
-/**
- * What /admin/new collects. Everything OpsFields carries EXCEPT reviews.
- *
- * A review cannot exist before a crew has cleaned a house in that market,
- * so it is the one operator fact that is logically unanswerable on the
- * screen that creates a market. It lives on /admin/sites/<key> instead,
- * which is where it will actually be typed — months later, when a customer
- * has said something. buildOps still parses it; only this form stops
- * asking.
- */
+// /admin/new collects everything except reviews, which live on the settings screen
 export type NewCityFields = Omit<OpsFields, 'reviews'> & {
   city: string
   state: string
@@ -143,27 +98,14 @@ export type NewCityFields = Omit<OpsFields, 'reviews'> & {
   address?: string
 }
 
-/**
- * Splits an operator's ZIP paste into five-digit codes.
- *
- * Deliberately forgiving about separators — commas, spaces, newlines, a
- * pasted column from a spreadsheet — and deliberately strict about what
- * counts, because a malformed ZIP is a visible error on a live page. Anything
- * that is not exactly five digits is dropped rather than guessed at.
- */
+// ZIP paste -> five-digit codes; forgiving separators, anything else dropped
 export function parseZips(raw: string | undefined): string[] {
   if (!raw) return []
   const found = raw.split(/[^0-9]+/).filter((t) => /^\d{5}$/.test(t))
   return [...new Set(found)].sort()
 }
 
-/**
- * Bounds on the reviews field. This parser sits behind a server action, which
- * is an untrusted RPC boundary whether or not a page was ever rendered — the
- * same threat model sites/logic.ts states for MAX_RAW_LENGTH. MAX_REVIEWS is
- * generous against real use (the prompts quote at most two) and small enough
- * that nobody can grow a draft without bound through this field.
- */
+// bounds on the reviews field (untrusted RPC boundary)
 export const MAX_REVIEWS = 10
 export const MAX_REVIEWS_LENGTH = 8000
 
@@ -189,24 +131,8 @@ function unquote(value: string): string {
   return value
 }
 
-/**
- * An operator's pasted reviews into the structured form the prompts quote from.
- *
- *   quote | first name | area | date (optional)
- *
- * one per line. The separator is a pipe rather than a comma or a dash because
- * real reviews are full of both — "Fast, thorough — and they came back" would
- * be shredded by either.
- *
- * WHY THIS REJECTS RATHER THAN DROPS, unlike parseZips above: a malformed ZIP
- * is unambiguous junk among dozens of good ones, and guessing at it would put
- * a visible error on a live page. A review is a paragraph a human typed once,
- * from a real customer in a real market — it is the one input a competitor
- * cannot reproduce. Losing one silently is unrecoverable, so a bad line fails
- * the whole submission with the line number the operator's cursor is on.
- * Blank lines are skipped but still counted, so that number matches the
- * textarea rather than the parser's idea of it.
- */
+// Reviews: `quote | first name | area | date?`, one per line. Pipe because real reviews are full of commas and dashes.
+// A bad line rejects the whole submission with its line number: a review is the one input that can't be reproduced.
 export function parseReviews(raw: string | undefined): ParseReviewsResult {
   if (!raw || raw.trim() === '') return { ok: true, reviews: [] }
   if (raw.length > MAX_REVIEWS_LENGTH) {
@@ -253,15 +179,7 @@ export type BuildOpsResult =
   | { ok: true; ops: MarketOps | undefined }
   | { ok: false; error: string }
 
-/**
- * Raw form strings -> the validated ops block, or undefined when the operator
- * filled in none of it.
- *
- * Undefined rather than {} on purpose: an empty object satisfies
- * `!== undefined` and would put a meaningless `ops: {}` on every draft, and —
- * once the ops editor exists — would make "cleared every field" indis-
- * tinguishable from "supplied an empty record".
- */
+// raw form strings -> ops block, or undefined when empty (never {})
 export function buildOps(fields: OpsFields): BuildOpsResult {
   const zips = parseZips(fields.zips)
   const servingSince = fields.servingSince?.trim()
@@ -285,11 +203,7 @@ export function buildOps(fields: OpsFields): BuildOpsResult {
   return { ok: true, ops: Object.keys(ops).length ? ops : undefined }
 }
 
-/**
- * The inverse of buildOps: stored facts back into the exact text the form
- * shows. Round-trips — feeding this straight back to buildOps stores the same
- * facts — which is what lets the editor prefill without a separate shape.
- */
+// inverse of buildOps; round-trips
 export function formatOpsFields(ops: MarketOps | undefined): OpsFields {
   if (!ops) return {}
   return {
@@ -308,14 +222,7 @@ export function formatOpsFields(ops: MarketOps | undefined): OpsFields {
   }
 }
 
-/**
- * Form input -> derived facts -> draft sidecar. The phone arrives however the
- * operator typed it ("(305) 555-0142", "305.555.0142"); everything that is not
- * a digit is dropped before deriveFacts, which is the single validator for the
- * 10-digit rule. Optional fields that came back empty are omitted rather than
- * stored as '' — Facts treats absent and empty differently (an empty address
- * would satisfy `!== undefined` and land in the published document).
- */
+// form -> derived facts -> draft sidecar. Phone stripped to digits; empty optionals omitted.
 export async function createDraftFromFields(fields: NewCityFields): Promise<CreateResult> {
   try {
     const digits = fields.phone.replace(/\D/g, '')
@@ -338,15 +245,9 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Stage execution
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Stage execution ──
 
-/**
- * One stage, one call. The progress screen drives these sequentially rather
- * than running the pipeline in a single request: each stage is its own short
- * request, which survives a serverless duration cap, a reload, and a retry.
- */
+// one stage per request so a serverless cap, reload or retry is survivable
 export async function runStageLogic(
   key: string,
   stage: StageId,
@@ -355,17 +256,7 @@ export async function runStageLogic(
   return attempt(() => runStage(makeClient(), key, stage, only))
 }
 
-/**
- * The areas the suburb stage still has to write, in order.
- *
- * The admin drives the suburb loop one area per request: twelve model calls
- * inside a single request runs three to six minutes and a serverless function
- * is killed long before that. The client needs the list to drive that loop,
- * and it cannot know it before research has run.
- *
- * Already-written and un-writable areas are omitted, so the returned length is
- * exactly the number of model calls left to pay for.
- */
+// areas the suburb stage still has to write; the client drives one per request
 export async function pendingSuburbsLogic(
   key: string
 ): Promise<{ ok: true; areas: { slug: string; name: string }[] } | { ok: false; error: string }> {
@@ -383,20 +274,7 @@ export async function pendingSuburbsLogic(
   }
 }
 
-/**
- * The service pages the service stage still has to write, in order.
- *
- * The admin drives this loop one service per request, for the same reason the
- * suburb loop is driven that way: six model calls inside a single server
- * action runs for minutes and a serverless function is killed long before
- * that.
- *
- * UNLIKE pendingSuburbsLogic this does not need research to have run — the
- * same seven services exist in every city, so the list is known from the
- * moment a draft exists. (The stage itself still needs research, for the
- * local conditions it writes from.) Already-written services are omitted, so
- * the returned length is exactly the number of model calls left to pay for.
- */
+// service pages still to write; known from creation since the seven services are fixed
 export async function pendingServicesLogic(
   key: string
 ): Promise<{ ok: true; services: { slug: string; name: string }[] } | { ok: false; error: string }> {
@@ -416,11 +294,7 @@ export async function regenerateLogic(key: string, stage: StageId): Promise<Acti
   return attempt(() => regenerateStage(makeClient(), key, stage))
 }
 
-/** Snapshot the admin's live activity feed can poll: the raw event log, which stages
- * are done, and (once research has run) the researched suburb names / zips as plain
- * strings — not the {name, slug} objects draft.research stores them as — plus a
- * subdivisions total (landmarks are gone; subdivisions are the fact that replaced
- * them, see src/pipeline/schemas.ts ResearchSchema). */
+// snapshot for the activity feed: events, done stages, suburb names/zips, subdivision total
 export type ProgressSnapshot =
   | {
       ok: true
@@ -452,13 +326,7 @@ export async function finalizeLogic(key: string): Promise<ActionResult> {
   return attempt(() => finalizeDraft(key))
 }
 
-/**
- * Flip status to 'live', map or BUY a host, retire the sidecar.
- *
- * `provision` spends real money, so it is an explicit argument rather than a
- * default: the publish screen's toggle is off unless the operator turns it on
- * for that city.
- */
+// flip to live, map or buy a host, retire the sidecar. `provision` spends money, so it is explicit.
 export async function publishLogic(
   key: string,
   domain?: string,
@@ -473,16 +341,7 @@ export async function publishLogic(
   )
 }
 
-/**
- * Is a provisioned domain actually serving yet?
- *
- * publishCity routes the domain and returns without waiting: DNS and TLS take
- * minutes, and a server action does not get minutes. So the wait lives in the
- * browser, which polls this — one config call per poll, no loop on the server.
- *
- * Clears `doc.provisioning` once the answer is yes, which is what makes the
- * "waiting for DNS" banner disappear on its own.
- */
+// is a provisioned domain serving yet? The browser polls this; clears doc.provisioning once yes.
 export async function checkProvisioningLogic(
   key: string,
 ): Promise<{ ok: true; live: boolean; domain: string | null } | { ok: false; error: string }> {
@@ -513,17 +372,9 @@ export async function discardDraftLogic(key: string): Promise<ActionResult> {
   return attempt(() => deleteDraft(key))
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Suburb editing
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Suburb editing ──
 
-/**
- * Slugs become URLs, so the editor's free text goes through the same
- * normalizer the model output does (stages.ts normalizeSlug): lowercase,
- * non-alphanumerics to single hyphens, edges trimmed. Rows with an empty name,
- * an empty normalized slug, or a slug that duplicates an earlier row are
- * dropped — two area entries cannot share a URL.
- */
+// editor text through the same slug normaliser as model output; empty and duplicate rows dropped
 export function normalizeSuburbs(rows: SuburbRow[]): SuburbRow[] {
   const seen = new Set<string>()
   const out: SuburbRow[] = []
@@ -539,21 +390,7 @@ export function normalizeSuburbs(rows: SuburbRow[]): SuburbRow[] {
   return out
 }
 
-/**
- * Rows from the editor carry name and slug only; the researched fields live
- * on the existing entries and must survive an edit. Slug is the stable
- * identity, so match on it and copy the research across.
- *
- * A row whose slug matches nothing is one the operator ADDED by hand. It gets
- * empty research fields, which is honest — nobody researched it — and the
- * uniqueness gate scores it 0 and flags it in the review screen rather than
- * letting an unresearched area quietly become a page.
- *
- * CONSEQUENCE, documented deliberately: renaming an area without changing its
- * slug keeps the old research. Operators rename for spelling far more often
- * than they repoint a row at a different place, so slug-as-identity is the
- * right default — but the editor hint should say so.
- */
+// rows carry name + slug; research fields are matched back by slug. An unknown slug is a hand-added row with empty research.
 function mergeSuburbRows(rows: readonly SuburbRow[], existing: readonly Suburb[]): Suburb[] {
   const bySlug = new Map(existing.map((s) => [s.slug, s]))
   return rows.map((row) => {
@@ -577,16 +414,7 @@ async function readCityDoc(key: string): Promise<CityContent | null> {
   }
 }
 
-/**
- * Writes an edited suburb list to wherever it lives for this city.
- *
- * A city can be in two places at once: between finalize and publish it has
- * BOTH a draft sidecar and a content/<key>.json. The published document is
- * what the preview renders (src/data/areas.ts maps `research.suburbs`), and
- * the sidecar is what a later regenerate/finalize would rebuild from — so an
- * edit that touched only one of them would silently revert. Both are updated
- * when both exist, and it is not an error for only one to.
- */
+// a city between finalize and publish has both a sidecar and a document; update both
 export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promise<ActionResult> {
   try {
     const suburbs = normalizeSuburbs(rows)
@@ -602,11 +430,7 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
     }
     const doc = await readCityDoc(key)
 
-    // The operator's slug must not collide with a static sibling route or
-    // this city's two computed service slugs (stages.ts reservedSlugs) — a
-    // colliding row would silently SHADOW that page rather than get its own,
-    // so unlike normalizeResearchSlugs' silent drop, the human here gets told
-    // exactly which slug is the problem instead of watching it vanish.
+    // a colliding slug would shadow a page; tell the operator which
     const cityName = draft?.facts.city ?? doc?.city ?? key
     const collision = suburbs.find((s) => reservedSlugs(cityName).has(s.slug))
     if (collision) {
@@ -645,16 +469,9 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Ops editing
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Ops editing ──
 
-/**
- * The stored ops for a city, as the text the editor's form should show.
- *
- * The draft sidecar wins when both exist: between finalize and publish it is
- * the newer of the two, and it is what a regenerate would rebuild from.
- */
+// stored ops as form text; the sidecar wins when both exist
 export async function readOpsLogic(
   key: string,
 ): Promise<{ ok: true; fields: OpsFields } | { ok: false; error: string }> {
@@ -676,23 +493,7 @@ export async function readOpsLogic(
   }
 }
 
-/**
- * Writes edited market facts to wherever this city lives.
- *
- * The same two-places-at-once problem updateSuburbsLogic documents, for the
- * same reason: between finalize and publish a city has BOTH a sidecar and a
- * content/<key>.json, and an edit that touched only one would be silently
- * reverted by the other. Both are updated when both exist, and it is not an
- * error for only one to.
- *
- * A LIVE city has only the document — publishCity deletes the sidecar — and
- * that is precisely the case this function exists for. Before it, ops could
- * be entered only on the create form, so hiring a crew lead after launch had
- * nowhere to be recorded.
- *
- * Nothing here regenerates copy. Changing a fact changes what the NEXT
- * generation is given; the pages already written still say what they said.
- */
+// write edited facts wherever the city lives (sidecar, document, or both). Changes what the NEXT generation is given.
 export async function updateOpsLogic(key: string, fields: OpsFields): Promise<ActionResult> {
   try {
     // Parse before touching anything, so a malformed review line leaves the
@@ -700,17 +501,7 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
     const built = buildOps(fields)
     if (!built.ok) return { ok: false, error: built.error }
 
-    /*
-     * Photos survive an ops save even though the form never sends them.
-     *
-     * buildOps REPLACES the whole block — that is deliberate, it is what lets
-     * an operator clear a fact — but `photos` has no input on the ops form
-     * (the files live in the repo under public/images, so they are placed by
-     * whoever commits them, not typed into a textarea). Without this, the
-     * first time anyone saved Minneapolis's crew lead, its five
-     * before-and-afters would vanish from every one of its pages with no
-     * error and nothing in the form to hint at what was lost.
-     */
+    // photos survive a save: the form has no photo input and buildOps replaces the whole block
     const keepPhotos = (previous: MarketOps | undefined): MarketOps | undefined => {
       const photos = previous?.photos
       if (!photos?.length) return built.ops
@@ -730,9 +521,7 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
     }
 
     if (draft) {
-      // Delete rather than assign undefined: the sidecar is serialized to
-      // JSON, where `ops: undefined` and an absent key are the same thing on
-      // the way out but not on the way in through a partial merge.
+      // delete, not undefined: the sidecar is JSON
       const facts = { ...draft.facts }
       const ops = keepPhotos(facts.ops)
       if (ops) facts.ops = ops
@@ -759,9 +548,7 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Dashboard listing
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Dashboard listing ──
 
 async function readCityKeys(): Promise<string[]> {
   try {
@@ -771,28 +558,8 @@ async function readCityKeys(): Promise<string[]> {
   }
 }
 
-/**
- * Every city the operator can act on, in one list.
- *
- * The two sources overlap by design. `content/_cities.json` holds every city
- * that has been FINALIZED (published or not) and its document carries the
- * authoritative live/draft status. `listDrafts()` holds every sidecar, which
- * exists from creation until publish. A city that has been finalized but not
- * published therefore appears in both — the document wins for status, and the
- * row is flagged `hasDraft` so the screen can still offer Regenerate.
- *
- * A sidecar with no document is mid-pipeline: 'generating' while stages
- * remain, 'draft-unfinalized' once all four are done but finalize has not run
- * (or failed) — those are the two states the Resume link exists for.
- *
- * Sidecars are read FIRST and the documents layered on top, which decides the
- * one ambiguous case: a key registered in _cities.json whose document will not
- * load. With a sidecar present that is simply a city mid-pipeline (a key can
- * be registered by a finalize that a later regenerate rolled back), so the
- * sidecar's own state stands; with no sidecar there is nothing to fall back on
- * and the row is surfaced as 'error' rather than dropped — a city silently
- * missing from this table is the one outcome an operator cannot debug.
- */
+// Every city in one list. _cities.json holds finalized cities, listDrafts() holds sidecars; a finalized-not-published
+// city is in both (the document wins for status). Sidecars first, documents on top; an unloadable document with no sidecar is 'error'.
 export async function listCities(): Promise<CityRow[]> {
   const rows = new Map<string, CityRow>()
 

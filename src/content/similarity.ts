@@ -1,37 +1,10 @@
 // src/content/similarity.ts
-/*
- * Cross-city duplication checks. No new dependencies, matching validate.ts.
- *
- * This exists because it already happened. Houston and Miami each share a
- * 125-character verbatim run with Minneapolis — "...r business, give our
- * professional cleaning company a call today, request your quote, and put our
- * skills to an effective test!" — and Minneapolis's "our business ethos is
- * unmatched" arrived in Houston as "our standard of work is unmatched".
- *
- * The cause is structural rather than a prompt failure. buildFrontPrompt shows
- * the model the real Minneapolis paragraphs and says "match the SHAPE, never
- * copy its sentences". For the long paragraphs that instruction is satisfiable.
- * For hero paragraphs 4 and 5, which are a single sentence each, there is
- * nothing left to match once you match the shape — so the example gets
- * reproduced, exactly as asked and exactly wrong.
- *
- * Three sites in one brand network sharing sentences is the fingerprint that
- * matters, and nothing in the codebase looked for it: validate.ts checks types
- * and shapes, never content against other cities.
- *
- * Cheap first, expensive second. runCheck() runs the verbatim scan on every
- * pair and only computes shingle similarity for slots that pass it.
- */
+// Cross-city duplication checks. Houston and Miami shared a 125-char verbatim run with Minneapolis because the
+// prompt's one-sentence examples can only be reproduced. Verbatim scan on every pair; shingles only for slots that pass.
 
-/* ──────────────────────────────────────────────────────────────────────────
- * Normalisation
- * ────────────────────────────────────────────────────────────────────────── */
+// ── Normalisation ──
 
-/**
- * Casing, whitespace and apostrophe style are not what we are testing for.
- * U+2019 is folded to ASCII so a copy that survived a straight-quote round
- * trip still matches its source.
- */
+// fold case, whitespace and U+2019 before comparing
 export function normalize(text: string): string {
   return text
     .toLowerCase()
@@ -41,9 +14,7 @@ export function normalize(text: string): string {
     .trim()
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
- * Verbatim runs
- * ────────────────────────────────────────────────────────────────────────── */
+// ── Verbatim runs ──
 
 /** Every substring of exactly `len` characters in `text`. */
 function windows(text: string, len: number): Set<string> {
@@ -62,13 +33,7 @@ function sharesRunOfLength(a: string, b: string, len: number): boolean {
   return false
 }
 
-/**
- * The longest run of characters the two strings share verbatim, or ''.
- *
- * Binary search on length over the O(n+m) membership test above, so the whole
- * thing is O((n + m) log n) — fast enough to run every city against every
- * other on each publish without anyone noticing.
- */
+// longest shared verbatim run, or ''; binary search on length, O((n+m) log n)
 export function longestSharedRun(rawA: string, rawB: string): string {
   const a = normalize(rawA)
   const b = normalize(rawB)
@@ -90,9 +55,7 @@ export function longestSharedRun(rawA: string, rawB: string): string {
   return ''
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
- * Shingle similarity
- * ────────────────────────────────────────────────────────────────────────── */
+// ── Shingle similarity ──
 
 function shingles(text: string, k: number): Set<string> {
   const words = normalize(text).split(' ').filter(Boolean)
@@ -101,11 +64,7 @@ function shingles(text: string, k: number): Set<string> {
   return out
 }
 
-/**
- * Jaccard similarity over 5-word shingles. Catches the reworded case that a
- * verbatim scan misses: two paragraphs that say the same thing in mostly the
- * same words with the city name swapped.
- */
+// Jaccard over 5-word shingles: catches the reworded case
 export function shingleSimilarity(a: string, b: string, k = 5): number {
   const sa = shingles(a, k)
   const sb = shingles(b, k)
@@ -115,9 +74,7 @@ export function shingleSimilarity(a: string, b: string, k = 5): number {
   return shared / (sa.size + sb.size - shared)
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
- * The gate
- * ────────────────────────────────────────────────────────────────────────── */
+// ── The gate ──
 
 export interface SimilarityFinding {
   kind: 'verbatim' | 'shingle'
@@ -142,19 +99,7 @@ export const DEFAULT_THRESHOLDS: SimilarityThresholds = {
   maxSibling: 0.75,
 }
 
-/**
- * Slots that are ALLOWED to be identical across cities.
- *
- * Hero paragraphs 4 and 5 are one sentence each — a call to action and a
- * request for a quote. They cannot be meaningfully varied, and pretending
- * otherwise produces worse copy, not less duplication. Treat them as fixed
- * brand lines: exempt them deliberately here, and give them a spec rather than
- * a structural example in buildFrontPrompt so the model is not being asked for
- * something impossible.
- *
- * Nothing else belongs in this set. An exemption is a decision, not a way to
- * quiet a failing check.
- */
+// slots allowed to be identical across cities: hero paragraphs 4 and 5, one-sentence brand lines. Nothing else.
 export const EXEMPT_SLOTS: ReadonlySet<string> = new Set<string>([
   // 'services.heroParagraphs' is an array; index-level exemption is applied
   // in flattenSections below.
@@ -182,14 +127,7 @@ export function flattenSections(sections: SectionMap): Array<[string, string]> {
   return out
 }
 
-/**
- * Check one city's generated copy against every already-published city, and
- * against itself for sibling area pages.
- *
- * Returns findings rather than throwing: the admin review screen should show
- * an operator what collided and where, not a stack trace. publishCity() is the
- * right place to refuse on a non-empty result.
- */
+// one city against every published city, and against its own sibling areas. Returns findings; publishCity refuses on them.
 export function checkCity(
   city: string,
   sections: SectionMap,
@@ -261,29 +199,10 @@ export function checkCity(
   return findings
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
- * Invisible-character guard
- * ────────────────────────────────────────────────────────────────────────── */
+// ── Invisible-character guard ──
 
-/**
- * Characters that render as nothing (or as an ordinary space) but change the
- * bytes of a string.
- *
- * WHY THIS GUARD EXISTS, and why it lives next to the duplication check
- * rather than anywhere else: checkCity finds duplicates by comparing text. A
- * single zero-width space inside an otherwise byte-identical paragraph makes
- * two strings compare unequal, so the duplication check goes QUIET on a page
- * that is still identical to every reader and every crawler. The guard exists
- * to stop the safety net being defeated by something nobody can see.
- *
- * The smaller harms are real too: word counts drift (the suburb prompt asks
- * for 60–130 words per paragraph), a reader's in-page search silently fails to
- * match, and the characters surface in diffs as junk nobody can locate.
- *
- * NOT in this set: U+2019 apostrophes, en dashes and em dashes. Those are
- * required by the project's style rules and appear throughout the reference
- * copy — flagging them would make the guard unusable.
- */
+// characters that render as nothing but change the bytes — a zero-width space defeats the duplication check.
+// U+2019, en and em dashes are NOT here: the style rules require them.
 const INVISIBLE_CHARS: ReadonlyMap<string, string> = new Map([
   [' ', 'NO-BREAK SPACE'],
   ['­', 'SOFT HYPHEN'],
@@ -329,10 +248,7 @@ export interface InvisibleFinding {
   detail: string
 }
 
-/**
- * Invisible characters that come in blocks rather than singly, so listing
- * every codepoint would be noise. All three render as nothing.
- */
+// invisible ranges (blocks, not single codepoints)
 function rangeName(cp: number): string | undefined {
   if (cp >= 0xe0000 && cp <= 0xe007f) return 'TAG CHARACTER'
   if (cp >= 0xfe00 && cp <= 0xfe0f) return 'VARIATION SELECTOR'
@@ -357,14 +273,7 @@ function scan(slot: string, text: string): InvisibleFinding[] {
   return out
 }
 
-/**
- * Scan every generated slot for invisible characters.
- *
- * Unlike flattenSections this applies NO exemptions. Hero paragraphs 4 and 5
- * are exempt from CROSS-CITY comparison because they are fixed brand lines,
- * but an invisible character in one is still a defect, so the guard sees
- * every slot.
- */
+// every slot, no exemptions: an invisible character in a brand line is still a defect
 export function findInvisibleChars(sections: SectionMap): InvisibleFinding[] {
   const out: InvisibleFinding[] = []
   for (const [slot, value] of Object.entries(sections)) {

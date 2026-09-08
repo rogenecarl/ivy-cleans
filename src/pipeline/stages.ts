@@ -1,26 +1,4 @@
-/**
- * The three pipeline stages, and the prompts that are the actual product.
- *
- * Each stage is resumable: `runStage` loads the draft sidecar, returns
- * immediately if the stage is already in `draft.done`, otherwise calls the
- * model, writes its outputs into the draft, and appends the stage id to
- * `done`. Nothing here knows about Next.js or about the network — the
- * ModelClient seam (src/pipeline/model.ts) is the only way out, so the whole
- * file runs against StubModelClient in tests.
- *
- * The prompt builders are exported individually and are pure functions of
- * (facts, research): they are unit-testable, and they are where the quality
- * of every generated city site is decided. Both `generate()` system prompts
- * (front, deep) start with the identical SYSTEM_BASE string so that a future
- * prompt-cache breakpoint can be placed after it and reused across stages.
- *
- * The `home` stage (ZIP and landmark prose for the Locations block) is gone:
- * its two sentences were byte-identical across every Ivy Cleans site apart
- * from the city name — a network fingerprint, not content — and the landmark
- * sentence itself never earned a click (Minneapolis: 3,030 impressions, zero
- * clicks over sixteen months). ZIPs are still researched; they render as a
- * plain list (src/components/home/Locations.tsx) with no model call at all.
- */
+// The pipeline stages and their prompts. Each stage is resumable via the draft sidecar; the ModelClient seam is the only way out.
 
 import type { Facts } from './facts'
 import {
@@ -53,53 +31,15 @@ import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
 
-/**
- * STAGES, STAGE_IDS, StageId and stageSlots all moved to
- * src/content/slots.ts in Task 18, alongside suburbSlots which already lived
- * there (Task 17): src/content/drafts.ts needs stageSlots for
- * requiredSlotsFor, and this module imports loadDraft/saveDraft FROM
- * drafts.ts — so drafts.ts importing any of these from here would be a
- * genuine ESM import cycle. It worked only by accident before (every
- * cycle-imported binding was used inside a function body, never at
- * module-eval time); the first top-level `const X = stageSlots(...)` would
- * have turned that accident into a TypeError at import with a stack trace
- * pointing nowhere useful. Re-exported here so every other importer of this
- * module (admin-logic.ts, the admin console pages, the test suite) keeps
- * compiling against the same public surface untouched.
- */
-/*
- * BANNED_PHRASES is re-exported, not defined here. It lives in
- * src/content/quality.ts because the validator that CHECKS the list has to
- * import it, and this module cannot be that home: stages.ts imports
- * loadDraft/saveDraft from content/drafts.ts, and drafts.ts imports the
- * validator to run it at publish — content -> pipeline would close the loop.
- * One definition, imported downhill.
- */
+// STAGES/STAGE_IDS/stageSlots live in src/content/slots.ts (drafts.ts needs them; importing from here would cycle). Re-exported.
+// BANNED_PHRASES lives in src/content/quality.ts for the same cycle reason
 export { BANNED_PHRASES }
 export { SERVICE_LOCAL_SLUGS, STAGES, STAGE_IDS, serviceSlots, stageSlots, suburbSlots, type StageId }
 
-/**
- * New cities get a bare `<area>` slug — the area name, lowercased and
- * hyphenated. Minneapolis's live area pages rotate four URL shapes
- * (content/minneapolis.json → research.suburbs), but Google evaluates the
- * page, not the shape of its URL: rotating bought nothing and cost
- * consistency, so new cities do not imitate it. Minneapolis keeps its stored
- * slugs — they are indexed, and normalizeResearchSlugs/normalizeSlug only
- * ever clean up characters, never rewrite a slug's shape, so this change
- * affects nothing already on disk.
- */
+// new cities get a bare `<area>` slug; Minneapolis keeps its stored ones
 export const SLUG_PATTERN = '<area>' as const
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Shape examples — verbatim copies of the REAL Minneapolis copy from
- * content/minneapolis.json. They go into the prompts as structural models
- * ("match the shape, never the sentences"), which is the single most
- * effective lever on output quality: the model has a concrete target for
- * paragraph count, paragraph length, register and rhythm instead of guessing.
- * If content/minneapolis.json's copy ever changes, these should be updated to
- * match — they are deliberately inlined so the prompt builders stay pure,
- * synchronous and independently testable.
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Shape examples: real Minneapolis copy, used as structural models in the prompts ──
 
 const MPLS_HERO_PARAGRAPHS = [
   'As a local and insured business, Ivy Cleans is thrilled to be providing cleaning and janitorial services across various areas of Minneapolis. Our experienced team, backed by a life-long dedication to cleanliness, is committed to delivering outstanding house cleaning services that our loyal customers cherish. We are proudly invested in the exceptional results we achieve with every clean. Having established our roots in the industry, we can assertively declare that our business ethos is unmatched. We take care of all cleaning aspects, from all surfaces to the tiniest nooks, and always supersede our client’s expectations, a trait we believe sets us apart.',
@@ -123,28 +63,10 @@ const MPLS_CARD_DUSTING =
 const MPLS_CARD_VACUUMING =
   'Vacuuming is another crucial cleaning service that is particularly important in Minneapolis. The city’s cold winters mean that people spend more time indoors, leading to a buildup of dirt and debris on floors and carpets. Our professional vacuuming services ensure that your home is free from dirt and dust, providing a more pleasant and hygienic living environment.'
 
-/* ────────────────────────────────────────────────────────────────────────────
- * System prompts
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── System prompts ──
 
-/**
- * Shared prefix of every structured-generation system prompt. Kept first and
- * byte-identical across stages so a cache_control breakpoint can be dropped
- * at its end later without touching the stage code.
- */
-/**
- * The phrasings that mark local-service copy as machine-written.
- *
- * Defined once and interpolated into SYSTEM_BASE so the prompt and the
- * mechanical checker can never disagree about what is banned — a list that
- * lives in two places drifts, and the half that drifts is always the one
- * nobody reads.
- *
- * The last four are not generic tells: they are what THIS pipeline actually
- * produced while the voice guide named the live Minneapolis hero as its
- * target. Houston came back as "we can assertively declare that our standard
- * of work is unmatched" from a page sitting at position 33.
- */
+// shared prefix, byte-identical across stages for a future cache breakpoint
+// The phrasings that mark copy as machine-written; interpolated into SYSTEM_BASE so prompt and checker agree.
 
 export const SYSTEM_BASE = `You write website copy for Ivy Cleans, a local, insured residential and commercial cleaning company. Each Ivy Cleans website serves one specific city, and you are writing that city's copy. Everything you write must read as though the people who actually clean houses in that city wrote it about their own city.
 
@@ -201,12 +123,7 @@ THE TEST. Read back what you wrote and ask whether it would sit unchanged on the
 
 An honest short answer beats a padded long one. If the conditions genuinely do not change how this service is done here, say so plainly and stop.`
 
-/**
- * The structuring call that turns raw web-research findings into
- * ResearchSchema. Deliberately NOT built on SYSTEM_BASE: this call writes no
- * marketing copy at all, and the voice guide would only invite it to
- * embellish the facts it is supposed to be transcribing.
- */
+// structuring call: findings -> ResearchSchema. Not on SYSTEM_BASE: it writes no copy.
 export const RESEARCH_STRUCTURE_SYSTEM = `You convert a block of local-market research findings into strict JSON.
 
 You are a transcriber, not a researcher and not a writer. Every area name, subdivision, ZIP code and local condition you output must appear in the findings text you are given. Do not add entries from your own knowledge, do not correct or "improve" spellings, and do not guess at a ZIP code or a development name that is not written in the findings. If the findings contain fewer items than requested, return fewer items — a short accurate list is correct, an invented one is not. An empty subdivisions array for an area is a valid and useful answer.
@@ -215,23 +132,10 @@ Drop anything the findings themselves flag as uncertain, disputed, or out of the
 
 Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.`
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Prompt builders
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Prompt builders ──
 
 
-/**
- * Renders the operator's market facts, or '' when there are none.
- *
- * This is a set of facts
- * the model is REQUIRED to use. That distinction is the whole value of the
- * block: anyone can generate a description of Katy, and only this branch can
- * say that Maria's crew has cleaned 340 homes there since March 2024.
- *
- * Nothing here is invented, so nothing here needs hedging — the instruction
- * is to use the numbers as given, not to round them up, and not to invent a
- * companion fact to sit beside a real one.
- */
+// the operator's market facts, or '' — facts the model must use, as given
 function opsBlock(facts: Facts): string {
   const o = facts.ops
   if (!o) return ''
@@ -253,19 +157,12 @@ function numberedExample(paragraphs: string[]): string {
   return paragraphs.map((p, i) => `${i + 1}. ${p}`).join('\n\n')
 }
 
-// STOPGAP until keywords.ts (feature 6) lands: buildFrontPrompt and
-// buildDeepPrompt both read research.keywords, so removing this before
-// DataForSEO supplies them would empty both prompts' steering. Delete this
-// part, and this comment, in Phase 5.
+// STOPGAP until keywords.ts: the front/deep prompts read research.keywords
 function keywordsPart(city: string): string {
   return `(d) KEYWORDS — the search phrases people in this area actually type when they are looking to hire a cleaner, in the family of "cleaning services ${city}": house cleaning, maid service, deep cleaning, move-out cleaning, and any local phrasing that shows up in search results or competitor titles.`
 }
 
-/**
- * The web-search brief. This is the only prompt that reaches the internet,
- * and every downstream stage is limited by how good its answer is, so it asks
- * for the five kinds of fact separately and refuses recall as a source.
- */
+// the web-search brief: the only prompt that reaches the internet
 export function buildResearchPrompt(facts: Facts): string {
   return `Research the local market for a residential cleaning company that serves ${facts.city}, ${facts.stateName}. Search the web for each part below and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
 ${opsBlock(facts)}
@@ -292,17 +189,7 @@ ${keywordsPart(facts.city)}
 Do NOT research or report phone numbers, street addresses, business names, prices, or contact details of any kind — those are supplied separately and anything you found would be wrong.`
 }
 
-/**
- * Second research call: findings text in, ResearchSchema out.
- *
- * `keywords` branches on the third argument. An empty list means Phase 5
- * (DataForSEO) has not landed yet, so we still ask the model to derive
- * keywords from the findings, matching buildResearchPrompt's part (e). Once
- * real search-volume keywords are supplied, telling the model to derive its
- * own from the findings would be circular — it would just be asked to
- * faithfully reproduce a list it had itself invented — so a non-empty list
- * instead gets a "use this exact list" instruction.
- */
+// findings -> ResearchSchema. No supplied keywords: the model derives them. A list: it uses that list.
 export function buildResearchStructuringPrompt(
   findings: string,
   facts: Facts,
@@ -337,9 +224,7 @@ ${findings}`
 /** Front page: hero paragraphs, service intro, five cards. */
 export function buildFrontPrompt(facts: Facts, research: ResearchOutput): string {
   const suburbList = research.suburbs.map((s) => s.name).join(', ')
-  // Omit the section entirely when empty rather than emitting a header with
-  // nothing under it — a bare heading reads to the model as missing data it
-  // should fill in, which is how invention starts.
+  // omit an empty section: a bare header invites invention
   const keywordSection =
     research.keywords.length === 0
       ? ''
@@ -387,38 +272,20 @@ ${numberedExample(MPLS_SERVICE_INTRO)}
 const EXEMPLAR_LOCAL =
   'Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds.'
 
-/**
- * One area page: three paragraphs (intro, homes, local). `suburb.conditions`
- * is placed BEFORE `research.conditions` — area-specific material leads,
- * metro-wide material follows — and both are filtered to `copySafe` before
- * they ever reach the string that becomes this prompt. A `copySafe: false`
- * condition (flood risk, crime, income — collected only to judge whether a
- * market is workable) must never be printable, and filtering here, before any
- * template interpolation, is what makes that true rather than merely intended.
- */
+// One area page: intro, homes, local. Area conditions first, then metro; both filtered to copySafe.
 export function buildSuburbPrompt(
   facts: Facts,
   research: ResearchOutput,
   suburb: Suburb
 ): string {
-  // Defensive, not just documentary: the homes paragraph below requires at
-  // least three named subdivisions, and there is no way to satisfy that
-  // instruction honestly with none. The uniqueness gate (scoreSuburbs) is
-  // supposed to have already skipped an area like this; this throw is what
-  // makes the contradiction unbuildable even if some future path bypasses it.
+  // the homes paragraph needs at least three subdivisions; the gate should have skipped this
   if (!isWritableArea(suburb)) {
     throw new Error(
       `cannot write the area page for "${suburb.name}": no subdivisions were researched for it, and the homes paragraph must name real ones rather than invent one. The uniqueness gate should have dropped this area before it reached generation.`
     )
   }
 
-  /*
-   * Ask for what exists, never for more. scoreSuburbs rejects an area with
-   * ZERO subdivisions outright, but one and two both clear the gate — and
-   * "use at least three of these" over a list of two is an impossible
-   * instruction, which is an invitation to invent the third. Same number the
-   * quality validator then checks for (content/quality.ts).
-   */
+  // ask for what exists: 'at least three' over two invites inventing the third
   const nameCount = numberWord(Math.min(SUBDIVISIONS_REQUIRED, suburb.subdivisions.length))
 
   const safe = suburb.conditions.filter((c) => c.copySafe)
@@ -432,10 +299,7 @@ export function buildSuburbPrompt(
     .map((s) => s.name)
     .join(', ')
 
-  // A header followed by nothing reads as missing data the model should
-  // fill in — which is exactly the invitation to invent that this whole
-  // change exists to close off. So an empty section is omitted entirely
-  // rather than emitted blank; the surviving lines are unchanged verbatim.
+  // omit an empty section: a bare header invites invention
   const housingSection =
     suburb.housingCharacter.trim() === ''
       ? ''
@@ -471,32 +335,8 @@ function numberWord(n: number): string {
   return ['zero', 'one', 'two', 'three'][n] ?? String(n)
 }
 
-/**
- * The local section of one service page.
- *
- * Six of the seven service pages are static files rendered identically in
- * every city — Airbnb cleaning in Houston is hurricane-season turnovers
- * against nine thousand listings, in Minneapolis it is winter turnovers
- * against a few hundred, and today the two pages cannot say so. This writes
- * the one paragraph that can.
- *
- * DELIBERATELY NOT the whole page. What a deep clean IS should read the same
- * everywhere; that is the canonical text, and regenerating it per city would
- * make a hundred sites compete with each other for the same phrases.
- *
- * THE CAP IS LOAD-BEARING. Every service receives the identical metro
- * condition list — only the service name differs — so without an instruction
- * to select, the safe move is to cover all of them, and six pages converge on
- * the same facts in the same order. Measured on the first real Houston run:
- * four of six used all four conditions, one pair shared a 61-character run,
- * and the two best sections were the two that used the fewest. Shingle
- * similarity did NOT catch it (0.054 against a 0.75 threshold) because the
- * wording varied and only the substance repeated.
- *
- * Throws for a slug the shared template does not render —
- * move-in-move-out-cleaning is the registry's one `bespoke` entry and owns no
- * slot, so copy written for it would never reach a page.
- */
+// The local section of one service page — the one per-city paragraph. Capped at two metro conditions:
+// without the cap all six pages covered the same four. Throws for the bespoke move-out slug.
 export function buildServiceLocalPrompt(
   facts: Facts,
   research: ResearchOutput,
@@ -514,10 +354,7 @@ export function buildServiceLocalPrompt(
     .map((c) => `- ${c.condition} — ${c.implication}`)
     .join('\n')
 
-  // Omitted entirely when empty, never emitted blank: a header with nothing
-  // under it reads as missing data the model should supply, which is what
-  // made the first real Houston run invent the same three facts for every
-  // area page. Same rule as buildSuburbPrompt.
+  // omit an empty section: a bare header invites invention
   const conditionsSection =
     conditionLines === ''
       ? ''
@@ -536,17 +373,9 @@ Working through every condition on the list is what makes six service pages read
 If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.`
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Stage execution
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Stage execution ──
 
-/** ModelClient keys, one per call. Also the StubModelClient fixture keys.
- *
- * `suburb` is keyed per area rather than a single string: StubModelClient
- * fixtures (and the tests that read them) can then give each area its own
- * canned copy, so a bug that returned identical text for every area would be
- * caught instead of hidden behind one shared fixture key.
- */
+// ModelClient keys, one per call; `suburb` is keyed per area so fixtures can differ per area
 export const MODEL_KEYS = {
   research: 'research',
   researchStructure: 'research.structure',
@@ -555,12 +384,7 @@ export const MODEL_KEYS = {
   service: (slug: string) => `service.${slug}`,
 } as const
 
-/**
- * Slugs are the one model-authored field that becomes a URL, so they are
- * normalized in code rather than trusted to the prompt: lowercase, anything
- * that is not a-z/0-9 becomes a hyphen, runs of hyphens collapse, edges
- * trimmed.
- */
+// slugs become URLs, so normalise in code: lowercase, non-alphanumerics to hyphens, trimmed
 export function normalizeSlug(raw: string): string {
   return raw
     .toLowerCase()
@@ -569,33 +393,8 @@ export function normalizeSlug(raw: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-/**
- * Route segments that already exist under `src/app/(sites)/[city]/` for
- * EVERY city — the static (front)/(inner) sibling pages plus, for this one
- * city, the two service slugs `[serviceSlug]/page.tsx` resolves by string
- * match (see its `serviceSlugs()`). A suburb slug equal to one of these would
- * not 404 or visibly collide: Next matches static segments before the
- * dynamic `[serviceSlug]` one, so the suburb page is silently SHADOWED (the
- * Areas We Serve link 200s to the static page instead) and
- * generateStaticParams would additionally emit a duplicate path for the two
- * computed slugs. Both the model path (normalizeResearchSlugs below) and the
- * operator path (admin-logic updateSuburbsLogic) must reject a colliding slug
- * before it ever reaches a suburb list.
- *
- * Enumerated from the folder names actually present under
- * src/app/(sites)/[city]/(front)/ and .../(inner)/ — every static leaf
- * except the [slug] catch-all itself:
- *   (front)/book-now
- *   (inner)/blog, book, cleaning-services, contact, faq, home, services
- *           (the parent segment of services/[serviceSlug], which has no
- *            page.tsx of its own, so /services itself 404s)
- *
- * plus every root-level blog-post URL (blogPostSlugs). Posts are no longer one
- * literal route segment: they share the [slug] segment with suburbs, and that
- * segment matches suburbs FIRST, so a suburb slug equal to a post slug would
- * shadow the post rather than the other way round. Either way the URL is
- * double-claimed, so it is reserved here.
- */
+// Route segments that exist for every city; a suburb slug equal to one would be silently shadowed.
+// Static leaves under (front)/ and (inner)/, plus every root-level blog post slug.
 export function reservedSlugs(cityName: string): Set<string> {
   const slug = citySlug(cityName)
   return new Set([
@@ -613,14 +412,7 @@ export function reservedSlugs(cityName: string): Set<string> {
   ])
 }
 
-/**
- * Every root-level slug the site serves, or links to, as a blog post. Derived
- * rather than listed so it cannot drift: the posts we render (src/data/posts),
- * the listing cards (src/data/blog), and the front page's recent-post cards
- * (src/data/recent-posts). The last two matter because two of the cards point
- * at posts that are NOT on the shared post template and so have no module in
- * src/data/posts — their URLs are still spoken for.
- */
+// every root-level post slug: posts, listing cards and recent-post cards
 function blogPostSlugs(): string[] {
   const hrefSlug = (href: string) => href.replace(/^\//, '')
   return [
@@ -630,16 +422,7 @@ function blogPostSlugs(): string[] {
   ]
 }
 
-/**
- * Normalizes every suburb slug and drops entries whose slug collides with an
- * earlier one (first wins), normalizes to nothing, or is RESERVED — equal to
- * a static sibling route or to this city's own two computed service slugs
- * (see reservedSlugs). Two area pages cannot share a URL, a suburb with no
- * reachable page is worse than an absent one, and a suburb slug shadowed by a
- * static route is worse still (it silently serves the wrong page) — so all
- * three are resolved here, deterministically, instead of surfacing as a
- * shadowed route or a duplicate static path at build time.
- */
+// normalise every slug; drop collisions (first wins), empties and reserved slugs
 export function normalizeResearchSlugs(research: ResearchOutput, cityName: string): ResearchOutput {
   const reserved = reservedSlugs(cityName)
   const seen = new Set<string>()
@@ -648,32 +431,13 @@ export function normalizeResearchSlugs(research: ResearchOutput, cityName: strin
     const slug = normalizeSlug(suburb.slug)
     if (slug === '' || seen.has(slug) || reserved.has(slug)) continue
     seen.add(slug)
-    // Spread the original suburb, not a hand-picked field list: subdivisions,
-    // housingCharacter and conditions are the entire reason this pipeline
-    // exists, and a literal-rebuild here would silently drop them the moment
-    // research completes — the same bug class Task 7 fixed in
-    // updateSuburbsLogic. Only slug is meant to change; everything else must
-    // survive untouched.
+    // spread the suburb: only slug changes, the research fields must survive
     suburbs.push({ ...suburb, slug })
   }
   return { ...research, suburbs }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
- * 6 · NEW — the uniqueness gate
- *
- * Research returns 8 to 12 areas and, until now, every one of them became a
- * page. Nothing asked whether there was enough to say about it.
- *
- * Minneapolis is the argument: Vadnais Heights ran 745 impressions and zero
- * clicks across sixteen months, Richfield 934 and zero. Those pages were never
- * going to earn anything, because there was nothing on them that was not on
- * the other twenty-two. An area with no distinct local material produces a
- * doorway page by construction, and no amount of prompt quality fixes it.
- *
- * Runs after normalizeResearchSlugs, in the same place and in the same
- * spirit: deterministic, in code, before anything downstream can consume it.
- * ═══════════════════════════════════════════════════════════════════════════ */
+// ── The uniqueness gate: an area with no distinct local material is a doorway page ──
 
 export type SuburbVerdict = 'build' | 'review' | 'skip'
 
@@ -684,23 +448,11 @@ export interface ScoredSuburb {
   reason: string
 }
 
-// A false 'skip' silently deletes a page that might have worked, so these
-// thresholds are set to require real, distinct material rather than to catch
-// every thin one: >= 8 (roughly named subdivisions plus housing character
-// plus a printable condition or two) builds outright; 4-7 is handed to the
-// operator instead of being dropped automatically, because the operator
-// knows things the research does not (search demand, a client relationship,
-// a listing they've seen); only < 4 — next to nothing researched — is cut
-// without a human ever seeing it.
+// >= 8 builds, 4-7 goes to the operator, < 4 is cut
 const BUILD_THRESHOLD = 8
 const REVIEW_THRESHOLD = 4
 
-/**
- * Distinct, publishable local material. Only copySafe conditions count: a
- * condition marked copySafe: false is flood risk, crime, or income data,
- * collected to decide whether to work a market at all, never to print — it
- * must not be able to earn an area a page it will never actually carry.
- */
+// distinct, publishable material; only copySafe conditions count
 export function scoreSuburb(suburb: Suburb): number {
   const safeConditions = suburb.conditions.filter((c: Condition) => c.copySafe).length
   const housing = suburb.housingCharacter.trim() === '' ? 0 : 2
@@ -711,14 +463,7 @@ export function scoreSuburbs(research: ResearchOutput): ScoredSuburb[] {
   return research.suburbs.map((suburb) => {
     const score = scoreSuburb(suburb)
 
-    // Zero subdivisions is a structural disqualifier, not just a low score:
-    // buildSuburbPrompt's homes paragraph must name at least three real ones,
-    // and there is no honest way to do that with none. An area here would
-    // otherwise still reach 'review' on housing character plus conditions
-    // alone (e.g. 0 + 2 + 4 = 6) and pass straight into a prompt that asks
-    // for developments it cannot supply — the exact setup that invites the
-    // model to invent one. So this overrides the threshold ladder outright,
-    // regardless of how high the rest of the score runs.
+    // zero subdivisions disqualifies outright: the homes paragraph needs three
     if (!isWritableArea(suburb)) {
       return {
         suburb,
@@ -740,13 +485,7 @@ export function scoreSuburbs(research: ResearchOutput): ScoredSuburb[] {
   })
 }
 
-/**
- * Drops 'skip' areas. 'review' areas are KEPT — surfaced to the operator with
- * their score and reason so they get removed deliberately rather than by
- * default. Returns the full scored list, skips included, because the caller
- * needs the dropped names and reasons to tell the operator what happened;
- * discarding them here would make that impossible upstream.
- */
+// drops 'skip'; keeps 'review' for the operator; returns the full scored list so the caller can report drops
 export function applyUniquenessGate(research: ResearchOutput): {
   research: ResearchOutput
   scored: ScoredSuburb[]
@@ -783,10 +522,7 @@ async function executeStage(
         // Sync callback — cannot await. Task 1's per-key chain serializes these writes.
         void appendProgress(key, { stage: 'research', kind: e.kind, label: e.label }).catch(() => {})
       })
-      // Persist the raw findings BEFORE structuring. If the structuring call
-      // fails or returns a thin object, this is the only evidence of what the
-      // research actually found — and it is what tells you whether to fix the
-      // search brief or the transcriber prompt.
+      // persist the raw findings before structuring: the only evidence of what research found
       draft.findings = findings
       await saveDraft(key, draft)
 
@@ -802,42 +538,18 @@ async function executeStage(
         prompt: buildResearchStructuringPrompt(findings, facts, []),
       })
       const normalized = normalizeResearchSlugs(structured, facts.city)
-      // The uniqueness gate runs here, right after slugs settle and before
-      // anything downstream (front/deep prompts, finalize, the suburb pages
-      // Task 14 adds) can see a 'skip' area. Minneapolis is the argument:
-      // Vadnais Heights and Richfield ran a combined 1,679 impressions and
-      // zero clicks over sixteen months because there was nothing on their
-      // pages that wasn't on twenty-two siblings. A dropped area must never
-      // look like research simply finding less than usual, so its name is
-      // put in the progress line below rather than swallowed silently.
+      // the gate runs here, before anything downstream can see a skipped area
       const { research: r, scored } = applyUniquenessGate(normalized)
       draft.research = r
       const skipped = scored.filter((s) => s.verdict === 'skip')
-      // Landmarks are gone (see schemas.ts ResearchSchema) — subdivisions are
-      // the fact this pipeline now leans on, so the progress label counts
-      // those instead.
+      // subdivisions, not landmarks, are the count that matters
       const subdivisionCount = r.suburbs.reduce((n, s) => n + s.subdivisions.length, 0)
       await appendProgress(key, {
         stage: 'research',
         kind: 'found',
         label: `${r.suburbs.length} areas · ${r.zips.length} ZIP codes · ${subdivisionCount} subdivisions · ${r.keywords.length} search phrases`,
       })
-      /*
-       * The line an operator reads to know whether the run was worth what it
-       * cost. Two rules learned the hard way:
-       *
-       * The arithmetic has to reconcile. This used to read "10 areas kept ·
-       * 2 thin · 2 dropped", and `r.suburbs.length` is the POST-gate count —
-       * so the two thin areas were already inside the ten, and the line
-       * looked like twelve areas. Reporting "10 of 12" states both numbers
-       * and cannot be misread.
-       *
-       * And "thin" is not here. A progress line reports what happened; the
-       * review screen's "Before you publish" panel reports what needs
-       * deciding, and it already names the thin areas. Three words an
-       * operator has to learn ("kept", "thin", "dropped") to read one status
-       * line is three too many.
-       */
+      // the line an operator reads: 'X of Y' so the arithmetic reconciles
       await appendProgress(key, {
         stage: 'research',
         kind: 'found',
@@ -878,20 +590,10 @@ async function executeStage(
       break
     }
     case 'suburb': {
-      // The only stage that makes more than one model call, so it is the
-      // only one that has to be resumable INSIDE itself: a serverless
-      // timeout or a transient API error on area nine must not discard
-      // areas one through eight, and redoing eleven good areas to recover
-      // the twelfth is both slow and expensive.
+      // the only multi-call stage, so it resumes inside itself
       const research = requireResearch(draft, key, stage)
 
-      /*
-       * `only` runs a SINGLE area. The admin drives the loop from the client
-       * one area at a time, because twelve model calls inside one request is
-       * three to six minutes and a serverless function is killed long before
-       * that. Passing no slug still runs every area, which is what the tests
-       * and any script want.
-       */
+      // `only` runs a single area; the admin drives the loop one area per request
       const targets = only === undefined ? research.suburbs : research.suburbs.filter((s) => s.slug === only)
       if (only !== undefined && targets.length === 0) {
         throw new Error(`cannot write area "${only}" for "${key}": no such area in this city's research`)
@@ -913,24 +615,12 @@ async function executeStage(
       for (const suburb of targets) {
         const [introSlot, homesSlot, localSlot] = suburbSlots(suburb.slug)
 
-        // Already written on an earlier attempt — skip, do not pay for it
-        // twice. A blank string counts as NOT written: it is `!== undefined`
-        // but it is also not usable copy, and treating it as done would
-        // leave a permanently blank paragraph on a published page with no
-        // way to ever regenerate it.
+        // already written: skip. A blank string is NOT written.
         if (isWrittenSlot(draft.sections[introSlot]) && isWrittenSlot(draft.sections[homesSlot]) && isWrittenSlot(draft.sections[localSlot])) {
           continue
         }
 
-        // buildSuburbPrompt throws on subdivisions.length === 0 — correctly,
-        // since the homes paragraph it builds requires at least three real
-        // subdivision names and there is nothing honest to put there. The
-        // uniqueness gate is supposed to have already dropped an area like
-        // this, but if one still reaches here, failing this ONE area must
-        // not stop the other N-1: catching the whole call (or a broader
-        // try/catch around it) would also swallow real API errors, timeouts
-        // and schema-parse failures that resumability depends on surfacing,
-        // so this checks the exact precondition instead of catching a throw.
+        // check the precondition instead of catching: a try/catch would swallow real API errors
         if (!isWritableArea(suburb)) {
           await appendProgress(key, {
             stage: 'suburb',
@@ -971,18 +661,7 @@ async function executeStage(
       break
     }
     case 'service': {
-      /*
-       * Six of the seven service pages are byte-identical in every city. This
-       * writes the one paragraph on each that is not — what the homes, the
-       * climate or the habits here change about doing that particular job.
-       *
-       * Like the suburb stage this makes more than one model call, so it is
-       * resumable inside itself and drivable one service at a time: six calls
-       * in a single request is minutes and a serverless function is killed
-       * long before that. Unlike the suburb stage the target list is fixed —
-       * the services are the same in every city — so there is no gate and no
-       * skipping, only "already written".
-       */
+      // the one per-city paragraph on each template service page; resumable, drivable one service at a time
       const research = requireResearch(draft, key, stage)
 
       const targets =
@@ -1009,10 +688,7 @@ async function executeStage(
       for (const slug of targets) {
         const [localSlot] = serviceSlots(slug)
 
-        // Already written on an earlier attempt — skip, do not pay twice. A
-        // blank string counts as NOT written: it is `!== undefined` but it is
-        // not usable copy, and treating it as done would leave a permanently
-        // empty paragraph with no way to regenerate it.
+        // already written: skip. A blank string is NOT written.
         if (isWrittenSlot(draft.sections[localSlot])) continue
 
         const out = await client.generate({
@@ -1049,33 +725,19 @@ async function executeStage(
     }
   }
 
-  /*
-   * A stage is done when every slot it owns holds real copy — not merely
-   * because executeStage returned. The suburb stage can be run one area at a
-   * time, so returning after area three must NOT mark it complete: finalize
-   * would then demand slots nothing is going to write.
-   */
+  // done when every owned slot holds real copy, not when executeStage returned
   if (!draft.done.includes(stage) && stageComplete(draft, stage)) draft.done.push(stage)
   await saveDraft(key, draft)
 }
 
-/**
- * Every slot this stage owns holds real copy.
- *
- * For `suburb`, slots belonging to un-writable areas are excluded — nothing
- * is ever going to fill them, so requiring them would deadlock the stage.
- */
+// every owned slot holds real copy; un-writable areas excluded
 function stageComplete(draft: DraftDoc, stage: StageId): boolean {
   // stageSlots already excludes un-writable areas, so this and finalize's
   // requiredSlotsFor now demand exactly the same set — the whole point.
   return stageSlots(draft.research)[stage].every((slot) => isWrittenSlot(draft.sections[slot]))
 }
 
-/**
- * Run one stage, unless it is already done. Resumability is the whole point:
- * the admin progress screen calls this once per stage, and a reload, a
- * serverless timeout or a retry after an error re-enters here safely.
- */
+// run one stage unless already done
 export async function runStage(
   client: ModelClient,
   key: string,
@@ -1093,30 +755,14 @@ export async function runStage(
   }
 }
 
-/**
- * Strips a stage's outputs (and its `done` entry) from a draft in memory.
- * Slot ownership is computed against the draft's OWN research (before any
- * clearing below touches it) — clearing 'suburb' must delete the slots for
- * the areas this draft actually has, not an empty set.
- */
+// strip a stage's outputs and `done` entry; ownership computed against the draft's own research
 function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
   draft.done = draft.done.filter((s) => s !== stage)
   for (const slot of stageSlots(draft.research)[stage]) delete draft.sections[slot]
   if (stage === 'research') delete draft.research
 }
 
-/**
- * Force a stage to run again: drop its outputs, drop its `done` entry, re-run.
- *
- * Regenerating `research` also clears front, deep AND suburb. All three
- * CONSUMED the research they were written against — front and deep are built
- * on its keywords and local detail, and the area pages quote its subdivisions
- * and conditions directly — so leaving any of them in place would publish
- * copy that cites a suburb list, ZIP list or local-condition set the site no
- * longer has. Cheaper to rewrite them than to ship that mismatch. This must
- * run BEFORE clearStageOutputs('research') deletes draft.research, since
- * stageSlots needs it to know which suburb slots to strip.
- */
+// re-run a stage. Regenerating research also clears front and suburb: both consumed it.
 export async function regenerateStage(
   client: ModelClient,
   key: string,

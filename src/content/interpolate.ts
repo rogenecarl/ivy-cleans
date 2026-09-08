@@ -12,29 +12,13 @@ export function citySlug(city: string): string {
     .replace(/^-|-$/g, '')
 }
 
-/**
- * The registry key a city document is stored under (content/<key>.json).
- * CityContent carries no explicit key field, so it is derived from the display
- * name — verified to match the filename for every shipped city
- * ("Minneapolis" -> minneapolis, "Testville" -> testville). A city whose name
- * does not slugify to its filename would break its preview links, so the
- * publish flow (Plan 3) must keep the two in step.
- */
+// registry key (content/<key>.json), derived from the display name
 export function cityKeyOf(c: Pick<CityContent, 'city'>): string {
   return citySlug(c.city)
 }
 
-/**
- * Rewrites an internal path for the city it is rendered for.
- *
- * A LIVE city is served from its own host, so its links stay public and this
- * is the identity function — that is what keeps Minneapolis byte-identical.
- * A DRAFT city has no host yet; it is previewed at its internal
- * `/<cityKey>/…` paths, so every internal link has to carry that prefix or
- * the preview escapes to the default tenant on the first click.
- *
- * External URLs, `tel:`/`mailto:` and asset paths must NOT go through here.
- */
+// internal path for this city: identity for a live city, /<key>-prefixed for a draft preview.
+// Not for external URLs, tel:/mailto: or assets.
 export function cityHref(c: Pick<CityContent, 'city' | 'status'>, path: string): string {
   if (c.status === 'live') return path
   const key = cityKeyOf(c)
@@ -42,11 +26,7 @@ export function cityHref(c: Pick<CityContent, 'city' | 'status'>, path: string):
   return path === '/' ? `/${key}` : `/${key}${path}`
 }
 
-/**
- * Fills {tokens} in template copy. Static copy with a city mention is stored
- * ONCE in src/data with tokens; this is the only mechanism that writes a
- * city name into it — a model never edits static copy.
- */
+// fills {tokens} in template copy; the only thing that writes a city name into static copy
 export function t(template: string, c: TokenSource): string {
   const tokens: Record<string, string> = {
     city: c.city,
@@ -70,15 +50,7 @@ export function t(template: string, c: TokenSource): string {
   return result
 }
 
-/**
- * A real street address, or undefined when it is the placeholder.
- *
- * finalizeDraft writes "<City> — address pending" for a city created with
- * the address field blank (src/content/drafts.ts). That is honest on a draft
- * document and must never reach a reader: /orlando/contact shipped showing
- * it. Matched on the exact suffix finalizeDraft writes, so a real street
- * called Pending Lane is unaffected.
- */
+// a real street address, or undefined for the finalizeDraft placeholder (exact suffix match)
 export function realAddress(address: string | undefined): string | undefined {
   if (address === undefined) return undefined
   return / — address pending$/.test(address) ? undefined : address

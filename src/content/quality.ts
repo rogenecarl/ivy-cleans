@@ -1,57 +1,11 @@
 // src/content/quality.ts
-/*
- * Did the copy do the job the prompt gave it?
- *
- * similarity.ts asks the neighbouring question — "is this the same as some
- * other city's copy" — and catches duplication. These checks catch the
- * failures that are invisible to it: an area page that never named the
- * developments it was handed, a page that was given a real operator fact and
- * ignored it, a phrase the voice guide forbids.
- *
- * WHY IT MATTERS MORE AT 100 THAN AT 1: nobody is going to read 1,200 area
- * pages. These are how you know the strategy is being executed rather than
- * merely specified.
- *
- * WHY IT TAKES ONLY THE DOCUMENT: it runs at publish, where the draft sidecar
- * is already gone (publishCity deletes it). Everything needed is on
- * CityContent — `research.suburbs` for the entities, `ops` for the operator
- * facts, `sections` for the copy.
- *
- * WHAT THIS DELIBERATELY DOES NOT CHECK, and why:
- *
- *   Reading level. content-strategy.md lists Flesch 60-80 as an optional
- *   fourth check. A syllable counter accurate enough to be worth acting on is
- *   more than twenty lines, and an inaccurate one produces warnings an
- *   operator learns to ignore — which costs more than the check is worth.
- *
- *   "at most once per page" for `peace of mind` and `exceptional`. A page is
- *   several slots and this module sees slots, so "per page" has no honest
- *   definition here. Counting per slot would miss the real case; counting per
- *   document would flag a city for using a common phrase twice in twenty
- *   sections.
- *
- *   Convergence. Six service pages can each pass every check here while all
- *   saying the same four things in a different order — that happened, was
- *   measured, and was fixed in the prompt. Catching it needs a rubric call to
- *   a second model, which is content-strategy item E, not this file.
- */
+// Did the copy do what the prompt asked? Entities named, operator facts used, banned phrases absent.
+// similarity.ts covers duplication. Takes only the document: it runs at publish, after the sidecar is gone.
+// Not checked here: reading level, once-per-page phrases, cross-page convergence (needs a rubric call).
 import type { CityContent, MarketOps, Suburb } from './types'
 
-/**
- * The phrasings that mark copy as machine-written.
- *
- * DEFINED HERE, not in src/pipeline/stages.ts where the prompt that forbids
- * them lives, and that is a cycle constraint rather than a preference:
- * stages.ts imports loadDraft/saveDraft from src/content/drafts.ts, and
- * drafts.ts imports this module to run the checks at publish. content ->
- * pipeline would close that loop. stages.ts imports the list from here
- * instead, so there is still exactly one definition — a second copy would
- * eventually forbid something nothing verifies, or fail copy the model was
- * never told to avoid.
- *
- * `peace of mind` and `exceptional` are NOT here. SYSTEM_BASE allows each
- * once per page, which is a rule this module cannot express (see the header).
- */
+// Defined here, not in stages.ts, to avoid a content -> pipeline cycle; stages.ts imports it.
+// `peace of mind` / `exceptional` are allowed once per page, which this module can't express.
 export const BANNED_PHRASES: readonly string[] = [
   'nestled in the heart of',
   "whether you're a busy professional",
@@ -71,15 +25,7 @@ export const BANNED_PHRASES: readonly string[] = [
   'unmatched',
 ]
 
-/**
- * How many of an area's own subdivisions its page has to name.
- *
- * Three is what buildSuburbPrompt asks for, and it is the strongest signal a
- * page carries that it is about ONE place. An area researched with fewer than
- * three cannot honestly supply three, so the requirement is capped at what
- * exists — the uniqueness gate only rejects an area with ZERO outright, so
- * one- and two-subdivision areas do reach generation.
- */
+// subdivisions a page must name: three, capped at what the area has
 export const SUBDIVISIONS_REQUIRED = 3
 
 export type QualityRule = 'entity-coverage' | 'ops-unused' | 'banned-phrase' | 'area-code'
@@ -90,14 +36,7 @@ export interface QualityFinding {
   rule: QualityRule
   /** One line an operator can act on without opening the page. */
   detail: string
-  /**
-   * Blocking findings refuse the publish; the rest are shown and let through.
-   *
-   * The split is "did this page fail to use something real it was given"
-   * (blocking) versus "did it phrase something badly" (warn). The first is a
-   * page that cannot be fixed by a reader's goodwill; the second is a
-   * regeneration an operator can choose to spend.
-   */
+  // blocking = failed to use something real it was given; warn = phrased badly
   blocking: boolean
 }
 
@@ -140,20 +79,7 @@ function entityCoverage(suburbs: readonly Suburb[], sections: CityContent['secti
   return out
 }
 
-/**
- * A supplied operator fact that never reached the copy.
- *
- * ONLY crewLead and homesCleaned are enforced, and the omissions are
- * deliberate — a validator that cries wolf is one an operator learns to click
- * past. `servingSince` arrives as "2024-03" and the prompt asks for it
- * plainly, so a correct page writes "March 2024" and a literal check would
- * fail it. `crewSize` can honestly be spelled as a word. Reviews are quoted
- * "at most two", so quoting none is inside the instruction.
- *
- * Read across the WHOLE document, not the front page alone as
- * content-strategy.md's sketch does: a crew lead named on an area page or a
- * service page has been used, and reporting it unused would be a false alarm.
- */
+// only crewLead and homesCleaned are enforced — the others have honest variant spellings. Read across the whole document.
 function opsUsed(ops: MarketOps | undefined, sections: CityContent['sections']): QualityFinding[] {
   if (!ops) return []
   const text = allText(sections).toLowerCase()
@@ -169,9 +95,7 @@ function opsUsed(ops: MarketOps | undefined, sections: CityContent['sections']):
   }
 
   if (ops.homesCleaned !== undefined) {
-    // opsBlock hands the model toLocaleString(), so the page is ASKED to
-    // print "1,200". Accept either form rather than failing a page that did
-    // exactly as it was told.
+    // accept 1,200 or 1200
     const forms = [String(ops.homesCleaned), ops.homesCleaned.toLocaleString('en-US')]
     if (!forms.some((form) => text.includes(form.toLowerCase()))) {
       out.push({
@@ -186,21 +110,8 @@ function opsUsed(ops: MarketOps | undefined, sections: CityContent['sections']):
   return out
 }
 
-/**
- * North American area codes by state, for the one check that matters: does
- * this city's phone number plausibly belong to this city?
- *
- * Orlando shipped publicly with 346-644-6564 — a Houston code — on every
- * page, because the number is typed by hand on the create form and nothing
- * ever looked at it. The phone is the entire conversion path of a lead-gen
- * site.
- *
- * DELIBERATELY NOT EXHAUSTIVE and deliberately not authoritative. It catches
- * the obvious mismatch — a Texas number on a Florida city — and says nothing
- * at all about a state it does not carry, because a check that fires on
- * correct data is one an operator learns to ignore. Overlays and splits mean
- * this will drift; a missing code produces a warning, never a refusal.
- */
+// area codes by state, for the one check that matters: does the phone plausibly belong here?
+// Not exhaustive; an unlisted state produces no finding. Warns, never refuses.
 const AREA_CODES: Record<string, readonly string[]> = {
   AL: ['205', '251', '256', '334', '659', '938'],
   AZ: ['480', '520', '602', '623', '928'],
@@ -262,15 +173,7 @@ function bannedPhrases(sections: CityContent['sections']): QualityFinding[] {
   return out
 }
 
-/**
- * Every quality finding for a finished city document, blocking ones first.
- *
- * Ordered so the first line an operator reads is the one that will stop the
- * publish, rather than a phrasing warning that happens to sort earlier.
- * Returns [] for a document that did everything right — the review screen
- * renders nothing at all in that case, because a panel that always says
- * READY is one nobody reads.
- */
+// every finding, blocking first; [] when clean
 export function checkQuality(doc: CityContent): QualityFinding[] {
   const findings = [
     ...entityCoverage(doc.research.suburbs, doc.sections),

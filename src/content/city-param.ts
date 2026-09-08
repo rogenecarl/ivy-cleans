@@ -1,12 +1,4 @@
-/*
- * The one place a route segment turns its [city] param into a CityContent.
- *
- * Kept out of store.ts on purpose: store.ts is imported by plain-node vitest
- * suites, and `next/navigation`'s notFound() only works inside a Next render.
- * Every page/layout/generateMetadata under app/(sites)/[city] calls this
- * instead of getDefaultCity(), so an unknown or unreadable city key 404s that
- * request only (the store rejects; we translate that into notFound()).
- */
+// [city] param -> CityContent, or notFound(). Kept out of store.ts: notFound() only works inside a Next render.
 import { notFound } from "next/navigation";
 import { getCity } from "./store";
 import type { CityContent } from "./types";

@@ -1,42 +1,9 @@
 // src/pipeline/provision.ts
-/*
- * Domain purchase + hosting, autonomous. Called from publishCity().
- *
- * Three providers behind three seams, each with a real client and a stub, the
- * same shape as ModelClient and KeywordClient. STUB_MODEL=1 runs the whole
- * flow with no network and no spend.
- *
- *   Registrar   Porkbun    owns the domain and the authoritative DNS
- *   Host        Vercel     one multi-tenant project; verifies via DNS
- *   Router      Global Config   host -> city map, read by the proxy at the edge
- *
- * The registrar is deliberately NOT the host. If Vercel suspends the project,
- * every domain and its DNS is still yours at Porkbun, and recovery is two DNS
- * records per domain pointed at a new deployment. See domain-automation.md.
- *
- * Endpoint paths were verified against Porkbun API v3 and Vercel's REST docs.
- * NOT YET RUN AGAINST LIVE ACCOUNTS — buy ONE domain with this, watched,
- * before it runs unattended. tests/provision.test.ts proves the ORDER and the
- * IDEMPOTENCY against fakes; it cannot prove the two providers behave as
- * documented.
- *
- * TWO DEPARTURES from docs/ivy-cleans-handsoff/patches/provision.ts, both
- * deliberate:
- *
- *   1. This does NOT poll for DNS/TLS. The handoff's version loops for up to
- *      ten minutes, and publishCity is reached through a server action — a
- *      serverless function is killed long before that, the same failure that
- *      forced the suburb stage into one request per area. One config check,
- *      then return; `live: false` means "routed, not yet observed live", and
- *      the admin polls checkDomainLive() separately.
- *
- *   2. Provisioning is opt-in at the call site and defaults OFF. It spends
- *      real money on a button press.
- */
+// Domain purchase + hosting: Porkbun (registrar, DNS) -> Vercel (host) -> Global Config (host -> city map).
+// Three seams with stubs; STUB_MODEL=1 runs it with no spend. Not yet run against live accounts.
+// No DNS/TLS polling (serverless timeout): the admin polls checkDomainLive(). Opt-in at the call site.
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Types
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Types ──
 
 export interface Registrar {
   /** null if unavailable; price in USD if available. */
@@ -77,19 +44,11 @@ export interface ProvisionResult {
   live: boolean
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Candidates
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Candidates ──
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 
-/**
- * Preference order. First available wins.
- *
- * Deliberately mixed rather than one fixed pattern: a hundred domains all
- * built as ivycleans{city}.com is a visible shape. Rotating the ladder per
- * city costs nothing.
- */
+// preference order, first available wins; mixed so 100 domains don't share one shape
 export function defaultCandidates(city: string, state: string): string[] {
   const c = slug(city)
   const st = state.toLowerCase()
@@ -104,9 +63,7 @@ export function defaultCandidates(city: string, state: string): string[] {
   return ladders[h % ladders.length]
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * The orchestrator
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── The orchestrator ──
 
 export async function provisionDomain(
   input: ProvisionInput,
@@ -179,17 +136,10 @@ export async function provisionDomain(
     log(`CNAME www → ${cfg.cname}`)
   }
 
-  /*
-   * 6 · liveness is READ, never waited for. cfg was fetched before the DNS
-   *     records were written, so on a first run it is all but always false;
-   *     that is correct and not a failure. checkDomainLive() below is what
-   *     the admin polls afterwards.
-   */
+  // 6 · liveness is read, never waited for; false on a first run is expected
   const live = cfg.live
 
-  // 7 · route it. Upsert, so a re-run is harmless. Done even when the domain
-  //     is not live yet — the map must be correct the moment DNS propagates,
-  //     or the site comes up on the host and routes nowhere.
+  // 7 · route it (upsert), even before the domain is live
   await router.setHost(domain, input.cityKey)
   await router.addCityKey(input.cityKey)
   log(`routed ${domain} → ${input.cityKey}`)
@@ -197,21 +147,12 @@ export async function provisionDomain(
   return { domain, orderId, priceUsd: price, live }
 }
 
-/**
- * One liveness check. `misconfigured: false` means "DNS is configured AND we
- * can issue TLS" — the single answer that says the site really is serving.
- *
- * Separate from provisionDomain because waiting is minutes and a request is
- * seconds: the admin calls this on a timer, so the wait lives in the browser
- * where a long one costs nothing.
- */
+// one liveness check; misconfigured false = DNS configured and TLS issuable. The admin polls this.
 export async function checkDomainLive(host: Host, domain: string): Promise<boolean> {
   return (await host.config(domain)).live
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Porkbun
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Porkbun ──
 
 const PB = 'https://api.porkbun.com/api/json/v3'
 
@@ -279,9 +220,7 @@ export class PorkbunRegistrar implements Registrar {
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Vercel host
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Vercel host ──
 
 const VC = 'https://api.vercel.com'
 
@@ -344,9 +283,7 @@ export class VercelHost implements Host {
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Global Config router
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Global Config router ──
 
 export class GlobalConfigRouter implements Router {
   constructor(
@@ -388,9 +325,7 @@ export class GlobalConfigRouter implements Router {
     }
   }
 
-  // The map is one key holding an object, so a write is read-modify-write.
-  // Concurrent publishes are rare enough that this is fine; if it ever isn't,
-  // key each host separately (host:{domain} = cityKey) and drop the read.
+  // read-modify-write on one key; fine at this publish rate
   async setHost(domain: string, cityKey: string) {
     const cur = await this.read()
     cur.hosts[domain.toLowerCase()] = cityKey
@@ -404,9 +339,7 @@ export class GlobalConfigRouter implements Router {
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Stubs — STUB_MODEL=1 exercises the whole flow with no network and no spend
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Stubs (STUB_MODEL=1) ──
 
 export class StubRegistrar implements Registrar {
   owned = new Set<string>()
@@ -453,19 +386,9 @@ export class StubRouter implements Router {
   }
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Construction — mirror how ModelClient is built
- * ──────────────────────────────────────────────────────────────────────────── */
+// ── Construction ──
 
-/**
- * The router alone, or null when Global Config is not configured.
- *
- * Separate from buildProvisioners because publishing a domain the operator
- * already owns must not require a registrar account — buildProvisioners
- * throws without one, and every deployment is in that state until task 9's
- * accounts exist. Null here means "no store to update", which is not an
- * error: content/_domains.json is still written and is still the fallback.
- */
+// the router alone, or null when Global Config isn't configured (not an error: _domains.json is the fallback)
 export function buildRouter(): Router | null {
   if (process.env.STUB_MODEL === '1') return new StubRouter()
   return GlobalConfigRouter.fromEnv()

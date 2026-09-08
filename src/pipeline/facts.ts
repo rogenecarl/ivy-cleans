@@ -1,19 +1,6 @@
-/**
- * FACTS are derived in code, never by the model.
- *
- * Phone numbers, phone formats, and state names are the kind of thing a
- * language model will happily hallucinate a single wrong digit or a
- * plausible-but-wrong state name into — and a wrong digit here costs every
- * lead the generated city page would otherwise send. So none of this ever
- * goes through a prompt: it's derived deterministically from the operator's
- * form input, the same way every time.
- */
+// Facts are derived in code, never by the model: a wrong digit in a phone number costs every lead.
 
-/*
- * Full name back to code, built from STATE_NAMES so the two can never fall
- * out of step. Keyed on a normalised form (lowercased, whitespace collapsed)
- * so "florida", "FLORIDA" and " Florida " all land on the same entry.
- */
+// full name -> code, built from STATE_NAMES; keyed on a normalised form
 import type { MarketOps } from './schemas'
 
 const CODE_BY_NAME: Record<string, string> = {}
@@ -24,21 +11,7 @@ function normalizeStateInput(raw: string): string {
   return raw.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-/**
- * Accepts either form the operator might reasonably type -- "FL" or
- * "Florida" -- and returns the two-letter code, or null if it is neither.
- *
- * WHY BOTH INPUTS BUT ONE STORED VALUE. Everything downstream (the {ST} and
- * {stateName} tokens, content/<city>.json, the validator) deals only in the
- * code; widening what is ACCEPTED costs nothing there, while storing whatever
- * was typed would give two spellings of one state and let the two tokens
- * disagree between pages.
- *
- * Deliberately NOT fuzzy. "Fla.", "Flor" and misspellings are rejected rather
- * than guessed at: this value ends up in published copy on a customer-facing
- * site, and a wrong guess is far worse than an error message the operator can
- * act on immediately.
- */
+// 'FL' or 'Florida' -> 'FL', else null. Not fuzzy: this ends up in published copy.
 export function resolveStateCode(raw: string): string | null {
   const trimmed = raw.trim()
   if (trimmed === '') return null
@@ -125,16 +98,7 @@ export interface Facts {
   phoneDisplay: string
   phoneHref: string
   address?: string
-  /**
-   * Operator-entered facts about this market: who leads the crew, how long
-   * we have served it, how many homes we have cleaned, real reviews, and the
-   * ZIP codes we actually serve.
-   *
-   * Travels the same road as the phone number — a human typed it, so it is
-   * fact and the model never touches it. Prompts are REQUIRED to use every
-   * field that is present; the quality validator fails a page that received
-   * one and ignored it.
-   */
+  // operator-entered market facts; prompts must use every present field
   ops?: MarketOps
 }
 

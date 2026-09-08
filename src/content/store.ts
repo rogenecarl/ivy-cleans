@@ -1,12 +1,5 @@
 // src/content/store.ts
-/*
- * The city registry. Plan 2a: static, file-backed, single live city.
- * Plan 2b: async, per-process-cached, Blob-or-file-backed, with a
- * host -> cityKey index (_domains.json). The SEAM is now honest — this
- * module resolves ANY city key async; per-request resolution (reading the
- * key from the URL) arrives in Task 4 via [city] route params, not by
- * editing these call sites again.
- */
+// The city registry: async, per-process cached, Blob-or-file-backed, with a host -> key index
 import { readFile, readdir } from 'fs/promises'
 import path from 'path'
 import type { CityContent } from './types'
@@ -56,13 +49,7 @@ async function loadCityDoc(key: string): Promise<CityContent> {
   return assertKeyMatchesCity(key, validateCityContent(parsed))
 }
 
-/**
- * CityContent carries no explicit registry key, so `cityHref`/`cityKeyOf`
- * derive a draft city's preview prefix from `citySlug(doc.city)`. If that ever
- * disagreed with the key the document is stored under, every preview link
- * would point at a city that does not exist. Checked once, at load, with the
- * key still in hand — a mismatched document fails that city only.
- */
+// citySlug(doc.city) must match the stored key or every preview link breaks; checked at load
 export function assertKeyMatchesCity(key: string, doc: CityContent): CityContent {
   const slug = citySlug(doc.city)
   if (slug !== key) {
@@ -97,11 +84,7 @@ export async function getDefaultCity(): Promise<CityContent> {
   return getCity(defaultDomains.default)
 }
 
-/**
- * Pure function: host -> cityKey. Lowercases, strips a port, exact-matches
- * against `domains.hosts`, else falls back to `domains.default`. No fs —
- * safe to call from middleware.
- */
+// host -> cityKey, no fs
 export function resolveCityKey(host: string, domains: DomainsIndex = defaultDomains): string {
   const normalized = host.toLowerCase().split(':')[0]
   return domains.hosts[normalized] ?? domains.default
@@ -119,10 +102,7 @@ export async function listLiveCityKeys(): Promise<string[]> {
       .filter((name) => name.endsWith('.json') && !name.startsWith('_'))
       .map((name) => name.slice(0, -'.json'.length))
   } else {
-    // withFileTypes so a directory (e.g. content/_drafts/, holding the
-    // admin pipeline's in-progress sidecars) can never be mistaken for a
-    // city document — only regular files are eligible before the .json/`_`
-    // filters even run.
+    // withFileTypes: content/_drafts/ must never look like a city document
     const entries = await readdir(CONTENT_DIR, { withFileTypes: true })
     keys = entries
       .filter((entry) => entry.isFile() && entry.name.endsWith('.json') && !entry.name.startsWith('_'))

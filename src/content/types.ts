@@ -11,22 +11,11 @@ export type Suburb = {
   conditions: Condition[]
 }
 
-/**
- * A real customer review from this market. `firstName` and `area` are what
- * make the quote checkable rather than decorative, so both are required.
- */
+// a real customer review; firstName and area make it checkable
 export type MarketReview = { quote: string; firstName: string; area: string; date?: string }
 
-/**
- * Operator-entered facts about a market — mirrors MarketOpsSchema in
- * src/pipeline/schemas.ts, declared structurally here for the same reason
- * Suburb above is: this module is the content layer's own vocabulary and
- * stays free of zod and of the pipeline.
- */
-/**
- * A photo of this crew, or of a job in this market. `alt` is written by the
- * operator, never generated: it describes a picture only they have seen.
- */
+// mirrors MarketOpsSchema, declared structurally so this module stays free of zod
+// a photo of this crew or market; alt written by the operator
 export type MarketPhoto = { path: string; alt: string }
 
 export type MarketOps = {
@@ -57,10 +46,7 @@ export type CityContent = {
     conditions: Condition[]
     mapEmbedUrl: string | null
   }
-  /**
-   * AI- and research-written copy, keyed by slot id. Static copy never
-   * lives here — it stays in src/data with {tokens} for city mentions.
-   */
+  // generated copy by slot id; static copy stays in src/data with {tokens}
   sections: Record<string, string | string[]>
   /** Full state name for SEO copy, e.g. "Minnesota" (spec finding 5). */
   stateName: string
@@ -76,25 +62,8 @@ export type CityContent = {
   }
   /** Suburb pages exist only for Minneapolis; false renders Areas We Serve unlinked. */
   hasSuburbPages: boolean
-  /**
-   * Set when a domain has been bought, pointed and routed but NOT yet
-   * observed serving — DNS and TLS take minutes and publishCity does not wait
-   * for them (that wait is a serverless timeout; see publishCity).
-   *
-   * The site is live from the host's side either way; this only records that
-   * nobody has confirmed it answers. Cleared once a liveness check succeeds.
-   */
+  // domain routed but not yet observed serving; cleared once a liveness check succeeds
   provisioning?: { since: string; domain: string }
-  /**
-   * FACTS — typed by a human, never through a model. Carried here so they
-   * survive publish: publishCity deletes the draft sidecar that held them,
-   * and nothing can research or regenerate who leads a crew.
-   *
-   * Nothing renders this directly. The prompts consume it and the copy in
-   * `sections` carries the result; this is the record of what they were
-   * given, what the ops editor edits, and what a future regeneration reuses.
-   * `ops.zips` is the operator's own list — `research.zips` is what actually
-   * gets printed, and finalizeDraft prefers this one when it is non-empty.
-   */
+  // operator-entered facts, kept on the document so they survive publish. Nothing renders this directly.
   ops?: MarketOps
 }

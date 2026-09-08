@@ -1,17 +1,6 @@
 // src/pipeline/progress.ts
-/*
- * Per-draft progress log for the admin pipeline's live activity feed. Each
- * in-flight (or finished) draft key gets a sidecar at
- * content/_drafts/<key>.progress.json — a JSON array of ProgressEvent,
- * capped at PROGRESS_CAP entries — that stage runners append to as they
- * work (search queries, pages read, sections written, errors) so the admin
- * UI can poll/stream it back to the operator.
- *
- * Framework-free by design: node:fs/promises + node:path only, no next/*
- * import. Concurrent appends for the SAME key are serialized through a
- * module-level per-key promise chain so overlapping stream callbacks can't
- * race a read-modify-write cycle and silently drop events.
- */
+// Per-draft progress log at content/_drafts/<key>.progress.json, capped at PROGRESS_CAP. Framework-free.
+// Appends for one key are serialised through a per-key promise chain.
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
