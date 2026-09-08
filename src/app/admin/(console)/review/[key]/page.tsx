@@ -26,6 +26,13 @@ import { requireAdmin } from '@/lib/auth-server'
  * force-dynamic: every panel here reflects on-disk state the operator is
  * actively changing.
  */
+/**
+ * Per-stage regenerate, hidden for now. See the block that reads it below —
+ * the capability is built and tested, it is simply not on the screen while
+ * the normal flow is being learned.
+ */
+const SHOW_REGENERATE = false
+
 export const dynamic = 'force-dynamic'
 
 export default async function ReviewPage({ params }: { params: Promise<{ key: string }> }) {
@@ -212,22 +219,23 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
       </Panel>
 
       {/*
-        * Collapsed, not removed. It is the only way to fix one bad stage
-        * without deleting the city and re-paying for research — ~$0.50 to
-        * rewrite the area pages against ~$3 to rebuild everything, most of
-        * which was fine. But it is a repair tool, not part of the normal
-        * read-then-publish flow, so it does not need to sit open competing
-        * with the findings and the publish box.
+        * HIDDEN, not deleted — flip SHOW_REGENERATE to bring it back.
+        *
+        * It is the only way to fix one bad stage without deleting the city
+        * and re-paying for research: ~$0.50 to rewrite the area pages
+        * against ~$3 to rebuild everything, most of which was fine. That
+        * matters whenever a prompt changes, because every existing city's
+        * copy goes stale and this is the cheap way to refresh one stage of
+        * it.
+        *
+        * Off for now because it is a repair tool on a screen whose job is
+        * read-then-publish, and it had not been needed yet. Gated behind a
+        * named constant rather than commented out so the JSX still
+        * typechecks and cannot rot silently against a stage-list change.
         */}
-      <details className="mb-6 rounded-xl border border-border bg-card px-5 py-4">
-        <summary className="cursor-pointer list-none text-[1rem] font-semibold">
-          <span className="text-muted-foreground">▸</span> Regenerate copy
-          <span className="ml-2 text-[0.8rem] font-normal text-muted-foreground">
-            rewrite one stage without rebuilding the city
-          </span>
-        </summary>
-        <div className="mt-4">
-        {hasDraft ? (
+      {SHOW_REGENERATE && (
+        <Panel title="Regenerate copy">
+          {hasDraft ? (
           <RegeneratePanel
             cityKey={key}
             stages={STAGES.map((stage) => ({ id: stage.id, label: stage.label }))}
@@ -238,8 +246,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
             be regenerated from here.
           </p>
         )}
-      </div>
-      </details>
+        </Panel>
+      )}
 
       <Panel title={isLive ? 'Published' : 'Publish'}>
         {isLive ? (
