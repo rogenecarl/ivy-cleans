@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Pkg } from "@/data/packages";
 import type { SiteData } from "@/data/site";
 import { CtaCompact } from "./CtaBand";
@@ -51,7 +52,10 @@ export default function Packages({
                   <div className="min-w-0 md:basis-full">
                     {/* b8ee32c: title margin 0.5rem top / 10px bottom */}
                     <h3 className="mt-[9px] mb-[10px] text-[2rem] leading-[1.2em] font-bold md:mt-[0.5rem] lg:text-[2.4rem]">
-                      {p.title}
+                      {/* every card is one of the seven service pages (item 13) */}
+                      <Link href={p.href} className="hover:text-rust">
+                        {p.title}
+                      </Link>
                     </h3>
                     <p className="text-[1.4rem] leading-[1.5em] font-light lg:text-[1.8rem]">{p.text}</p>
                   </div>

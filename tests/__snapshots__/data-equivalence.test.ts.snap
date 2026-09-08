@@ -320,7 +320,7 @@ exports[`data module values are unchanged by the content-layer refactor > home 1
   ],
   "featuresOutro": "Ivy Cleans is committed to providing exceptional cleaning services in Minneapolis throughout homes, apartments and offices. Our services are personalized, eco-friendly, and affordable. Our highly-trained staff takes pride in their work and always goes the extra mile to ensure that your home is thoroughly cleaned and disinfected.",
   "homeMeta": {
-    "description": "Ivy Cleans is a great choice for all of your home cleaning needs. We offer a 100% satisfaction on all of our cleans. Check us out today!",
+    "description": "That is why we hold fast to the notion that our services are the top most in the Minneapolis area.",
     "title": "Cleaning Service in Minneapolis, MN | Ivy Cleans",
   },
   "houseCleaning": [
@@ -500,54 +500,46 @@ exports[`data module values are unchanged by the content-layer refactor > packag
 {
   "packages": [
     {
+      "href": "/services/standard-cleaning",
       "icon": "/images/icon1.png",
       "text": "Maintaining frequently used sections of your household ensures a worry-free living experience. Choose between scheduling one-time, bi-weekly, or monthly services!",
       "title": "Standard Cleaning",
     },
     {
+      "href": "/services/deep-cleaning",
       "icon": "/images/icon6.png",
       "text": "A comprehensive sanitation of your residence, encompassing inaccessible regions such as beneath furniture and appliances, as well as baseboards and window sills.",
       "title": "Deep Cleaning",
     },
     {
+      "href": "/services/move-in-move-out-cleaning",
       "icon": "/images/icon2.png",
       "text": "A comprehensive cleaning service that covers all areas of the home, from top to bottom, including activities such as dusting, vacuuming, and disinfecting surfaces in order to ready the residence for its new occupants.",
-      "title": "Move In/Move Out Cleaning",
+      "title": "Move In / Move Out Cleaning",
     },
     {
+      "href": "/services/apartment-cleaning",
       "icon": "/images/icon7.png",
       "text": "Efficient and comprehensive cleaning service designed specifically for condominiums, ensuring every room is meticulously cleaned, from living areas to bedrooms and kitchens.",
-      "title": "Condo Cleaning",
+      "title": "Apartment & Condo Cleaning",
     },
     {
+      "href": "/services/airbnb-cleaning",
       "icon": "/images/icon3.png",
       "text": "A specialized cleaning service designed specifically for the maintenance of temporary accommodations, which includes tasks such as handling laundry, restocking supplies, and guaranteeing excellent guest reviews.",
-      "title": "AirBnB Cleaning",
+      "title": "Airbnb & Short-Term Rental Cleaning",
     },
     {
-      "icon": "/images/icon8.png",
-      "text": "A specialized cleaning service tailored for extended rental properties, guaranteeing that the property is immaculate and in a hospitable state for future tenants.",
-      "title": "Rental Cleaning",
-    },
-    {
+      "href": "/services/post-construction-cleaning",
       "icon": "/images/icon4.png",
       "text": "A cleaning process that entails the elimination of dust, debris, and other construction materials following a renovation or construction endeavor.",
-      "title": "Renovation & Post Construction Cleaning",
+      "title": "Post-Construction & Renovation Cleaning",
     },
     {
-      "icon": "/images/icon9.png",
-      "text": "Upon your preference, we are able to employ organic cleaning substances in order to guarantee a chemical-free environment in your residence.",
-      "title": "Eco Friendly Green Cleaning",
-    },
-    {
-      "icon": "/images/icon5.png",
-      "text": "A cleaning service that entails the preservation of cleanliness and maintenance of office spaces and clinics.",
-      "title": "Commercial & Office Cleaning",
-    },
-    {
-      "icon": "/images/icon10.png",
-      "text": "Consistent and thorough cleaning of your entire residence, customized to fit your individual lifestyle and timetable.",
-      "title": "Maid Service",
+      "href": "/services/pre-listing-cleaning",
+      "icon": "/images/icon8.png",
+      "text": "A detailed cleaning that prepares a home for photos, showings, and open houses, so that it makes its best first impression on buyers from the very first walk-through.",
+      "title": "Real Estate & Pre-Listing Cleaning",
     },
   ],
   "packagesIntro": "Under this section, we provide different types of cleaning services in Minneapolis. Our services include residential cleaning, commercial cleaning, office cleaning, and more. Our team of professional cleaners is experienced in handling any type of cleaning job, no matter how big or small. We use high-quality cleaning products and equipment to ensure the best possible results for our clients. Our team is also flexible, and we work around our client’s schedules to provide cleaning services at a time that is convenient for them.",

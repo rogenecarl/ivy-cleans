@@ -94,3 +94,19 @@ export function serviceBySlug(slug: string): ServiceEntry | undefined {
 export function allServices(): ServiceEntry[] {
   return [...ENTRIES]
 }
+
+/**
+ * The <title> pattern for every service page — Abdi's review, item 12.
+ *
+ * "Deep Clean Orlando" said too little; "Deep Cleaning Services in Orlando,
+ * FL | Ivy Cleans" says the service, the place and the brand, which is what
+ * a title is for. Built from the registry name so the tab, the nav and the
+ * breadcrumb all call the service the same thing. generateMetadata applies
+ * it to all seven, over whatever the data builders still carry.
+ */
+export function serviceTitle(
+  entry: Pick<ServiceEntry, 'name'>,
+  c: Pick<CityContent, 'city' | 'state'>,
+): string {
+  return `${entry.name} Services in ${c.city}, ${c.state} | Ivy Cleans`
+}

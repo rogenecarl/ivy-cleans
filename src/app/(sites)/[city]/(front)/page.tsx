@@ -16,6 +16,7 @@ import { cityFromParams, type CityParams } from "@/content/city-param";
 import { t } from "@/content/interpolate";
 import { siteData } from "@/data/site";
 import { servicesData } from "@/data/services";
+import { metaDescription } from "@/data/meta";
 import { packagesData } from "@/data/packages";
 import { areasData } from "@/data/areas";
 
@@ -30,13 +31,16 @@ export async function generateMetadata({
 }: {
   params: CityParams;
 }): Promise<Metadata> {
-  const bits = cityBits(await cityFromParams(params));
+  const c = await cityFromParams(params);
+  const bits = cityBits(c);
   return {
     title: t("House Cleaning Service in {city} {stateName} - Ivy Cleans", bits),
-    description: t(
-      "As a local and insured business, Ivy Cleans is thrilled to be providing cleaning and janitorial services across various areas of {city}. Our experienced",
-      bits,
-    ),
+    /*
+     * From the page's own hero, not the template (Abdi's review, item 9).
+     * The literal this replaced was the OLD Minneapolis hero, cut mid-word
+     * at "Our experienced", shown under a hero that had been rewritten.
+     */
+    description: metaDescription(servicesData(c).heroParagraphs[0]),
   };
 }
 

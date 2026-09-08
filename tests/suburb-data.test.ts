@@ -13,6 +13,7 @@ import { getCity } from '../src/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 import { suburbData } from '../src/data/suburb'
 import { suburbSlots } from '../src/content/slots'
+import { BANNED_PHRASES } from '../src/content/quality'
 
 const minneapolis = await getCity('minneapolis')
 const miami = await loadCityFixture('miami')
@@ -38,7 +39,7 @@ describe('suburbData', () => {
       expect(data.suburbMeta.title).toBe('House Cleaning Service In Savage, MN')
     })
 
-    test('meta description', () => {
+    test('meta description falls back to the template line when there is no generated copy', () => {
       expect(data.suburbMeta.description).toBe(
         'Choose Ivy Cleans for superior house cleaning in Savage MN. Best-in-class home cleaning service awaits. Book your cleaning now!',
       )
@@ -57,13 +58,6 @@ describe('suburbData', () => {
       expect(data.houseCleaning.paragraph).toBe(dumpLine)
     })
 
-    test('benefits listIntro contains the metro city', () => {
-      expect(data.benefits.listIntro).toContain('in Minneapolis')
-      expect(data.benefits.listIntro).toBe(
-        'There are many benefits to deep cleaning your home in Minneapolis, including:',
-      )
-    })
-
     test('benefits static paragraphs match the dump verbatim', () => {
       expect(data.benefits.paragraphs[0]).toBe(dumpLineContaining('one of the vital aspects of health'))
       expect(data.benefits.paragraphs[1]).toBe(
@@ -71,14 +65,18 @@ describe('suburbData', () => {
       )
     })
 
-    test('benefits items match the dump verbatim, in order', () => {
-      expect(data.benefits.items).toEqual([
-        'Reducing the number of allergens in your home',
-        'Improving indoor air quality',
-        'Preventing the spread of germs and bacteria',
-        'Removing stubborn stains and dirt buildup',
-        'Creating a more comfortable living environment',
-      ])
+    /*
+     * Abdi's review, item 7. The bulleted list ("Reducing the number of
+     * allergens…"), its intro line and the eco-friendly closing line were
+     * byte-identical on every area page of every city. They are cut, not
+     * templated: a benefits block is heading + paragraphs and nothing else.
+     */
+    test('benefits carries no list and no eco line any more', () => {
+      expect(Object.keys(data.benefits).sort()).toEqual(['heading', 'paragraphs'])
+      const text = JSON.stringify(data)
+      expect(text).not.toContain('Reducing the number of allergens')
+      expect(text).not.toContain('There are many benefits to deep cleaning')
+      expect(text).not.toContain('eco-friendly cleaning products')
     })
 
     test('otherServices hrefs and labels (live city: unprefixed)', () => {
@@ -89,9 +87,9 @@ describe('suburbData', () => {
     })
 
     test('closing heading, paragraph, cta', () => {
-      expect(data.closing.heading).toBe(
-        'We understand that every home in Savage is unique, which is why we offer customized cleaning services to meet your specific needs.',
-      )
+      // The live heading — "We understand that every home in Savage is
+      // unique…" — is on the banned list and is gone (item 7).
+      expect(data.closing.heading).toBe('Ready to book in Savage?')
       expect(data.closing.paragraph).toBe('Contact us today to discuss your deep cleaning requirements in Minneapolis.')
       expect(data.closing.ctaLabel).toBe('Set an appointment 👈')
       expect(data.hero.ctaLabel).toBe('Set an appointment 👈')
@@ -152,6 +150,36 @@ describe('suburbData', () => {
     })
   })
 
+  /*
+   * checkQuality reads generated slots only, so a banned phrase living in the
+   * TEMPLATE shipped on every area page while the validator reported the
+   * city clean. This sweep is the cheap version of the fix: every string
+   * suburbData produces, for every area of a live and a draft city, against
+   * the same list.
+   */
+  describe('template copy against the banned list', () => {
+    const strings = (value: unknown): string[] =>
+      typeof value === 'string'
+        ? [value]
+        : Array.isArray(value)
+          ? value.flatMap(strings)
+          : value && typeof value === 'object'
+            ? Object.values(value).flatMap(strings)
+            : []
+
+    test('no area page of Minneapolis or Miami carries a banned phrase in its template copy', () => {
+      for (const city of [minneapolis, miami]) {
+        for (const suburb of city.research.suburbs) {
+          for (const text of strings(suburbData(city, suburb))) {
+            for (const phrase of BANNED_PHRASES) {
+              expect(text.toLowerCase(), `${city.city} / ${suburb.name}`).not.toContain(phrase)
+            }
+          }
+        }
+      }
+    })
+  })
+
   describe('generated per-area copy (Task 17)', () => {
     const katy = { name: 'Katy', slug: 'katy' }
     const [introSlot, homesSlot, localSlot] = suburbSlots(katy.slug)
@@ -172,6 +200,14 @@ describe('suburbData', () => {
         [localSlot]: 'Katy summers bring dust and pollen that settle fast on floors here.',
       },
     }
+
+    test('suburbMeta.description is cut from the generated homes copy (item 9)', () => {
+      const data = suburbData(cityWithSuburbCopy, katy)
+      expect(data.suburbMeta.description).toBe(
+        'Homes in Katy tend to be newer builds with tile floors and HOAs.',
+      )
+      expect(data.suburbMeta.description).not.toContain('Choose Ivy Cleans for superior house cleaning')
+    })
 
     test('hero.paragraphs renders the generated intro, not the Savage template', () => {
       const data = suburbData(cityWithSuburbCopy, katy)
@@ -231,7 +267,7 @@ describe('suburbData', () => {
       const b = suburbData(minneapolis, savage)
       expect(a).toEqual(b)
       expect(a).not.toBe(b)
-      expect(a.benefits.items).not.toBe(b.benefits.items)
+      expect(a.benefits.paragraphs).not.toBe(b.benefits.paragraphs)
       expect(a.workInAction.images).not.toBe(b.workInAction.images)
       expect(a.otherServices.links).not.toBe(b.otherServices.links)
     })

@@ -60,9 +60,12 @@ export default function CtaBand({
     >
       <div className="ec">
         {/* b165434/022049e/24e2e95: widget-container margin-bottom -1rem below 768px */}
-        <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
+        {/* A <p>, not the live <h2> (Abdi's review, item 11): this band repeats
+            on the front page, and three identical h2s are noise in the
+            document outline, not structure. Same classes, so the look holds. */}
+        <p className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           {t("Ready For a Sparkling Clean House? Book Your Cleaning Service {city}", bits)}
-        </h2>
+        </p>
         <CtaCompact site={site} light />
       </div>
     </section>

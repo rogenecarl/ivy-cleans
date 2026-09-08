@@ -356,12 +356,12 @@ Produce three things.
 1. heroParagraphs — exactly 5 paragraphs, following this arc, one paragraph per step:
    1) Who we are and where we work: a local, insured business providing cleaning and janitorial services across ${facts.city}; our experienced team, our care for detail, what our customers get. Roughly 80 to 110 words.
    2) Confidence: why our work in ${facts.city} stands up to scrutiny — effort, clear communication, results, the same standard on every job regardless of size. Roughly 70 to 90 words.
-   3) Three short questions to the reader, one sentence each, in a single paragraph — the "do you have a mess that needs cleaning?" beat. Under 35 words in total.
+   3) Three questions a homeowner in ${facts.city} might actually be asking themselves — about their own house, their schedule, or one specific room — one sentence each, in a single paragraph. Under 35 words in total. Every question must be one this city's conditions make likely; a question that could be asked anywhere is wrong here.
    4) One sentence: home or business, call our professional cleaning company today and request a quote.
    5) One sentence: call Ivy Cleans today and get an estimate. Similar in spirit to paragraph 4 but not a repeat of its wording.
 
-   STRUCTURAL EXAMPLE — this is the Minneapolis version of the first three of these paragraphs. Match its SHAPE, its paragraph lengths and its rhythm; never copy its sentences, and never carry over a Minneapolis detail. This shows the length and structure only — its voice is not the target, the VOICE section above is.
-${numberedExample(MPLS_HERO_PARAGRAPHS.slice(0, 3))}
+   STRUCTURAL EXAMPLE — this is the Minneapolis version of the first two of these paragraphs. Match its SHAPE, its paragraph lengths and its rhythm; never copy its sentences, and never carry over a Minneapolis detail. This shows the length and structure only — its voice is not the target, the VOICE section above is. Paragraph 3 is deliberately NOT shown: every city that saw the Minneapolis questions wrote the same three.
+${numberedExample(MPLS_HERO_PARAGRAPHS.slice(0, 2))}
 
    Paragraphs 4 and 5 are one sentence each, so there is no shape left to imitate once you match it — write them to the spec in steps 4 and 5 above: a direct call to action, then a request for a quote or estimate close in spirit to it but not a repeat of its wording. Do not imitate a sample sentence for either.
 

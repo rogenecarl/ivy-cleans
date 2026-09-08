@@ -1,6 +1,4 @@
-import Image from "next/image";
 import Link from "next/link";
-import { CheckItemIcon } from "@/components/Icons";
 import type { SuburbData } from "@/data/suburb";
 
 /*
@@ -73,43 +71,9 @@ export default function Benefits({
           ))}
         </div>
 
-        <div className="mb-[2rem] flex flex-wrap items-start md:mb-[4rem]">
-          <div className="w-full pb-[1rem] md:w-[50%] md:pr-[1rem] md:pb-0">
-            <div className="flow-root mb-0 lg:mb-[2rem]">
-              <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
-                {benefits.listIntro}
-              </p>
-            </div>
-            <ul>
-              {benefits.items.map((item) => (
-                <li key={item} className="mb-[1.5rem] flex items-start last:mb-0">
-                  <span className="mt-[1px] flex w-[2.125rem] shrink-0 md:w-[2.375rem] lg:w-[2.5rem]">
-                    <CheckItemIcon className="h-[1.7rem] w-[1.7rem] text-[#5A8E00] md:h-[1.9rem] md:w-[1.9rem] lg:h-[2rem] lg:w-[2rem]" />
-                  </span>
-                  <span className="text-[1.7rem] leading-[1.4em] font-light text-black md:text-[1.9rem] lg:text-[2rem]">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="w-full pt-[1rem] md:w-[50%] md:pt-0 md:pl-[1rem]">
-            <Image
-              src="/images/deep-bg4.jpg"
-              alt=""
-              width={800}
-              height={390}
-              className="h-auto w-full"
-            />
-          </div>
-        </div>
-
-        <div className="flow-root mb-0 lg:mb-[2rem]">
-          <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
-            {benefits.closing}
-          </p>
-        </div>
-
+        {/* The two-column benefits list and the eco-friendly closing line that
+            sat here were cut (Abdi's review, item 7): identical on every area
+            page of every city, and covered by the generated paragraph above. */}
         <div className="text-center">
           <Link
             href={bookHref}

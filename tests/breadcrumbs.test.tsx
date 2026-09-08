@@ -57,7 +57,7 @@ describe('breadcrumbs()', () => {
 
   it('the JSON-LD is the same list, positioned from 1', () => {
     const trail = breadcrumbs(minneapolis, { kind: 'service', slug: 'standard-cleaning' })
-    const ld = breadcrumbListJsonLd(trail) as { itemListElement: { position: number; name: string; item: string }[] }
+    const ld = breadcrumbListJsonLd(trail) as { '@type': string; itemListElement: { position: number; name: string; item: string }[] }
     expect(ld['@type']).toBe('BreadcrumbList')
     expect(ld.itemListElement.map((i) => i.position)).toEqual([1, 2, 3])
     expect(ld.itemListElement.map((i) => i.name)).toEqual(trail.map((c) => c.label))

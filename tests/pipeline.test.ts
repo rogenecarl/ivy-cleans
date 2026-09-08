@@ -982,11 +982,21 @@ describe('pipeline stages', () => {
       expect(prompt).not.toContain(
         'Call our professional cleaning company Ivy Cleans today, get an estimate of our prices and put us to the test!',
       )
-      // The first three paragraphs are still shown as examples.
+      // The first two paragraphs are still shown as examples.
       expect(prompt).toContain(
         'That is why we hold fast to the notion that our services are the top most in the Minneapolis area.',
       )
-      expect(prompt).toContain('Do you have a mess that needs cleaning?')
+      /*
+       * Paragraph 3 is NOT shown any more (Abdi's Orlando review, item 8).
+       * Orlando, Houston and Miami all wrote "…or workplace? Is there a
+       * cleaning project sitting on your list?" — 63 to 70 characters shared
+       * across cities — because three short questions converge on the
+       * exemplar every time. The prompt now specs the questions instead of
+       * showing them.
+       */
+      expect(prompt).not.toContain('Do you have a mess that needs cleaning?')
+      expect(prompt).not.toContain('Do you have any cleaning project on your radar?')
+      expect(prompt).toContain('Three questions a homeowner in')
     })
 
 

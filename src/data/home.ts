@@ -1,6 +1,8 @@
 // src/data/home.ts
 import type { CityContent, MarketPhoto } from '../content/types'
 import { t } from '../content/interpolate'
+import { sl } from '../content/slots'
+import { metaDescription } from './meta'
 
 export type Feature = { title: string; text: string; icon: string; width: number; height: number };
 
@@ -24,8 +26,14 @@ export function homeData(c: CityContent): HomeData {
   return {
     homeMeta: {
       title: t("Cleaning Service in {city}, {state} | Ivy Cleans", c),
-      description:
-        "Ivy Cleans is a great choice for all of your home cleaning needs. We offer a 100% satisfaction on all of our cleans. Check us out today!",
+      /*
+       * The SECOND hero paragraph, deliberately (Abdi's review, item 9): this
+       * page renders the same hero as the front page, and the front page's
+       * description is the first paragraph. Two pages with one description
+       * would be a duplicate for no reason; the second paragraph is just as
+       * much this city's own copy.
+       */
+      description: metaDescription(sl(c, "services.heroParagraphs")[1]),
     },
 
     nearMe: [

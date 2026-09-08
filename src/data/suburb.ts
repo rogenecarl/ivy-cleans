@@ -33,6 +33,7 @@
 import type { CityContent, MarketPhoto } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
 import { sOpt, suburbSlots } from '../content/slots'
+import { metaDescription } from './meta'
 
 export type SuburbRef = { name: string; slug: string }
 
@@ -40,7 +41,7 @@ export type SuburbData = {
   suburbMeta: { title: string; description: string }
   hero: { titleLines: [string, string]; paragraphs: string[]; ctaLabel: string }
   houseCleaning: { heading: string; paragraph: string }
-  benefits: { heading: string; paragraphs: string[]; listIntro: string; items: string[]; closing: string }
+  benefits: { heading: string; paragraphs: string[] }
   otherServices: { heading: string; intro: string; links: { label: string; href: string }[] }
   workInAction: { heading: string; images: MarketPhoto[] }
   closing: { heading: string; paragraph: string; ctaLabel: string }
@@ -61,7 +62,17 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
     // description does not — reproduced as on the live page.
     suburbMeta: {
       title: `House Cleaning Service In ${name}, ${c.state}`,
-      description: `Choose Ivy Cleans for superior house cleaning in ${name} ${c.state}. Best-in-class home cleaning service awaits. Book your cleaning now!`,
+      /*
+       * Abdi's review, item 9: the template description was identical on
+       * every area of every city bar the name. The opening of the generated
+       * `homes` slot — what the houses in THIS place are like — is a better
+       * snippet and costs nothing. The template line stays only as the
+       * fallback for a city with no generated area copy (Minneapolis).
+       */
+      description:
+        homes !== undefined
+          ? metaDescription(homes)
+          : `Choose Ivy Cleans for superior house cleaning in ${name} ${c.state}. Best-in-class home cleaning service awaits. Book your cleaning now!`,
     },
 
     // dump lines 17-21. `intro` (suburb.<slug>.intro) is Task 16's generated
@@ -109,17 +120,15 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
               // Static — no city/suburb mention (dump line 26).
               'The benefits of our house cleaning really come in because the service is so comprehensive. Areas that aren’t typically cleaned are covered, wiped down, and sanitized. Ivy cleans specializes in improving the cleanliness of clients’ homes. To offer the most comprehensive service available, making sure that there isn’t a single box we leave unchecked.',
             ],
-      listIntro: t('There are many benefits to deep cleaning your home in {city}, including:', c),
-      items: [
-        'Reducing the number of allergens in your home',
-        'Improving indoor air quality',
-        'Preventing the spread of germs and bacteria',
-        'Removing stubborn stains and dirt buildup',
-        'Creating a more comfortable living environment',
-      ],
-      // Static — no city/suburb mention (dump line 33).
-      closing:
-        'At Ivy Cleans, we use eco-friendly cleaning products and techniques to ensure that your home is not only clean but also safe for you, your family, and your pets. It is important to us that you’re as comfortable as possible in your freshly cleaned home.',
+      /*
+       * Abdi's review, item 7. The bulleted benefits list ("Reducing the
+       * number of allergens…", dump lines 27-32) and the eco-friendly closing
+       * line (dump line 33) that used to follow are gone: both were
+       * byte-identical on every area page of every city, and the generated
+       * `local` paragraph above already says what they said, about THIS
+       * place. Template copy that is the same on Lake Mary, Windermere and
+       * Maitland is a fingerprint, not a benefit.
+       */
     },
 
     // dump lines 35-38
@@ -157,9 +166,16 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       images: [...(c.ops?.photos ?? [])],
     },
 
-    // dump lines 40-42
+    /*
+     * dump lines 40-42 — minus the heading. The live line, "We understand that
+     * every home in {suburb} is unique, which is why we offer customized
+     * cleaning services to meet your specific needs.", is on the banned
+     * list (src/content/quality.ts) and shipped on every area page anyway,
+     * because checkQuality only reads generated slots. Item 7 cuts it; the
+     * replacement is deliberately short and says only the area name.
+     */
     closing: {
-      heading: `We understand that every home in ${name} is unique, which is why we offer customized cleaning services to meet your specific needs.`,
+      heading: `Ready to book in ${name}?`,
       paragraph: t('Contact us today to discuss your deep cleaning requirements in {city}.', c),
       ctaLabel: CTA_LABEL,
     },

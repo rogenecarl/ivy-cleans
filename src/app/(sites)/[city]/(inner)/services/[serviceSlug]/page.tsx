@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cityFromParams } from "@/content/city-param";
 import type { CityContent } from "@/content/types";
-import { SERVICE_SLUGS, serviceBySlug } from "@/data/services/registry";
+import { SERVICE_SLUGS, serviceBySlug, serviceTitle } from "@/data/services/registry";
 import type { ServiceContent } from "@/data/service-types";
 import { moveOutData } from "@/data/move-out";
 import { siteData } from "@/data/site";
@@ -70,12 +70,15 @@ export async function generateMetadata({
   params: ServiceParams;
 }): Promise<Metadata> {
   const { c, entry } = await resolveService(params);
+  // One title pattern for all seven (item 12); the description is still each
+  // service's own.
+  const title = serviceTitle(entry, c);
   if (entry.kind === "template") {
     const { meta } = entry.content(c);
-    return { title: meta.title, description: meta.description };
+    return { title, description: meta.description };
   }
   const { moveOutMeta } = moveOutData(c);
-  return { title: moveOutMeta.title, description: moveOutMeta.description };
+  return { title, description: moveOutMeta.description };
 }
 
 export default async function ServicePage({ params }: { params: ServiceParams }) {
