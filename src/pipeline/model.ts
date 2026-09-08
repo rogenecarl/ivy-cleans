@@ -22,6 +22,36 @@ export type GenerateArgs<T> = {
 }
 
 /** A single unit of research-call activity, surfaced to callers for a live progress feed. */
+/**
+ * How many web searches the research stage may make.
+ *
+ * WAS 8, WHICH WAS NOT ENOUGH FOR THE BRIEF IT SERVES. A real Orlando run
+ * named 14 areas and kept ONE — thirteen dropped by the uniqueness gate for
+ * having zero researched subdivisions. The research pass explained itself in
+ * its own persisted findings: "If you restore the search budget, the
+ * highest-value order is: 1. Subdivisions, one query per area (~10 queries) —
+ * the biggest gap and the hardest to fake."
+ *
+ * The arithmetic, from buildResearchPrompt's own parts:
+ *
+ *   1-2  the area list itself                     part (a), 8-12 areas
+ *   12   subdivisions, one search per area        part (b) — a general
+ *        "<city> neighborhoods" query returns the LIST, never the
+ *        developments inside any one of them, so this does not batch
+ *   3    climate, housing stock, local conditions part (c)
+ *   ---
+ *   ~17
+ *
+ * This is a REAL COST LEVER, not a free dial: every search pulls page content
+ * into context, and research is already the expensive stage at ~200K input
+ * tokens on eight searches. Expect research to roughly double. That is the
+ * trade — a city with one area page is not worth generating at any price.
+ *
+ * Keywords are not counted: part (d) is deferred to DataForSEO, and the same
+ * findings note zero keyword searches were run.
+ */
+export const MAX_SEARCHES = 18
+
 export type ResearchEvent = { kind: 'search' | 'reading'; label: string }
 
 /**
@@ -166,7 +196,7 @@ export class AnthropicModelClient implements ModelClient {
       max_tokens: 64000,
       system: RESEARCH_SYSTEM,
       messages: [{ role: 'user', content: prompt }],
-      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 8 }],
+      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: MAX_SEARCHES }],
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
     })

@@ -13,7 +13,7 @@
 // whatIs.text is this page's one AI-class slot (see below).
 
 import type { CityContent } from '../content/types'
-import { s, sOpt, serviceSlots } from '../content/slots'
+import { sOpt, serviceSlots } from '../content/slots'
 import { t } from '../content/interpolate'
 import type { ServiceContent } from './service-types'
 
@@ -41,7 +41,26 @@ export function deepCleaningData(c: CityContent): ServiceContent {
     whatIs: {
       h2: "What is Deep House Cleaning?",
       // AI-class slot — part of the Plan 3 writer-schema contract.
-      text: s(c, 'deep.whatIs'),
+      /*
+       * STATIC, and byte-verbatim from the live site's deep-cleaning page
+       * (docs/superpowers/reference/ivycleans-live/deep-cleaning-content-dump.txt).
+       *
+       * This was generated per city by a `deep` stage until that stage was
+       * removed. Generating it violated content-strategy.md's own rule for
+       * service pages -- "the explanation of what a deep clean IS should be
+       * the same everywhere; that's the canonical text and duplicating it per
+       * city would cannibalise" -- and the eval measured the consequence: 73
+       * characters shared verbatim between Houston and Miami.
+       *
+       * It also did the local section's job badly. The generated versions
+       * spent their second half on city-specific conditions, which is exactly
+       * what whatIs.local below now carries, capped at two conditions and
+       * forbidden from re-explaining the service.
+       *
+       * Minneapolis's stored deep.whatIs was byte-identical to this, so its
+       * live page renders unchanged.
+       */
+      text: "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.",
       image: "/images/deep-img1.jpg",
       local: sOpt(c, serviceSlots('deep-cleaning')[0]),
     },

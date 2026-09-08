@@ -171,7 +171,7 @@ export async function deleteDraft(key: string): Promise<void> {
 
 /**
  * The section slots that do not depend on research at all — the eight the
- * front and deep stages own, plus one local section per template service.
+ * front stage owns, plus one local section per template service.
  * finalizeDraft() requires every one of these before a draft can become a
  * published CityContent.
  *
@@ -189,7 +189,6 @@ export const REQUIRED_SLOTS = [
   'services.cards.bathroom',
   'services.cards.window',
   'services.cards.upholstery',
-  'deep.whatIs',
   ...SERVICE_LOCAL_SLUGS.flatMap((slug) => serviceSlots(slug)),
 ] as const
 

@@ -161,8 +161,19 @@ export const FrontSectionsSchema = z
   .strict()
 export type FrontSectionsOutput = z.infer<typeof FrontSectionsSchema>
 
-export const DeepSchema = z.object({ whatIs: z.string() }).strict()
-export type DeepOutput = z.infer<typeof DeepSchema>
+/*
+ * REMOVED: DeepSchema / DeepOutput.
+ *
+ * The `deep` stage generated the "What is Deep House Cleaning?" paragraph per
+ * city. That is the canonical explainer, and content-strategy.md's own rule
+ * for service pages says it must be the same everywhere — "duplicating it per
+ * city would cannibalise". The eval measured exactly that: 73 characters
+ * shared verbatim between Houston and Miami.
+ *
+ * It is now static in src/data/deep-cleaning.ts, byte-verbatim from the live
+ * site's content dump like the other six services, and the per-city angle
+ * comes from service.deep-cleaning.local instead.
+ */
 
 /**
  * One area page's generated copy. Three blocks, matching the three places in

@@ -124,7 +124,6 @@ export function serviceSlots(slug: string): readonly string[] {
 export const STAGES = [
   { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
   { id: 'front', label: 'Writing the front page — hero and services' },
-  { id: 'deep', label: 'Writing the deep-cleaning page' },
   { id: 'suburb', label: 'Writing the area pages' },
   { id: 'service', label: 'Writing the local section of each service page' },
 ] as const
@@ -183,7 +182,6 @@ export function stageSlots(research: ResearchOutput | undefined): Record<StageId
       'services.cards.window',
       'services.cards.upholstery',
     ],
-    deep: ['deep.whatIs'],
     suburb: research ? research.suburbs.filter(isWritableArea).flatMap((s) => suburbSlots(s.slug)) : [],
     // Not a function of research, unlike suburb: the services are the same
     // seven in every city, so all six are owed from the moment a draft exists.

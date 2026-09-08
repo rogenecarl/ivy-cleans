@@ -244,11 +244,11 @@ describe('stage run → finalize → publish', () => {
     expect((await freshDraft(KEY)).ok).toBe(true)
   })
 
-  it('runs all three stages through the stub client', async () => {
+  it('runs both single-call stages through the stub client', async () => {
     await runAllStages(KEY)
     const draft = await loadDraft(KEY)
     expect(draft.done).toEqual([...RUNNABLE_STAGE_IDS])
-    expect(Object.keys(draft.sections)).toHaveLength(8)
+    expect(Object.keys(draft.sections)).toHaveLength(7)
     expect(draft.research?.zips).toEqual(['00001', '00002'])
   })
 
@@ -270,10 +270,10 @@ describe('stage run → finalize → publish', () => {
   })
 
   it('surfaces a stage failure as a message, not an exception', async () => {
-    // 'research' has not run for this key, so 'deep' has nothing to consume.
+    // 'research' has not run for this key, so 'front' has nothing to consume.
     await wipe('ztest-editville')
     await freshDraft('ztest-editville')
-    const result = await runStageLogic('ztest-editville', 'deep')
+    const result = await runStageLogic('ztest-editville', 'front')
     expect(result.ok).toBe(false)
     expect(result.ok === false && result.error).toMatch(/research stage has not completed/)
   })
@@ -841,12 +841,12 @@ describe('regenerateLogic', () => {
     await runAllStages(KEY)
 
     const draft = await loadDraft(KEY)
-    draft.sections['deep.whatIs'] = 'STALE'
+    draft.sections['service.deep-cleaning.local'] = 'STALE'
     const { saveDraft } = await import('../src/content/drafts')
     await saveDraft(KEY, draft)
 
-    expect(await regenerateLogic(KEY, 'deep')).toEqual({ ok: true })
-    expect((await loadDraft(KEY)).sections['deep.whatIs']).not.toBe('STALE')
+    expect(await regenerateLogic(KEY, 'service')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).sections['service.deep-cleaning.local']).not.toBe('STALE')
   })
 
   it('clears downstream copy when research is regenerated', async () => {
@@ -857,7 +857,7 @@ describe('regenerateLogic', () => {
 
     const draft = await loadDraft(KEY)
     expect(draft.done).toEqual(['research'])
-    expect(draft.sections['deep.whatIs']).toBeUndefined()
+    expect(draft.sections['service.deep-cleaning.local']).toBeUndefined()
   })
 
   it('cannot demote a LIVE city, even with a sidecar left over from a partial publish', async () => {
@@ -885,13 +885,13 @@ describe('regenerateLogic', () => {
     await saveDraft(KEY, sidecar) // the delete that never happened
     expect((await getCity(KEY)).status).toBe('live')
 
-    expect(await regenerateLogic(KEY, 'deep')).toEqual({ ok: true })
+    expect(await regenerateLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const doc = await getCity(KEY)
     expect(doc.status).toBe('live')
     expect(doc.domain).toBe('ztest-partial.example')
-    expect(doc.sections['deep.whatIs']).toMatch(/Deep cleaning/)
+    expect(doc.sections['service.deep-cleaning.local']).toBeTruthy()
   })
 })
 
@@ -955,15 +955,15 @@ describe('listCities', () => {
   // 'draft-unfinalized' once ALL of STAGE_IDS are done. runAllStages here
   // deliberately tops out at RUNNABLE_STAGE_IDS (research/front/deep, not
   // suburb) so this test can exercise the genuinely-partial state: a draft
-  // that has run three of the four stages is still, correctly, 'generating'.
-  it('labels a sidecar that ran every currently-implemented stage as still GENERATING (suburb pending)', async () => {
+  // that has run the single-call stages is still, correctly, 'generating'.
+  it('labels a sidecar that ran only the single-call stages as still GENERATING', async () => {
     await freshDraft(KEY)
     await runAllStages(KEY)
 
     expect(row(await listCities(), KEY)).toMatchObject({
       status: 'generating',
       hasDraft: true,
-      doneCount: 3,
+      doneCount: 2,
     })
   })
 
@@ -972,14 +972,14 @@ describe('listCities', () => {
     await runAllStages(KEY)
     // finalizeLogic requires every surviving area's suburb slots AND every
     // template service's local slot, so both multi-call stages have to run
-    // before finalize can succeed — which brings doneCount to 5, not 3.
+    // before finalize can succeed — which brings doneCount to 4, not 2.
     expect(await runStageLogic(KEY, 'suburb')).toEqual({ ok: true })
     expect(await runStageLogic(KEY, 'service')).toEqual({ ok: true })
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const rows = await listCities()
     expect(rows.filter((r) => r.key === KEY)).toHaveLength(1)
-    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 5 })
+    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 4 })
   })
 
   it('shows a published city as LIVE with no sidecar left', async () => {

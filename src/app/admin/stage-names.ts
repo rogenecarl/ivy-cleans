@@ -16,7 +16,6 @@
 export const STAGE_NAMES: Record<string, string> = {
   research: 'Research',
   front: 'Front page',
-  deep: 'Deep cleaning',
   suburb: 'Area pages',
   service: 'Service pages',
 }
@@ -38,7 +37,6 @@ export const STAGE_NAMES: Record<string, string> = {
 export const STAGE_EXPECTED: Record<string, string> = {
   research: '~3 min',
   front: '~30s',
-  deep: '~30s',
   suburb: '~20s each',
   service: '~10s each',
 }

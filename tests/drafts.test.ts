@@ -96,7 +96,6 @@ function fullSections(): Record<string, string | string[]> {
     'services.cards.bathroom': 'Bathroom copy.',
     'services.cards.window': 'Window copy.',
     'services.cards.upholstery': 'Upholstery copy.',
-    'deep.whatIs': 'Deep cleaning is...',
     'suburb.house-cleaning-north-ztest.intro': 'North Ztest is a quiet area we clean often.',
     // Names both researched subdivisions: checkQuality (content-strategy D)
     // requires an area page to name min(3, subdivisions.length) of its own,
@@ -176,12 +175,12 @@ describe('drafts store', () => {
     it('saveDraft persists mutations round-trippable via loadDraft', async () => {
       const doc = await loadDraft(key)
       doc.done = ['research']
-      doc.sections['deep.whatIs'] = 'updated copy'
+      doc.sections['service.deep-cleaning.local'] = 'updated copy'
       await saveDraft(key, doc)
 
       const reloaded = await loadDraft(key)
       expect(reloaded.done).toEqual(['research'])
-      expect(reloaded.sections['deep.whatIs']).toBe('updated copy')
+      expect(reloaded.sections['service.deep-cleaning.local']).toBe('updated copy')
     })
 
     it('deleteDraft removes the sidecar; loadDraft then throws unknown-draft', async () => {
@@ -251,7 +250,7 @@ describe('drafts store', () => {
       const doc = await loadDraft(key)
       doc.research = fullResearch()
       doc.sections = fullSections()
-      doc.done = ['research', 'front', 'home', 'deep']
+      doc.done = ['research', 'front', 'home']
       await saveDraft(key, doc)
 
       await finalizeDraft(key)
@@ -264,7 +263,7 @@ describe('drafts store', () => {
       expect(validated.maps).toEqual({ front: null, home: null, contact: null })
       expect(validated.contactAddress).toBe('123 Ztest Ave')
       expect(validated.research.zips).toEqual(['00001', '00002'])
-      expect(validated.sections['deep.whatIs']).toBe('Deep cleaning is...')
+      expect(validated.sections['service.deep-cleaning.local']).toBe('Deep cleans in Ztest begin in the bathrooms.')
       // The gap Task 18 closes: generated area copy must actually reach the
       // published document instead of being silently dropped at finalize.
       expect(validated.sections['suburb.house-cleaning-north-ztest.intro']).toBe(
@@ -313,7 +312,7 @@ describe('drafts store', () => {
         // fullSections() carries the north-ztest suburb slots but nothing for
         // south-ztest — the missing area.
         doc.sections = fullSections()
-        doc.done = ['research', 'front', 'deep']
+        doc.done = ['research', 'front']
         await saveDraft(twoAreaKey, doc)
 
         let caught: Error | undefined
@@ -354,7 +353,6 @@ describe('drafts store', () => {
           'services.cards.bathroom': 'Bathroom copy.',
           'services.cards.window': 'Window copy.',
           'services.cards.upholstery': 'Upholstery copy.',
-          'deep.whatIs': 'Deep cleaning is...',
           // Research-independent, like the eight above: the same seven
           // services exist in a city with no areas at all.
           'service.standard-cleaning.local': 'A standard visit here starts with the entry mats.',
@@ -364,7 +362,7 @@ describe('drafts store', () => {
           'service.post-construction-cleaning.local': 'Post-construction work here is a dust problem first.',
           'service.pre-listing-cleaning.local': 'A pre-listing clean here is aimed at the windows.',
         }
-        doc.done = ['research', 'front', 'deep', 'service']
+        doc.done = ['research', 'front', 'service']
         await saveDraft(noAreasKey, doc)
 
         await finalizeDraft(noAreasKey)
@@ -389,7 +387,7 @@ describe('drafts store', () => {
         const doc = await loadDraft(noAddrKey)
         doc.research = fullResearch()
         doc.sections = fullSections()
-        doc.done = ['research', 'front', 'home', 'deep']
+        doc.done = ['research', 'front', 'home']
         await saveDraft(noAddrKey, doc)
 
         await finalizeDraft(noAddrKey)
@@ -425,7 +423,7 @@ describe('drafts store', () => {
       // No research assigned; only some sections filled.
       doc.sections = {
         'services.heroParagraphs': ['Hero.'],
-        'deep.whatIs': 'Deep copy.',
+        'service.deep-cleaning.local': 'Deep copy.',
       }
       await saveDraft(key, doc)
 
@@ -446,7 +444,7 @@ describe('drafts store', () => {
       expect(msg).toMatch(/services\.cards\.upholstery/)
       // Slots that WERE provided must not be reported missing.
       expect(msg).not.toMatch(/services\.heroParagraphs/)
-      expect(msg).not.toMatch(/deep\.whatIs/)
+      expect(msg).not.toMatch(/service\.deep-cleaning\.local/)
 
       // Nothing should have been published.
       await expect(readFile(cityPath(key), 'utf-8')).rejects.toThrow()
@@ -511,7 +509,7 @@ describe('drafts store', () => {
       const doc = await loadDraft(key)
       doc.research = fullResearch()
       doc.sections = fullSections()
-      doc.done = ['research', 'front', 'home', 'deep']
+      doc.done = ['research', 'front', 'home']
       await saveDraft(key, doc)
       await finalizeDraft(key)
 
@@ -675,7 +673,7 @@ describe('drafts store', () => {
     it('does NOT refuse a banned phrase — it is surfaced, not blocking', async () => {
       await goodDraft()
       const doc = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
-      doc.sections['deep.whatIs'] = 'Look no further: deep cleaning is a thorough service.'
+      doc.sections['service.deep-cleaning.local'] = 'Look no further: deep cleaning is a thorough service.'
       await writeFile(cityPath(KEY), JSON.stringify(doc, null, 2), 'utf-8')
       revalidateCity(KEY)
 
@@ -709,13 +707,13 @@ describe('drafts store', () => {
       await createDraft(factsA)
       const docA = await loadDraft(keyA)
       docA.research = fullResearch()
-      docA.sections = { ...fullSections(), 'deep.whatIs': sharedWhatIs }
+      docA.sections = { ...fullSections(), 'service.deep-cleaning.local': sharedWhatIs }
       docA.done = ['research', 'front', 'home', 'deep']
       await saveDraft(keyA, docA)
       await finalizeDraft(keyA)
       await publishCity(keyA)
 
-      // Everything BUT deep.whatIs is deliberately distinct prose, so the
+      // Everything BUT that one slot is deliberately distinct prose, so the
       // rejection can only be attributed to the one slot this test cares about.
       const factsB = deriveFacts({ city: 'Ztest Dupe B', state: 'MN', phoneDigits: '6125550111' })
       await createDraft(factsB)
@@ -726,13 +724,13 @@ describe('drafts store', () => {
         'services.heroParagraphs': ['City B opens with wholly separate hero copy.', 'And a second distinct hero line.'],
         'services.serviceIntro': ['City B has an entirely unrelated service introduction paragraph.'],
         'home.zipParagraph': 'City B serves an unrelated pair of zip codes, 00003 and 00004.',
-        'deep.whatIs': sharedWhatIs,
+        'service.deep-cleaning.local': sharedWhatIs,
       }
       docB.done = ['research', 'front', 'home', 'deep']
       await saveDraft(keyB, docB)
       await finalizeDraft(keyB)
 
-      await expect(publishCity(keyB)).rejects.toThrow(/deep\.whatIs/)
+      await expect(publishCity(keyB)).rejects.toThrow(/service\.deep-cleaning\.local/)
 
       // Refused publishes must not have side effects: B stays a draft, and its
       // sidecar (an operator's in-progress work) is not deleted out from under them.
@@ -775,7 +773,7 @@ describe('drafts store', () => {
       const doc = await loadDraft(key)
       doc.research = fullResearch()
       doc.sections = fullSections()
-      doc.done = ['research', 'front', 'home', 'deep']
+      doc.done = ['research', 'front', 'home']
       await saveDraft(key, doc)
 
       await finalizeDraft(key)
@@ -794,7 +792,7 @@ describe('drafts store', () => {
       expect((await getCity(key)).status).toBe('live')
 
       const draft = await loadDraft(key)
-      draft.sections['deep.whatIs'] = 'Rewritten deep-cleaning copy.'
+      draft.sections['service.deep-cleaning.local'] = 'Rewritten deep-cleaning copy.'
       await saveDraft(key, draft)
 
       await finalizeDraft(key)
@@ -802,7 +800,7 @@ describe('drafts store', () => {
       const validated = validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8')))
       expect(validated.status).toBe('live')
       expect(validated.domain).toBe('ztest-republish.example')
-      expect(validated.sections['deep.whatIs']).toBe('Rewritten deep-cleaning copy.')
+      expect(validated.sections['service.deep-cleaning.local']).toBe('Rewritten deep-cleaning copy.')
       // The store must agree — this is what the public site serves.
       expect((await getCity(key)).status).toBe('live')
     })
@@ -832,7 +830,7 @@ describe('drafts store', () => {
       const doc = await loadDraft(key)
       doc.research = fullResearch()
       doc.sections = fullSections()
-      doc.done = ['research', 'front', 'home', 'deep']
+      doc.done = ['research', 'front', 'home']
       await saveDraft(key, doc)
       await finalizeDraft(key)
 
@@ -924,7 +922,7 @@ describe('drafts store', () => {
       const doc = await loadDraft(key)
       doc.research = fullResearch()
       doc.sections = fullSections()
-      doc.done = ['research', 'front', 'home', 'deep']
+      doc.done = ['research', 'front', 'home']
       await saveDraft(key, doc)
       await finalizeDraft(key)
       await writeFile(progressPath(key), '[]', 'utf-8')

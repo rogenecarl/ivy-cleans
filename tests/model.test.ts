@@ -3,13 +3,14 @@ import path from 'node:path'
 import { afterEach, describe, expect, test } from 'vitest'
 import { z } from 'zod'
 import {
-  DeepSchema,
+  ServiceCopySchema,
   FrontSectionsSchema,
   ResearchSchema,
 } from '../src/pipeline/schemas'
 import {
   AnthropicModelClient,
   StubModelClient,
+  MAX_SEARCHES,
   makeClient,
   searchQuery,
   type ResearchEvent,
@@ -109,32 +110,35 @@ describe('FrontSectionsSchema', () => {
   })
 })
 
-describe('DeepSchema', () => {
-  const valid = { whatIs: 'Deep cleaning is...' }
+describe('ServiceCopySchema', () => {
+  const valid = { local: 'What changes here...' }
 
   test('accepts a valid example', () => {
-    expect(DeepSchema.parse(valid)).toEqual(valid)
+    expect(ServiceCopySchema.parse(valid)).toEqual(valid)
   })
 
   test('rejects an extra key', () => {
-    expect(() => DeepSchema.parse({ ...valid, extra: 'nope' })).toThrow()
+    expect(() => ServiceCopySchema.parse({ ...valid, extra: 'nope' })).toThrow()
   })
 
   test('rejects a wrong-typed field', () => {
-    expect(() => DeepSchema.parse({ whatIs: 42 })).toThrow()
+    expect(() => ServiceCopySchema.parse({ local: 42 })).toThrow()
   })
 
   test('rejects a missing key', () => {
-    expect(() => DeepSchema.parse({})).toThrow()
+    expect(() => ServiceCopySchema.parse({})).toThrow()
   })
 })
 
 describe('StubModelClient', () => {
   test('generate returns canned data validated through the schema', async () => {
-    const canned = { whatIs: 'Stubville deep cleaning removes years of buildup.' }
-    const client = new StubModelClient({ research: {}, generated: { deep: canned } })
+    const canned = { local: 'Stubville deep cleaning removes years of buildup.' }
+    const client = new StubModelClient({
+      research: {},
+      generated: { 'service.deep-cleaning': canned },
+    })
 
-    const result = await client.generate({ schema: DeepSchema, system: 's', prompt: 'p', key: 'deep' })
+    const result = await client.generate({ schema: ServiceCopySchema, system: 's', prompt: 'p', key: 'service.deep-cleaning' })
 
     expect(result).toEqual(canned)
   })
@@ -142,11 +146,11 @@ describe('StubModelClient', () => {
   test('generate rejects malformed canned data with a ZodError', async () => {
     const client = new StubModelClient({
       research: {},
-      generated: { deep: { whatIs: 42 } },
+      generated: { 'service.deep-cleaning': { local: 42 } },
     })
 
     await expect(
-      client.generate({ schema: DeepSchema, system: 's', prompt: 'p', key: 'deep' })
+      client.generate({ schema: ServiceCopySchema, system: 's', prompt: 'p', key: 'service.deep-cleaning' })
     ).rejects.toBeInstanceOf(z.ZodError)
   })
 
@@ -154,7 +158,7 @@ describe('StubModelClient', () => {
     const client = new StubModelClient({ research: {}, generated: {} })
 
     await expect(
-      client.generate({ schema: DeepSchema, system: 's', prompt: 'p', key: 'deep' })
+      client.generate({ schema: ServiceCopySchema, system: 's', prompt: 'p', key: 'service.deep-cleaning' })
     ).rejects.toThrow(/deep/)
   })
 
@@ -173,6 +177,40 @@ describe('StubModelClient', () => {
     const client = new StubModelClient({ research: {}, generated: {} })
 
     await expect(client.research('prompt text', 'missing-stage')).rejects.toThrow(/missing-stage/)
+  })
+
+  describe('MAX_SEARCHES — the research stage\'s web-search budget', () => {
+    /*
+     * This was 8, and 8 is not enough to satisfy the brief it is paired with.
+     *
+     * A real Orlando run named 14 areas and kept ONE: thirteen were dropped by
+     * the uniqueness gate for having zero researched subdivisions. The
+     * research pass said why, in its own persisted findings:
+     *
+     *   "If you restore the search budget, the highest-value order is:
+     *    1. Subdivisions, one query per area (~10 queries) — the biggest gap
+     *    and the hardest to fake."
+     *   "(d) KEYWORDS — not researched. I ran zero keyword or competitor-title
+     *    searches."
+     *
+     * Part (a) of the brief asks for 8-12 areas and part (b) asks for
+     * subdivisions in each. Subdivisions need roughly one search per area,
+     * because a general "<city> neighborhoods" query returns the LIST and not
+     * the developments inside any of them. Eight searches buys the list and
+     * then runs out — which is also why an earlier attempt to fix this by
+     * strengthening the brief made metro conditions WORSE: the model did not
+     * try harder, it reallocated the same eight searches.
+     */
+    test('covers a search per area at the top of the brief\'s range, plus the metro pass', () => {
+      const AREAS_MAX = 12 // part (a) of buildResearchPrompt
+      expect(MAX_SEARCHES).toBeGreaterThanOrEqual(AREAS_MAX + 3)
+    })
+
+    test('is bounded, because every search pulls page content into context', () => {
+      // Research is already the expensive stage — ~200K input tokens at eight
+      // searches. This is a real cost lever, not a free dial.
+      expect(MAX_SEARCHES).toBeLessThanOrEqual(24)
+    })
   })
 
   describe('searchQuery — what the operator sees while research runs', () => {
@@ -290,8 +328,15 @@ describe('makeClient', () => {
 
     expect(client).toBeInstanceOf(StubModelClient)
     await expect(client.research('prompt', 'research')).resolves.toMatch(/Stubville/)
-    const deep = await client.generate({ schema: DeepSchema, system: 's', prompt: 'p', key: 'deep' })
-    expect(deep.whatIs).toMatch(/Stubville/)
+    // The committed fixture's service copy is about the stub metro; assert it
+    // came from the fixture rather than pinning one city name in the prose.
+    const svc = await client.generate({
+      schema: ServiceCopySchema,
+      system: 's',
+      prompt: 'p',
+      key: 'service.deep-cleaning',
+    })
+    expect(svc.local).toMatch(/Fixture City/)
   })
 
   test('falls through to AnthropicModelClient when STUB_MODEL is unset, which throws without an API key', () => {

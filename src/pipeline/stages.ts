@@ -24,7 +24,6 @@
 
 import type { Facts } from './facts'
 import {
-  DeepSchema,
   FrontSectionsSchema,
   ResearchSchema,
   ServiceCopySchema,
@@ -124,9 +123,6 @@ const MPLS_CARD_DUSTING =
 const MPLS_CARD_VACUUMING =
   'Vacuuming is another crucial cleaning service that is particularly important in Minneapolis. The city’s cold winters mean that people spend more time indoors, leading to a buildup of dirt and debris on floors and carpets. Our professional vacuuming services ensure that your home is free from dirt and dust, providing a more pleasant and hygienic living environment.'
 
-const MPLS_WHAT_IS =
-  'Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.'
-
 /* ────────────────────────────────────────────────────────────────────────────
  * System prompts
  * ──────────────────────────────────────────────────────────────────────────── */
@@ -184,10 +180,6 @@ Return only the requested fields, filled with finished copy — no commentary, n
 export const FRONT_SYSTEM = `${SYSTEM_BASE}
 
 STAGE: the front page. You are writing the opening hero paragraphs, the service-introduction paragraphs, and the five short service cards (dusting, vacuuming, bathroom, window, upholstery). This copy is the first thing a visitor reads, so the city has to be recognizable in it within the first two sentences.`
-
-export const DEEP_SYSTEM = `${SYSTEM_BASE}
-
-STAGE: the deep-cleaning page. You are writing the single paragraph that answers "What is Deep House Cleaning?" — an explanation, calmly given, of what a deep clean covers and why homes in this particular city need one.`
 
 export const SUBURB_SYSTEM = `${SYSTEM_BASE}
 
@@ -392,34 +384,6 @@ ${numberedExample(MPLS_SERVICE_INTRO)}
    Note that the real Minneapolis card and its matching intro paragraph overlap heavily. Yours must not — the two sit on one page and a reader sees both.`
 }
 
-/** Deep-cleaning page: the "What is Deep House Cleaning?" paragraph. */
-export function buildDeepPrompt(facts: Facts, research: ResearchOutput): string {
-  const keywordSection =
-    research.keywords.length === 0
-      ? ''
-      : `\nSearch phrases for context — never quote them:\n${research.keywords.slice(0, 8).map((k) => `- ${k}`).join('\n')}\n`
-
-  return `Write the "What is Deep House Cleaning?" paragraph for the Ivy Cleans website serving ${facts.city}, ${facts.stateName}.
-${opsBlock(facts)}${keywordSection}
-whatIs — a single paragraph of 80 to 110 words that explains what a deep clean actually is: how it goes beyond a regular visit, that it reaches every surface, floor, carpet and piece of furniture, and that it lifts out the dirt, dust and allergens an ordinary clean leaves behind — ending on a healthier, more comfortable home.
-
-Give it one angle that belongs to ${facts.city}: the local reason homes there accumulate what a deep clean removes — the humidity and mold pressure, the months sealed up against the cold, the pollen or desert dust or blown sand, the age and construction of the housing stock. One or two sentences of that, woven in, not bolted on.
-
-STRUCTURAL EXAMPLE — the Minneapolis version, for coverage. It runs shorter than yours should — you are adding a local angle it lacks. Match the shape; write different sentences. This shows the length and structure only — its voice is not the target, the VOICE section above is.
-${MPLS_WHAT_IS}`
-}
-
-/**
- * Structural exemplar. Deliberately NOT taken from the live Savage page that
- * src/data/suburb.ts was transcribed from: that page is one of the twenty-four
- * that produced twenty-three clicks in sixteen months, and it is exactly the
- * register we are trying to leave behind.
- *
- * This is the generated Houston deep-cleaning paragraph — the one piece of
- * output this pipeline has produced that does the job properly. It names a
- * real condition, says what that condition does inside a house, and lands on
- * the cleaning. That movement is what the model should copy.
- */
 const EXEMPLAR_LOCAL =
   'Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds.'
 
@@ -587,7 +551,6 @@ export const MODEL_KEYS = {
   research: 'research',
   researchStructure: 'research.structure',
   front: 'front',
-  deep: 'deep',
   suburb: (slug: string) => `suburb.${slug}`,
   service: (slug: string) => `service.${slug}`,
 } as const
@@ -900,27 +863,6 @@ async function executeStage(
       })
       break
     }
-    case 'deep': {
-      const research = requireResearch(draft, key, stage)
-      await appendProgress(key, {
-        stage: 'deep',
-        kind: 'start',
-        label: `Writing the deep-cleaning explainer for ${facts.city}`,
-      })
-      const out = await client.generate({
-        schema: DeepSchema,
-        key: MODEL_KEYS.deep,
-        system: DEEP_SYSTEM,
-        prompt: buildDeepPrompt(facts, research),
-      })
-      draft.sections['deep.whatIs'] = out.whatIs
-      await appendProgress(key, {
-        stage: 'deep',
-        kind: 'done',
-        label: `“What is deep cleaning” paragraph (${out.whatIs.trim().split(/\s+/).length} words)`,
-      })
-      break
-    }
     case 'suburb': {
       // The only stage that makes more than one model call, so it is the
       // only one that has to be resumable INSIDE itself: a serverless
@@ -1169,14 +1111,14 @@ export async function regenerateStage(
   const draft = await loadDraft(key)
 
   if (stage === 'research') {
-    for (const downstream of ['front', 'deep', 'suburb', 'service'] as const) {
+    for (const downstream of ['front', 'suburb', 'service'] as const) {
       clearStageOutputs(draft, downstream)
     }
   }
   clearStageOutputs(draft, stage)
 
   if (stage === 'research') {
-    for (const downstream of ['front', 'deep', 'suburb', 'service'] as const) {
+    for (const downstream of ['front', 'suburb', 'service'] as const) {
       await clearProgress(key, downstream)
     }
   }
