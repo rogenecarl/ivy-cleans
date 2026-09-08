@@ -813,7 +813,6 @@ async function executeStage(
       const { research: r, scored } = applyUniquenessGate(normalized)
       draft.research = r
       const skipped = scored.filter((s) => s.verdict === 'skip')
-      const flagged = scored.filter((s) => s.verdict === 'review')
       // Landmarks are gone (see schemas.ts ResearchSchema) — subdivisions are
       // the fact this pipeline now leans on, so the progress label counts
       // those instead.
@@ -823,14 +822,29 @@ async function executeStage(
         kind: 'found',
         label: `${r.suburbs.length} areas · ${r.zips.length} ZIP codes · ${subdivisionCount} subdivisions · ${r.keywords.length} search phrases`,
       })
+      /*
+       * The line an operator reads to know whether the run was worth what it
+       * cost. Two rules learned the hard way:
+       *
+       * The arithmetic has to reconcile. This used to read "10 areas kept ·
+       * 2 thin · 2 dropped", and `r.suburbs.length` is the POST-gate count —
+       * so the two thin areas were already inside the ten, and the line
+       * looked like twelve areas. Reporting "10 of 12" states both numbers
+       * and cannot be misread.
+       *
+       * And "thin" is not here. A progress line reports what happened; the
+       * review screen's "Before you publish" panel reports what needs
+       * deciding, and it already names the thin areas. Three words an
+       * operator has to learn ("kept", "thin", "dropped") to read one status
+       * line is three too many.
+       */
       await appendProgress(key, {
         stage: 'research',
         kind: 'found',
         label:
-          `${r.suburbs.length} areas kept` +
-          (flagged.length ? ` · ${flagged.length} thin` : '') +
+          `${r.suburbs.length} of ${scored.length} areas will get a page` +
           (skipped.length
-            ? ` · ${skipped.length} dropped: ${skipped.map((s) => s.suburb.name).join(', ')}`
+            ? ` · no developments found for ${skipped.map((s) => s.suburb.name).join(', ')}`
             : ''),
       })
       await appendProgress(key, { stage: 'research', kind: 'done', label: 'Research complete' })

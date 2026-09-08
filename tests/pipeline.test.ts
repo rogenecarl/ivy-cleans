@@ -902,10 +902,12 @@ describe('pipeline stages', () => {
     })
 
     it('names the areas the gate dropped in the progress line', async () => {
+      // A dropped area must never look like research simply finding less
+      // than usual, so its name is printed rather than swallowed.
       await runStage(newClient(), KEY, 'research')
 
       const events = await readProgress(KEY)
-      const dropped = events.find((e) => /dropped:/.test(e.label))
+      const dropped = events.find((e) => /no developments found for/.test(e.label))
       expect(dropped).toBeDefined()
       expect(dropped!.label).toContain('Fixture Heights')
     })
@@ -914,7 +916,7 @@ describe('pipeline stages', () => {
       await runStage(new CountingClient(new StubModelClient(allGoodFixtures())), KEY, 'research')
 
       const events = await readProgress(KEY)
-      expect(events.some((e) => /dropped:/.test(e.label))).toBe(false)
+      expect(events.some((e) => /no developments found for/.test(e.label))).toBe(false)
       // Confirms the label is genuinely conditional, not just missing the
       // word: all three areas were kept.
       expect((await loadDraft(KEY)).research!.suburbs).toHaveLength(3)
@@ -1433,6 +1435,36 @@ describe('buildResearchPrompt', () => {
       expect(() => buildServiceLocalPrompt(facts, research, 'move-in-move-out-cleaning')).toThrow(
         /move-in-move-out-cleaning/,
       )
+    })
+  })
+
+  describe('the research summary line', () => {
+    /*
+     * The line an operator reads to know whether a $3 run was worth it.
+     *
+     * It used to say "10 areas kept · 2 thin · 2 dropped: …" and the numbers
+     * did not reconcile: `r.suburbs.length` is the POST-gate list, so the two
+     * thin areas were already inside the ten, and the line read as twelve.
+     *
+     * "thin" is gone from here entirely. A progress line reports what
+     * happened; the review screen's "Before you publish" panel reports what
+     * needs deciding, and it already lists the thin areas. And "kept / thin /
+     * dropped" made an operator learn three words to read one status line.
+     */
+    it('reconciles its own arithmetic and names what was dropped, and why', async () => {
+      await resetDraft()
+      await runStage(newClient(), KEY, 'research')
+
+      const events = await readProgress(KEY)
+      const summary = events.find((e) => e.label.includes('will get a page'))
+      expect(summary).toBeDefined()
+
+      // The fixture researches three areas; Fixture Heights has zero
+      // subdivisions, so the gate drops exactly it.
+      expect(summary!.label).toMatch(/^2 of 3 areas will get a page/)
+      expect(summary!.label).toContain('Fixture Heights')
+      expect(summary!.label).toMatch(/no developments found/)
+      expect(summary!.label).not.toMatch(/kept|thin|dropped/)
     })
   })
 
