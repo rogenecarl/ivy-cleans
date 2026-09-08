@@ -8,13 +8,8 @@ import { saveNotesAction } from '../lead-actions'
 
 type SaveState = { savedAt: number } | null
 
-/*
- * Wraps the exact same saveNotesAction(id, formData) the old plain <form>
- * called -- useActionState just gives this a return value to key a toast off
- * of. `savedAt` (not a boolean) so a second identical save still produces a
- * new value and the effect fires again; a plain `true` would look unchanged
- * to React between two successful saves.
- */
+// same saveNotesAction as before; useActionState gives it a return value to key a toast off. `savedAt`, not a
+// boolean, so a second identical save fires the effect again.
 export function NotesForm({ id, notes }: { id: string; notes: string }) {
   const [state, formAction] = useActionState<SaveState, FormData>(async (_prev, formData) => {
     await saveNotesAction(id, formData)

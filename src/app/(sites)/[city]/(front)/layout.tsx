@@ -14,11 +14,7 @@ export default async function FrontLayout({
 }) {
   const c = await cityFromParams(params);
   const { site, innerSite } = siteData(c);
-  /*
-   * The footer's "Quick Links" column — labels and order verbatim from the
-   * live footer (post-2342.css icon-list), built here so they go through
-   * cityHref like every other internal link. Identity for a live city.
-   */
+  // footer Quick Links, verbatim from post-2342.css, built here so they go through cityHref
   const quickLinks = [
     { label: "Home", href: cityHref(c, "/") },
     { label: "Blog", href: cityHref(c, "/blog") },

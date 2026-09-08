@@ -1,12 +1,5 @@
 // src/leads/email.ts
-/*
- * The notification body, as a pure function, so it can be asserted on without
- * a provider or a network.
- *
- * Values come from a public form and are interpolated into HTML, so every one
- * is escaped. Nothing here is customer-facing: this email goes to the operator
- * for the city the lead came from.
- */
+// the notification body as a pure function; every submitted value is escaped
 import type { LeadInput } from './types'
 
 export type LeadEmail = { subject: string; html: string; text: string }
@@ -19,15 +12,7 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
-/*
- * The plaintext half of a multipart email has no markup to escape, so a
- * newline is the only structural character a submitter controls: an
- * unsanitized value can inject what reads as a whole extra line — a forged
- * field or a forged "Open in dashboard" link — into the operator's inbox.
- * Collapse any run of CR/LF into a single space so a submitted value can
- * never start a new line. Applied to submitted values (and the lead's name,
- * for the subject) only — never to labels, which are fixed schema constants.
- */
+// plaintext has no markup to escape, so collapse CR/LF: a submitted value must never start a new line
 function collapseNewlines(value: string): string {
   return value.replace(/\r\n|\r|\n/g, ' ')
 }
@@ -35,13 +20,7 @@ function collapseNewlines(value: string): string {
 export function buildLeadEmail(args: {
   cityName: string
   lead: LeadInput
-  /**
-   * null when the deployment has no configured canonical origin
-   * (LEADS_DASHBOARD_ORIGIN unset -- see lead-actions.ts). A URL placed in an
-   * outbound email must never be guessed from request input, so the caller
-   * fails closed instead of deriving one from the Host header: this function
-   * renders no clickable link at all rather than an attacker-influenced one.
-   */
+  // null when LEADS_DASHBOARD_ORIGIN is unset: no link rather than one derived from request input
   dashboardUrl: string | null
 }): LeadEmail {
   const { cityName, lead, dashboardUrl } = args

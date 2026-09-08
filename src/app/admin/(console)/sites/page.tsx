@@ -37,15 +37,7 @@ import { SiteStatusChips } from './status-chips'
 import { SiteSearch } from './site-search'
 import { requireAdmin } from '@/lib/auth-server'
 
-/*
- * Dashboard. Reads the store directly (server component) rather than calling
- * listCitiesAction — an action is an RPC endpoint for the browser; on the
- * server the same work is a plain function call.
- *
- * force-dynamic because the whole list comes off disk and changes whenever the
- * operator does anything: a cached dashboard would show a city as GENERATING
- * after it went live.
- */
+// Sites list. Reads the store directly (server component). force-dynamic: the list changes with every operator action.
 export const dynamic = 'force-dynamic'
 
 /** Where the primary action for each row leads. */
@@ -64,33 +56,14 @@ export default async function SitesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  /*
-   * Own guard, in addition to the layout's — Sites and everything reached
-   * from it (new/generate/review) is admin-only per src/lib/access.ts, and a
-   * manager who is demoted mid-visit must not keep this screen working
-   * through a soft navigation the layout does not re-render for.
-   */
+  // own guard: admin-only
   await requireAdmin()
 
   const query = parseSiteQuery(await searchParams)
   const rows = await listCities()
 
-  /*
-   * Lead data is an ENHANCEMENT to this screen, not a prerequisite for it.
-   * The cities table -- reading from disk/Blob via listCities() above -- has
-   * nothing to do with the leads database and must keep working even when
-   * Postgres is unreachable (a Neon outage, or a fresh clone with no
-   * DATABASE_URL provisioned yet). Scoped to exactly these two store calls,
-   * not the JSX below: a genuine rendering bug must still throw, not get
-   * swallowed into a friendly banner.
-   *
-   * On failure: counts/settingsByCity stay empty and `leadsUnavailable`
-   * flips true, which suppresses the leads column and the readiness chips
-   * entirely below (see the row-rendering code) rather than computing them
-   * from empty data -- an empty read would otherwise report 0 leads and
-   * flag every live city as having no inbox, which is a lie, not a
-   * degradation.
-   */
+  // lead data is an enhancement: the cities table must survive a Postgres outage. On failure `leadsUnavailable`
+  // suppresses the leads column and readiness chips rather than computing them from empty data.
   let counts: Record<string, LeadCounts> = {}
   let settingsByCity: Record<string, SiteSettingsRecord> = {}
   let leadsUnavailable = false
@@ -102,27 +75,16 @@ export default async function SitesPage({
     ])
   } catch (err) {
     leadsUnavailable = true
-    // Loud on purpose: an operator sees the banner below, but only the logs
-    // say WHY. Never log lead contents here -- this catch only ever wraps
-    // the two aggregate/settings queries above, neither of which returns
-    // anything resembling a lead's PII, so the caught error itself is safe
-    // to log in full.
+    // loud: this catch only wraps the two aggregate queries, no PII
     console.error('AdminDashboard: lead data unavailable (leadCountsByCity/getSiteSettingsMany failed):', err)
   }
 
   const domains = domainsJson as DomainsIndex
 
-  /*
-   * Each row's derived facts, computed ONCE. The desktop table and the mobile
-   * cards below used to each recompute domain, lead counts and readiness from
-   * scratch, which is two places for the same rule to drift apart -- and the
-   * sort needs the readiness result anyway, before either renders.
-   */
+  // each row's derived facts, computed once for the table, the cards and the sort
   const viewRows = rows.map((row) => {
     const domain = domainFor(row.key, domains)
-    // null, not a zeroed-out fallback, when the store read failed -- computing
-    // either from empty counts/settings would render real-looking numbers and
-    // chips that are actually fabricated.
+    // null, not zeroes, when the store read failed
     const cityCounts = leadsUnavailable
       ? null
       : (counts[row.key] ?? { total: 0, unworked: 0, emailFailed: 0 })
@@ -142,9 +104,7 @@ export default async function SitesPage({
       readiness,
       primary: primaryLink(row),
       previewable: row.status === 'live' || row.status === 'draft',
-      // What sorts this row up the page. A site in `error` counts as a
-      // problem in its own right even when readiness is unavailable, which is
-      // exactly when it matters most.
+      // an `error` site is a problem even when readiness is unavailable
       problemCount: (readiness?.problems.length ?? 0) + (row.status === 'error' ? 1 : 0),
     }
   })
@@ -283,15 +243,7 @@ export default async function SitesPage({
                         )}
                       </TableCell>
                       <TableCell>
-                        {/*
-                          * One menu rather than three buttons per row. Five rows
-                          * of three put fifteen equally-weighted controls on
-                          * screen, which reads as noise and makes the row itself
-                          * hard to scan. The mobile cards below deliberately keep
-                          * the three buttons: there is room, they are already
-                          * thumb-sized, and collapsing them into one small target
-                          * would make touch worse rather than better.
-                          */}
+                        {/* one menu, not three buttons per row; the mobile cards keep the buttons (thumb-sized) */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

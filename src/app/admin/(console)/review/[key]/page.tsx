@@ -17,30 +17,15 @@ import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
 import { requireAdmin } from '@/lib/auth-server'
 
-/*
- * Review + publish. The heavy lifting is the preview link: the generated site
- * is a real, browsable copy of the product at /<key>, so this screen only has
- * to carry the three things the preview cannot do — fix the area list,
- * re-roll a stage, and go live.
- *
- * force-dynamic: every panel here reflects on-disk state the operator is
- * actively changing.
- */
-/**
- * Per-stage regenerate, hidden for now. See the block that reads it below —
- * the capability is built and tested, it is simply not on the screen while
- * the normal flow is being learned.
- */
+// Review + publish. The preview at /<key> does the heavy lifting; this screen fixes the area list, re-rolls a stage,
+// and goes live. force-dynamic.
+// per-stage regenerate, hidden for now (built and tested)
 const SHOW_REGENERATE = false
 
 export const dynamic = 'force-dynamic'
 
 export default async function ReviewPage({ params }: { params: Promise<{ key: string }> }) {
-  /*
-   * Own guard, in addition to the layout's — review and publish are
-   * admin-only per src/lib/access.ts, and a manager must not be able to
-   * reach this through a soft navigation the layout does not re-render for.
-   */
+  // own guard: admin-only
   await requireAdmin()
 
   const { key } = await params
@@ -69,9 +54,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
     )
   }
 
-  // The sidecar survives finalize and is deleted by publish, so its presence
-  // is exactly "this city can still be regenerated". Reused below to build
-  // the suburb chip metadata, so it's loaded once rather than twice.
+  // the sidecar's presence is exactly "this city can still be regenerated"; loaded once
   let hasDraft = true
   let draftResearch: ResearchOutput | undefined = undefined
   try {
@@ -80,15 +63,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
     hasDraft = false
   }
 
-  // Recomputed from the draft's research every render, never persisted: a
-  // stored score would drift the moment an operator edits the suburb list
-  // below, and a stale score on a decision screen is worse than no score.
-  // Keyed by slug so a row the operator added by hand -- one scoreSuburbs
-  // never saw -- simply has no entry, which SuburbsEditor renders as "not
-  // researched" rather than a wrong or borrowed score. 'skip' verdicts never
-  // appear here: applyUniquenessGate already dropped those suburbs from
-  // draft.research during the research stage (see stages.ts), before this
-  // list could ever reach the review screen.
+  // recomputed from the draft's research every render, keyed by slug; a hand-added row has no entry ("not researched").
+  // 'skip' never appears: the research stage already dropped those.
   const scored = draftResearch ? scoreSuburbs(draftResearch) : []
   const suburbMeta = Object.fromEntries(
     scored.map((s) => [s.suburb.slug, { score: s.score, verdict: s.verdict, reason: s.reason }]),
@@ -96,20 +72,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
 
   const isLive = doc.status === 'live'
 
-  /*
-   * What publish would refuse, computed HERE so the operator can see it
-   * before clicking rather than after.
-   *
-   * These same two checks already ran — but only inside publishCity, which
-   * means their findings arrived as an error message on a button press. The
-   * handoff's own decision (change-list.md, decision 3) put the block at
-   * publish specifically "so an operator can look at findings in the review
-   * screen first"; that second half was never wired up. This is it.
-   *
-   * Live cities only, matching publishCity: a draft is not a page Google can
-   * see, and comparing against one would let the order two operators happen
-   * to work in decide whose copy is "the duplicate".
-   */
+  // what publish would refuse, computed here so the operator sees it before clicking. Live cities only, as in publishCity.
   let duplication: Awaited<ReturnType<typeof checkCity>> = []
   let duplicationUnavailable = false
   try {
@@ -160,11 +123,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         </a>
       </Button>
 
-      {/*
-        * The answer to "can I publish this?", before the button. Renders
-        * nothing at all when there is nothing wrong — a panel that always
-        * says READY is one nobody reads.
-        */}
+      {/* renders nothing when nothing is wrong */}
       {!isLive &&
         (invisible.length > 0 ||
           duplication.length > 0 ||
@@ -218,21 +177,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />
       </Panel>
 
-      {/*
-        * HIDDEN, not deleted — flip SHOW_REGENERATE to bring it back.
-        *
-        * It is the only way to fix one bad stage without deleting the city
-        * and re-paying for research: ~$0.50 to rewrite the area pages
-        * against ~$3 to rebuild everything, most of which was fine. That
-        * matters whenever a prompt changes, because every existing city's
-        * copy goes stale and this is the cheap way to refresh one stage of
-        * it.
-        *
-        * Off for now because it is a repair tool on a screen whose job is
-        * read-then-publish, and it had not been needed yet. Gated behind a
-        * named constant rather than commented out so the JSX still
-        * typechecks and cannot rot silently against a stage-list change.
-        */}
+      {/* HIDDEN, not deleted — flip SHOW_REGENERATE. The cheap way to refresh one stage after a prompt change. */}
       {SHOW_REGENERATE && (
         <Panel title="Regenerate copy">
           {hasDraft ? (

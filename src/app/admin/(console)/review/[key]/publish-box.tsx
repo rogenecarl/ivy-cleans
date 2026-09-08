@@ -20,32 +20,13 @@ import { Label } from '@/components/ui/label'
 import { publishAction } from '../../actions'
 import { ErrorText } from '../../../ui'
 
-/*
- * Publish. Two irreversible-ish things happen at once (the city goes live and
- * its draft sidecar is retired), so this is confirmed before it runs.
- *
- * Stage 3: the confirmation moved from window.confirm() to an AlertDialog so
- * the operator sees exactly what is about to happen — including whether a
- * domain will be attached — rather than a generic "are you sure". The
- * dialog's copy is computed from the domain field at the moment the trigger
- * is clicked, same as the confirm() message it replaces.
- *
- * The domain is optional and separate from the DNS work: publishCity() maps
- * the host in content/_domains.json so the proxy will route it, but attaching
- * that domain to the Vercel project is a manual step outside this app. The
- * success panel says so, because a city that publishes cleanly and then does
- * not answer on its domain is the one failure mode this screen can predict.
- */
+// Publish, confirmed in an AlertDialog that says whether a domain will be attached. Mapping a host in _domains.json
+// is not the same as attaching it to the Vercel project; the success panel says so.
 
 export default function PublishBox({ cityKey, city }: { cityKey: string; city: string }) {
   const router = useRouter()
   const [domain, setDomain] = useState('')
-  /*
-   * OFF by default, unlike the handoff's "default on for new cities". This
-   * checkbox spends real money the moment Publish is confirmed — buying a
-   * domain is the one irreversible thing in this admin — so turning it on is
-   * a decision the operator makes per city, not one they inherit.
-   */
+  // OFF by default: buying a domain spends real money
   const [buyDomain, setBuyDomain] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -62,9 +43,7 @@ export default function PublishBox({ cityKey, city }: { cityKey: string; city: s
       setError(result.error)
       return
     }
-    // A bought domain is routed but not yet observed serving — DNS and TLS
-    // take minutes and publish does not wait for them. checkProvisioningAction
-    // is what clears this, polled from the panel below.
+    // bought domain routed but not yet observed serving; the poll below clears this
     setPublished({ domain: host, provisioning: buyDomain })
     router.refresh()
   }

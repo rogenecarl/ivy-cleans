@@ -1,30 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/*
- * shadcn/ui theming, matching trip-scheduler's Tailwind v4 setup (new-york
- * style, neutral base color, cssVariables: true).
- *
- * CRITICAL: this is admin-only tooling grafted onto a pixel-fidelity clone of
- * a live site. The standard shadcn install writes a `@layer base` block that
- * sets `body` background/foreground and a `* { border-color }` reset at
- * global scope — dropped in as-is, that repaints every public page. So the
- * split here is deliberate:
- *   - Theme variables (`--background`, `--border`, etc.) live on `:root`
- *     below. A custom property has no visual effect until a class reads it,
- *     and no public page uses shadcn class names (bg-primary, text-border,
- *     ...), so defining them is safe. It's also required: shadcn's Dialog,
- *     DropdownMenu, Tooltip and Toast portal to `document.body`, outside the
- *     admin wrapper, so the variables must be global to reach them.
- *   - The `@layer base` resets (`* { border-color }`, `body { background }`)
- *     are NOT here — they live under `[data-admin-root]` in
- *     src/app/admin/admin.css instead, so only the admin
- *     shell is repainted.
- *   - `@custom-variant dark` is scoped to a `.dark` ancestor class, which
- *     this stage never adds (no dark mode toggle yet) — so `dark:` utilities
- *     in the shadcn components compile but stay inert instead of reacting to
- *     the OS `prefers-color-scheme`.
- */
+/* shadcn theme variables only. The @layer base resets (border-color, body background) are NOT here — they live
+   under [data-admin-root] in admin.css so the public site is not repainted. `dark` is scoped to a .dark class. */
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -49,9 +27,7 @@
   --ring: oklch(0.708 0 0);
 }
 
-/* Defined for later (stage 1 ships no dark mode toggle, no theme provider,
-   no persistence) so a future stage can wire up `.dark` without redoing the
-   palette. */
+/* dark palette, defined for later; no toggle yet */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -101,34 +77,10 @@
 }
 
 @theme {
-  /*
-   * Elementor's device breakpoints, which every reference stylesheet is written
-   * against: mobile is `max-width:767px`, tablet `max-width:1024px`, so desktop
-   * starts at *1025*. Tailwind's stock `lg` (min-width:1024px) applied our
-   * desktop styles one pixel early — at a 1024px viewport the live site is still
-   * on tablet (probe: live h1 40px/full-width vs ours 72px/49% column).
-   * `xl` and `2xl` map to the page CSS's `max-width:1280px` and
-   * `max-width:1440px` steps the same way.
-   *
-   * The whole scale is re-declared (after `--breakpoint-*: initial`) because
-   * tailwind emits breakpoint media queries in *registration* order: overriding
-   * only lg/xl/2xl left the stock `min-width:768px` block emitted last, so `md:`
-   * utilities beat `lg:` ones at 1280+ (probe: our h1 came out 33.28px instead of
-   * 59.904px at 1440). Declaring them all here keeps the cascade ascending.
-   */
+  /* Elementor breakpoints: mobile <=767, tablet <=1024, desktop from 1025; xl/2xl at 1280/1440.
+     The whole scale is re-declared so the media queries emit in ascending order. */
   --breakpoint-*: initial;
-  /*
-   * Stage 3 of the admin's shadcn redesign added `sm:` back. The public site
-   * never uses it (grep confirms zero `sm:` classes outside admin
-   * and the shadcn primitives under components/ui, which nothing else imports),
-   * so this is a no-op for every public route — Tailwind only emits a
-   * breakpoint's media query for utility classes actually found in scanned
-   * content, and none exist outside the admin. Without it, `sm:` utilities
-   * (shadcn's own default breakpoint, used throughout the admin for
-   * "44px touch target on mobile, tighter on desktop") were silently dropped
-   * admin-wide: `--breakpoint-*: initial` above clears Tailwind's stock scale
-   * entirely, and only md/lg/xl/2xl were ever re-declared beneath it.
-   */
+  /* sm: is admin-only; nothing on the public site uses it */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1025px;
@@ -144,11 +96,7 @@
   --color-icongrey: #69727d;
 }
 
-/*
- * The live site drives every rem-based size from a viewport-stepped root
- * font-size (Elementor kit custom CSS). Reproducing the ladder is what makes
- * the rem values copied out of post-2035.css render at the real pixel sizes.
- */
+/* the live site's viewport-stepped root font-size (Elementor kit); rem values from post-2035.css depend on it */
 html {
   font-size: 62.5%;
 }
@@ -188,30 +136,14 @@ p {
   line-height: 1.5;
 }
 
-/*
- * Elementor boxed container. post-2035.css custom CSS:
- *   body .elementor-section.elementor-section-boxed > .elementor-container
- *     { max-width: 132rem; }
- * It is a *rem* cap, so it rides the root font-size ladder above and the outer
- * width changes with the viewport step — live probe: 1320 @1920, 1189.05 @1600,
- * 1098.23 @1440/1366, 1056 @1280/1152, 100% at <=1024. (A fixed 1098px only
- * matched the 1440 step.) The 10px padding is the widget-wrap's own gutter,
- * which the live site keeps all the way down to mobile — at a 390px viewport
- * its headings measure x=10 / width=370.
- */
+/* Elementor boxed container: max-width 132rem (post-2035.css), plus the widget-wrap's 10px gutter */
 .ec {
   margin-inline: auto;
   max-width: 132rem;
   padding: 10px;
 }
 
-/*
- * /home and /cleaning-services render through Elementor's *section* template,
- * whose boxed container is the kit's own `--container-max-width: 119rem`
- * (post-6.css "Font Sizing" block). Because that width is in rem it tracks the
- * root font-size ladder above — 990px at the 1440 step, where the front page's
- * flexbox containers stay at 1098px. Scoped so `/` is untouched.
- */
+/* /home and /cleaning-services use the kit's 119rem container (post-6.css); scoped so / is untouched */
 .tpl-inner .ec {
   max-width: 119rem;
 }

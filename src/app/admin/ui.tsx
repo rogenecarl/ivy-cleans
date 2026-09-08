@@ -8,18 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { VariantProps } from 'class-variance-authority'
 
-/*
- * Presentational scraps shared by the admin screens, re-implemented on top of
- * shadcn/ui (Stage 1 of the redesign). Server-safe (no hooks, no event
- * handlers) so both server and client components can render them.
- *
- * Stage 3 finished the migration onto real shadcn components: every screen
- * now uses <Button>, <Input>, <Label> directly, and the BTN / BTN_PRIMARY /
- * INPUT / LABEL plain-class-string constants that used to keep unconverted
- * screens rendering during the staged migration are gone. Nothing in this
- * file should go back to a class-string export — a future screen should use
- * the shadcn components, not reintroduce that pattern.
- */
+// Presentational scraps shared by the admin screens, on shadcn/ui. Server-safe. No class-string exports.
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant']
 
@@ -98,21 +87,8 @@ export function readinessProblemLabel(problem: ReadinessProblem): string {
   return PROBLEM_LABEL[problem]
 }
 
-/**
- * The inline "something is wrong with this site" marker.
- *
- * Replaced a whole Config column of READY/NO INBOX chips. That column spent a
- * column's width to say "READY" on every row, and said it WRONGLY on drafts --
- * siteReadiness() exempts an unlaunched city from the domain and inbox checks,
- * so a draft with nothing configured scored zero problems and rendered READY,
- * which reads as "ready to go live" when it means "nothing has been checked
- * yet". NO DOMAIN also duplicated the Domain column two cells to its left.
- *
- * What was worth keeping is the signal itself, because the list sorts sites
- * with problems to the top -- without a visible marker that ordering looks
- * arbitrary. Renders nothing at all when there is nothing wrong, so a healthy
- * table is completely quiet.
- */
+// inline "something is wrong with this site" marker; renders nothing when nothing is wrong.
+// Replaced a READY/NO INBOX column that said READY on unchecked drafts.
 export function ReadinessMarker({ readiness }: { readiness: Readiness | null }) {
   if (readiness === null || readiness.problems.length === 0) return null
   const names = readiness.problems.map(PROBLEM_LABEL_TITLE).join(' · ')
@@ -135,17 +111,7 @@ function PROBLEM_LABEL_TITLE(problem: ReadinessProblem): string {
   return 'Some notification emails failed to send'
 }
 
-/**
- * Designed empty state (Stage 2): an icon, one line of explanation, and an
- * optional action -- for a table/list that has zero rows, as distinct from
- * ErrorText/Alert above, which is for "the data couldn't be read at all."
- * This dashboard starts empty and stays sparse, so "no rows" grey text is
- * not an acceptable substitute here.
- *
- * `action` is a ReactNode (typically a <Link>), not an onClick prop, so this
- * stays server-safe like every other export in this file -- a page can drop
- * it in without becoming a client component.
- */
+// designed empty state for a zero-row list. `action` is a ReactNode so this stays server-safe.
 export function EmptyState({
   icon: Icon,
   title,
@@ -171,19 +137,7 @@ export function EmptyState({
   )
 }
 
-/**
- * One headline number, with an optional line of context under it.
- *
- * `hint` is not decoration. "3 waiting" and "3 waiting, oldest 4 hr" lead to
- * different actions, and a rate without its denominator ("57%") invites a
- * confidence that "4 of 7 decided" correctly withholds. Every figure that can
- * mislead on its own carries the thing that stops it.
- *
- * `tone` is what makes the alarm row readable at a glance: an alarm tile is
- * only coloured when the number is actually non-zero, so a healthy dashboard
- * is uniformly quiet and any colour at all means something needs attention.
- * Never colour a zero -- an always-red tile is one nobody reads.
- */
+// one headline number with context. `tone` colours an alarm tile only when non-zero — never colour a zero.
 export function StatPill({
   icon: Icon,
   label,

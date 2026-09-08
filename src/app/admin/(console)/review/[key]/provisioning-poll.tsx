@@ -5,22 +5,8 @@ import { Loader2, RotateCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { checkProvisioningAction } from '../../actions'
 
-/*
- * "Is the domain answering yet?", asked from the browser.
- *
- * publishCity buys the domain, points DNS at the host and routes it — then
- * returns. It does not wait for DNS to propagate or for the host to issue a
- * TLS certificate, because that takes minutes and publish is reached through
- * a server action: a serverless function is killed long before that. It is
- * the same constraint that forced the suburb stage into one request per area.
- *
- * So the waiting lives here, where minutes cost nothing. Each poll is one
- * config call on the server; when it comes back live, checkProvisioningLogic
- * clears `doc.provisioning` and this stops.
- *
- * Twenty seconds between polls: DNS propagation is measured in minutes, and a
- * tighter loop would spend the host's rate limit to learn nothing sooner.
- */
+// "Is the domain answering yet?", polled from the browser every 20s: publishCity returns without waiting for DNS/TLS
+// (serverless timeout). checkProvisioningLogic clears doc.provisioning when live, and this stops.
 const EVERY_MS = 20_000
 
 export function ProvisioningPoll({ cityKey, domain }: { cityKey: string; domain: string }) {

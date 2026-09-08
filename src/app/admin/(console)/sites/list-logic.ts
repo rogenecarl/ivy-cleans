@@ -1,16 +1,5 @@
 // src/app/admin/(console)/sites/list-logic.ts
-/*
- * The Sites LIST's filtering, counting and ordering, as pure functions.
- *
- * Separate from logic.ts, which parses the notify-email settings form: that
- * module is about one site's configuration, this one is about finding a site
- * among many. Two unrelated jobs, two files.
- *
- * Filters live in the URL rather than in client state, matching the Leads
- * screen: a filtered view stays bookmarkable, the back button works, and the
- * table itself can stay a server component with its domain/readiness/lead-count
- * computation intact.
- */
+// The Sites list's filtering, counting and ordering as pure functions. Filters live in the URL, like the Leads screen.
 import type { CityStatus } from '@/pipeline/admin-logic'
 import { ADMIN_SITES } from '@/lib/admin-routes'
 
@@ -38,24 +27,12 @@ function firstParam(value: string | string[] | undefined): string | null {
   return value ?? null
 }
 
-/**
- * Reads the URL into a SiteQuery, discarding anything unrecognised.
- *
- * An unknown status is dropped rather than passed through, so a hand-edited
- * or stale URL shows every site instead of silently showing none -- an empty
- * table reads as "there are no sites", which is a worse lie than ignoring a
- * bad parameter.
- */
+// URL -> SiteQuery; an unknown status is dropped so a stale URL shows every site rather than none
 export function parseSiteQuery(params: Record<string, string | string[] | undefined>): SiteQuery {
   const rawStatus = firstParam(params.status)
   const status = SITE_STATUSES.find((s) => s === rawStatus) ?? null
   const q = (firstParam(params.q) ?? '').trim()
-  /*
-   * Anything that is not a positive whole number becomes page 1 rather than
-   * NaN or 0. A NaN page silently slices to an empty array, which renders as
-   * "no sites match" -- a hand-mangled URL should show the first page, not
-   * claim the list is empty.
-   */
+  // anything but a positive whole number is page 1 (NaN would slice to empty)
   const rawPage = Number(firstParam(params.page) ?? '1')
   const page = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage : 1
   return { status, q, page }
@@ -84,12 +61,7 @@ export function siteFilterHref(
     const parsed = Number(value ?? '1')
     next.page = Number.isInteger(parsed) && parsed >= 1 ? parsed : 1
   } else {
-    /*
-     * CHANGING A FILTER RESETS TO PAGE 1. Without this, narrowing from 200
-     * sites to 3 while on page 4 lands on an empty page that reads as "no
-     * sites match these filters" -- the filter looks broken when it worked
-     * perfectly.
-     */
+    // changing a filter resets to page 1
     next.page = 1
     if (key === 'status') {
       next.status = (SITE_STATUSES.find((s) => s === value) ?? null) as CityStatus | null
@@ -101,14 +73,7 @@ export function siteFilterHref(
   return `${ADMIN_SITES}${search ? `?${search}` : ''}`
 }
 
-/**
- * One page of rows, plus the numbers the footer prints.
- *
- * `page` is CLAMPED to the available range rather than trusted: rows can
- * disappear between the URL being built and the page rendering (a site
- * published, a filter applied), and a page number past the end would slice to
- * nothing and read as an empty list.
- */
+// one page of rows; `page` is clamped since rows can disappear between URL and render
 export function paginate<T>(
   rows: T[],
   page: number,
@@ -139,10 +104,7 @@ export type FilterableSite = {
   domain: string | null
 }
 
-/**
- * Applies the query. Search matches city name, url key or domain, so an
- * operator can find a site by whichever of the three they happen to remember.
- */
+// search matches city name, key or domain
 export function filterSites<T extends FilterableSite>(rows: T[], query: SiteQuery): T[] {
   const q = query.q.toLowerCase()
   return rows.filter((row) => {
@@ -156,9 +118,7 @@ export function filterSites<T extends FilterableSite>(rows: T[], query: SiteQuer
   })
 }
 
-/** Every status with at least the zero, for the filter chips. Counts the
- * UNFILTERED set by status, for the same reason the Leads chips do: counting
- * the filtered set would zero every chip but the selected one. */
+/** Counts per status over the UNFILTERED set, for the chips. */
 export function siteStatusCounts(rows: { status: CityStatus }[]): Record<CityStatus, number> {
   const counts: Record<CityStatus, number> = {
     live: 0,
@@ -171,18 +131,7 @@ export function siteStatusCounts(rows: { status: CityStatus }[]): Record<CitySta
   return counts
 }
 
-/**
- * Sites with something wrong first, then everything else alphabetically.
- *
- * Recency is the right order for leads; it is the wrong one here. The only
- * reason to open this screen is a site that is broken or not launched, and a
- * city with NO INBOX buried alphabetically under twenty healthy ones is how it
- * stays broken. `problemCount` is supplied by the caller because computing it
- * needs lead data this module has no business importing.
- *
- * Stable and total: ties break on city name, so the order cannot change
- * between two renders of the same data.
- */
+// problems first, then alphabetical; stable and total. `problemCount` supplied by the caller.
 export function sortProblemsFirst<T extends { city: string; problemCount: number }>(
   rows: T[],
 ): T[] {
@@ -191,24 +140,7 @@ export function sortProblemsFirst<T extends { city: string; problemCount: number
   )
 }
 
-/**
- * Which status chips to render.
- *
- * `live` and `draft` are the steady states every install has, so they always
- * show -- a zero there is real information ("nothing is published yet").
- *
- * The other three are not a workflow anyone tracks. `generating` exists for
- * about two minutes while a city is being built; `draft-unfinalized` and
- * `error` are recovery states. On a healthy system all three sit at zero
- * permanently, and three chips that always read "0" are decoration. They
- * appear only when they have something in them -- the same rule the
- * dashboard's alarm tiles follow, so a chip showing up at all means
- * something happened.
- *
- * A status that is CURRENTLY SELECTED always shows, even at zero. Hiding it
- * would strand the operator on a filtered view with no chip to show what the
- * filter is or to click back out of it.
- */
+// live and draft always show; generating / draft-unfinalized / error only when non-zero — except the selected one, which always shows
 export function visibleStatuses(
   counts: Record<CityStatus, number>,
   active: CityStatus | null,

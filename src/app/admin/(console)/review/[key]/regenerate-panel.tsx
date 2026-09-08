@@ -9,31 +9,9 @@ import { ADMIN_BASE } from '@/lib/admin-routes'
 import { ErrorText } from '../../../ui'
 import { stageName } from '../../../stage-names'
 
-/*
- * Per-stage regenerate. Regenerating `research` clears front, home and deep
- * as well (stages.ts: they consumed the research they were written against),
- * so this warns before doing it and then sends the operator to the progress
- * screen, which re-runs whatever is now missing. The regenerate call has
- * ALREADY happened by then — the progress screen reads the sidecar's `done`
- * list and picks up exactly the cleared stages, so nothing is passed between
- * the two screens.
- *
- * The other three stages rewrite themselves in place, but a regenerate only
- * touches the DRAFT sidecar — the preview renders content/<key>.json. So each
- * one is followed by a finalize, which re-assembles that document from the
- * refreshed draft; without it the operator would regenerate, reload the
- * preview, and see the old copy.
- *
- * Two independent things make that finalize safe on a city that is already
- * live. This panel renders only while a sidecar exists, and publish retires
- * the sidecar — so in the normal flow a live city has no Regenerate buttons
- * at all. That is a UI condition, though, and a partly-completed publish (doc
- * written 'live', sidecar delete interrupted) would break it, so it is not
- * load-bearing on its own: finalizeDraft carries an existing document's
- * `status` and `domain` forward rather than resetting them, which means a
- * finalize refreshes copy and cannot demote a live city no matter which
- * screen calls it. Both are tested.
- */
+// Per-stage regenerate. Regenerating research clears the dependent stages and sends the operator to the progress
+// screen. The other stages are followed by a finalize so the preview shows the new copy; finalizeDraft carries
+// status/domain forward, so that can't demote a live city.
 
 type StageMeta = { id: string; label: string }
 
@@ -95,9 +73,7 @@ export default function RegeneratePanel({
             title={stage.label}
           >
             {running === stage.id && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-            {/* stageName, not stage.id — "Regenerate suburb" put a database
-                field name on a button, singular, for something that rewrites
-                ten area pages. Same short names the generate screen uses. */}
+            {/* stageName, not stage.id: "Regenerate suburb" put a field name on a button */}
             {running === stage.id
               ? `Regenerating ${stageName(stage.id, stage.label).toLowerCase()}…`
               : `Regenerate ${stageName(stage.id, stage.label).toLowerCase()}`}

@@ -19,30 +19,9 @@ import { ADMIN_BASE } from '@/lib/admin-routes'
 import { STAGE_EXPECTED, stageName } from '../../../stage-names'
 import { ErrorText, Pill } from '../../../ui'
 
-/*
- * The progress screen's engine. One server-action call per stage, in order,
- * driven from the browser — NOT one long request that runs the whole
- * pipeline. Each stage is a research or writing call to Claude that can take
- * a minute; a single request doing all four would sit right on top of a
- * serverless duration cap, and a timeout halfway through would leave the
- * operator with no idea which stages had landed. Per-stage calls also make
- * every failure individually retryable, and the draft sidecar records `done`
- * server-side, so a reload picks up exactly where this left off.
- *
- * `cityKey`, not `key`: `key` is reserved by React — passed as a prop it would
- * be consumed as the reconciliation key and never reach this component.
- *
- * The stage list is a prop rather than an import because src/pipeline/stages.ts
- * reaches the filesystem through the draft store; it cannot cross into a
- * client bundle.
- *
- * Stage 3 (shadcn redesign): everything below the polling/execution effects
- * is presentational only. The polling interval, how progress events are
- * read, the status-icon glyphs (✓/⏳/✗/•) and the activity feed's event
- * labels are UNCHANGED — scripts/admin-e2e.mjs asserts on the glyphs and the
- * data-role="status-icon"/"skill-name" hooks, and the labels themselves come
- * straight from the running pipeline, not from this component.
- */
+// One server-action call per stage, driven from the browser: one long request would hit the serverless cap and
+// leave no idea which stages landed. The sidecar records `done`, so a reload resumes. `cityKey`, not `key` (reserved
+// by React). Stage list is a prop because stages.ts reaches the filesystem. Glyphs/data-role hooks are asserted by scripts/admin-e2e.mjs.
 
 type StageMeta = { id: string; label: string }
 
@@ -54,20 +33,7 @@ type Props = {
 
 type Phase = 'idle' | 'running' | 'error'
 
-/**
- * How long a stage took, measured in the browser as the runner drives it.
- *
- * Only stages run in THIS session appear here. A reload mid-pipeline knows
- * from the draft which stages are done but not how long they took, and
- * inventing a duration for them would be worse than leaving the cell blank.
- *
- * Deliberately NOT a model-call count. The client counts REQUESTS, and the
- * two are not the same number — the research stage is one request and two
- * model calls (search, then the structuring pass). Showing requests under a
- * heading that reads as calls would understate what a run costs, so the only
- * per-item number here is the one that is exactly right: how many areas or
- * service pages the loop has left.
- */
+// how long a stage took in THIS session; no invented durations for stages done before a reload. Not a model-call count.
 type StageTiming = { ms: number }
 
 /** m:ss. Every stage is seconds-to-minutes; nothing here runs for an hour. */
@@ -83,14 +49,8 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
   const [finalizePhase, setFinalizePhase] = useState<Phase | 'done'>('idle')
   const [finalizeError, setFinalizeError] = useState<string | null>(null)
   const [snapshot, setSnapshot] = useState<ProgressSnapshot | null>(null)
-  /*
-   * Per-area progress for the suburb stage. That stage makes one model call
-   * per area, and the client drives that loop (see below), so it is the only
-   * place that knows "8 of 12, writing Sugar Land" while it is happening.
-   */
-  /* Per-item progress for the two stages that make one model call per item
-   * -- suburb (per area) and service (per service page). One piece of state
-   * because only one stage runs at a time. */
+  // per-area progress for the suburb stage: the client drives that loop
+  // per-item progress for suburb (per area) and service (per page); one state since only one stage runs at a time
   const [itemProgress, setItemProgress] = useState<{ done: number; total: number; name: string } | null>(null)
 
   /* Measured per stage as this session runs it — see StageTiming. */
@@ -99,9 +59,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
   const [now, setNow] = useState(() => Date.now())
   /* When the CURRENT stage started, so its row counts its own time. */
   const [stageStartedAt, setStageStartedAt] = useState<number | null>(null)
-  /* State, not refs: both are READ during render (the ledger line and each
-   * running row's elapsed time), and a ref read in render is a stale value
-   * React never re-renders for. */
+  // state, not refs: both are read during render
   const [runStartedAt, setRunStartedAt] = useState<number | null>(null)
   /* Frozen when the run ends, so the total stops rather than counting on. */
   const [runEndedAt, setRunEndedAt] = useState<number | null>(null)
@@ -112,13 +70,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
     return () => clearInterval(id)
   }, [current])
 
-  /*
-   * A single in-flight guard for the whole runner. React 19's dev-mode double
-   * effect invocation would otherwise start two passes over the same stages,
-   * and a second `runStage` for a stage already in flight would call the model
-   * twice — money, not just noise. A ref (not state) because the check has to
-   * see the write immediately, before the next render.
-   */
+  // one in-flight guard: React 19 dev double-invokes effects, and a second runStage would call the model twice
   const busy = useRef(false)
 
   const finalize = useCallback(async () => {
@@ -133,12 +85,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
     }
   }, [cityKey])
 
-  /*
-   * Walk the areas the suburb stage still owes, one request each. The list
-   * comes from the server because it depends on research, which has only just
-   * run. Areas already written are excluded, so a resume after a failure pays
-   * for exactly what is left.
-   */
+  // walk the areas still owed, one request each; the list comes from the server since it depends on research
   const runSuburbAreas = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
     const pending = await pendingSuburbsAction(cityKey)
     if (!pending.ok) return { ok: false, error: pending.error }
@@ -156,13 +103,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
     return runStageAction(cityKey, 'suburb')
   }, [cityKey])
 
-  /*
-   * The same walk for the six service pages. Unlike the areas, this list does
-   * not depend on research -- the same seven services exist in every city --
-   * but the reason for driving it one request at a time is identical: six
-   * sequential model calls in one request is minutes, and a serverless
-   * function is killed long before that.
-   */
+  // the same walk for the service pages
   const runServicePages = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
     const pending = await pendingServicesAction(cityKey)
     if (!pending.ok) return { ok: false, error: pending.error }
@@ -197,14 +138,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
           setStageStartedAt(stageStart)
           setNow(stageStart)
 
-          /*
-           * suburb and service are driven ONE ITEM PER REQUEST. Twelve areas
-           * is twelve sequential model calls, six service pages is six; done
-           * server-side that is minutes in a single request, and a serverless
-           * function is killed long before that. One item per request is
-           * ~20s, inside any platform limit, and it is also the only way the
-           * client can show which area or page is being written.
-           */
+          // suburb and service run one item per request (~20s each); minutes in one request is killed
           const result =
             stage.id === 'suburb'
               ? await runSuburbAreas()
@@ -242,13 +176,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
     void run(initialDone)
   }, [run, initialDone])
 
-  /*
-   * Display-only polling of the activity log — NOT part of the execution
-   * engine above. StageRunner's own sequential loop is still what drives
-   * generation forward; this effect only fetches what the server has
-   * recorded so far so the skill cards can show it. Stops once finalize has
-   * landed, since nothing further will be appended to the log after that.
-   */
+  // display-only polling of the activity log; stops once finalize has landed
   useEffect(() => {
     if (finalizePhase === 'done') return
     let stopped = false
@@ -273,11 +201,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
 
   return (
     <>
-      {/*
-        * No headline progress bar. Five rows with their own state already say
-        * how far along the run is, and a second bar restating it is chrome
-        * competing with the content it summarises.
-        */}
+      {/* no headline progress bar: five rows already say how far along the run is */}
       <ol className="divide-y divide-border/40">
         {stages.map((stage) => {
           const isDone = done.includes(stage.id)
@@ -287,22 +211,9 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
           const isFailed = failed?.stage === stage.id
           // The glyphs are load-bearing: scripts/admin-e2e.mjs polls
           // [data-role="status-icon"] for '✓' to know the run finished.
-          /*
-           * '⏳' is gone for the RUNNING row: it is a static emoji that does
-           * not move, which is most of what "this looks stuck" actually means
-           * at five seconds in. A real spinner replaces it below.
-           *
-           * The other three glyphs stay text, and are load-bearing:
-           * scripts/admin-e2e.mjs polls [data-role="status-icon"] for '✓' to
-           * know the run finished and breaks on '✗'.
-           */
+          // a real spinner for the running row; the other glyphs are polled by scripts/admin-e2e.mjs
           const icon = isDone ? '✓' : isFailed ? '✗' : isRunning ? '' : '•'
-          /*
-           * Colour ONLY where it changes what you would do. A finished stage
-           * is not green: when all five land, an all-green list carries no
-           * information at all, and the eye stops reading colour that is
-           * always there. Running and failed are the two states worth a hue.
-           */
+          // colour only for running and failed: an all-green list says nothing
           const tone = isFailed
             ? 'text-destructive'
             : isRunning
@@ -312,26 +223,19 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
           const timing = timings[stage.id]
           const elapsed = timing?.ms
 
-          // Every event this stage has logged so far, oldest first — 'error'
-          // events are excluded here because the `isFailed` block above
-          // already owns error display.
+          // events oldest first; 'error' is shown by the isFailed block
           const stageEvents: ProgressEvent[] = snapshot?.ok
             ? snapshot.events.filter((e) => e.stage === stage.id && e.kind !== 'error')
             : []
           const recentEvents = stageEvents.slice(-3)
           const searchCount = stageEvents.filter((e) => e.kind === 'search').length
-          // The finished summary line: research logs a 'found' digest before
-          // its generic 'done' marker ("Research complete"), so 'found' wins
-          // when present; front/home/deep only ever log 'done', which already
-          // carries their digest.
+          // research logs a 'found' digest before its 'done' marker, so 'found' wins when present
           const summaryEvent =
             [...stageEvents].reverse().find((e) => e.kind === 'found') ??
             [...stageEvents].reverse().find((e) => e.kind === 'done')
           const research = stage.id === 'research' && snapshot?.ok ? snapshot.research : null
 
-          // No background tint on the running row: it already carries a
-          // coloured glyph, a bolder name, a moving progress bar and a live
-          // timer. A fifth signal for one state is decoration.
+          // no tint on the running row: it already has four signals
           return (
             <li key={stage.id} className="py-2.5">
               <div className="flex items-start gap-3 px-1">
@@ -359,18 +263,9 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                     >
                       {name}
                     </p>
-                    {/* The numeric column. Monospace and tabular so counts
-                        and timings form a straight edge down the list —
-                        the one place a mono face earns its keep here. Two
-                        spans with a gap, not one string with spaces in it:
-                        HTML collapses runs of whitespace. */}
+                    {/* numeric column: mono + tabular so counts line up; two spans since HTML collapses whitespace */}
                     <span className="flex shrink-0 items-baseline gap-4 font-mono text-[0.75rem] tabular-nums text-muted-foreground">
-                      {/*
-                        Research has no honest denominator — how many searches
-                        it uses is the model's call, and a bar filling at an
-                        invented rate is a promise this screen cannot keep.
-                        The COUNT is real and it moves, so show that instead.
-                      */}
+                      {/* research has no honest denominator: show the count, not a bar */}
                       {isRunning && searchCount > 0 && (
                         <span>
                           {searchCount} search{searchCount === 1 ? '' : 'es'}
@@ -390,10 +285,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                               : ''}
                         </span>
                       ) : (
-                        // Not started yet: say how long it usually takes. A
-                        // number to wait against is what stops a slow stage
-                        // reading as a stuck one — research is ~3 minutes and
-                        // it is the first thing an operator ever sees.
+                        // not started: say how long it usually takes so slow doesn't read as stuck
                         <span className="w-16 text-right opacity-60">
                           {STAGE_EXPECTED[stage.id] ?? ''}
                         </span>
@@ -401,14 +293,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                     </span>
                   </div>
 
-                  {/*
-                    suburb and service each take minutes and, before this,
-                    showed a spinner with no sign of movement for the whole
-                    run. The count comes from the client's own per-item
-                    loop, so it is accurate the moment it changes — and it
-                    is printed once, in the numeric column above, rather
-                    than again beside the bar.
-                  */}
+                  {/* per-item bar for suburb and service; the count is printed once, in the numeric column */}
                   {items && items.total > 0 && (
                     <div className="mt-1.5 flex items-center gap-2" data-role="area-progress">
                       <div className="h-[3px] w-32 shrink-0 overflow-hidden rounded-full bg-muted">
@@ -477,10 +362,7 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
         })}
       </ol>
 
-      {/*
-        * The ledger. One rule, at the foot of the list, carrying the two
-        * numbers that describe the whole run rather than any one stage.
-        */}
+      {/* the ledger: two numbers for the whole run */}
       <div className="mt-3 flex items-baseline justify-between border-t border-border pt-2.5">
         <span className="text-[0.75rem] text-muted-foreground">
           {done.length} of {stages.length} stages

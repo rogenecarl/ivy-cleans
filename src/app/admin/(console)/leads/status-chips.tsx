@@ -3,23 +3,8 @@ import { LEAD_STATUSES, type LeadQuery, type LeadStatusCounts } from '@/leads/ty
 import { cn } from '@/lib/utils'
 import { filterHref } from './logic'
 
-/*
- * The pipeline, as the primary filter control.
- *
- * These replaced a row of read-only stat tiles. As decoration a count is hard
- * to justify -- "Lost 0" tells an operator with two leads nothing -- but as
- * the thing you click to narrow the list, the same number earns its place: it
- * says how many rows the filter would leave. That also retired the separate
- * Status dropdown, which did the identical job with none of the counts.
- *
- * Every stage is rendered, zeros included, and in pipeline order rather than
- * by size. A gap where "Quoted" should be would be read as "no such stage" --
- * which is exactly the bug this replaced, where quoted leads were folded into
- * a "Need action" roll-up and appeared nowhere of their own.
- *
- * Server-safe: plain links, no hooks. The filters live in the URL, so a
- * filtered view stays bookmarkable and the back button works.
- */
+// The pipeline as the primary filter: a count earns its place when it says how many rows the click would leave.
+// Every stage rendered, zeros included, in pipeline order. Plain links, no hooks.
 
 /** Pipeline order, and the wording the chips show. LEAD_STATUSES is the
  * source of the set; this only supplies capitalisation. */
@@ -77,9 +62,7 @@ export function StatusChips({
 
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by status">
-      {/* "All" is explicit rather than relying on clicking the active chip to
-        * toggle it off -- an unlabelled toggle is not discoverable, and an
-        * operator who has filtered to Lost needs an obvious way back. */}
+      {/* explicit "All": an unlabelled toggle isn't discoverable */}
       <Chip
         href={filterHref(query, 'status', null)}
         label="All"

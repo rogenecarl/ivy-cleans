@@ -1,33 +1,6 @@
 // src/leads/env.ts
-/*
- * The ONE place the leads feature reads its environment variables.
- *
- * WHY THIS FILE EXISTS. Three variables in this one feature had three
- * different "absent vs. empty" semantics, and two of them were actively
- * dangerous:
- *
- *   IP_HASH_SALT      `?? 'unsalted-dev-only'` — `??` only fires on
- *                     `undefined`, so the half-filled `IP_HASH_SALT=` line
- *                     that .env.local.example produces yields '', hashIp()
- *                     threw by design, and EVERY submission failed. Set to
- *                     nothing at all, it hashed real customer IPs with a
- *                     literal string committed to this public repository,
- *                     which defeats the entire point of salting. Both
- *                     branches were wrong; the fallback string is gone.
- *   LEADS_FROM_EMAIL  the identical `??` inversion: a blank value sent
- *                     `from: ''` and every notification failed at Resend.
- *   LEADS_DASHBOARD_ORIGIN  used truthiness and got it right by accident.
- *
- * The rule now, for all three: an absent variable and a blank/whitespace-only
- * one MEAN THE SAME THING — "not configured" — and are both resolved to
- * `null` exactly once, here, at module load. No caller writes
- * `process.env.<name>` for these again, so a fourth semantic cannot appear.
- *
- * Resolved at module load rather than per request so a misconfigured
- * deployment announces itself once, on the first import in the process,
- * instead of once per customer (or, worse, only on the customer whose
- * submission it refuses).
- */
+// The one place the leads feature reads env. Absent and blank both mean "not configured" and resolve to null once,
+// at module load. (`??` on IP_HASH_SALT used to hash real IPs with a committed fallback string.)
 
 /** `undefined` and blank/whitespace-only both mean "not configured" -> null. */
 function read(name: string): string | null {
@@ -37,15 +10,7 @@ function read(name: string): string | null {
   return trimmed === '' ? null : trimmed
 }
 
-/**
- * Server-held salt for the stored IP hash. `null` = not configured.
- *
- * DEGRADES, never refuses: with no salt the submission is still captured and
- * still emailed, it just stores no ipHash, which costs the per-IP rate limit
- * and nothing else. Refusing to boot would take every city's marketing site
- * down over a spam control; refusing the submission would lose the customer.
- * Losing a customer is the worse failure, so this is the side we fail to.
- */
+// server-held salt for the stored IP hash. null = not configured: capture the lead, store no ipHash, skip the limit.
 export const IP_HASH_SALT = read('IP_HASH_SALT')
 
 /** Verified Resend sending address. `null` = not configured; the mailer then reports a legible failure instead of sending `from: ''`. */
@@ -54,32 +19,11 @@ export const LEADS_FROM_EMAIL = read('LEADS_FROM_EMAIL')
 /** Canonical origin for the dashboard link in the notification email. `null` = not configured; the email omits the link rather than guess (see lead-actions.ts). */
 export const LEADS_DASHBOARD_ORIGIN = read('LEADS_DASHBOARD_ORIGIN')
 
-/**
- * Opt-in only. When `'1'`, disables Node's Happy Eyeballs (RFC 8305) address
- * racing process-wide before src/lib/db.ts opens its `pg` Pool.
- *
- * Defaults OFF on purpose: racing addresses is the correct behaviour
- * anywhere IPv6 actually works (including Vercel's dual-stack functions) --
- * sequential connect attempts stall on an unreachable address for a full TCP
- * timeout, and RFC 8305 exists precisely to avoid that. This flag is for the
- * opposite failure mode, seen so far only in environments with NO IPv6 route
- * at all: the race itself can spuriously time out an otherwise-reachable
- * IPv4 address to a dual-stack host. Symptom to recognise: connections to a
- * dual-stack Postgres host (Neon's pooler, for instance) time out even
- * though the host is reachable -- verifiable by connecting directly to one
- * resolved IPv4 address instead of the hostname and seeing it succeed
- * immediately. See example.env.
- */
+// '1' disables Node's Happy Eyeballs racing before db.ts opens its Pool. Off by default; only for environments with
+// no IPv6 route where the race times out a reachable IPv4 host (Neon's pooler). See example.env.
 export const DB_DISABLE_HAPPY_EYEBALLS = read('DB_DISABLE_HAPPY_EYEBALLS') === '1'
 
-/*
- * One loud line per missing variable, once per process, at import time.
- *
- * Silenced under vitest only: the suite imports these modules with a
- * deliberately bare environment and the noise would train the reader to
- * ignore the warning that matters in production. Nothing else suppresses it
- * — dev is exactly where an operator should notice.
- */
+// one line per missing variable, once per process; silenced under vitest only
 if (!process.env.VITEST) {
   const missing: string[] = []
   if (IP_HASH_SALT === null) {

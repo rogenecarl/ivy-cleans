@@ -20,59 +20,28 @@ export default async function SiteSettingsPage({
   params: Promise<{ key: string }>
   searchParams: Promise<{ error?: string }>
 }) {
-  /*
-   * Own guard, in addition to the layout's — this is an admin-only screen
-   * per src/lib/access.ts, and it holds a form that WRITES a city's
-   * notification inbox list, so a demoted-mid-visit manager must not keep
-   * reaching it through a soft navigation.
-   */
+  // own guard: admin-only, and this screen writes a city's inbox list
   await requireAdmin()
 
   const { key } = await params
   const { error } = await searchParams
 
-  /*
-   * getSiteSettings THROWING is not the same as it resolving to null (a city
-   * with no settings row yet, i.e. genuinely zero configured inboxes) --
-   * only the throw case means "we don't actually know what's configured
-   * here." Scoped to exactly this call, matching the other three screens.
-   *
-   * The distinction matters more on THIS screen than the others: it holds a
-   * form that WRITES notifyEmails. If settings can't be read, the form must
-   * not render pre-filled with an empty textarea -- saving that would wipe
-   * the city's real inbox list, and the operator would believe they were
-   * clearing an empty list when they were actually destroying a configured
-   * one. Same destructive-write shape as the malformed-POST cases already
-   * fixed in the actions (lead-actions.ts, site-actions.ts), just arriving
-   * through the UI instead. Chose to hide the form ENTIRELY rather than
-   * render it disabled: a disabled form still shows a specific (wrong, or
-   * at best unknown) address list as if it were the true one, which invites
-   * the same misreading even if it can't be submitted. An absent form has
-   * no address list to misread.
-   */
+  // getSiteSettings THROWING (unknown) is not null (no row yet). On a throw the form is hidden entirely: a pre-filled
+  // empty textarea would wipe the real inbox list on save.
   let settings: Awaited<ReturnType<typeof getSiteSettings>> = null
   let settingsUnavailable = false
   try {
     settings = await getSiteSettings(key)
   } catch (err) {
     settingsUnavailable = true
-    // Loud on purpose, no email addresses logged: this catch wraps only the
-    // getSiteSettings call above, so whatever it caught is a
-    // connection/query failure, never the row's notifyEmails contents.
+    // loud, no addresses: this catch only wraps getSiteSettings
     console.error(
       `SiteSettingsPage: getSiteSettings(key) failed for city "${key}" -- settings are unavailable:`,
       err,
     )
   }
 
-  /*
-   * The market's operator-entered facts. Unlike the notification inboxes
-   * above, a failure to read these is NOT a reason to hide the form: a city
-   * with no ops yet reads back as empty fields, which is the same thing an
-   * unreadable one would show, and this screen is the only place they can be
-   * entered at all. An unreachable city (neither draft nor document) is the
-   * one case worth saying out loud, because saving would fail too.
-   */
+  // a failed ops read does not hide the form: empty fields read the same either way. An unreachable city is the one case worth saying.
   const ops = await readOpsLogic(key)
 
   return (

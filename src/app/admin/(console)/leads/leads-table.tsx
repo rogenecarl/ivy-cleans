@@ -1,25 +1,8 @@
 'use client'
 
-/*
- * The Leads list, as a master-detail: scan the table, click a row, read the
- * whole submission in a sheet without losing your place in the list.
- *
- * Laid out after the operator's other admin (peaktransport's Applications
- * screen): one bordered card holding a header bar of controls, the table, and
- * a paged footer -- so the filters visibly belong to the table they filter
- * instead of floating above it.
- *
- * WHY THE ROWS CARRY PRE-RENDERED TIME STRINGS. This is a client component,
- * so anything derived from `Date.now()` or `toLocaleString()` here would be
- * computed once on the server and again in the browser -- different clock,
- * different timezone, hydration mismatch. The server builds
- * `submittedLabel`/`submittedExact` in page.tsx and passes them down as
- * plain strings, so both renders are identical by construction.
- *
- * The sheet does not replace /leads/<id>. That page is what the notification
- * email links to (see (sites)/[city]/lead-actions.ts), so it stays, and both
- * render the same <LeadSubmission> -- see lead-submission.tsx.
- */
+// The Leads list as master-detail: table, click a row, read the submission in a sheet. Time strings are pre-rendered
+// on the server (this is a client component; Date.now()/toLocaleString() here would hydration-mismatch).
+// /leads/<id> still exists for the email deep link; both render <LeadSubmission>.
 import { useMemo, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, ExternalLink, Inbox, Search, SearchX } from 'lucide-react'
@@ -82,12 +65,7 @@ export function LeadsTable({
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
-  /*
-   * Client-side, over the rows already loaded, deliberately: the URL filters
-   * (city/status/form) go through the database because they change what is
-   * fetched, but "find Jane" is a scan of what is already on screen and
-   * should not cost a round trip.
-   */
+  // client-side over the loaded rows: "find Jane" shouldn't cost a round trip
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (q === '') return rows
@@ -205,9 +183,7 @@ export function LeadsTable({
                             {initials(lead.name)}
                           </span>
                           <span className="min-w-0">
-                            {/* The real keyboard target. The row's onClick is
-                              * a mouse convenience on top of it, so the list
-                              * stays operable by Tab + Enter. */}
+                            {/* the real keyboard target; the row's onClick is a mouse convenience */}
                             <button
                               type="button"
                               onClick={() => setSelectedId(lead.id)}
@@ -360,9 +336,7 @@ export function LeadsTable({
                   <h3 className="mb-2.5 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
                     Notes
                   </h3>
-                  {/* key: remounts the form when a different lead is opened,
-                    * so the textarea's defaultValue is re-read instead of
-                    * showing the previous lead's notes. */}
+                  {/* key remounts the form per lead so the textarea's defaultValue is re-read */}
                   <NotesForm
                     key={selected.lead.id}
                     id={selected.lead.id}

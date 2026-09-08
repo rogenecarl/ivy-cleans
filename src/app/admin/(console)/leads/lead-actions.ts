@@ -1,20 +1,6 @@
 'use server'
-/*
- * Mutations for the lead detail screen.
- *
- * Both revalidate the detail page AND the list, because a status change alters
- * the list's filtering and its "still need action" count. Per the Next 16
- * server-actions guide (node_modules/next/dist/docs/01-app/02-guides/server-actions.md),
- * revalidatePath re-renders inside the same response, so the screen updates
- * without a follow-up fetch.
- *
- * These actions are as reachable as the pages, whether or not the caller ever
- * loaded the detail screen -- the Next docs' "treat every action as an
- * untrusted entry point" warning. Two things follow, and BOTH are needed:
- * every input is validated here, and every function starts with a guard from
- * src/lib/auth-server.ts. The (console) layout's guard does NOT cover these
- * -- a layout does not run for an action POST.
- */
+// Mutations for the lead detail screen. Both revalidate the detail page and the list. Every input is validated and
+// every action starts with a guard — the layout guard does not run for an action POST.
 import { revalidatePath } from 'next/cache'
 import { LeadNotFoundError, setLeadNotes, setLeadStatus } from '@/leads/store'
 import { LEAD_STATUSES, type LeadStatus } from '@/leads/types'
@@ -24,23 +10,8 @@ import { requireSession } from '@/lib/auth-server'
 /** Notes are operator free text, not a customer-controlled field, but they still arrive over a POST that any signed-in caller can hit directly -- an authenticated bound is not the same thing as a trusted body, so the length is still capped here to stop one malicious request from growing a row without limit. */
 const MAX_NOTES_LENGTH = 5000
 
-/*
- * Both actions below can be POSTed with an id for a lead that does not (or
- * no longer does) exist -- these are authenticated but still untrusted RPC
- * endpoints, reachable by any signed-in caller who can POST with no page
- * ever rendered, so a wrong or stale id is not exotic. Prisma's
- * .update() throws PrismaClientKnownRequestError P2025 for that, which
- * store.ts translates into LeadNotFoundError so this file never has to
- * import Prisma itself (store.ts is the only module that does).
- *
- * A missing row is not a server fault, so it is not left to bubble into an
- * uncaught 500: it is swallowed here, and the revalidatePath calls that
- * follow still run, forcing the current route to re-render. On that
- * re-render the page's own `getLead` returns null and its existing
- * `if (!lead) notFound()` fires, which is the same "this lead is gone"
- * outcome the operator would see from a plain GET on a bad id -- no new UI
- * needed. Any OTHER error is a genuine server fault and is left to throw.
- */
+// a missing row (Prisma P2025 -> LeadNotFoundError from store.ts) is swallowed: revalidatePath re-renders, the page's
+// own getLead returns null and notFound() fires. Any other error is a real fault and throws.
 export async function setStatusAction(id: string, status: LeadStatus): Promise<void> {
   await requireSession()
   if (!LEAD_STATUSES.includes(status)) {
@@ -58,9 +29,7 @@ export async function setStatusAction(id: string, status: LeadStatus): Promise<v
 export async function saveNotesAction(id: string, formData: FormData): Promise<void> {
   await requireSession()
   const raw = formData.get('notes')
-  // A present-but-empty field is a legitimate "clear the notes" action; a
-  // field that is absent entirely (or the wrong FormData type, e.g. a File)
-  // is a malformed request and must not be silently treated as one.
+  // present-but-empty clears the notes; absent or non-string is a malformed request
   if (typeof raw !== 'string') {
     throw new Error('missing or invalid "notes" field')
   }
@@ -70,8 +39,6 @@ export async function saveNotesAction(id: string, formData: FormData): Promise<v
   } catch (err) {
     if (!(err instanceof LeadNotFoundError)) throw err
   }
-  // Notes are not shown on the list screen, so only the detail page needs to
-  // re-render. (Contrast setStatusAction above, which changes what the list
-  // itself displays and must revalidate both.)
+  // notes aren't on the list screen, so only the detail page re-renders
   revalidatePath(`${ADMIN_BASE}/leads/${id}`)
 }

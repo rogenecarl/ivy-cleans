@@ -4,11 +4,7 @@ import { citySlug } from "@/content/interpolate";
 import { bookData } from "@/data/book";
 import BookNowSection from "@/components/book/BookNowSection";
 
-// live /book-now has no <meta name="description"> — bookNowMeta carries
-// only a title, so no description key is set here (see src/data/book.ts).
-// bookNowMeta carries no city text today, but the city must never be
-// resolved at MODULE scope — it comes from this request's [city] param
-// (async) — same generateMetadata() shape as the sibling pages.
+// live /book-now has no meta description; the city is resolved per request, never at module scope
 export async function generateMetadata({
   params,
 }: {
@@ -20,14 +16,7 @@ export async function generateMetadata({
   };
 }
 
-/*
- * book-now.html uses header/footer templates 2338/2342 (grep-verified:
- * `data-elementor-id="2338"` on <header>, `"2342"` on <footer>), which are
- * the exact templates src/components/{TopBar,Header,Footer}.tsx already
- * clone — i.e. this route belongs in the `(front)` group, per the task
- * brief. /book uses different templates (47/186) and lives in `(inner)`
- * instead — see src/app/(sites)/[city]/(inner)/book/page.tsx.
- */
+// book-now.html uses the front templates (2338/2342), hence the (front) group; /book uses 47/186 and lives in (inner)
 export default async function BookNowPage({ params }: { params: CityParams }) {
   const c = await cityFromParams(params);
   const { bookFields, bookSubmitLabel, comingSoon } = bookData(c);

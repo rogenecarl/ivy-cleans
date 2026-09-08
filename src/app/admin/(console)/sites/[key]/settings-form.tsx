@@ -8,15 +8,7 @@ import { saveNotifyEmailsAction } from '../site-actions'
 
 type SaveState = { savedAt: number } | null
 
-/*
- * Wraps the exact same saveNotifyEmailsAction(cityKey, formData) the old
- * plain <form> called. On the happy path it returns and this toasts; on the
- * "some entries were rejected" path the action calls next/navigation's
- * redirect(), which throws through this wrapper same as it always did and
- * never reaches the `return` below -- so no false-positive toast fires when
- * the save was actually partial. The page re-renders at ?error=... instead,
- * same as before this stage.
- */
+// same saveNotifyEmailsAction as before; a partial save redirects (throws), so no false toast
 export function SettingsForm({ cityKey, defaultValue }: { cityKey: string; defaultValue: string }) {
   const [state, formAction] = useActionState<SaveState, FormData>(async (_prev, formData) => {
     await saveNotifyEmailsAction(cityKey, formData)

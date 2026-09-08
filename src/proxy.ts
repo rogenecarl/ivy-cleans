@@ -6,54 +6,17 @@ import { resolveAdminRedirect } from "@/content/resolve-admin";
 import { isUnder } from "@/lib/access";
 import { ADMIN_BASE } from "@/lib/admin-routes";
 
-/*
- * Host -> city rewrite. This is what makes ONE deployment serve every city:
- * the public URLs stay bare (/, /home, /deep-cleaning-minneapolis) while the
- * app tree lives under /[city], and this rewrite joins the two. Internal
- * /<cityKey>/... paths are left alone — they are the draft-city preview.
- *
- * NOTE ON THE FILENAME: Next.js 16 renamed the `middleware` file convention
- * to `proxy` (node_modules/next/dist/docs/01-app/03-api-reference/
- * 03-file-conventions/proxy.md: "the `middleware` file convention is
- * deprecated and has been renamed to `proxy`"), with the named export
- * renamed to match. The plan calls this file src/middleware.ts; same
- * mechanism, current name. All the decision logic is in the pure, unit-
- * tested resolveRewrite() — keep this adapter trivial.
- */
+// Host -> city rewrite: public URLs stay bare, the app tree lives under /[city]. Internal /<cityKey>/... paths are
+// the draft preview and are left alone. Next 16 calls this file `proxy`, not `middleware`. Logic is in resolveRewrite().
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const host = req.headers.get("host") ?? "";
 
-  /*
-   * Task 9: the host map is read at request time from Global Config, with the
-   * build-time JSON as the fallback, so a newly provisioned domain routes
-   * without a redeploy. loadRouting() never throws and consults the store only
-   * when EDGE_CONFIG is set, so a deployment without one behaves exactly as it
-   * did — same tables, no extra request.
-   *
-   * Read ONCE and passed to both pure functions below. They already took these
-   * as optional arguments, so neither changes; only where the data comes from
-   * does.
-   */
+  // host map from Global Config with the build-time JSON as fallback; read once for both pure functions
   const { domains, cityKeys } = await loadRouting();
 
-  /*
-   * Console paths, on the operator's own host only. The host test is not
-   * incidental: it is the same scoping resolveRewrite applies to its own
-   * admin passthrough, and hoisting this branch above it without the test
-   * would put a login box on every customer's branded domain — exactly what
-   * resolve-rewrite.ts's case-3 comment warns against. On a mapped host we
-   * fall through to the rewrite, which turns /admin into /<city>/admin and
-   * 404s, as it did before this branch existed.
-   *
-   * They are never city-rewritten either way, so doing the auth hop here
-   * keeps resolveRewrite's contract unchanged.
-   *
-   * getSessionCookie is a presence check on a signed cookie, and
-   * getCookieCache reads the role better-auth cached in it. Both are
-   * client-held; see resolve-admin.ts for why that is acceptable here and
-   * nowhere else.
-   */
+  // console paths, on the operator's own host only — on a mapped customer domain /admin falls through and 404s.
+  // Cookie and cached role are client-held; see resolve-admin.ts for why that is acceptable here and nowhere else.
   if (!isMappedHost(host, domains) && isUnder(pathname, ADMIN_BASE)) {
     const hasSession = !!getSessionCookie(req);
     let cached = null;
@@ -61,13 +24,7 @@ export async function proxy(req: NextRequest) {
       try {
         cached = await getCookieCache(req);
       } catch {
-        // A malformed or undecryptable session_data cookie (non-base64
-        // content, or BETTER_AUTH_SECRET missing from this runtime) makes
-        // getCookieCache THROW rather than return null. An unhandled throw
-        // here 500s every /admin path, including /admin/login -- the only
-        // way back -- with no in-band recovery. Treated as "no cached
-        // role", which resolveAdminRedirect already handles by passing
-        // the request through to the server-side guard.
+        // a malformed session_data cookie makes getCookieCache throw; treat it as no cached role rather than 500 /admin/login
         cached = null;
       }
     }
@@ -86,12 +43,7 @@ export async function proxy(req: NextRequest) {
   return NextResponse.rewrite(url);
 }
 
-/*
- * Without a matcher the proxy runs on every request including /_next/static
- * and public/ assets. resolveRewrite() rejects those anyway, but the matcher
- * keeps them from paying for the hop at all. Matcher values must be static
- * literals — Next analyses them at build time.
- */
+// keep static assets from paying for the hop; matcher values must be literals
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|images|icons|.*\\..*).*)"],
 };

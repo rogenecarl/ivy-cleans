@@ -1,9 +1,5 @@
 // src/leads/types.ts
-/*
- * Shared vocabulary for the leads feature. Deliberately free of Prisma types:
- * store.ts maps between these and the generated client, so every other module
- * (and every test) can be written without a database in scope.
- */
+// Shared vocabulary for the leads feature, free of Prisma types.
 
 export type FormType = 'booking' | 'contact'
 export type LeadStatus = 'new' | 'contacted' | 'quoted' | 'booked' | 'lost'
@@ -61,19 +57,7 @@ export type SiteSettingsRecord = {
   notifyEmails: string[]
 }
 
-/**
- * The dashboard's aggregate view of every lead, computed by the database
- * rather than by counting rows in memory.
- *
- * That distinction matters: listLeads() caps at 200 rows, so any figure
- * derived from its result silently stops being true once a city passes 200
- * leads -- and "booked in the last 30 days" computed from the newest 200
- * would quietly drift low with no visible symptom. Every number here comes
- * from a COUNT the store issues directly.
- *
- * Test rows are excluded from all of it: a preview submission is not a
- * customer and must never move a business metric.
- */
+// dashboard aggregates computed by the database, not from listLeads() (which caps at 200). Test rows excluded.
 export type LeadDashboardStats = {
   /** Leads still in `new` -- nobody has responded yet. */
   waiting: number
@@ -86,10 +70,7 @@ export type LeadDashboardStats = {
   bookedLast30: number
   /** All-time bookings, for the 30-day figure's context line. */
   booked: number
-  /** All-time split by form. A booking request (bedrooms, bathrooms, an
-   * address) signals far more intent than a general enquiry, and the ratio
-   * is readable at any volume -- unlike a win rate, which needs dozens of
-   * decided leads before it stops swinging on a single outcome. */
+  /** All-time split by form: a booking request signals far more intent than an enquiry. */
   bookings: number
   enquiries: number
   /** Non-test lead count per cityKey. */

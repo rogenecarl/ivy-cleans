@@ -4,15 +4,8 @@ import { getServerUser } from '@/lib/auth-server'
 import { safeNext } from '@/lib/access'
 import { LoginForm } from './login-form'
 
-/*
- * The one path under /admin that is not session-gated, which is why it sits
- * outside the (console) route group — under (console)/layout.tsx's guard it
- * would redirect to itself forever.
- *
- * force-dynamic because it reads the session to bounce an operator who is
- * already signed in. Without it Next would try to prerender a page whose
- * whole job is to look at cookies.
- */
+// The one path under /admin that isn't session-gated, hence outside (console). force-dynamic: it reads the session
+// to bounce an operator who is already signed in.
 export const dynamic = 'force-dynamic'
 
 export default async function LoginPage({

@@ -20,12 +20,7 @@ import { metaDescription } from "@/data/meta";
 import { packagesData } from "@/data/packages";
 import { areasData } from "@/data/areas";
 
-// Moved here from src/app/layout.tsx (booking-pages fix round 1): a root
-// layout's metadata is inherited per-key by any page that doesn't set its
-// own, so leaving the homepage's description on the root layout was making
-// EVERY page without its own description (i.e. /book-now) silently inherit
-// it. Verbatim from ivycleans.html's <title>/<meta name="description">
-// (front page, elementor id 2035), with only the {city} token swapped in.
+// title verbatim from ivycleans.html (page 2035). Lives here, not on the root layout, so /book-now doesn't inherit it.
 export async function generateMetadata({
   params,
 }: {
@@ -35,11 +30,7 @@ export async function generateMetadata({
   const bits = cityBits(c);
   return {
     title: t("House Cleaning Service in {city} {stateName} - Ivy Cleans", bits),
-    /*
-     * From the page's own hero, not the template (Abdi's review, item 9).
-     * The literal this replaced was the OLD Minneapolis hero, cut mid-word
-     * at "Our experienced", shown under a hero that had been rewritten.
-     */
+    // from the page's own hero, not the old Minneapolis line
     description: metaDescription(servicesData(c).heroParagraphs[0]),
   };
 }

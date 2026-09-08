@@ -5,23 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import type { Role } from '@/lib/access'
 
-/*
- * The success half of the sign-in feedback, and the reason it is shaped like
- * this rather than living in the login form.
- *
- * signInAction ends in redirect(), so by the time sign-in has succeeded the
- * login form is already unmounting -- a toast raised there would never paint.
- * The toast therefore has to be raised at the DESTINATION. Sign-out can use a
- * plain ?signedout=1 on the login page because it has exactly one
- * destination; sign-in lands wherever safeNext() sends it, so this component
- * sits in the console layout, which every one of those destinations shares.
- *
- * It reads the marker with useSearchParams rather than taking a server prop
- * because a layout does not receive searchParams -- only pages do. Stripping
- * the param with history.replaceState (not router.replace) is deliberate: it
- * rewrites the URL without a re-render, so a refresh will not re-announce the
- * sign-in and this cannot feed back into its own effect.
- */
+// Sign-in success toast, raised at the DESTINATION: the login form is unmounting by then. Reads ?signedin=1 with
+// useSearchParams (layouts don't get searchParams) and strips it with history.replaceState so it can't loop.
 export function SignedInToast({ role }: { role: Role }) {
   const params = useSearchParams()
 

@@ -11,24 +11,8 @@ import { saveOpsAction } from '../site-actions'
 
 type SaveState = { savedAt: number } | null
 
-/*
- * The market's operator-entered facts, editable after creation.
- *
- * Before this form these could be typed only once, on /admin/new, and were
- * then destroyed by publishing (publishCity deletes the draft sidecar they
- * lived in). So a crew lead hired after launch, a homes-cleaned count that
- * grew, a first real review -- none of them had anywhere to go, on exactly
- * the cities that had been running long enough to have them.
- *
- * Same wrapper shape as SettingsForm alongside: on the happy path the action
- * returns and this toasts; a rejected review line calls redirect(), which
- * throws through this wrapper and re-renders the page at ?error=... instead,
- * so no false-positive toast fires on a save that did not happen.
- *
- * Every input is rendered with a defaultValue of '' rather than omitted --
- * parseOpsForm REJECTS an absent field rather than reading it as cleared, and
- * that is what stops one malformed POST erasing a market's facts.
- */
+// Market facts, editable after creation (they used to be lost at publish). Same wrapper shape as SettingsForm: a
+// rejected line redirects, so no false toast. Every input has defaultValue '' — parseOpsForm rejects an absent field.
 export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsFields }) {
   const [state, formAction] = useActionState<SaveState, FormData>(async (_prev, formData) => {
     await saveOpsAction(cityKey, formData)

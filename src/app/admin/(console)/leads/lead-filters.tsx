@@ -6,23 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { FormType, LeadQuery } from '@/leads/types'
 import { filterHref } from './logic'
 
-/*
- * Client component: a Select needs onValueChange, which a server component
- * cannot have. The filters themselves still live entirely in the URL (see
- * ../../../leads/filters.ts) -- this only translates a Select's change event
- * into a navigation, through the SAME `filterHref` the old link-based filter
- * row used and tests/leads-admin-ui.test.ts already covers, so "Miami,
- * contacted" stays bookmarkable and the URL shape does not change.
- *
- * The Status select used to live here too. It is gone: the status chips
- * above the table (leads/status-chips.tsx) set the same URL parameter
- * through the same filterHref, and carry the per-stage counts a dropdown
- * cannot show. Two controls for one filter is one too many.
- *
- * Radix's Select.Item forbids an empty-string value (it's reserved to mean
- * "no selection"), so "All" is represented by the ALL sentinel below and
- * translated back to `null` before it ever reaches filterHref.
- */
+// Client component for the Selects; the filters still live in the URL through filterHref. Status moved to the chips
+// above the table. Radix forbids an empty-string value, hence the ALL sentinel.
 const ALL = '__all__'
 
 export function LeadFilters({
@@ -44,12 +29,7 @@ export function LeadFilters({
         label="City"
         value={query.city ?? ALL}
         onValueChange={(v) => go('city', v)}
-        // A lead's city can outlive the city itself -- see
-        // ./logic.ts's cityDisplayName -- so `query.city` (any string
-        // matching CITY_KEY in ../../../leads/filters.ts) is not guaranteed
-        // to be one of today's cities. Without this, filtering to a since-
-        // deleted city's key would leave the trigger showing no matching
-        // option and rendering blank instead of that key.
+        // a lead's city can outlive the city (logic.ts cityDisplayName); keep the trigger from rendering blank
         options={
           query.city && !cities.some((c) => c.key === query.city)
             ? [...cities.map((c) => ({ value: c.key, label: c.city })), { value: query.city, label: query.city }]
@@ -69,13 +49,7 @@ export function LeadFilters({
         capitalize
       />
 
-      {/*
-       * The toggle spec 3.1 promised. Not a FilterSelect: this dimension has
-       * two states, not "All plus some values", and calling the default
-       * state "All" would read as "everything is shown" when it is exactly
-       * the state that hides rows. Kept as plain links (not a Select) since
-       * there is nothing to pick from a list here.
-       */}
+      {/* the test-row toggle: two states, not "All plus values", so plain links */}
       <div className="flex min-h-11 flex-wrap items-center gap-1 rounded-md border border-input bg-transparent px-2 py-1 sm:min-h-9">
         <span className="text-[0.7rem] font-semibold text-muted-foreground uppercase">Test rows</span>
         <Link

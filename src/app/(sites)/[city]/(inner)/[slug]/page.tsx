@@ -18,39 +18,9 @@ import SuburbClosing from "@/components/suburb/Closing";
 import PostArticle from "@/components/blog/PostArticle";
 import CommentFormDisplay from "@/components/blog/CommentFormDisplay";
 
-/*
- * This dynamic segment RENDERS exactly two classes of value, and recognises
- * two more only to redirect them — anything else still 404s, and it must
- * never become a catch-all that swallows typos:
- *
- *   1. any stored suburb slug, c.research.suburbs[].slug — rendered here
- *   2. any blog post slug, src/data/posts — rendered here
- *   3. /deep-cleaning-<citySlug>              — 308 to /services/deep-cleaning
- *   4. /<citySlug>-move-out-cleaning-services — 308 to
- *      /services/move-in-move-out-cleaning
- *
- * Cases 3 and 4 carry the city name IN THE URL; they used to render here,
- * and are kept as permanent redirects because those URLs are indexed (see
- * resolveSlug below). Suburb slugs are looked up by exact match against
- * c.research.suburbs — never derived, since the live site's suburb URL
- * patterns vary (house-cleaning-*, cleaning-services-*, cleaning-service-*,
- * *-cleaning-services, all four appear in the fixtures). The literal sibling
- * routes (blog, book, contact, faq, home, cleaning-services, services) still
- * win because Next matches static segments before dynamic ones.
- *
- * Blog posts live at the ROOT of a site on the live install — the listing
- * links to /how-to-clean-bathroom-walls, not /blog/how-to-clean-bathroom-walls
- * — which is why they resolve through this segment rather than a
- * blog/[slug] one. Next allows only a single dynamic segment per level, so
- * this file is that segment for every root-level slug the site serves.
- *
- * No nav or body link points at cases 3 and 4 any more: src/data/site.ts and
- * src/components/home/HouseCleaning.tsx now link to /services/<slug>. The
- * only links that still land here are suburb links built from stored slugs
- * (src/data/areas.ts, ServiceArea.tsx/Locations.tsx) and post links built
- * from stored post slugs (src/data/blog.ts, src/data/recent-posts.ts), so
- * slugs and hrefs cannot drift.
- */
+// Root-level slugs: stored suburb slugs and blog post slugs render here; /deep-cleaning-<city> and
+// /<city>-move-out-cleaning-services 308 to /services/... (indexed URLs). Anything else 404s.
+// Static sibling routes win because Next matches them first. Posts live at the root on live, hence this segment.
 type SlugParams = Promise<{ city: string; slug: string }>;
 
 function redirectSlugs(c: CityContent) {
@@ -65,14 +35,7 @@ type Resolved =
   | { kind: "suburb"; c: CityContent; suburb: SuburbRef }
   | { kind: "post"; c: CityContent; post: PostArticleData };
 
-/**
- * Which slug this request addresses, or `notFound()`. The deep and move
- * slugs no longer render here — they redirect permanently to their
- * /services/... equivalents, since those two URLs are indexed and must
- * keep whatever search ranking they've earned instead of 404ing. Suburb
- * slugs and post slugs are the two that resolve to page content. Both the
- * page and generateMetadata dispatch through here so they can never disagree.
- */
+// which slug this request addresses, or notFound(); page and generateMetadata both dispatch through here
 async function resolveSlug(params: SlugParams): Promise<Resolved> {
   const c = await cityFromParams(params);
   const { slug } = await params;
@@ -90,20 +53,7 @@ async function resolveSlug(params: SlugParams): Promise<Resolved> {
   notFound();
 }
 
-/*
- * Runs once per city emitted by the parent [city] segment's
- * generateStaticParams, receiving that city in `params` (Next merges parent
- * params into the child call — next/dist/build/static-paths/app.js). Cities
- * are re-read here rather than threaded, because generateStaticParams gets a
- * plain params object, not the request-time Promise.
- *
- * Suburb slugs are only appended when c.hasSuburbPages — a city whose suburb
- * pages are not live yet must not get real routes for slugs Areas We Serve
- * still renders unlinked (src/data/areas.ts / ServiceArea.tsx honour the same
- * flag). Post slugs carry no such flag: the blog listing links to them from
- * every city. dynamicParams below still lets a draft preview reach an
- * un-generated slug on demand.
- */
+// runs once per city from the parent segment's params. Suburb slugs only when hasSuburbPages; post slugs always.
 export async function generateStaticParams({ params }: { params: { city: string } }) {
   const c = await getCity(params.city);
   const { deep, move } = redirectSlugs(c);

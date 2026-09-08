@@ -1,26 +1,9 @@
 // src/app/admin/dashboard-logic.ts
-/*
- * The dashboard's presentation decisions, as pure functions.
- *
- * Split out of page.tsx for the same reason leads/logic.ts is: these are the
- * parts that can be wrong in a way nobody notices -- an age that rounds a
- * four-day-old lead down to "0 d", an alarm that fails to fire, a top-city
- * tile that flickers between two tied cities -- and they are only testable
- * at all with the framework out of scope.
- */
+// The dashboard's presentation decisions as pure functions, testable without the framework.
 import type { Role } from '@/lib/access'
 import { ADMIN_BASE, ADMIN_LEADS } from '@/lib/admin-routes'
 
-/**
- * How long a lead has been waiting, in the shortest form that is still
- * honest: "just now", "6 min", "4 hr", "3 d".
- *
- * ROUNDS DOWN, unlike the leads list's relative(), which rounds to nearest.
- * "3 d" must never appear over a lead that has waited two and a half days --
- * this figure exists to make an aging lead look BAD, so overstating it would
- * be as wrong as understating it, and rounding up an hour to "2 hr" reads as
- * neglect that has not happened yet.
- */
+// how long a lead has waited: "just now", "6 min", "4 hr", "3 d". Rounds DOWN — this figure must never overstate.
 export function describeAge(from: Date, now: Date): string {
   const mins = Math.floor((now.getTime() - from.getTime()) / 60000)
   if (mins < 1) return 'just now'
@@ -30,13 +13,7 @@ export function describeAge(from: Date, now: Date): string {
   return `${Math.floor(hours / 24)} d`
 }
 
-/**
- * This week against last, as a short phrase.
- *
- * Says "no change" rather than "0%" when they match, and names the previous
- * figure in every case: a bare arrow tells the operator a direction but not
- * whether it moved by one lead or twenty.
- */
+// this week against last, naming the previous figure; "no change" rather than "0%"
 export function describeTrend(current: number, previous: number): string {
   if (previous === 0 && current === 0) return 'none last week either'
   if (previous === 0) return 'none last week'
@@ -51,13 +28,7 @@ export function trendDirection(current: number, previous: number): 'up' | 'down'
   return current > previous ? 'up' : 'down'
 }
 
-/**
- * The city producing the most leads, for the "Top city" tile.
- *
- * Ties break on the city key so the tile does not flicker between two equal
- * cities on consecutive renders. Returns null for no leads at all rather
- * than an arbitrary city with zero.
- */
+// top city; ties break on key so the tile doesn't flicker. null for no leads.
 export function topCity(byCity: Record<string, number>): { key: string; count: number } | null {
   const entries = Object.entries(byCity).filter(([, count]) => count > 0)
   if (entries.length === 0) return null
@@ -65,14 +36,7 @@ export function topCity(byCity: Record<string, number>): { key: string; count: n
   return { key: entries[0][0], count: entries[0][1] }
 }
 
-/**
- * Live cities with no notification address configured.
- *
- * The worst silent failure this system has: the site is public, the form
- * accepts submissions, every lead is stored -- and no human is ever told.
- * Draft cities are exempt, matching siteReadiness(): they have not launched,
- * so there is nothing to miss yet.
- */
+// live cities with no notification address — the worst silent failure. Drafts exempt.
 export function sitesWithNoInbox(
   cities: { key: string; city: string; status: string }[],
   notifyEmailsByCity: Record<string, { notifyEmails: string[] }>,
@@ -91,21 +55,7 @@ export type Alarm = {
   hint: string
 }
 
-/**
- * Only the checks that are FAILING, never the ones that pass.
- *
- * The dashboard used to render all three as permanent tiles, so a healthy day
- * spent a third of the screen saying "0, 0, 0". Returning just the failures
- * lets the page collapse the healthy case to a single line while still
- * naming every check by name there -- which is the property that matters: an
- * empty space cannot distinguish "all clear" from "that check is not running
- * any more", but a line that says what was checked can.
- *
- * Order is fixed and deliberate: leads waiting on a human first (a customer
- * is sitting there), then notifications that failed (a lead arrived and
- * nobody knows), then sites that can never notify anyone (the same failure,
- * permanently, until someone configures it).
- */
+// only the FAILING checks, in fixed order: leads waiting, notifications failed, sites that can never notify
 export function activeAlarms(
   args: {
     waiting: number
@@ -145,16 +95,7 @@ export function activeAlarms(
   return alarms
 }
 
-/**
- * Drops the alarms a role cannot act on.
- *
- * Only the `inbox` alarm is affected: it counts live sites with no
- * notification address, links to /admin/sites, and is fixed there — none of
- * which a manager can reach. The two lead alarms are every operator's job.
- *
- * A filter rather than a branch in the JSX so it is covered by this file's
- * tests; the page has none of its own.
- */
+// drop the alarms a role can't act on (the inbox alarm links to Sites, which a manager can't reach)
 export function visibleAlarms(alarms: Alarm[], role: Role): Alarm[] {
   if (role === 'admin') return alarms
   return alarms.filter((a) => a.key !== 'inbox')
@@ -168,11 +109,7 @@ export type QuickAction = {
   description: string
 }
 
-/**
- * The quick actions this role can actually perform. Same reasoning as
- * visibleAlarms: creating a city site is admin-only, so a manager is not
- * shown a tile that would bounce them.
- */
+// quick actions this role can perform
 export function quickActionsFor(role: Role): QuickAction[] {
   const actions: QuickAction[] = [
     {

@@ -1,13 +1,5 @@
 // src/leads/store.ts
-/*
- * The only module that speaks Prisma's *query* API.
- *
- * The client itself now lives in src/lib/db.ts, because src/lib/auth.ts needs
- * the same one. Everything above this file still speaks src/leads/types.ts,
- * which is why the ORM choice stays reversible: swapping Prisma out touches
- * this file, src/lib/db.ts and prisma/schema.prisma — not the actions, the
- * screens, or their tests.
- */
+// The only module that speaks Prisma's query API; the client lives in src/lib/db.ts. Everything above speaks types.ts.
 import { Prisma, type Lead as PrismaLead } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import type {
@@ -25,18 +17,7 @@ import type {
 /** Re-exported so existing consumers and tests keep their import path. */
 export { prisma }
 
-/**
- * Coerces a Prisma `Json` column's parsed value into the flat
- * Record<string, string> that LeadRecord.payload claims to be.
- *
- * `payload` is written today only from src/leads/schema.ts, which always
- * produces flat strings -- but the column's type is `Json`, which permits
- * anything JSON allows, and nothing enforces the shape on the way back out.
- * This is the one place that reads the column, so every consumer (this
- * file's toRecord, the lead detail screen, the email builder) is safe by
- * construction rather than trusting an unchecked cast. Latent today, not
- * live: worth fixing anyway, because the next writer will not know.
- */
+// coerce the Json column into the flat Record<string, string> payload claims to be
 export function coercePayload(value: unknown): Record<string, string> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return {}
   const out: Record<string, string> = {}
@@ -56,13 +37,7 @@ export function coercePayload(value: unknown): Record<string, string> {
   return out
 }
 
-/**
- * Thrown by setLeadStatus/setLeadNotes when `id` matches no row (Prisma's
- * P2025). A plain Error subtype, not the Prisma error class itself, so
- * callers outside this file can distinguish "no such lead" from every other
- * database failure without importing Prisma -- this file is the only one
- * that does.
- */
+// thrown for Prisma P2025 so callers can tell "no such lead" apart without importing Prisma
 export class LeadNotFoundError extends Error {
   constructor(id: string) {
     super(`no lead with id "${id}"`)
@@ -135,20 +110,7 @@ export async function listLeads(query: LeadQuery): Promise<LeadRecord[]> {
   return rows.map(toRecord)
 }
 
-/**
- * How many leads sit at each pipeline stage, for the status filter chips.
- *
- * DELIBERATELY IGNORES query.status. The chips are the control that SETS
- * that filter, so counting with it applied would zero every chip except the
- * selected one the moment you clicked -- the row would stop describing the
- * pipeline and start describing itself. Every other filter (city, form, test
- * rows) IS applied, because those genuinely narrow which leads the chips
- * should be counting.
- *
- * Every stage is present in the result, including the ones with no leads:
- * a missing key would render as a gap in the pipeline rather than a zero,
- * and "0 quoted" is information.
- */
+// counts per stage for the status chips. Ignores query.status (the chips SET that filter); every stage present.
 export async function leadStatusCounts(query: LeadQuery): Promise<LeadStatusCounts> {
   const rows = await prisma.lead.groupBy({
     by: ['status'],
@@ -164,16 +126,7 @@ export async function leadStatusCounts(query: LeadQuery): Promise<LeadStatusCoun
   return counts
 }
 
-/**
- * How many rows the CURRENT filters would show if test rows were included.
- *
- * The dashboard hides test rows by default, so without this the operator has
- * no way to tell "there are genuinely no leads" from "everything here is
- * classified as a preview and hidden from you". That second state is exactly
- * how a whole city's real customers went unanswered behind a "0 / 0", so the
- * hidden count is now always on screen. Ignores query.includeTest by design:
- * it answers "how many are being hidden", not "what is displayed".
- */
+// how many rows the current filters would show if test rows were included — so hidden leads are never silent
 export async function countTestLeads(query: LeadQuery): Promise<number> {
   return prisma.lead.count({
     where: {
@@ -238,16 +191,7 @@ export async function getSiteSettings(cityKey: string): Promise<SiteSettingsReco
   return row ? { cityKey: row.cityKey, notifyEmails: row.notifyEmails } : null
 }
 
-/**
- * Every requested city's settings in one query, keyed by cityKey. A city
- * with no row is simply absent from the result -- same "not configured yet"
- * meaning as getSiteSettings returning null, just batched.
- *
- * For the Sites table (one row per city, every row needing its own
- * settings): calling getSiteSettings per row is an N+1 round trip, the same
- * shape leadCountsByCity already avoids for lead counts. This is that same
- * fix for settings.
- */
+// settings for every requested city in one query (avoids N+1 on the Sites table)
 export async function getSiteSettingsMany(
   cityKeys: string[],
 ): Promise<Record<string, SiteSettingsRecord>> {
@@ -268,20 +212,8 @@ export async function upsertSiteSettings(cityKey: string, notifyEmails: string[]
   })
 }
 
-/**
- * Every figure the dashboard shows, in one round trip's worth of counts.
- *
- * `now` is a PARAMETER, not `new Date()` read in here, so the week and month
- * boundaries are decided by the caller and the function is testable against a
- * fixed clock. A server component passes its own render time.
- *
- * All of it excludes test rows. A preview submission is not a customer, and
- * letting one inflate "booked this month" would make the dashboard lie in the
- * one direction nobody would think to check.
- *
- * Counts rather than findMany+filter throughout: see LeadDashboardStats for
- * why deriving these from listLeads() would silently go wrong past 200 rows.
- */
+// every dashboard figure via COUNT, not findMany (listLeads caps at 200). `now` is a parameter for testability.
+// Test rows excluded throughout.
 export async function leadDashboardStats(now: Date): Promise<LeadDashboardStats> {
   const day = 24 * 60 * 60 * 1000
   const weekAgo = new Date(now.getTime() - 7 * day)
@@ -304,14 +236,7 @@ export async function leadDashboardStats(now: Date): Promise<LeadDashboardStats>
       prisma.lead.count({
         where: { ...real, submittedAt: { gte: twoWeeksAgo, lt: weekAgo } },
       }),
-      /*
-       * Keyed off updatedAt, not submittedAt: "booked in the last 30 days"
-       * is about when the BOOKING happened, and a lead that arrived in
-       * January and booked today belongs in today's figure. updatedAt is an
-       * approximation of that moment -- it moves on any later edit too --
-       * and is the closest the current schema can get without a dedicated
-       * bookedAt column.
-       */
+      // keyed off updatedAt: "booked in the last 30 days" is about when the booking happened
       prisma.lead.count({
         where: { ...real, status: 'booked', updatedAt: { gte: monthAgo } },
       }),

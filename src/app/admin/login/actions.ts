@@ -1,13 +1,5 @@
 'use server'
-/*
- * Sign-in, as a server action rather than a client call to better-auth.
- *
- * The reason is the rate limiter: it keys on the client IP, and only the
- * server sees a trustworthy one (src/leads/client-ip.ts already works out
- * which header to believe for this deployment). A browser-side
- * authClient.signIn.email would rate-limit on whatever better-auth's endpoint
- * infers instead, and would not let us fail closed the same way.
- */
+// Sign-in as a server action so the rate limiter keys on a trustworthy client IP
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
@@ -19,11 +11,7 @@ import { clientIp } from '@/leads/client-ip'
 
 export type SignInState = { error: string } | null
 
-/*
- * ONE message for every credential failure — unknown address, wrong password,
- * disabled account. Distinguishing them tells an attacker which addresses are
- * real, which for a two-person console is a meaningful leak.
- */
+// one message for every credential failure: distinguishing them leaks which addresses are real
 const CREDENTIALS_REJECTED = 'Wrong email or password.'
 
 export async function signInAction(_prev: SignInState, formData: FormData): Promise<SignInState> {
@@ -48,63 +36,24 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
     result = await auth.api.signInEmail({ body: { email, password }, headers: headersList })
   } catch (err) {
     if (isRedirectError(err)) throw err
-    /*
-     * Log the FAILURE, never the address or the password. An APIError here is
-     * an expected outcome (bad credentials); anything else is a real fault
-     * and worth the stack.
-     */
+    // log the failure, never the address or password
     if (err instanceof APIError) return { error: CREDENTIALS_REJECTED }
     console.error('signInAction: unexpected failure:', err)
     return { error: 'Could not sign you in. Try again.' }
   }
 
-  /*
-   * Validate the role from signInEmail's OWN response — found by
-   * scripts/admin-e2e.mjs, in a real browser, to be the only correct choice
-   * here, not a style preference.
-   *
-   * This used to re-read the session with getServerUser(), which calls
-   * headers() -- the INCOMING request's headers, snapshotted before this
-   * action ran. better-auth's nextCookies() plugin applies the new session
-   * cookie by calling Next's cookies().set() (the request-scoped, mutable
-   * cookie jar); headers() is a separate, read-only view of the original
-   * request and never reflects a same-request cookies() mutation. So
-   * immediately after a successful sign-in, getServerUser() read the
-   * pre-sign-in headers, found no session, and this action reported "Wrong
-   * email or password" to an operator who had typed the correct one --
-   * while the correct cookie was already on its way to their browser. (The
-   * NEXT request -- a reload, or hitting the redirect target below --
-   * legitimately carries it, since by then the browser has sent it back;
-   * that is exactly why no unit test caught this and why it took a real
-   * two-step request lifecycle, in a real browser, to surface it.)
-   * redirect() throws, so it sits outside the try/catch above -- swallowing
-   * it would silently do nothing.
-   */
+  // validate the role from signInEmail's OWN response. getServerUser() reads headers() — the incoming request's
+  // snapshot — which never reflects a cookie set in this same action, so it reported "wrong password" after a
+  // correct sign-in (found by scripts/admin-e2e.mjs). redirect() throws, so it sits outside the try.
   const role = (result.user as { role?: unknown } | undefined)?.role
   if (!isRole(role)) {
-    // Mirrors auth-server.ts's getServerUser(): an authenticated user whose
-    // role isn't one of the two known values means the database and
-    // src/lib/access.ts disagree, which is worth a trace, not a silent
-    // rejection -- this path used to go through getServerUser() and log
-    // there; it no longer does, so it logs here instead.
+    // an unknown role means the database and access.ts disagree: log it
     console.error('signInAction: signed-in user has an unrecognised role; refusing')
-    // signInEmail above already set a live session cookie for this browser
-    // before this check ran -- rejecting the sign-in without clearing it
-    // would leave a cookie the server can never treat as authorized but
-    // that still passes the proxy's presence check, which is exactly the
-    // stale-cookie condition resolve-admin.ts's login branch has to assume
-    // can happen. Sign it back out so this path cannot seed that state.
+    // the session cookie is already set; sign back out so this path can't leave a stale cookie
     await auth.api.signOut({ headers: headersList })
     return { error: CREDENTIALS_REJECTED }
   }
-  /*
-   * ?signedin=1 is picked up by <SignedInToast/> in the console layout, which
-   * raises the success toast and strips the param. It is appended AFTER
-   * safeNext() has validated and possibly replaced the target, so it can
-   * never influence where the redirect goes -- and the separator is computed
-   * because safeNext returns whatever `next` held, which may already carry a
-   * query string (e.g. /admin/leads?status=new).
-   */
+  // ?signedin=1 raises the toast in the console layout; appended AFTER safeNext() so it can't steer the redirect
   const target = safeNext(next, role)
   redirect(`${target}${target.includes('?') ? '&' : '?'}signedin=1`)
 }

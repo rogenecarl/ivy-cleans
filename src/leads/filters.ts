@@ -1,12 +1,5 @@
 // src/leads/filters.ts
-/*
- * searchParams in, a validated LeadQuery out.
- *
- * Every filter lives in the URL, which is what makes "Miami, contacted"
- * bookmarkable and pasteable, and is why this feature needs no client state
- * library. A hand-edited URL must never crash the dashboard, so anything
- * unrecognised degrades to "no filter" rather than throwing.
- */
+// searchParams -> validated LeadQuery. Filters live in the URL; anything unrecognised degrades to no filter.
 import { LEAD_STATUSES, type FormType, type LeadQuery, type LeadStatus } from './types'
 
 const CITY_KEY = /^[a-z0-9-]+$/

@@ -1,45 +1,17 @@
-/*
- * Admin-only stylesheet. Imported by the admin layout, so Next ships it with
- * the admin routes and nowhere else — the public site's CSS is untouched.
- *
- * WHY IT HAS TO EXIST AT ALL: globals.css drives the whole clone off a
- * viewport-stepped root font-size (62.5% = 10px on desktop) so the reference
- * site's rem values land on the right pixels. Every Tailwind rem utility rides
- * that ladder, which would render this internal tool at 62.5% scale —
- * `text-sm` at 8.75px. rem always resolves against the root, so no wrapper
- * element can opt out; the root itself has to be reset for these pages.
- *
- * The `:has()` selector scopes the reset to pages that actually render the
- * admin shell. It also makes the rule inert if this file were ever loaded on a
- * site page, and its (0,2,0) specificity beats globals.css's plain `html`
- * selectors (0,0,1) regardless of stylesheet order — including the ones inside
- * the ladder's media queries, so the reset holds at every breakpoint.
- */
+/* Admin-only stylesheet. globals.css sets a 62.5% root font-size ladder for the clone; rem can't opt out per element,
+   so the root is reset here, scoped via :has() to pages that render the admin shell. */
 :root:has([data-admin-root]) {
   font-size: 100%;
 }
 
-/*
- * The site body is Poppins via next/font; an internal tool has no reason to
- * pay for a webfont or to look like the product. Set on the shell rather than
- * on body so nothing here can leak.
- */
+/* system font, set on the shell so nothing leaks */
 [data-admin-root] {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
   line-height: 1.5;
 }
 
-/*
- * shadcn's standard Tailwind v4 install writes these two rules at global
- * `@layer base` scope: a `*` border-color reset (Tailwind v4 defaults
- * unset borders to currentColor; shadcn's components assume the theme
- * border color instead) and a `body` background/foreground. Global, that
- * repaints every public page, so both are scoped to the admin shell here
- * instead — the theme *variables* they read (`--border`, `--background`,
- * ...) are still declared on `:root` in globals.css, which is safe on its
- * own since a custom property has no effect until a class reads it.
- */
+/* shadcn's @layer base resets, scoped to the admin shell instead of global */
 @layer base {
   [data-admin-root] * {
     border-color: var(--border);
@@ -51,10 +23,7 @@
   }
 }
 
-/*
- * Marks the newest line in a running skill card's activity feed (generate/
- * [key]/stage-runner.tsx) so the operator's eye lands on what just happened.
- */
+/* marks the newest activity line in a running stage card */
 @keyframes admin-pulse {
   0%,
   100% {
@@ -68,10 +37,7 @@
   animation: admin-pulse 1.4s ease-in-out infinite;
 }
 
-/* Stage 3: the pulse is purely decorative (it marks the newest activity
- * line, the text itself is unaffected), so it is dropped entirely for
- * operators who have asked the OS for less motion rather than merely slowed
- * or muted. */
+/* decorative pulse dropped under reduced motion */
 @media (prefers-reduced-motion: reduce) {
   [data-admin-root] .admin-pulse {
     animation: none;

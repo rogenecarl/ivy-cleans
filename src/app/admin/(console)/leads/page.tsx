@@ -11,11 +11,7 @@ import { LeadsTable, type LeadRow } from './leads-table'
 import { StatusChips } from './status-chips'
 import { requireSession } from '@/lib/auth-server'
 
-/*
- * force-dynamic for the same reason the Sites screen uses it: the list changes
- * whenever a customer submits or the operator moves a lead, and a cached
- * dashboard would show stale counts.
- */
+// force-dynamic: the list changes with every submission
 export const dynamic = 'force-dynamic'
 
 function relative(from: Date): string {
@@ -32,12 +28,7 @@ export default async function LeadsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  /*
-   * Own guard, in addition to the layout's — this screen reads real customer
-   * PII, so a session revoked mid-visit must not keep serving it through a
-   * soft navigation the layout does not re-render for. React.cache on
-   * getServerSession means this shares the layout's lookup for the request.
-   */
+  // own guard: this screen reads customer PII
   await requireSession()
 
   const params = await searchParams
@@ -45,26 +36,13 @@ export default async function LeadsPage({
   const cities = await listCities()
   const cityLookup = buildCityLookup(cities)
 
-  /*
-   * Unlike the Sites screen, this screen has no useful content once the
-   * store is unreachable -- it exists to list, filter and open leads, and
-   * every one of those needs a working database. So it does not degrade;
-   * it fails legibly instead of the raw 500 an uncaught throw here would
-   * produce. Scoped to exactly this call, per the Sites-screen precedent.
-   */
+  // no useful content without the store, so this fails legibly rather than degrading
   let leads: LeadRecord[] = []
   let testCount = 0
   let statusCounts: LeadStatusCounts = { new: 0, contacted: 0, quoted: 0, booked: 0, lost: 0 }
   let leadsError = false
   try {
-    /*
-     * Both in the same try: the test count is not decoration, it is the
-     * safety net. Spec 3.1 promised test rows would be hidden BEHIND A
-     * TOGGLE, and until now nothing rendered one -- so a lead classified as a
-     * test row was invisible on every screen with no control to reveal it and
-     * no hint that anything was being withheld. The count and the toggle
-     * below exist so that can never be silent again.
-     */
+    // the test-row count is in the same try: hidden rows must never be silent
     const [rows, hidden, byStatus] = await Promise.all([
       listLeads(query),
       countTestLeads(query),
@@ -75,9 +53,7 @@ export default async function LeadsPage({
     statusCounts = byStatus
   } catch (err) {
     leadsError = true
-    // Loud on purpose, no lead contents: this catch wraps only the two store
-    // calls above, so whatever it caught is a connection/query failure, never
-    // a row's data.
+    // loud, no lead contents: this catch only wraps the two store calls
     console.error('LeadsPage: reading leads failed -- lead data is unavailable:', err)
   }
 
@@ -102,13 +78,7 @@ export default async function LeadsPage({
   const unworked = leads.filter((l) => l.status !== 'booked' && l.status !== 'lost').length
   const filtersActive = query.city !== null || query.status !== null || query.formType !== null
 
-  /*
-   * The view-model the client table renders. Both time strings are built
-   * HERE, on the server, because leads-table.tsx is a client component and
-   * anything derived from Date.now()/toLocaleString() would otherwise be
-   * computed twice against a different clock and timezone -- a guaranteed
-   * hydration mismatch. See the header of leads-table.tsx.
-   */
+  // view-model for the client table; time strings built here on the server to avoid a hydration mismatch
   const rows: LeadRow[] = leads.map((lead) => ({
     lead,
     cityName: cityDisplayName(cityLookup, lead.cityKey),
@@ -137,9 +107,7 @@ export default async function LeadsPage({
         </p>
       </div>
 
-      {/* The pipeline doubles as the status filter -- see status-chips.tsx
-        * for why these replaced a row of read-only tiles (and why "Quoted",
-        * which the tiles omitted entirely, is back). */}
+      {/* the pipeline doubles as the status filter (status-chips.tsx) */}
       <div className="mb-4">
         <StatusChips query={query} counts={statusCounts} />
       </div>

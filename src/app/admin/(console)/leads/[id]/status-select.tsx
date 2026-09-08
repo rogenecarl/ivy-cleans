@@ -6,22 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LEAD_STATUSES, type LeadStatus } from '@/leads/types'
 import { setStatusAction } from '../lead-actions'
 
-/*
- * Stage 2: the five separate <form>-per-status buttons collapse into one
- * Select -- one decision, one control -- but it still calls the exact same
- * setStatusAction(id, status) the buttons called, so lead-actions.ts and the
- * store call underneath it are untouched.
- *
- * A Select's onValueChange is not a form submission, so there is no <form>
- * for useFormStatus to read (see submit-button.tsx for the case where there
- * is one). Per the Next.js Server Actions guide
- * (node_modules/next/dist/docs/01-app/02-guides/server-actions.md,
- * "you create one ... then invoke it from a form, or from an event handler
- * ... wrapped in startTransition"), calling the action directly from the
- * change handler inside useTransition is the sanctioned pattern for a
- * non-form trigger, and it's what gives us `isPending` for the same
- * disable-and-show feedback used everywhere else this stage.
- */
+// one Select instead of five forms; still calls setStatusAction(id, status). No <form>, so the action runs inside
+// useTransition for `isPending` (the sanctioned non-form pattern per the Next server-actions guide).
 export function StatusSelect({ id, status }: { id: string; status: LeadStatus }) {
   const [value, setValue] = useState<LeadStatus>(status)
   const [isPending, startTransition] = useTransition()
@@ -34,9 +20,7 @@ export function StatusSelect({ id, status }: { id: string; status: LeadStatus })
       try {
         await setStatusAction(id, nextStatus)
       } catch {
-        // Revert the optimistic pick if the write genuinely failed (not the
-        // swallowed LeadNotFoundError case -- that one still resolves, and
-        // the page's own notFound() takes over on the next render).
+        // revert the optimistic pick only on a genuine failure; LeadNotFoundError resolves and notFound() takes over on re-render
         setValue(previous)
       }
     })

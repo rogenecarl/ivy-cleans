@@ -32,25 +32,8 @@ import {
 } from '../../dashboard-logic'
 import { requireSession } from '@/lib/auth-server'
 
-/*
- * The console's landing screen, in two tiers.
- *
- * TIER 1 ("Needs attention") is an alarm panel: leads nobody has replied to,
- * notifications that failed to send, and live sites with no inbox at all. It
- * is meant to be BORING -- all zeros on a healthy day -- so that any colour on
- * it means something genuinely needs doing. Tiles here are only tinted when
- * their number is non-zero; a permanently red dashboard is one nobody reads.
- *
- * TIER 2 ("Performance") is the weekly read, not the hourly one: volume
- * against last week, bookings, win rate, and which city site is actually
- * producing. Kept visually quieter than tier 1 on purpose.
- *
- * Everything is a summary; nothing is edited here. A dashboard that grows its
- * own editing controls becomes a third place the same bug has to be fixed.
- *
- * force-dynamic because every figure changes whenever a customer submits or
- * the operator moves a lead.
- */
+// Two tiers: "Needs attention" (alarms, tinted only when non-zero) and "Performance" (the weekly read).
+// Nothing is edited here. force-dynamic: every figure changes with each submission.
 export const dynamic = 'force-dynamic'
 
 /** Which icon each alarm gets. A lookup, not a branch in the JSX, so adding
@@ -75,41 +58,18 @@ function initials(name: string | null): string {
 }
 
 export default async function AdminDashboard() {
-  /*
-   * Own guard, in addition to the layout's. React.cache on getServerSession
-   * means this costs no extra round trip when the layout already ran one for
-   * the same render — see src/lib/auth-server.ts. Needed anyway per the Next
-   * docs: layouts don't re-render on a soft navigation (Partial Rendering),
-   * so a session revoked mid-visit would otherwise keep this page working.
-   */
+  // own guard: layouts don't re-render on soft navigation; React.cache makes it free
   const { role } = await requireSession()
   const isAdmin = role === 'admin'
 
-  /*
-   * One clock for the whole render. Calling new Date() inside each helper
-   * would let the "oldest waiting" age and the week boundaries disagree by a
-   * few milliseconds -- harmless here, but the kind of drift that makes a
-   * figure impossible to reproduce when someone questions it.
-   */
+  // one clock for the whole render
   const now = new Date()
 
   const cities = await listCities()
   const cityLookup = buildCityLookup(cities)
 
-  /*
-   * Lead data is an ENHANCEMENT to this screen, not a prerequisite. The city
-   * counts come off disk/Blob via listCities() above and have nothing to do
-   * with Postgres, so they must keep working through a Neon outage or on a
-   * fresh clone with no DATABASE_URL. Scoped to exactly these calls, not the
-   * JSX below: a genuine rendering bug must still throw rather than get
-   * swallowed into a friendly banner.
-   *
-   * settings is in here too because the no-inbox alarm is a LEAD-side fact:
-   * with it unavailable we must show nothing rather than compute the alarm
-   * from an empty map, which would flag every live city as having no inbox.
-   * A manager cannot reach /admin/sites, where that alarm links, so the
-   * fetch is skipped for them rather than run and then thrown away.
-   */
+  // lead data is an enhancement: the city counts must survive a Postgres outage. Scoped to these calls only.
+  // settings is inside because the no-inbox alarm is a lead-side fact; skipped for managers who can't reach Sites.
   let stats: LeadDashboardStats | null = null
   let recent: LeadRecord[] = []
   let settings: Record<string, SiteSettingsRecord> = {}
@@ -170,14 +130,7 @@ export default async function AdminDashboard() {
         stats && (
           <>
             <section className="mb-8">
-              {/*
-                * Every check this role runs passes -> ONE line, not one tile
-                * per check reading "0". Still names each check that ran,
-                * because an empty space cannot tell an operator "all clear"
-                * apart from "that check stopped running", but a sentence can
-                * -- which is why the sentence below must never name a check
-                * a manager's render never evaluated (see noInbox above).
-                */}
+              {/* every check passes -> one line naming each check that ran (never one a manager's render didn't evaluate) */}
               {alarms.length === 0 ? (
                 <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
                   <CheckCircle2
@@ -207,9 +160,7 @@ export default async function AdminDashboard() {
                           hint={alarm.hint}
                         />
                       )
-                      // Two of the three have somewhere to go and fix it; the
-                      // failed-notification one does not, so it stays inert
-                      // rather than linking somewhere that cannot help.
+                      // the failed-notification alarm has nowhere to link
                       const href =
                         alarm.key === 'waiting'
                           ? filterHref(EMPTY_QUERY, 'status', 'new')
@@ -254,15 +205,7 @@ export default async function AdminDashboard() {
                   value={stats.bookedLast30}
                   hint={`${stats.booked} booked all time`}
                 />
-                {/*
-                  * Replaced the win rate here. A rate needs dozens of decided
-                  * leads before it stops swinging on a single outcome, and
-                  * rendered "—" until then -- a tile spending space to say
-                  * nothing. This split is readable from the very first lead
-                  * and says something actionable: a booking request carries
-                  * bedrooms, bathrooms and an address, so it is far closer to
-                  * a sale than a general enquiry.
-                  */}
+                {/* form split instead of a win rate: readable from the first lead */}
                 <StatPill
                   icon={ClipboardList}
                   label="Booking requests"

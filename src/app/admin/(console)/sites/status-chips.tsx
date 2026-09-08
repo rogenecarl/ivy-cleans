@@ -3,17 +3,7 @@ import type { CityStatus } from '@/pipeline/admin-logic'
 import { cn } from '@/lib/utils'
 import { siteFilterHref, visibleStatuses, type SiteQuery } from './list-logic'
 
-/*
- * Site status as the primary filter, mirroring the Leads screen's pipeline
- * chips so the two lists are learnable as one thing.
- *
- * Only the statuses worth showing render -- see visibleStatuses() in
- * list-logic.ts. Live and Draft are always there; Generating, Needs finalize
- * and Error appear only when they have something in them, because on a
- * healthy system all three sit at zero forever.
- *
- * Server-safe -- plain links, no hooks.
- */
+// Site status as the primary filter, mirroring the Leads chips. Only statuses worth showing render (visibleStatuses). Plain links.
 
 const LABEL: Record<CityStatus, string> = {
   live: 'Live',

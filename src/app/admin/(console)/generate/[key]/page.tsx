@@ -9,20 +9,11 @@ import { ErrorText } from '../../../ui'
 import StageRunner from './stage-runner'
 import { requireAdmin } from '@/lib/auth-server'
 
-/*
- * Progress screen. The server half does one thing — read the draft sidecar so
- * the runner starts from the stages that are ALREADY done — and hands the rest
- * to the client runner. force-dynamic because that sidecar changes under us
- * with every stage.
- */
+// Progress screen: reads the sidecar so the runner starts from the stages already done. force-dynamic.
 export const dynamic = 'force-dynamic'
 
 export default async function GeneratePage({ params }: { params: Promise<{ key: string }> }) {
-  /*
-   * Own guard, in addition to the layout's — the pipeline screens are
-   * admin-only per src/lib/access.ts, and a manager must not be able to
-   * reach this through a soft navigation the layout does not re-render for.
-   */
+  // own guard: admin-only, and layouts don't re-render on soft navigation
   await requireAdmin()
 
   const { key } = await params
@@ -31,9 +22,7 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
   try {
     draft = await loadDraft(key)
   } catch (err) {
-    // The usual cause is a published city: publishCity() retires the sidecar,
-    // so there is nothing left to generate and the review screen is the right
-    // place to land.
+    // usually a published city: the sidecar is gone, so the review screen is the place to land
     return (
       <>
         <h1 className="mb-2 text-[1.4rem] font-semibold tracking-tight">Nothing to generate</h1>
@@ -60,13 +49,7 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
           <ChevronLeft className="size-4" aria-hidden="true" />
           Sites
         </Link>
-        {/*
-          * The city, and the number that will end up on every page of it.
-          * The sentence that used to sit here explained that the stages run
-          * one at a time so a failure is retryable — architecture, read once
-          * and then scrolled past forever. The runner's own footer says what
-          * an operator needs while it is working.
-          */}
+        {/* the city and the number that ends up on every page */}
         <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">
           {draft.facts.city}, {draft.facts.state}
         </h1>

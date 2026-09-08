@@ -1,31 +1,8 @@
 'use server'
 
-/**
- * The admin's server actions — thin wrappers, on purpose.
- *
- * Every function here is a Next RPC endpoint, so this module cannot be
- * imported by vitest without dragging in the framework's server runtime. All
- * of the substance therefore lives in src/pipeline/admin-logic.ts (plain
- * async functions, tested in tests/admin-logic.test.ts) and this file adds
- * only what needs Next: redirect() after a create, and revalidatePath() after
- * anything that changes what a rendered city page would show.
- *
- * revalidatePath('/', 'layout') is deliberately the blunt version: a city's
- * pages are reachable both at the public paths (via the host rewrite) and at
- * the /<cityKey> preview prefix, so there is no single path to invalidate.
- * The admin is used a handful of times a day — a full-tree revalidation costs
- * nothing here and cannot leave a stale published page behind.
- *
- * These actions are as reachable as the pages, whether or not the caller ever
- * loaded the Sites screen -- the Next docs' "treat every action as an
- * untrusted entry point" warning. Two things follow, and BOTH are needed:
- * every input is validated here, and every function starts with a guard from
- * src/lib/auth-server.ts. The (console) layout's guard does NOT cover these
- * -- a layout does not run for an action POST. Every export here is
- * admin-only, including the two read-only ones (listCitiesAction,
- * getProgressAction): they leak which cities exist and how generation is
- * progressing, which is not a manager's business.
- */
+// Thin server-action wrappers; the substance is in src/pipeline/admin-logic.ts (testable without Next).
+// revalidatePath('/', 'layout') on purpose: a city is reachable at public paths and the /<key> preview.
+// Every action starts with a guard — the layout guard does not run for an action POST — and every export is admin-only.
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -56,14 +33,7 @@ function field(form: FormData, name: string): string {
   return typeof value === 'string' ? value : ''
 }
 
-/**
- * New-city form submit. Errors cannot be returned from an action a <form>
- * posts to directly without turning the page into a client component, so a
- * failure redirects back to the form with the message in the query string and
- * the form re-renders it. Both redirects sit OUTSIDE the try/catch inside
- * createDraftFromFields — redirect() signals by throwing, and swallowing that
- * throw would silently do nothing.
- */
+// errors redirect back to the form with ?error=; the redirects sit OUTSIDE createDraftFromFields' try/catch (redirect throws)
 export async function createDraftAction(formData: FormData): Promise<void> {
   await requireAdmin()
   const result = await createDraftFromFields({
@@ -96,21 +66,13 @@ export async function runStageAction(
   return runStageLogic(key, stage, only)
 }
 
-/**
- * Which areas the suburb stage still owes, so the client can drive that loop
- * one request per area. See pendingSuburbsLogic for why the loop is not
- * server-side.
- */
+// areas the suburb stage still owes; the client drives the loop one request per area
 export async function pendingSuburbsAction(key: string) {
   await requireAdmin()
   return pendingSuburbsLogic(key)
 }
 
-/**
- * Which service pages the service stage still owes, so the client can drive
- * that loop one request per service. See pendingServicesLogic for why the
- * loop is not server-side.
- */
+// service pages the service stage still owes; same one-per-request loop
 export async function pendingServicesAction(key: string) {
   await requireAdmin()
   return pendingServicesLogic(key)
@@ -140,13 +102,7 @@ export async function updateSuburbsAction(key: string, suburbs: SuburbRow[]): Pr
   return result
 }
 
-/**
- * Publish, and optionally BUY a domain on the way.
- *
- * `provision` spends real money, so it crosses the boundary as an explicit
- * flag rather than a default — the publish screen's toggle is off unless the
- * operator turns it on for that city.
- */
+// publish, optionally buying a domain; `provision` is an explicit flag because it spends money
 export async function publishAction(
   key: string,
   domain?: string,

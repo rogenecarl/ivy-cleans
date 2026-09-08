@@ -1,15 +1,6 @@
 // src/leads/submit.ts
-/*
- * The order of operations for a public form submission, with every side effect
- * behind an injected port so this module has no I/O and its tests need no
- * database and no network.
- *
- * THE ORDERING CONSTRAINT: the lead is created BEFORE the email is attempted,
- * and no email outcome can turn a saved lead into a failed submission. If
- * Resend is down, the domain is unverified, or the inbox is misconfigured, the
- * customer is already captured and the row carries a visible flag. A broken
- * notification path must never lose a customer.
- */
+// A public form submission, every side effect behind an injected port. The lead is created BEFORE the email is
+// attempted; a failed notification never loses a customer.
 import type { DomainsIndex } from '../content/resolve-rewrite'
 import { attributeCity } from './attribution'
 import { buildLeadEmail, type LeadEmail } from './email'
@@ -23,19 +14,8 @@ export type SubmitPorts = {
   createLead(input: LeadInput): Promise<LeadRecord>
   markLeadEmail(id: string, status: EmailStatus, error: string | null): Promise<void>
   getSiteSettings(cityKey: string): Promise<SiteSettingsRecord | null>
-  /**
-   * Is this city still a draft? A draft city's submissions are previews:
-   * stored, hidden from the dashboard by default, never emailed. A LIVE
-   * city's submissions are real customers no matter what host they arrived
-   * on -- see the header of attribution.ts for the bug this replaced.
-   *
-   * MUST NOT THROW and MUST FAIL OPEN: an implementation that cannot resolve
-   * the city (store unreachable, key unknown) reports `false`, i.e. "real".
-   * A real lead wrongly marked as a test row disappears from every screen and
-   * is never emailed; a preview wrongly marked real is merely a visible,
-   * clearly-labelled row someone can ignore. Only one of those loses a
-   * customer.
-   */
+  // is this city still a draft? MUST NOT THROW and MUST FAIL OPEN (false = real): a real lead misfiled as a test
+  // disappears from every screen; a preview misfiled as real is just a labelled row.
   isDraftCity(cityKey: string): Promise<boolean>
   sendEmail(args: {
     to: string[]
@@ -71,17 +51,10 @@ export async function submitLead(args: SubmitArgs, ports: SubmitPorts): Promise<
   const honeypotRaw = args.form.get(HONEYPOT_FIELD)
   const honeypotValue = typeof honeypotRaw === 'string' ? honeypotRaw : null
 
-  // Checked before any I/O: no hashing, no query. A bot is told it succeeded --
-  // it learns nothing, and retries cost it time -- but the whole point of a
-  // honeypot is that catching one must be free, so this must run first.
+  // before any I/O: catching a bot must be free
   if (honeypotFilled(honeypotValue)) return { ok: true }
 
-  // `ipSalt: null` means "not configured" (env.ts already logged that, once,
-  // at boot): hashIp returns null, no ipHash is stored, and the rate limit is
-  // skipped. The customer is still captured -- losing the lead would be a far
-  // worse outcome than losing a spam control. A blank STRING never reaches
-  // here (env.ts normalizes it to null) and hashIp still throws on one, since
-  // at that point it can only be a programming error.
+  // ipSalt null = not configured: no ipHash, no rate limit, lead still captured
   const ipHash = hashIp(args.clientIp, args.ipSalt)
   const recentCount = ipHash ? await ports.countRecentByIpHash(ipHash, RATE_WINDOW_MS) : 0
   if (overRateLimit(recentCount)) return { ok: false, error: 'rate-limit' }
@@ -90,13 +63,7 @@ export async function submitLead(args: SubmitArgs, ports: SubmitPorts): Promise<
 
   const attribution = attributeCity(args.host, args.renderedCityKey, args.domains)
 
-  /*
-   * The city key decides WHOSE lead this is (attribution.ts, pure, Host-first).
-   * The city's own status decides whether it is a real customer or a draft
-   * preview -- a separate question, answered here because it needs I/O.
-   * Deliberately after validation and the rate limit, so a rejected or
-   * bot-filled submission never costs a city lookup.
-   */
+  // attribution decides whose lead; the city's status decides real vs preview. After validation and the rate limit.
   const isTest = await ports.isDraftCity(attribution.cityKey)
 
   const input: LeadInput = {
@@ -149,9 +116,7 @@ async function notify(
 
     const result = await ports.sendEmail({ to, replyTo: input.email, email })
     if (result.ok) {
-      // A failure to RECORD success is not a failure to SEND: swallow this in
-      // its own try/catch so the outer catch below can never relabel a
-      // genuinely successful send as failed.
+      // a failure to record success is not a failure to send
       try {
         await ports.markLeadEmail(lead.id, 'sent', null)
       } catch {

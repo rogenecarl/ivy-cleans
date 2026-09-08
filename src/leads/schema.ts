@@ -1,17 +1,6 @@
 // src/leads/schema.ts
-/*
- * FormData in, validated fields out. Pure: no database, no framework.
- *
- * The `name` attributes below are the LIVE Elementor names, kept byte-exact
- * because the public markup is a fidelity clone and must not change. They are
- * opaque ids, so this module maps each one to its human label for the payload
- * — that label is what the dashboard and the notification email display.
- *
- * TRAP: form_fields[email] means completely different things on the two forms.
- * On the contact form it really is the email address. On the booking form it is
- * the service-type dropdown, because Elementor reused the slot. Do not assume
- * they are the same without checking the actual form data.
- */
+// FormData -> validated fields, pure. Field names are the live Elementor names, byte-exact.
+// TRAP: form_fields[email] is the email on the contact form but the service dropdown on the booking form.
 import { z } from 'zod'
 
 export const HONEYPOT_FIELD = 'form_fields[website_url]'
@@ -27,21 +16,8 @@ export type ParseResult =
   | { ok: true; fields: ParsedFields }
   | { ok: false; fieldErrors: Record<string, string> }
 
-/**
- * The live form's fields, in render order: the Elementor submission name, the
- * human label the dashboard and the email show, and whether the field is
- * marked required IN THE PUBLIC MARKUP.
- *
- * `required` is not decoration. It used to live only in src/data/*.ts while
- * this module hardcoded its own idea of which fields were mandatory — and the
- * two disagreed: the contact form renders Name as OPTIONAL and the server
- * rejected any submission without one, so a customer doing exactly what the
- * page allowed got an error. Nothing could catch it, because the drift guard
- * (tests/leads-schema.test.ts) compared names and labels only.
- *
- * Both halves are now closed: the guard compares `required` too, and the
- * validation below is DERIVED from these flags instead of restating them.
- */
+// the live form's fields in render order. `required` mirrors the public markup; validation is derived from it
+// (the server used to reject a Name the contact form marks optional).
 export type LeadFormField = {
   /** The live `name` attribute the browser actually submits. */
   name: string
@@ -73,21 +49,8 @@ export const CONTACT_FIELDS: readonly LeadFormField[] = [
   { name: "form_fields[field_45db7dd]", label: "How Can We Help?", required: false },
 ]
 
-/**
- * The identity rules, derived from the field table so the server can never be
- * STRICTER than the markup claims to be.
- *
- * The direction matters. Server-stricter-than-markup rejects a customer who
- * did exactly what the page allowed — the I2 defect. Server-more-lenient is
- * harmless: the browser already enforces `required`, and accepting a field
- * the markup insisted on costs nothing (every one of these columns is
- * nullable in Prisma).
- *
- * So `name` and `email` follow the table exactly, and `phone` stays optional
- * unconditionally — booking marks it required, but refusing to store a lead
- * that carries a name and a working email address, over a missing phone
- * number, would lose a real customer to satisfy a form attribute.
- */
+// derived from the field table so the server is never stricter than the markup. `phone` stays optional:
+// refusing a lead with a name and email over a missing phone loses a customer.
 function identitySchema(nameRequired: boolean, emailRequired: boolean) {
   const name = z.string().trim().max(200)
   const email = z.string().trim().max(320)
@@ -137,9 +100,7 @@ function parse(
   const payload: Record<string, string> = {}
   for (const field of fields) payload[field.label] = str(form, field.name)
 
-  // An optional field left blank is null, not '' -- Lead.name/email/phone are
-  // all nullable in Prisma, and the dashboard's "No name given" / "No contact
-  // info" fallbacks key off null. Same rule for all three.
+  // blank optional -> null; the dashboard's fallbacks key off null
   return {
     ok: true,
     fields: {

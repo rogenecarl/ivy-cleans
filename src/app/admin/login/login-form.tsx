@@ -7,36 +7,15 @@ import { Label } from '@/components/ui/label'
 import { SubmitButton } from '../submit-button'
 import { signInAction, type SignInState } from './actions'
 
-/*
- * No react-hook-form and no zodResolver, unlike peaktransport's version of
- * this form: neither library is in this project, and adding one to validate
- * two required fields is not worth the dependency. The pattern here is the
- * one every other form in this console uses.
- *
- * TOASTS, and why this differs from peaktransport's version. peaktransport
- * signs in CLIENT-side (authClient.signIn.email() then router.push()), so it
- * can raise a success toast while still mounted. This form posts to a server
- * action that ends in redirect(), so on success the page is already
- * navigating -- a success toast would either never paint or flash. The
- * feedback for success is landing on the dashboard. What IS worth toasting:
- *
- *   - the wait. A cold Neon connection plus scrypt has been measured at ~8s
- *     on this project; eight seconds of nothing reads as broken.
- *   - the failure, which is easy to miss as inline text alone. The inline
- *     message below stays too -- it survives after the toast auto-dismisses,
- *     which matters while someone is still retyping.
- */
+// No form library for two fields. Success is the redirect itself (a toast would never paint); what's worth toasting
+// is the wait (~8s on a cold Neon + scrypt) and the failure.
 export function LoginForm({ next, signedOut }: { next: string; signedOut?: boolean }) {
   const [state, formAction, isPending] = useActionState<SignInState, FormData>(
     signInAction,
     null,
   )
 
-  /*
-   * Holds the loading toast so the result can replace it in place rather than
-   * stacking a second toast on top of it (sonner's `id` option), and so the
-   * unmount cleanup below can dismiss it.
-   */
+  // holds the loading toast so the result replaces it in place and unmount can dismiss it
   const loadingToast = useRef<string | number | null>(null)
 
   useEffect(() => {
@@ -53,26 +32,14 @@ export function LoginForm({ next, signedOut }: { next: string; signedOut?: boole
     }
   }, [state])
 
-  /*
-   * On SUCCESS the action redirects, this component unmounts, and nothing
-   * ever resolves the loading toast -- and because the Toaster now lives in
-   * the outer /admin layout, that orphan would follow the operator onto the
-   * dashboard and sit there indefinitely. Dismissing on unmount is what
-   * closes it; do not remove this thinking the toast is self-limiting.
-   */
+  // on success the action redirects and this unmounts; dismiss the loading toast or it follows the operator onto the dashboard
   useEffect(() => {
     return () => {
       if (loadingToast.current !== null) toast.dismiss(loadingToast.current)
     }
   }, [])
 
-  /*
-   * Sign-out redirects here with ?signedout=1 rather than carrying a flash
-   * message, because sign-out always lands on this one page -- a query param
-   * costs nothing where a cookie-backed flash would be machinery. The param
-   * is stripped with replaceState so a refresh does not re-announce it, and
-   * because history.replaceState does not re-render, this cannot loop.
-   */
+  // sign-out lands here with ?signedout=1; stripped with replaceState so a refresh doesn't re-announce it
   useEffect(() => {
     if (!signedOut) return
     toast.success('Signed out.')

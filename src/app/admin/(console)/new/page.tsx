@@ -11,15 +11,7 @@ import { ErrorText } from '../../ui'
 import { SubmitButton } from '../../submit-button'
 import { requireAdmin } from '@/lib/auth-server'
 
-/*
- * New-city form. A plain server-rendered <form action={serverAction}> — no
- * client component, so it works before hydration and there is no submit-state
- * machinery to get wrong.
- *
- * Errors arrive back as ?error=… : createDraftAction redirects here with the
- * message when deriveFacts rejects the phone/state or a draft already exists.
- * (Next 16: searchParams is a Promise and must be awaited.)
- */
+// New-city form: a plain server-rendered <form action>. Errors come back as ?error=. searchParams is a Promise in Next 16.
 export const dynamic = 'force-dynamic'
 
 export default async function NewCityPage({
@@ -27,11 +19,7 @@ export default async function NewCityPage({
 }: {
   searchParams: Promise<{ error?: string }>
 }) {
-  /*
-   * Own guard, in addition to the layout's — creating a city is admin-only
-   * per src/lib/access.ts, and a manager must not be able to reach this form
-   * through a soft navigation the layout does not re-render for.
-   */
+  // own guard: creating a city is admin-only
   await requireAdmin()
 
   const { error } = await searchParams
@@ -72,10 +60,7 @@ export default async function NewCityPage({
                 <Label htmlFor="state" className="mb-1.5">
                   State <span className="text-destructive">*</span>
                 </Label>
-                {/* No pattern/length constraint: the field takes "FL" or
-                  * "Florida" and deriveFacts() resolves either to the code.
-                  * A browser-level pattern would reject the full name before
-                  * the server ever saw it. */}
+                {/* no pattern: "FL" or "Florida", resolved by deriveFacts() */}
                 <Input
                   id="state"
                   name="state"
@@ -117,33 +102,8 @@ export default async function NewCityPage({
               />
             </div>
 
-            {/*
-              * Owner knowledge and operating facts, collapsed.
-              *
-              * These WERE shown open, on the reasoning that a collapsed
-              * section stays empty forever. That argument no longer holds:
-              * every one of these is now editable afterwards at
-              * /admin/sites/<key>, which is their natural home, because they
-              * describe a market that is already running and this screen
-              * creates one that is not. Six always-empty boxes above the
-              * button were crowding out the three fields that actually have
-              * answers on day one.
-              *
-              * Kept here rather than moved out entirely: these feed the FIRST
-              * generation, so an operator who already knows them saves a full
-              * regeneration by typing them now.
-              *
-              * REVIEWS ARE NOT HERE. Every field left is one a market about to
-              * launch could answer -- a crew lead can be assigned before the
-              * first clean, the ZIPs can be decided. A review cannot exist
-              * until a house has been cleaned, so asking for one on the screen
-              * that CREATES a market is asking for something that cannot be
-              * true yet. It lives on /admin/sites/<key>.
-              *
-              * <details>, not a client-side toggle -- this page is a plain
-              * server-rendered form on purpose (see the header) and works
-              * before hydration.
-              */}
+            {/* Operating facts, collapsed: all editable later at /admin/sites/<key>, kept here because they feed the first
+              generation. Reviews are not here — none can exist before a house has been cleaned. <details> so it works before hydration. */}
             <details className="rounded-md border border-border/60 p-4">
               <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
                 This market is already operating
@@ -229,12 +189,7 @@ export default async function NewCityPage({
               </div>
             </details>
 
-            {/*
-              * What the button actually does. It starts a five-stage pipeline
-              * against a real model that runs for several minutes -- nothing
-              * on this screen said so, and the first thing an operator did
-              * with a long-running job they did not expect was close the tab.
-              */}
+            {/* say what the button does: a several-minute pipeline */}
             <div className="rounded-md bg-muted/50 px-4 py-3 text-[0.8rem] text-muted-foreground">
               <p className="font-medium text-foreground">What happens next</p>
               <p className="mt-1">
@@ -246,13 +201,7 @@ export default async function NewCityPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {/*
-                * SubmitButton, not a bare <Button type="submit">. Every other
-                * form in this admin uses it (see its own header); this one
-                * did not, so the button that starts a several-minute pipeline
-                * was the single place in the console with no feedback at all
-                * on click.
-                */}
+              {/* SubmitButton for feedback on click, like every other form here */}
               <SubmitButton pendingLabel="Creating…" className="sm:min-h-9">
                 Create &amp; generate
               </SubmitButton>

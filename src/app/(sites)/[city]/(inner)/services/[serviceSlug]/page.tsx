@@ -23,19 +23,8 @@ import { areasData } from "@/data/areas";
 import { cityBits } from "@/content/store";
 import type { ServiceEntry } from "@/data/services/registry";
 
-/*
- * The shared-template home for all seven services. All seven are registered
- * in src/data/services/registry.ts today (move-in-move-out-cleaning as
- * `bespoke`, the other six as `template`), so every slug renders. An
- * unregistered slug would 404 here for free — resolveService() below calls
- * notFound() whenever serviceBySlug() returns undefined.
- *
- * This route runs ALONGSIDE the older [serviceSlug] catch-all, which still
- * owns every suburb slug but no longer renders /deep-cleaning-<city> or
- * /<city>-move-out-cleaning-services — those two are indexed elsewhere, so
- * it permanently redirects them here instead of 404ing. Nothing here
- * modifies that route or its components.
- */
+// Shared home for all seven services; an unregistered slug 404s via resolveService(). The [slug] route still owns
+// suburb slugs and redirects the two old service URLs here.
 type ServiceParams = Promise<{ city: string; serviceSlug: string }>;
 
 async function resolveService(params: ServiceParams) {
@@ -46,16 +35,7 @@ async function resolveService(params: ServiceParams) {
   return { c, entry };
 }
 
-/*
- * Emits all seven SERVICE_SLUGS, unconditionally and without touching
- * `params` — unlike the sibling [serviceSlug] route, whose suburb slugs are
- * per-city data read from c.research.suburbs, these seven slugs are the
- * same for every city, so nothing here needs to know which city is being
- * generated. All seven are emitted regardless of which are registered: an
- * unregistered slug's page calls notFound() at render, which Next handles
- * as a per-route 404 rather than a build failure (next/dist/docs/01-app/
- * 03-api-reference/04-functions/not-found.md).
- */
+// all seven slugs, the same for every city; an unregistered one 404s at render, not at build
 export async function generateStaticParams() {
   return SERVICE_SLUGS.map((serviceSlug) => ({ serviceSlug }));
 }
@@ -96,17 +76,7 @@ export default async function ServicePage({ params }: { params: ServiceParams })
   );
 }
 
-/*
- * Abdi's Orlando review, item 15B. Until this, a service page linked to no
- * area at all — Lake Mary had exactly one inbound link on the whole site,
- * the front page's list. Rendering the same Areas We Serve block here, under
- * its own heading, takes every area page from one inbound link to eight
- * (seven service pages plus the front page), and it is deterministic: no
- * prompt work, nothing to validate.
- *
- * Same component, same map, same hasSuburbPages rule as the front page, so a
- * city whose area pages are not live renders the names unlinked here too.
- */
+// every service page links every area: same block, map and hasSuburbPages rule as the front page
 function WhereWeDoIt({ c, entry }: { c: CityContent; entry: ServiceEntry }) {
   return (
     <ServiceArea

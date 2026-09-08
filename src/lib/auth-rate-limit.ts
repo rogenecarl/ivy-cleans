@@ -1,28 +1,7 @@
 // src/lib/auth-rate-limit.ts
-/*
- * FIXED-window limiter for the sign-in server action, after
- * peaktransport/src/lib/auth-rate-limit.ts.
- *
- * Fixed, not sliding, and the difference is worth stating because the naive
- * reading overstates the protection: a window opens on the first request and
- * every hit until `resetAt` shares one bucket. So an attacker who spends the
- * budget just before `resetAt` and again just after gets up to 2x maxRequests
- * — 10 sign-in attempts — in a span far shorter than the nominal 300s. A true
- * sliding window (weighting the previous bucket by overlap, or keeping a
- * timestamp log) would close that. Not worth it here: this is the second of
- * two limiters and the burst is bounded and small.
- *
- * IN-MEMORY, and therefore per-instance: it resets on restart, and a second
- * Vercel instance keeps its own counter. It is a speed bump on top of
- * better-auth's own /sign-in/email rule (src/lib/auth.ts), not a distributed
- * limiter. Both exist because the server action can be POSTed directly and
- * better-auth's rule only sees requests that reach its own endpoint.
- *
- * NO setInterval sweep, unlike the version this came from. A module-level
- * timer in a Next server module runs in every worker, keeps the event loop
- * referenced, and in dev re-registers on each module re-evaluation. Sweeping
- * inline on write costs nothing at this volume and has none of that.
- */
+// Fixed-window limiter for the sign-in action (up to 2x maxRequests across a window edge — accepted).
+// In-memory and per-instance: a speed bump on top of better-auth's own rule, which only sees its own endpoint.
+// No setInterval sweep: sweeps inline on write.
 
 type RateLimitRecord = {
   count: number
@@ -31,10 +10,7 @@ type RateLimitRecord = {
 
 const store = new Map<string, RateLimitRecord>()
 
-/** Bounded so a flood of distinct identifiers cannot grow the map without
- * limit. Well above any real operator count; if it is ever hit, the eviction
- * in checkRateLimit below makes room. Exported so tests/auth-rate-limit.test.ts
- * can drive the eviction path directly instead of hardcoding 10_000. */
+/** Cap on tracked identifiers; exported for the eviction test. */
 export const MAX_TRACKED = 10_000
 
 type RateLimitConfig = {
@@ -53,13 +29,7 @@ export type RateLimitResult = {
   retryAfterSeconds?: number
 }
 
-/**
- * The number of identifiers currently tracked. Exported only so
- * tests/auth-rate-limit.test.ts can assert the MAX_TRACKED bound actually
- * holds, rather than inferring it from checkRateLimit's return value alone —
- * that return value says nothing about how many OTHER entries are still in
- * the map.
- */
+/** Tracked identifier count; exported for the MAX_TRACKED test. */
 export function rateLimitTrackedCount(): number {
   return store.size
 }
@@ -72,10 +42,7 @@ function sweep(now: number): void {
   }
 }
 
-/**
- * Consumes one token. Returns `success: false` once the window is exhausted,
- * with the seconds until it reopens.
- */
+/** Consumes one token; `success: false` once the window is exhausted. */
 export function checkRateLimit(config: RateLimitConfig): RateLimitResult {
   const { key, identifier, windowSeconds, maxRequests } = config
   const storeKey = `${key}:${identifier}`
@@ -83,14 +50,7 @@ export function checkRateLimit(config: RateLimitConfig): RateLimitResult {
 
   if (store.size >= MAX_TRACKED) {
     sweep(now)
-    /*
-     * sweep() only removes EXPIRED records, so on its own it does not bound
-     * anything: a distributed credential-stuffing wave — precisely the threat
-     * this file exists to blunt — fills the map with LIVE entries that sweep
-     * cannot touch, and it grows without limit. Evict the record closest to
-     * expiring instead. Losing one counter early lets a single attacker get a
-     * few extra attempts; unbounded growth costs the whole process.
-     */
+    // sweep() only removes expired records, so evict the one closest to expiring to bound the map
     if (store.size >= MAX_TRACKED) {
       let oldestKey: string | null = null
       let oldestAt = Infinity
@@ -125,13 +85,7 @@ export function checkRateLimit(config: RateLimitConfig): RateLimitResult {
   return { success: true, remaining: maxRequests - record.count, resetAt: record.resetAt }
 }
 
-/**
- * Five attempts per five minutes per IP.
- *
- * Matches the '/sign-in/email' customRule in src/lib/auth.ts on purpose —
- * two limits with different numbers would make "why was I blocked" impossible
- * to answer.
- */
+// five attempts per five minutes per IP, matching the '/sign-in/email' rule in auth.ts
 export const RATE_LIMITS = {
   signIn: {
     windowSeconds: 300,

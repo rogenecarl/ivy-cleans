@@ -12,13 +12,7 @@ import {
 import type { AdminUser } from '@/lib/auth-server'
 import { signOutAction } from './sign-out-action'
 
-/*
- * Replaces the hardcoded "A / Admin / Administrator" chip this header carried
- * while the console had no authentication. That version came with a long
- * comment explaining it was a label rather than an account, and that a Sign
- * Out ending no session would be worse than none — both true then, neither
- * true now.
- */
+// the signed-in operator; replaces the hardcoded chip from before authentication
 
 /** First letters of the first two words, for the avatar circle. */
 function initials(name: string): string {

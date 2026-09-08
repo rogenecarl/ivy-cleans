@@ -7,34 +7,15 @@ import { IdentityChip } from '../identity-chip'
 import { SignedInToast } from '../signed-in-toast'
 import { requireSession } from '@/lib/auth-server'
 
-/*
- * The signed-in console's shell. Everything under this layout requires a
- * session; /admin/login deliberately sits outside it.
- *
- * Async so it can call the guard below. The only piece that needs the current
- * path to light up the active tab is split into the small client component
- * `AdminNav`.
- */
+// The signed-in console's shell; /admin/login sits outside it. AdminNav is the one client piece.
 export default async function ConsoleLayout({ children }: { children: ReactNode }) {
-  /*
-   * Every console page is behind this. It is NOT, however, what protects the
-   * server actions those pages call, or the pages themselves across a soft
-   * navigation — a layout does not run for an action POST, and Partial
-   * Rendering means it does not re-render on every route change either. Each
-   * of the eight console pages carries its own guard for that reason, and
-   * every server action in actions.ts/site-actions.ts/lead-actions.ts starts
-   * with a guard of its own.
-   */
+  // every console page is behind this, but it does NOT cover server actions (a layout doesn't run for an action POST)
+  // or soft navigations (Partial Rendering) — each page and each action carries its own guard
   const user = await requireSession()
 
   return (
     <>
-      {/*
-        * Raises the sign-in success toast on arrival. Suspense-wrapped because
-        * it calls useSearchParams, which Next requires a boundary around --
-        * without one, a page that could otherwise be static would be forced
-        * dynamic, and the build says so.
-        */}
+      {/* sign-in toast; Suspense-wrapped because it uses useSearchParams */}
       <Suspense fallback={null}>
         <SignedInToast role={user.role} />
       </Suspense>
@@ -46,9 +27,7 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
               href={ADMIN_DASHBOARD}
               className="shrink-0 rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              {/* Logo.png is the dark-on-light mark the inner site's header
-                * uses, which is the right one for this white bar --
-                * Logo-footer.png is the reversed variant for dark grounds. */}
+              {/* Logo.png is the dark-on-light mark; Logo-footer.png is the reversed one */}
               <Image
                 src="/images/Logo.png"
                 alt="Ivy Cleans"

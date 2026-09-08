@@ -76,10 +76,7 @@ export default async function HomePage({ params }: { params: CityParams }) {
       {/* live renders the FAQ as static text on /home, not the accordion — see HomeFaqStatic.tsx */}
       <HomeFaqStatic />
       <HomeCta innerSite={innerSite} />
-      {/* live section b975f84 closes the page with a text widget holding the
-          LocalBusiness JSON-LD. The widget itself measures 0px tall, but the
-          section still contributes its widget-wrap gutter — a flat 20px at all
-          seven probed widths — so the spacer is reproduced here. */}
+      {/* b975f84: the live JSON-LD section is 0px tall but still adds its 20px gutter */}
       <section className="bg-white">
         <div className="ec" />
       </section>

@@ -5,36 +5,10 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { isUnder, navTabsFor, type Role } from '@/lib/access'
 
-/*
- * The header's section tabs, laid out like peaktransport's AdminHeader: pill
- * links in the same bar as the logo, with the active one filled and carrying a
- * short accent underline.
- *
- * Client-only so it can read the current path with `usePathname`. Split out of
- * layout.tsx on purpose: the layout stays a server component so it can keep
- * `export const metadata` (a client component cannot carry it), and this is the
- * only piece that needs the hook.
- *
- * The tab list itself is NOT filtering anything security-relevant -- it is
- * just deciding what to draw. Hiding a tab here does not stop a manager from
- * typing the URL; that is src/lib/access.ts's canAccess(), enforced server-side
- * in src/lib/auth-server.ts and every server action. See src/lib/access.ts.
- */
+// Header tabs. Client-only for usePathname; split out so the layout stays a server component with `metadata`.
+// Hiding a tab is not security — access.ts canAccess() is, enforced in auth-server.ts.
 
-/*
- * Every tab now matches by the same rule, because every tab now has its own
- * segment. The dashboard used to need an exact-match special case: it WAS
- * the console root, so a startsWith test lit it up on every page.
- *
- * Nothing here keys off tab ORDER -- an earlier version of this nav sliced
- * site.nav by literal index and rendered the wrong menu whenever the array
- * was reordered. Adding a section to SECTIONS in src/lib/access.ts is safe.
- *
- * Matching uses access.ts's isUnder rather than a fourth hand-rolled
- * `pathname === href || pathname.startsWith(href + '/')` -- see that file's
- * comment on isUnder for why three independent copies of this boundary test
- * is already one too many.
- */
+// every tab matches by isUnder (access.ts); nothing keys off tab order
 export function AdminNav({ role }: { role: Role }) {
   const pathname = usePathname()
   const tabs = navTabsFor(role)

@@ -11,45 +11,22 @@ import { NotesForm } from './notes-form'
 import { StatusSelect } from './status-select'
 import { requireSession } from '@/lib/auth-server'
 
-/*
- * force-dynamic for the same reason the list uses it: a status change or a
- * saved note must show up the moment the operator makes it, not on the next
- * cold build.
- *
- * No generateMetadata here on purpose -- the layout's fixed
- * "Ivy Cleans: Site Manager" title covers this route, and a lead's name is
- * customer PII that must never end up in a page title, a URL, or a log line.
- */
+// force-dynamic: a status change must show immediately. No generateMetadata: a lead's name is PII and must not
+// end up in a title, URL or log.
 export const dynamic = 'force-dynamic'
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  /*
-   * Own guard, in addition to the layout's — this screen renders one lead's
-   * name, contact details and notes in full, the single most PII-dense
-   * screen in the console. React.cache on getServerSession means this shares
-   * the layout's lookup for the request rather than issuing a second one.
-   */
+  // own guard: the most PII-dense screen in the console; React.cache shares the layout's lookup
   await requireSession()
 
   const { id } = await params
 
-  /*
-   * getLead() returning null and getLead() THROWING are different answers
-   * and must not collapse into the same UI. null means "no lead with this
-   * id" -- notFound() is correct. A throw means the store could not even be
-   * asked -- the database may be briefly unreachable, and the lead may well
-   * exist. Telling an operator "this lead does not exist" when the truth is
-   * "the database was unreachable" is the kind of wrong answer that gets a
-   * real lead abandoned, so the two cases get distinct handling below.
-   * Scoped to exactly this call, matching the Sites and Leads-list screens.
-   */
+  // getLead() null (no such lead -> notFound) and getLead() THROWING (store unreachable, lead may exist) get distinct handling
   let lead: LeadRecord | null
   try {
     lead = await getLead(id)
   } catch (err) {
-    // Loud on purpose, no lead contents: this catch wraps only the getLead
-    // call above, so whatever it caught is a connection/query failure, never
-    // a row's data -- safe to log in full.
+    // loud, no lead contents: this catch only wraps getLead
     console.error('LeadDetailPage: getLead(id) failed -- lead data is unavailable:', err)
     return (
       <>

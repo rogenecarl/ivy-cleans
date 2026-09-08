@@ -1,26 +1,6 @@
 'use client' // Error boundaries must be Client Components (Next 16 error.js convention).
-/*
- * The admin's four READ screens each degrade on their own: a database blip
- * renders a legible "data is unavailable" panel instead of a 500. The three
- * MUTATIONS had no equivalent -- setStatusAction, saveNotesAction and
- * saveNotifyEmailsAction all let any non-P2025 Prisma error bubble straight
- * to Next's default error screen, which is where an operator loses the notes
- * they had just typed.
- *
- * This boundary covers the whole admin route tree, so a throw during a click
- * lands on the same kind of panel the reads already show. It deliberately
- * shows no error text: `error.message` from a Server Component is a generic
- * string plus a digest in production anyway, and the underlying failure is
- * already logged server-side where it is actionable. The digest is surfaced
- * so a report can be matched to that log line.
- *
- * unstable_retry() (not reset()) is the Next 16 recovery call: it re-fetches
- * and re-renders the segment, which is what a transient database failure
- * actually needs. reset() alone would re-render the same stale attempt.
- *
- * <Alert> already sets role="alert" itself (src/components/ui/alert.tsx), so
- * there is no separate wrapper div carrying that role here.
- */
+// Error boundary for the admin tree so a throw during a mutation lands on a panel, not Next's default screen.
+// Shows the digest, not the message. unstable_retry() re-fetches the segment, which is what a transient DB failure needs.
 import { RotateCw, TriangleAlert } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
