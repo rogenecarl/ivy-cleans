@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import type { SuburbVerdict } from '@/pipeline/stages'
 import { cn } from '@/lib/utils'
 import { updateSuburbsAction } from '../../actions'
@@ -99,16 +97,6 @@ export default function SuburbsEditor({
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function edit(index: number, field: keyof Row, value: string) {
-    setSaved(false)
-    setRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)))
-  }
-
-  function addRow() {
-    setSaved(false)
-    setRows((prev) => [...prev, { name: '', slug: '' }])
-  }
-
   function removeRow(index: number) {
     setSaved(false)
     setRows((prev) => prev.filter((_, i) => i !== index))
@@ -139,29 +127,13 @@ export default function SuburbsEditor({
             key={i}
             className="flex flex-col gap-2 rounded-md border border-border p-3 sm:flex-row sm:items-center sm:gap-3 sm:border-0 sm:p-0"
           >
-            <div className="flex-1">
-              <Label htmlFor={`suburb-name-${i}`} className="mb-1 text-[0.75rem] font-normal text-muted-foreground sm:hidden">
-                Area name
-              </Label>
-              <Input
-                id={`suburb-name-${i}`}
-                value={row.name}
-                aria-label={`Area ${i + 1} name`}
-                onChange={(e) => edit(i, 'name', e.target.value)}
-                className="min-h-11 sm:min-h-9"
-              />
+            <div className="flex-1 min-w-0">
+              <span className="text-[0.75rem] text-muted-foreground sm:hidden">Area name</span>
+              <p className="truncate text-[0.9rem] font-medium">{row.name}</p>
             </div>
-            <div className="flex-1">
-              <Label htmlFor={`suburb-slug-${i}`} className="mb-1 text-[0.75rem] font-normal text-muted-foreground sm:hidden">
-                URL slug
-              </Label>
-              <Input
-                id={`suburb-slug-${i}`}
-                value={row.slug}
-                aria-label={`Area ${i + 1} slug`}
-                onChange={(e) => edit(i, 'slug', e.target.value)}
-                className="min-h-11 sm:min-h-9"
-              />
+            <div className="flex-1 min-w-0">
+              <span className="text-[0.75rem] text-muted-foreground sm:hidden">URL slug</span>
+              <p className="truncate font-mono text-[0.8rem] text-muted-foreground">{row.slug}</p>
             </div>
             <div className="flex items-center sm:w-28 sm:shrink-0">
               <VerdictChip meta={meta[row.slug]} />
@@ -181,15 +153,13 @@ export default function SuburbsEditor({
       </div>
 
       <p className="mt-3 text-[0.75rem] text-muted-foreground">
-        Slugs are cleaned on save (lowercase, hyphens). Leave a slug blank to build it from the
-        name. Duplicate slugs and empty rows are dropped.
+        Research picks these. Remove any area you don&rsquo;t actually serve &mdash; a page for one
+        would claim you clean there. Adding and renaming are deliberately not offered: a
+        hand-typed area has no research behind it, so its page would render the generic template,
+        and a rename keeps the old area&rsquo;s developments under the new name.
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button type="button" variant="outline" className="min-h-11 sm:min-h-9" onClick={addRow}>
-          <Plus className="size-4" aria-hidden="true" />
-          Add area
-        </Button>
         <Button
           type="button"
           className="min-h-11 sm:min-h-9"

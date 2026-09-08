@@ -67,3 +67,44 @@ describe('SuburbsEditor verdict chips', () => {
     expect(matches).toHaveLength(2)
   })
 })
+
+describe('what the areas list lets an operator do', () => {
+  /*
+   * Read-only, plus Remove. Each of the three possible edits was weighed
+   * against what it can produce, and only one of them is purely subtractive:
+   *
+   *   Add     a hand-typed area has subdivisions: [], so isWritableArea is
+   *           false, the suburb stage skips it, and src/data/suburb.ts falls
+   *           back through sOpt to the Savage template — the exact generic
+   *           page that earned 23 clicks in 16 months. checkCity cannot see
+   *           it either, because it reads `sections` and this area has none.
+   *   Rename  mergeSuburbRows matches on SLUG, so renaming an area keeps the
+   *           previous one's subdivisions. Real developments, attached to the
+   *           wrong town — worse than a generic page, because it is false.
+   *   Remove  cannot create a page. It only prevents one, and research
+   *           returns 8-12 areas it GUESSES you serve, so a wrong one has to
+   *           be removable or its page claims you clean somewhere you don't.
+   */
+  const markup = render({})
+
+  it('offers no way to add an area', () => {
+    expect(markup).not.toMatch(/add area/i)
+  })
+
+  it('shows the name and slug as text, not as editable fields', () => {
+    expect(markup).toContain('Researched Heights')
+    expect(markup).toContain('researched-heights')
+    expect(markup).not.toMatch(/<input/i)
+  })
+
+  it('still offers Remove on every row', () => {
+    expect(markup).toMatch(/Remove area 1/)
+    expect(markup).toMatch(/Remove area 2/)
+  })
+
+  it('says why adding and renaming are not offered', () => {
+    // An absent control with no explanation reads as an oversight, and the
+    // next person to look at this will add it back.
+    expect(markup).toMatch(/no research behind it/i)
+  })
+})
