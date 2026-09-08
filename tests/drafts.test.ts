@@ -744,7 +744,9 @@ describe('drafts store', () => {
         'Deep cleaning reaches the buildup a routine visit skips entirely, from baseboards ' +
         'and window tracks to the tops of doorframes and the backs of every major appliance.'
 
-      const factsA = deriveFacts({ city: 'Ztest Dupe A', state: 'MN', phoneDigits: '6125550110' })
+      // A real address: validateCityContent refuses the placeholder on a LIVE
+      // city, and both of these publish.
+      const factsA = deriveFacts({ city: 'Ztest Dupe A', state: 'MN', phoneDigits: '6125550110', address: '1 Dupe Way' })
       await createDraft(factsA)
       const docA = await loadDraft(keyA)
       docA.research = fullResearch()
@@ -756,7 +758,7 @@ describe('drafts store', () => {
 
       // Everything BUT that one slot is deliberately distinct prose, so the
       // rejection can only be attributed to the one slot this test cares about.
-      const factsB = deriveFacts({ city: 'Ztest Dupe B', state: 'MN', phoneDigits: '6125550111' })
+      const factsB = deriveFacts({ city: 'Ztest Dupe B', state: 'MN', phoneDigits: '6125550111', address: '2 Dupe Way' })
       await createDraft(factsB)
       const docB = await loadDraft(keyB)
       docB.research = fullResearch()

@@ -92,6 +92,33 @@ describe('validateCityContent', () => {
     ).toThrow(/ops\.reviews\[0\]/)
   })
 
+  test('accepts a placeholder address on a DRAFT', () => {
+    // finalizeDraft writes "<City> — address pending" when the operator left
+    // the field blank. A draft is not a page anyone can reach by searching,
+    // so the placeholder is an honest interim state there.
+    const doc = { ...validDoc(), status: 'draft', address: 'Orlando — address pending' }
+    expect(validateCityContent(doc)).toEqual(doc)
+  })
+
+  test('REFUSES a placeholder address on a LIVE city', () => {
+    /*
+     * /orlando/contact shipped reading "Orlando — address pending" on a
+     * public URL. An address is the one fact a customer checks to decide
+     * whether a cleaning company is real, and a placeholder answers that
+     * question badly. It also blocks the LocalBusiness JSON-LD and the map
+     * embed, both of which need a real one.
+     */
+    expect(() =>
+      validateCityContent({ ...validDoc(), status: 'live', address: 'Orlando — address pending' }),
+    ).toThrow(/address/)
+  })
+
+  test('the refusal is about the placeholder, not the word', () => {
+    // A real street that happens to contain "pending" is not a placeholder.
+    const doc = { ...validDoc(), status: 'live', address: '4 Pending Lane, Testville, TS 00000' }
+    expect(validateCityContent(doc)).toEqual(doc)
+  })
+
   test('throws when phone is missing', () => {
     expect(() => validateCityContent(omit(validDoc(), 'phone'))).toThrow(/phone/i)
   })

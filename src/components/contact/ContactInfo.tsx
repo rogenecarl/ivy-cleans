@@ -28,12 +28,22 @@ export default function ContactInfo({
 }) {
   return (
     <div>
-      <h2 className="text-herogreen mb-[1rem] text-[2.2rem] leading-[1.2em] font-semibold lg:text-[2.4rem]">
-        {contactInfo.locationHeading}
-      </h2>
-      <p className="text-herogreen mb-[2rem] text-[1.6rem] leading-[1.5em]">
-        {contactInfo.address}
-      </p>
+      {/*
+        * Heading AND line, or neither. A "Location" heading over an empty
+        * paragraph reads as a broken page; an omitted block reads as a
+        * company that works from vans, which is the truth for most of these
+        * markets.
+        */}
+      {contactInfo.address !== undefined && (
+        <>
+          <h2 className="text-herogreen mb-[1rem] text-[2.2rem] leading-[1.2em] font-semibold lg:text-[2.4rem]">
+            {contactInfo.locationHeading}
+          </h2>
+          <p className="text-herogreen mb-[2rem] text-[1.6rem] leading-[1.5em]">
+            {contactInfo.address}
+          </p>
+        </>
+      )}
 
       <h2 className="text-herogreen mt-0 mb-[1rem] text-[2.2rem] leading-[1.2em] font-semibold lg:text-[2.4rem]">
         {contactInfo.hoursHeading}

@@ -1026,6 +1026,9 @@ describe('ops survive publish', () => {
       city: CITY_NAMES[KEY],
       state: 'mn',
       phone: '(612) 555-0142',
+      // A real one: validateCityContent refuses the "— address pending"
+      // placeholder on a LIVE city, and this test publishes.
+      address: '1 Fixture Way',
       servingSince: '2024-03',
       zips: '55401, 55402',
     })

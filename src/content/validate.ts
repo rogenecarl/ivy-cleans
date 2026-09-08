@@ -52,6 +52,27 @@ export function validateCityContent(raw: unknown): CityContent {
     errors.push(`status must be 'draft' or 'live'`)
   }
 
+  /*
+   * A LIVE city may not carry the placeholder address.
+   *
+   * finalizeDraft writes "<City> — address pending" when the operator left
+   * the field blank, which is an honest interim state on a draft. Orlando
+   * then reached a public URL with it on /orlando/contact — and an address
+   * is the one fact a customer checks to decide whether a cleaning company
+   * is real. It also blocks the LocalBusiness JSON-LD and the map embed,
+   * both of which need a real one.
+   *
+   * Matched against the exact suffix finalizeDraft writes, not the word
+   * "pending" anywhere: a real street called Pending Lane is not a
+   * placeholder, and a check that refuses a genuine address would be worse
+   * than the placeholder it prevents.
+   */
+  if (doc.status === 'live' && isString(doc.address) && / — address pending$/.test(doc.address)) {
+    errors.push(
+      'address is still the placeholder finalizeDraft writes for a blank field; a live city needs a real one (or none — see the contact page)',
+    )
+  }
+
   // -- domain (optional string) --
   if (doc.domain !== undefined && !isString(doc.domain)) {
     errors.push('domain must be a string when present')

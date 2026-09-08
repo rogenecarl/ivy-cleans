@@ -4,6 +4,7 @@
 // grep-verified against the task brief's line numbers 30-59).
 
 import type { CityContent } from '../content/types'
+import { realAddress } from '../content/interpolate'
 
 export type ContactField =
   | {
@@ -37,7 +38,8 @@ export type ContactData = {
   contactMap: { src: string; title: string };
   contactInfo: {
     locationHeading: string;
-    address: string;
+    /** Absent when the city has no real address — render nothing. */
+    address?: string;
     hoursHeading: string;
     hours: string[];
     location2Heading: string;
@@ -132,7 +134,18 @@ export function contactData(c: CityContent): ContactData {
       // variant (distinct from the footer's "West Unit 208" wording in
       // CityContent.address — do not "fix" one to match the other), falling
       // back to `address` for a city that never recorded the variant.
-      address: c.contactAddress ?? c.address,
+      /*
+       * undefined when the city has no real address, so the heading and the
+       * line render as nothing rather than as "Orlando — address pending",
+       * which is what /orlando/contact published. A placeholder is worse
+       * than an omission here: a customer reads it as a company that cannot
+       * say where it is.
+       *
+       * validateCityContent refuses the placeholder outright on a LIVE city;
+       * this covers the draft preview, where the placeholder is legitimate
+       * on the document but should still never be shown to a reader.
+       */
+      address: realAddress(c.contactAddress ?? c.address),
       hoursHeading: "Hours",
       // contact.html #df404d9: one <p> with two <br /> splitting it into three
       // lines (Mon-Fri / Sat / Sun), each "H:MM AM – H:MM PM" using an en dash

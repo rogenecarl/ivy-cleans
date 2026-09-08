@@ -69,3 +69,17 @@ export function t(template: string, c: TokenSource): string {
   }
   return result
 }
+
+/**
+ * A real street address, or undefined when it is the placeholder.
+ *
+ * finalizeDraft writes "<City> — address pending" for a city created with
+ * the address field blank (src/content/drafts.ts). That is honest on a draft
+ * document and must never reach a reader: /orlando/contact shipped showing
+ * it. Matched on the exact suffix finalizeDraft writes, so a real street
+ * called Pending Lane is unaffected.
+ */
+export function realAddress(address: string | undefined): string | undefined {
+  if (address === undefined) return undefined
+  return / — address pending$/.test(address) ? undefined : address
+}
