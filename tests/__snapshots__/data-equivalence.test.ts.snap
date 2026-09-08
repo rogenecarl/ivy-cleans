@@ -337,11 +337,26 @@ exports[`data module values are unchanged by the content-layer refactor > home 1
     "We have full assurance that you will observe the excellence in our services, encompassing our team and thorough cleaning procedures. As a result, we extend a 100% satisfaction guarantee, with no inquiries asked. If, within the initial 24 hours following completion of the service, you are dissatisfied, we will refund your payment in its entirety.",
   ],
   "workImages": [
-    "/images/rn_image_picker_lib_temp_d129a169-21-1.jpg",
-    "/images/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg",
-    "/images/Untitled-design.png",
-    "/images/Untitled-design-1-2.png",
-    "/images/Untitled-design-2.png",
+    {
+      "alt": "A basement room before cleaning: wrappers, tissues and empty boxes scattered across the carpet",
+      "path": "/images/rn_image_picker_lib_temp_d129a169-21-1.jpg",
+    },
+    {
+      "alt": "The same basement room after cleaning: bare vacuumed carpet and a single side table",
+      "path": "/images/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg",
+    },
+    {
+      "alt": "Before and after an oven clean: burnt-on grease on the racks and door, then bare metal and clear glass",
+      "path": "/images/Untitled-design.png",
+    },
+    {
+      "alt": "Before and after a bathtub clean: soap scum and hair rings around the basin, then white gloss",
+      "path": "/images/Untitled-design-1-2.png",
+    },
+    {
+      "alt": "Before and after a bedroom tidy: laundry piled across an unmade bed, then made up with pillows squared",
+      "path": "/images/Untitled-design-2.png",
+    },
   ],
   "zips": [
     "55401",

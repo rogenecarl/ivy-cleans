@@ -30,7 +30,7 @@
 // per city — SuburbRef is never stored on CityContent itself, callers pass
 // one entry from c.research.suburbs.
 
-import type { CityContent } from '../content/types'
+import type { CityContent, MarketPhoto } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
 import { sOpt, suburbSlots } from '../content/slots'
 
@@ -42,7 +42,7 @@ export type SuburbData = {
   houseCleaning: { heading: string; paragraph: string }
   benefits: { heading: string; paragraphs: string[]; listIntro: string; items: string[]; closing: string }
   otherServices: { heading: string; intro: string; links: { label: string; href: string }[] }
-  workInAction: { heading: string; images: string[] }
+  workInAction: { heading: string; images: MarketPhoto[] }
   closing: { heading: string; paragraph: string; ctaLabel: string }
 }
 
@@ -138,20 +138,23 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       ],
     },
 
-    // dump line 39. Gallery order/images match the live swiper carousel
-    // (elementor-element-777c3582): rn_image_picker_lib_temp_d129a169-21-1.jpg,
-    // rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg, Untitled-design.png,
-    // Untitled-design-1-2.png, Untitled-design-2.png — same on every suburb
-    // page (the carousel isn't per-suburb content on the live site).
+    /*
+     * The gallery was five hardcoded Minneapolis images from the live site's
+     * swiper — "same on every suburb page", and therefore the same on every
+     * page of every city. Five identical stock photos across a hundred
+     * domains is a fingerprint, not content; Orlando's ten area pages all
+     * carried them, with no alt text and two repeated.
+     *
+     * Now the operator's own photos of this market (Facts.ops.photos), or
+     * NOTHING. An empty gallery is better than a shared one, and a photo of
+     * the actual crew is the cheapest trust signal a local business has.
+     */
     workInAction: {
       heading: 'Our Work In Action',
-      images: [
-        '/images/rn_image_picker_lib_temp_d129a169-21-1.jpg',
-        '/images/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg',
-        '/images/Untitled-design.png',
-        '/images/Untitled-design-1-2.png',
-        '/images/Untitled-design-2.png',
-      ],
+      /* copied, not aliased: suburbData's contract is that every call returns
+         independent objects (tests/suburb-data.test.ts), and handing back the
+         document's own array would let a caller mutate the loaded doc */
+      images: [...(c.ops?.photos ?? [])],
     },
 
     // dump lines 40-42

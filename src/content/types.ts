@@ -23,6 +23,12 @@ export type MarketReview = { quote: string; firstName: string; area: string; dat
  * Suburb above is: this module is the content layer's own vocabulary and
  * stays free of zod and of the pipeline.
  */
+/**
+ * A photo of this crew, or of a job in this market. `alt` is written by the
+ * operator, never generated: it describes a picture only they have seen.
+ */
+export type MarketPhoto = { path: string; alt: string }
+
 export type MarketOps = {
   zips?: string[]
   servingSince?: string
@@ -30,6 +36,7 @@ export type MarketOps = {
   crewSize?: number
   homesCleaned?: number
   reviews?: MarketReview[]
+  photos?: MarketPhoto[]
 }
 
 export type CityContent = {

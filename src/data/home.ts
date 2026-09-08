@@ -1,5 +1,5 @@
 // src/data/home.ts
-import type { CityContent } from '../content/types'
+import type { CityContent, MarketPhoto } from '../content/types'
 import { t } from '../content/interpolate'
 
 export type Feature = { title: string; text: string; icon: string; width: number; height: number };
@@ -12,7 +12,7 @@ export type HomeData = {
   houseCleaning: string[];
   principles: string[];
   zips: string[];
-  workImages: string[];
+  workImages: MarketPhoto[];
 };
 
 /*
@@ -74,12 +74,11 @@ export function homeData(c: CityContent): HomeData {
        model call is needed for it. */
     zips: c.research.zips,
 
-    workImages: [
-      "/images/rn_image_picker_lib_temp_d129a169-21-1.jpg",
-      "/images/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg",
-      "/images/Untitled-design.png",
-      "/images/Untitled-design-1-2.png",
-      "/images/Untitled-design-2.png",
-    ],
+    /* OPS-class: the operator's own photos of their own jobs, from the ops
+       block. The five Minneapolis before-and-afters that used to be hardcoded
+       here now live in content/minneapolis.json, where they belong — they are
+       that market's photos, not the template's. A city with none renders no
+       gallery (see WorkCarousel). */
+    workImages: [...(c.ops?.photos ?? [])],
   };
 }

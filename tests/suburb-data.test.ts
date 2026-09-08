@@ -97,15 +97,37 @@ describe('suburbData', () => {
       expect(data.hero.ctaLabel).toBe('Set an appointment 👈')
     })
 
+    /*
+     * The gallery is OPS data now, not template data. Minneapolis keeps the
+     * same five photos it has always shown, in the same live order — they are
+     * that market's own before-and-afters — but they are read from its
+     * document's ops block, so a different city shows its own or none.
+     */
     test('workInAction gallery images, in the live gallery order', () => {
       expect(data.workInAction.heading).toBe('Our Work In Action')
-      expect(data.workInAction.images).toEqual([
+      expect(data.workInAction.images.map((i) => i.path)).toEqual([
         '/images/rn_image_picker_lib_temp_d129a169-21-1.jpg',
         '/images/rn_image_picker_lib_temp_7f5a4f2b-e3-1.jpg',
         '/images/Untitled-design.png',
         '/images/Untitled-design-1-2.png',
         '/images/Untitled-design-2.png',
       ])
+      /* alt text is the point of moving to {path, alt}: the old hardcoded
+         gallery rendered alt="" on every image */
+      for (const image of data.workInAction.images) {
+        expect(image.alt.length).toBeGreaterThan(10)
+      }
+    })
+
+    /*
+     * The fingerprint guard. A city whose operator has not sent photos gets an
+     * empty list, and WorkInAction renders nothing at all — NOT Minneapolis's
+     * basement and oven on somebody else's domain.
+     */
+    test('a city with no ops photos gets an empty gallery, not the Minneapolis set', () => {
+      expect(miami.ops?.photos).toBeUndefined()
+      const gallery = suburbData(miami, { name: 'Brickell', slug: 'house-cleaning-brickell' })
+      expect(gallery.workInAction.images).toEqual([])
     })
   })
 

@@ -76,6 +76,17 @@ export const MarketOpsSchema = z
           .strict()
       )
       .optional(),
+    /**
+     * Photos of this crew or this market. Nothing generates these and
+     * nothing invents alt text for them — an operator who has seen the
+     * picture writes it. Absent means the area pages show no gallery at
+     * all, which is deliberate: the alternative was five Minneapolis stock
+     * images repeated on every page of every city, which is a fingerprint
+     * across a hundred domains rather than content.
+     */
+    photos: z
+      .array(z.object({ path: z.string(), alt: z.string() }).strict())
+      .optional(),
   })
   .strict()
 export type MarketOps = z.infer<typeof MarketOpsSchema>

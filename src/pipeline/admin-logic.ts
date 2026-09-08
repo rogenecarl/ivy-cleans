@@ -700,6 +700,23 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
     const built = buildOps(fields)
     if (!built.ok) return { ok: false, error: built.error }
 
+    /*
+     * Photos survive an ops save even though the form never sends them.
+     *
+     * buildOps REPLACES the whole block — that is deliberate, it is what lets
+     * an operator clear a fact — but `photos` has no input on the ops form
+     * (the files live in the repo under public/images, so they are placed by
+     * whoever commits them, not typed into a textarea). Without this, the
+     * first time anyone saved Minneapolis's crew lead, its five
+     * before-and-afters would vanish from every one of its pages with no
+     * error and nothing in the form to hint at what was lost.
+     */
+    const keepPhotos = (previous: MarketOps | undefined): MarketOps | undefined => {
+      const photos = previous?.photos
+      if (!photos?.length) return built.ops
+      return { ...(built.ops ?? {}), photos }
+    }
+
     let draft
     try {
       draft = await loadDraft(key)
@@ -717,14 +734,16 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
       // JSON, where `ops: undefined` and an absent key are the same thing on
       // the way out but not on the way in through a partial merge.
       const facts = { ...draft.facts }
-      if (built.ops) facts.ops = built.ops
+      const ops = keepPhotos(facts.ops)
+      if (ops) facts.ops = ops
       else delete facts.ops
       draft.facts = facts
       await saveDraft(key, draft)
     }
 
     if (doc) {
-      if (built.ops) doc.ops = built.ops
+      const ops = keepPhotos(doc.ops)
+      if (ops) doc.ops = ops
       else delete doc.ops
       await writeFile(
         path.join(CONTENT_DIR, `${key}.json`),

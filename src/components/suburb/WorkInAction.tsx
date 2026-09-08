@@ -59,6 +59,12 @@ export default function WorkInAction({
 }: {
   workInAction: SuburbData["workInAction"];
 }) {
+  /* No photos, no section — heading included. WorkCarouselGallery already
+     drops the carousel when the list is empty; leaving the h3 behind would
+     put "Our Work In Action" above nothing on every area page of a city whose
+     operator has not sent photos yet. */
+  if (workInAction.images.length === 0) return null;
+
   return (
     <>
       <section>

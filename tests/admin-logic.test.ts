@@ -1171,6 +1171,30 @@ describe('editing the ops block after creation', () => {
     await wipe(KEY)
   })
 
+  /*
+   * The one ops field the form does not send. Photos are file paths under
+   * public/images, placed by whoever commits the files, so an operator saving
+   * the form must not silently wipe them — and clearing every text field must
+   * not remove the block that holds them either.
+   */
+  it('keeps the market photos across an ops save, which never sends them', async () => {
+    await draftOnly()
+    const photos = [{ path: '/images/opsville-1.jpg', alt: 'Kitchen before and after' }]
+
+    const { saveDraft } = await import('../src/content/drafts')
+    const draft = await loadDraft(KEY)
+    draft.facts = { ...draft.facts, ops: { ...(draft.facts.ops ?? {}), photos } }
+    await saveDraft(KEY, draft)
+
+    expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).facts.ops).toEqual({ ...EXPECTED, photos })
+
+    // and they outlive a save that clears every field the form does send
+    expect(await updateOpsLogic(KEY, {})).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).facts.ops).toEqual({ photos })
+    await wipe(KEY)
+  })
+
   it('rejects a malformed review line and leaves the stored facts untouched', async () => {
     await draftOnly()
     expect(await updateOpsLogic(KEY, FILLED)).toEqual({ ok: true })

@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { ChevronRightIcon } from "@/components/Icons";
+import type { MarketPhoto } from "@/content/types";
 
 /*
  * Two live sections: 5d80ea1 holds only the heading (zero padding, the usual
@@ -80,7 +81,7 @@ const serverPerView = () => MAX_PER_VIEW;
  * WorkCarouselGallery so this file's default export (used by /home, heading
  * included) is unchanged byte-for-byte.
  */
-export function WorkCarouselGallery({ workImages }: { workImages: string[] }) {
+export function WorkCarouselGallery({ workImages }: { workImages: readonly MarketPhoto[] }) {
   const TOTAL = workImages.length;
   const RENDERED = TOTAL + MAX_PER_VIEW - 1;
   const perView = useSyncExternalStore(subscribePerView, readPerView, serverPerView);
@@ -126,6 +127,23 @@ export function WorkCarouselGallery({ workImages }: { workImages: string[] }) {
     return () => window.clearTimeout(id);
   }, [autoplay, hovered, page, pageCount]);
 
+  /*
+   * A city with no photos of its own renders no gallery at all.
+   *
+   * The alternative was to keep the five Minneapolis photos as a fallback, and
+   * that is exactly the fingerprint this change removes: the same basement,
+   * the same oven, the same bathtub on 100 domains is a network signal, and
+   * the photos are of jobs that city never did. Nothing is better than
+   * somebody else's before-and-afters.
+   *
+   * It has to sit BELOW the hooks, not above them — an early return before
+   * useSyncExternalStore/useState/useEffect would change the hook count
+   * between a city with photos and one without. Everything above tolerates
+   * TOTAL === 0 (pageCount 0 stops the autoplay effect at its own guard); it
+   * is only the render that would divide by it.
+   */
+  if (TOTAL === 0) return null;
+
   return (
     <section className="bg-white">
       <div className="mx-auto flex min-h-[395px] w-full max-w-[1205px] items-center">
@@ -156,8 +174,8 @@ export function WorkCarouselGallery({ workImages }: { workImages: string[] }) {
                         className="w-full shrink-0 min-[767px]:w-1/2 min-[1024px]:w-1/3"
                       >
                         <Image
-                          src={workImages[i % TOTAL]}
-                          alt=""
+                          src={workImages[i % TOTAL].path}
+                          alt={workImages[i % TOTAL].alt}
                           width={800}
                           height={600}
                           className="aspect-[4/3] w-full object-cover"
@@ -208,7 +226,8 @@ export function WorkCarouselGallery({ workImages }: { workImages: string[] }) {
 /* Default export unchanged: the heading section (verbatim, byte-identical to
    before this file's carousel body was extracted above) plus the extracted
    gallery. Used by /home only. */
-export default function WorkCarousel({ workImages }: { workImages: string[] }) {
+export default function WorkCarousel({ workImages }: { workImages: readonly MarketPhoto[] }) {
+  if (workImages.length === 0) return null;
   return (
     <>
       <section className="bg-white">
