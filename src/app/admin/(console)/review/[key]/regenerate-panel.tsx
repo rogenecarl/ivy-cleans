@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { finalizeAction, regenerateAction } from '../../actions'
 import { ADMIN_BASE } from '@/lib/admin-routes'
 import { ErrorText } from '../../../ui'
+import { stageName } from '../../../stage-names'
 
 /*
  * Per-stage regenerate. Regenerating `research` clears front, home and deep
@@ -94,7 +95,12 @@ export default function RegeneratePanel({
             title={stage.label}
           >
             {running === stage.id && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-            {running === stage.id ? `Regenerating ${stage.id}…` : `Regenerate ${stage.id}`}
+            {/* stageName, not stage.id — "Regenerate suburb" put a database
+                field name on a button, singular, for something that rewrites
+                ten area pages. Same short names the generate screen uses. */}
+            {running === stage.id
+              ? `Regenerating ${stageName(stage.id, stage.label).toLowerCase()}…`
+              : `Regenerate ${stageName(stage.id, stage.label).toLowerCase()}`}
           </Button>
         ))}
       </div>

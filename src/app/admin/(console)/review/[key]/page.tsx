@@ -211,7 +211,22 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />
       </Panel>
 
-      <Panel title="Regenerate copy">
+      {/*
+        * Collapsed, not removed. It is the only way to fix one bad stage
+        * without deleting the city and re-paying for research — ~$0.50 to
+        * rewrite the area pages against ~$3 to rebuild everything, most of
+        * which was fine. But it is a repair tool, not part of the normal
+        * read-then-publish flow, so it does not need to sit open competing
+        * with the findings and the publish box.
+        */}
+      <details className="mb-6 rounded-xl border border-border bg-card px-5 py-4">
+        <summary className="cursor-pointer list-none text-[1rem] font-semibold">
+          <span className="text-muted-foreground">▸</span> Regenerate copy
+          <span className="ml-2 text-[0.8rem] font-normal text-muted-foreground">
+            rewrite one stage without rebuilding the city
+          </span>
+        </summary>
+        <div className="mt-4">
         {hasDraft ? (
           <RegeneratePanel
             cityKey={key}
@@ -223,7 +238,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
             be regenerated from here.
           </p>
         )}
-      </Panel>
+      </div>
+      </details>
 
       <Panel title={isLive ? 'Published' : 'Publish'}>
         {isLive ? (
