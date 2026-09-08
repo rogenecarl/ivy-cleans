@@ -936,7 +936,7 @@ describe('listCities', () => {
   it('always carries the shipped cities with their document status', async () => {
     const rows = await listCities()
     expect(row(rows, 'minneapolis')).toMatchObject({ city: 'Minneapolis', status: 'live' })
-    expect(row(rows, 'testville')).toMatchObject({ status: 'draft' })
+    expect(row(rows, 'houston')).toMatchObject({ city: 'Houston', status: 'draft' })
   })
 
   it('labels a part-run sidecar GENERATING with its stage count', async () => {

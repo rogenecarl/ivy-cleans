@@ -1026,8 +1026,10 @@ describe('drafts store', () => {
    * verdict the gate would have reached, rather than leaving stale
    * placeholder areas that Task 18 can now never let through.
    */
-  describe('resuming the migrated houston/miami draft sidecars', () => {
-    it.each(['houston', 'miami'] as const)(
+  describe('resuming a migrated draft sidecar', () => {
+    // Was houston AND miami; miami's fixture moved to tests/fixtures/cities
+    // when it stopped being a city in the operator's list.
+    it.each(['houston'] as const)(
       'loadDraft then finalizeDraft does not throw for the resumable %s draft',
       async (key) => {
         const before = await readFile(cityPath(key), 'utf-8')

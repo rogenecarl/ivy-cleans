@@ -10,11 +10,12 @@ import { describe, expect, test } from 'vitest'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { getCity } from '../src/content/store'
+import { loadCityFixture } from './fixtures/cities/load'
 import { suburbData } from '../src/data/suburb'
 import { suburbSlots } from '../src/content/slots'
 
 const minneapolis = await getCity('minneapolis')
-const miami = await getCity('miami')
+const miami = await loadCityFixture('miami')
 
 const dumpPath = path.join(
   process.cwd(),

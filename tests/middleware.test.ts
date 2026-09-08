@@ -30,14 +30,15 @@ describe('resolveRewrite — default host (no _domains.hosts entry)', () => {
   })
 
   it('passes a DRAFT city preview path through too, once it is in _cities.json', () => {
-    // Task 5 added "testville" to content/_cities.json; that entry is the only
-    // thing that turns /testville/... from "a public page path" into "this
-    // draft city's preview tree" — the whole contract of the hand-maintained
-    // index. Draft cities are never in _domains.hosts, so this branch is the
-    // ONLY way their preview is reachable.
-    expect(resolveRewrite(DEFAULT_HOST, '/testville')).toBeNull()
-    expect(resolveRewrite(DEFAULT_HOST, '/testville/home')).toBeNull()
-    expect(resolveRewrite(DEFAULT_HOST, '/testville/deep-cleaning-testville')).toBeNull()
+    // A city's entry in content/_cities.json is the only thing that turns
+    // /<key>/... from "a public page path" into "this draft city's preview
+    // tree" — the whole contract of the hand-maintained index. Draft cities
+    // are never in _domains.hosts, so this branch is the ONLY way their
+    // preview is reachable. (Was testville until that fixture moved out of
+    // content/; houston is a real shipped draft and proves the same thing.)
+    expect(resolveRewrite(DEFAULT_HOST, '/houston')).toBeNull()
+    expect(resolveRewrite(DEFAULT_HOST, '/houston/home')).toBeNull()
+    expect(resolveRewrite(DEFAULT_HOST, '/houston/deep-cleaning-testville')).toBeNull()
   })
 
   it('passes the admin console through on the default host', () => {

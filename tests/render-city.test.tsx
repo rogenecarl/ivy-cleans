@@ -24,9 +24,10 @@ import { areasData } from '@/data/areas'
 import { homeData } from '@/data/home'
 import { siteData } from '@/data/site'
 import { cityBits, getCity } from '@/content/store'
+import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')
-const testville = await getCity('testville')
+const testville = await loadCityFixture('testville')
 
 const countAnchors = (html: string) => html.match(/<a[\s>]/g)?.length ?? 0
 

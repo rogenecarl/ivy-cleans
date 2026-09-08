@@ -100,7 +100,7 @@ describe("registry key must match the city name", () => {
 
   it("accepts the shipped documents, whose names match their filenames", async () => {
     expect((await getCity("minneapolis")).city).toBe("Minneapolis");
-    expect((await getCity("testville")).city).toBe("Testville");
+    expect((await getCity("houston")).city).toBe("Houston");
   });
 });
 
