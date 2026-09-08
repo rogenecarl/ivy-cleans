@@ -1,0 +1,392 @@
+{
+  "facts": {
+    "city": "Orlando",
+    "state": "FL",
+    "stateName": "Florida",
+    "phone": "346-644-6564",
+    "phoneDisplay": "(346) 644-6564",
+    "phoneHref": "tel:3466446564"
+  },
+  "sections": {
+    "services.heroParagraphs": [
+      "We’re a local, insured company, and we clean homes, offices, and rental turnovers across Orlando. Our team knows Central Florida houses — tile and terrazzo underfoot, screened lanais that funnel sand and oak pollen in through the sliders, air conditioning running eleven months a year and pushing dust around every room. We work through fan blades, baseboards, window tracks, switch plates, and the top of the refrigerator. Every job starts with a walk-through, so we clean what actually matters to you. What you get back is a home that still feels clean on the second look, not just the first.",
+      "Our work holds up to a close inspection because we do the parts that are easy to skip — behind the toilet, under the bed, the grout line at the edge of the shower pan. We tell you plainly what we’ll clean and what a room really needs. A one-bedroom apartment gets the same care as a five-bedroom with a pool bath, and we’d rather you check the results than take our word for them.",
+      "Do you have a mess that needs cleaning? Are you after a cleaner home or workplace? Is there a cleaning project sitting on your list right now?",
+      "Home or business, call our professional cleaning company today and ask for a quote on the work you need done.",
+      "Pick up the phone, tell Ivy Cleans about your space, and we’ll get you an estimate."
+    ],
+    "services.serviceIntro": [
+      "Ivy Cleans handles residential cleaning, commercial and janitorial work, regular office upkeep, and maid service in Orlando and the towns around it. Our house cleaners have years behind them, and they bring products and equipment chosen for the surfaces we find here — sealed tile, terrazzo, quartz, and glass shower doors that show every mineral spot. Weekly, every other week, monthly, or one deep clean before guests arrive: we build the schedule around your week instead of asking you to build your week around us.",
+      "Oak pollen coats this city yellow-green for weeks in late winter, and it comes indoors on shoes, on pets, and through every open slider. Add ceiling fans turning all year and dust never really settles. Our dusting reaches blades, vents, blinds, sills, and shelves so the air in your rooms is easier to breathe.",
+      "Sandy soil rides in from the yard on flip-flops twelve months a year, and the summer rains add grass clippings and grit off the driveway. Pool afternoons move half the deck onto the carpet. Our vacuuming pulls all of it out of rugs, hard floors, and the tracks along the sliding doors.",
+      "Bathrooms here rarely get a chance to dry out. Humidity sits high for months, mildew shows up in grout and along caulk lines, and mineral-heavy water leaves a chalky film on glass and fixtures. We scrub that back and disinfect the surfaces hands touch, leaving a safe, healthy space for your family.",
+      "Windows take a beating from irrigation spray that dries into mineral spots, pollen film in spring, and lovebugs smeared across the glass twice a year. Afternoon storms finish the job with rain spotting. Our window cleaning clears the panes and the tracks, and the light comes back into the room."
+    ],
+    "services.cards.dusting": "Dust doesn’t take a season off around here. Live oaks push pollen through February and March, and the air handler runs nearly year-round, carrying fine particles from room to room and dropping them on shelves, sills, and fan blades. Our dusting service works high to low and covers the surfaces most people forget, so allergy season is easier on everyone in the house.",
+    "services.cards.vacuuming": "Florida sand travels. It rides in from driveways, playgrounds, and pool decks, works down into carpet backing, and settles in the grout between tile. Pets shed heavily in the heat, too. Our vacuuming service covers carpet, area rugs, hard floors, stairs, and the door tracks where grit collects, leaving floors that feel clean when you walk them barefoot.",
+    "services.cards.bathroom": "A shower in August can stay damp all day, and that’s how mildew takes hold in grout, on caulk, and behind the shower door track. Mineral-heavy water leaves spotting on chrome and glass that a quick wipe won’t touch. Our bathroom cleaning strips the buildup, disinfects toilets, sinks, and tubs, and leaves a room your family can use without a second thought.",
+    "services.cards.window": "Glass in this city collects a lot: yellow pollen in late winter, lovebug residue in spring and again in fall, sprinkler overspray that dries into hard-water rings, and streaks left behind by afternoon downpours. Our window cleaning takes care of the panes, frames, sills, and tracks, so the sun comes through clear instead of hazy and your rooms feel brighter all day.",
+    "services.cards.upholstery": "Sofas here soak up sunscreen, chlorine, and damp swimsuits, and humid air keeps those odors locked in the cushions long after summer ends. Sand works its way into the seams, and pet hair binds to the fabric. Our upholstery cleaning lifts dirt and oils out of couches, chairs, and sectionals, freshening both the fabric and the room without leaving your furniture soaked.",
+    "suburb.maitland.intro": "Our professional house cleaners work in Maitland most weeks of the year, and the houses here make us ask more questions up front than almost anywhere else we clean. Two homes on the same street can differ by thousands of square feet, and inside one house we’ll often find original terrazzo in the hall running straight into new quartz in the kitchen. That’s why we walk the floors and count the surfaces before we say anything about the job, rather than guessing from an address.",
+    "suburb.maitland.homes": "Dommerich Estates goes back to 1957, and the range within it is wide — some homes sit close to fourteen hundred square feet, others push past five thousand, so a whole-house clean can mean two bathrooms or six. Dommerich Hills is steadier in the middle, roughly seventeen hundred to thirty-three hundred square feet, with the long low profiles and single-pane sliders of that era. Indian Hills adds early-1960s custom builds, Mid-Century Modern lines, flat-fronted cabinet runs and a lot of glass facing the yard. Many have been updated in pieces over decades, so original tile, terrazzo, and newer stone all live under one roof, and each one wants a different product and a different amount of time.",
+    "suburb.maitland.local": "Because the surfaces are mixed, we price and plan per surface rather than per hour — terrazzo takes a neutral cleaner and a soft pass, sealed stone counters take something else entirely, and the aluminum window frames from the original build need attention that new vinyl never does. Homes with Winter Park Chain of Lakes access bring lake grit and dock dust in through back sliders, and it collects along baseboards and in the tracks. Beyond that, our humidity keeps shower grout and closet corners damp enough for mildew, air conditioning that runs almost year round pushes fine dust onto blinds and shelves, and spring oak pollen films every windowsill until we wipe it off.",
+    "suburb.altamonte-springs.intro": "We clean houses and condos across Altamonte Springs, from the older ranch streets off Wymore Rd to the third-floor units near Uptown Altamonte. A lot of the work here is condo work, and that changes the job: no driveway to park in, a load-in by elevator or stair, and a compact floor plan where the kitchen, bath and living space all share the same air. We size the visit to the unit rather than to a square-footage bracket, and we carry gear up rather than dragging a full truck’s worth through a shared lobby.",
+    "suburb.altamonte-springs.homes": "Most of what we clean here went up between the 1960s and the 1980s — single-story ranch homes on sidewalk-lined streets with landscaped front lawns, three bedrooms, a hall bath and a galley or L-shaped kitchen. Those houses have terrazzo or tile through the wet rooms, original vanities in the second bath, and sliding shower doors whose tracks have never fully come clean. Spring Lake Hills and Lake Orienta run to that older stock. Sabal Point, Springs Landing and Lake Marion Golf give us larger single-family homes with real square footage, second baths upstairs and more tile to cover. Near Uptown Altamonte it flips again to condos and townhomes, some studios, some three-bedroom units past 2,000 square feet.",
+    "suburb.altamonte-springs.local": "In the condos, dust has nowhere to go, so we work top down and wipe the AC returns and blind slats before anything else, and we keep the whole visit inside the unit rather than tracking through a shared hallway. In the older ranch baths, the tile is sound but the grout has gone gray and the shower glass has a hard-water film on it — that comes back with the right acid and time on the knees, not scrubbing harder. Homes in Sabal Point back the Charles Lee Sabal Point Sanctuary and collect far more spider web, insect debris and leaf litter on lanai screens and door frames than an interior street does. Add year-round AC dust and February oak pollen on the sills, and we brush and wash the screens as part of the routine.",
+    "suburb.lake-mary.intro": "We clean houses across Lake Mary, from the gated streets off Markham Woods Road to the tighter blocks closer to town. Most of our work here is recurring, because these are HOA neighborhoods where the same crew on the same day of the week fits how people live. Heathrow is guard-gated, so we arrange authorization at the gate ahead of the visit instead of sorting it out at the callbox while your morning gets away from you.",
+    "suburb.lake-mary.homes": "Most of this housing stock went up between the late 1980s and the mid-2000s under a master plan, so the patterns repeat: tile through the entry and wet areas, carpet in the bedrooms, and two-story great rooms with fan blades and ledges no one reaches from the floor. Timacuan and Magnolia Plantation run to larger Mediterranean Revival elevations, arched niches, tray ceilings and long tiled hallways that take real time to mop properly. Plenty of homes in Steeplechase and Heathrow are still on original fittings, where the grout is older than the paint and shower glass has years of film on it. Griffin Farm and Griffin Park are newer and more compact, with stairs and stacked living space. The Forest, being 55+, tends toward lightly used rooms and steady upkeep.",
+    "suburb.lake-mary.local": "Heathrow’s guard list comes first in our planning, then the air handler. Homes here that haven’t had HVAC work since the 1990s push a fine gray dust that lands on plantation shutter slats, cabinet tops and the baseboards nearest the return, so we damp-wipe those surfaces rather than dry-dusting and moving the problem around. Summer humidity keeps shower corners and grout lines damp long enough for mildew to take hold, and we scrub them instead of spraying and hoping. Oak pollen in spring films sliders, sills and screen enclosures. Storm-season grit tracks in over tile and settles in the entry and along baseboards. In The Forest, soil is lighter and visits are more frequent, which suits a regular crew you come to recognize.",
+    "suburb.oviedo.intro": "We clean houses in Oviedo week in and week out, and the first thing our team plans for here is square footage. The newer construction at Oviedo Gardens runs from roughly 2,537 to 5,169 square feet, which is a different job from a townhome across the county line. A deep clean in one of those puts a full crew in the house instead of a pair, so nobody’s rushing the last bathroom to make up time. We size the visit to the floor plan before we ever pull into the driveway.",
+    "suburb.oviedo.homes": "Not every street here went up in the same decade, and it shows in the work. Carillon runs to more than 800 homes, Brighton Park to about 300 custom builds, and Chapman Groves to just 108 houses sitting on large lots with real room between neighbors, while Cardinal Glen is 40 custom lots behind a gate. In most of them we’re working tile through the main living space and carpet in the bedrooms, with two-story foyers, fan blades well above head height, and a lanai door that gets handled a hundred times a day. Older kitchens and baths around Aloma Woods have grout and glass that hold mineral film, so they get a different approach than the untouched fixtures at Oviedo Gardens.",
+    "suburb.oviedo.local": "Big houses on big lots change what ends up on the floor. In Chapman Groves and the other large-lot streets, sand, clippings and oak leaf litter ride in on shoes at the front door and the garage entry, so we start at the mats and work inward rather than saving entries for last. Gated pockets at Cardinal Glen and Aloma Woods need a code or a gate call arranged before the visit, and we sort that out with you when we book. Past that, this is central Florida: humidity keeps shower corners and closet walls damp enough for mildew, the air handler runs most of the year and lays dust on blinds and fan blades, and spring pollen yellows windowsills and screen tracks until someone wipes them down.",
+    "suburb.apopka.intro": "We clean houses in Apopka every week, and the nursery acreage that made this city the Indoor Foliage Capital of the World shows up in the work. Potting soil, leaf fragments and a fine green film ride in on shoes, truck tires and dogs, then settle on entry tile, baseboards and the bottom track of every slider. Add the cypress-shaded lakefront lots in the older subdivisions and there’s more organic grime on glass here than a sealed inland street ever produces. It’s the first thing we plan around.",
+    "suburb.apopka.homes": "Downtown streets still hold post-war ranches with terrazzo under the carpet, narrow galley kitchens and small tiled baths. In Errol Estates and Sweetwater the plans stretch out — long single-story houses from the golf-course era, sunken living rooms, wet bars, and wide sliders facing the fairway with original cabinets that want care rather than scrubbing. Wekiva Springs sits under heavy shade on lots that stay damp, so more of the yard ends up on the floor inside. Magnolia Park and Silver Oaks are the newer product: wood-look plank tile across the first floor, two-story entries, and stair ledges nobody reaches without a ladder. Out on former grove land off Kelly Park Road, the estate builds add longer baseboard runs than most crews plan for.",
+    "suburb.apopka.local": "Truck traffic from the foliage farms and greenhouse rows keeps a fine grit of potting mix and leaf litter moving down Apopka roads, and it comes indoors on the soles of shoes and settles first in entry mats, tile grout and the tracks of sliding doors. On the cypress-shaded lakefront lots, screens and lanai glass grow a green organic film that has to be washed off rather than wiped. Inside, the air handler runs most of the year and lays dust on fan blades and high ledges, summer humidity gives bathroom grout and closet corners a start on mildew, and February and March oak pollen coats sills and blinds. We work in that order: floors, glass, then the surfaces nobody looks at.",
+    "suburb.winter-garden.intro": "We clean houses on both sides of Winter Garden — the older streets near the downtown district, where rooms are smaller and the trim is original, and the newer villages spread south through Horizon West. Those two halves ask for different work. An older cottage downtown has floors that have been refinished more than once and baseboards worth going over by hand, while a build from the last decade gives us more square footage, more glass and taller ceilings. We plan the visit around which one you live in.",
+    "suburb.winter-garden.homes": "Stoneybrook West homes tend to come with granite counters, stainless appliances and hardwood through the main living space, which sets the order we work in: dry methods on the wood, a different cloth and a different motion on the steel. Summerlake townhomes stack their square footage vertically, so stairs, landings and a narrow upstairs hall take up more of the visit than the floor plan suggests. Waterleigh is largely built out now, and those houses sit close enough in age that the grout, the shower glass and the appliance seals are all wearing at the same rate. Hamlin runs bigger, with high great-room walls, long baseboard runs and more bathrooms to turn around, and some of it is still brand new with builders finishing phases nearby.",
+    "suburb.winter-garden.local": "Hardwood in Stoneybrook West never sees the wet mop we’d use on tile in Waterleigh; it gets a barely damp microfiber pass and dries behind us. Granite and stainless are the two surfaces people tell us streak, so both get finished dry, with the grain. Construction is still underway around Hamlin, and that fine drywall dust settles on fan blades, window tracks and the tops of door casings for months. The air conditioning runs most of the year and moves dust through every room, humidity keeps shower corners damp enough for mildew, and spring pollen coats sills and blinds. Houses here that turn over as short-term rentals get the same work on a tighter clock.",
+    "suburb.windermere.intro": "We clean homes in Windermere, from the gated lanes off Main Street out to the docks on the Butler Chain. Living on an isthmus with water on both sides shapes almost everything about the work here. Lake air keeps glass hazy, screened lanais collect a film that shows up the moment the sun hits it, and sliders facing the water need doing more often than the ones facing the street. Our team plans around that instead of treating a lakefront house like any other house.",
+    "suburb.windermere.homes": "Isleworth runs to sprawling Mediterranean and French Provincial estates where a single floor can hold more marble and travertine than an entire townhome, plus wrought-iron stair rails, coffered ceilings and stone showers that need the right products rather than the strongest ones. Keene’s Pointe, Lake Butler Sound, Lake Down Cove and Waterstone on Lake Butler lean Colonial Revival, New Traditional and Contemporary, with two-story foyers, hardwood through the main level, tile in the wet rooms and kitchens built around big islands and stainless. Over at Lake Burden and Lakes of Windermere, the townhomes and condos are newer and tighter, so the work concentrates in the stair treads, the carpeted bedrooms upstairs and the small tiled baths that get heavy use.",
+    "suburb.windermere.local": "Guard gates mean we handle access properly, with vetted, insured, background-checked cleaners and vehicles cleared ahead of the visit, whatever your HOA requires. On the large custom lakefront estates we send more than one cleaner and block out several hours, because the glass alone is a job: expanses of window and slider facing the water hold spray, spotting and the fine grit that blows off the docks. Blind mosquitoes off the lakes gather in porch corners and light fixtures after warm evenings. Summer humidity keeps master baths and closets damp enough for mildew, air conditioning runs most of the year and drifts dust onto blinds and baseboards, and spring oak pollen settles yellow on sills and lanai furniture.",
+    "suburb.dr-phillips.intro": "Our house cleaners work all over Dr. Phillips, from the gated streets off Apopka-Vineland to the older blocks near Turkey Lake Road. Sand Lake Road runs through the middle of it, and with Universal a mile or two away the commercial corridor backs up at odd hours, so we build our routes around it rather than pretend it isn’t there. That means we plan a Dr. Phillips morning differently than we would anywhere else in Orlando, and we tell you honestly how long a house of your size takes.",
+    "suburb.dr-phillips.homes": "Three very different kinds of house share one area name here. In Bay Hill and out along the Butler Chain you get estate floor plans with double-height foyers, marble and travertine that shows every water spot, and glass walls facing the water that need attention on both sides. Turtle Creek and Bay Lakes at Granada run to mid-century ranches off Turkey Lake Road, single story, terrazzo or tile under carpet, original bathroom tile and older kitchen cabinets with real corners to get into. Then Cypress Point, Vizcaya and Isle of Osprey bring newer construction, bigger bedrooms, tall baseboards and more square footage of hard floor than a family can keep up with on a weekend.",
+    "suburb.dr-phillips.local": "An estate on the lake and a three-bedroom ranch off Turkey Lake Road are not the same job, so we scope them separately and staff them differently rather than quote one number for the area. Gated entries in Bay Hill and Cypress Point need us cleared ahead of time, and we handle that before the crew rolls up. Living this close to the lakes, the humidity stays in the house: bathrooms and walk-in closets grow mildew along grout lines and door frames if nobody stays on them. Air conditioning runs most of the year and drives fine dust onto blinds, ceiling fan blades and high ledges. Oak pollen in spring settles on windowsills and screened lanais, and we wipe it rather than push it around.",
+    "suburb.college-park.intro": "Our professional house cleaners work the streets around College Park most weeks of the year, and the first thing we plan for is age. Homes here were platted in the 1920s, and the original wood floors, plaster walls and period fixtures are the reason people bought them. That means we clean by method, not by speed. We also park with a bit of thought, since a lot of these blocks are narrow and the garage sits out back off the alley.",
+    "suburb.college-park.homes": "Inside the Lake Adair–Lake Concord Historic District you get bungalows and revival cottages with compact, defined rooms rather than one open plan, narrow-plank wood floors that have been refinished a few times, and plaster walls that don’t take a wet cloth the way drywall does. The Lake Ivanhoe Historic Residential District runs similar, with older glazed tile in bathrooms, deep-set single-pane windows and sash tracks that collect grit, and original brass or nickel hardware that will spot if the wrong spray gets near it. Ceilings are often high, closets are shallow, and kitchens have been updated around cabinetry that stayed. Our crews clean these houses room by room, adjusting what we use for each surface as we go.",
+    "suburb.college-park.local": "Old glass and old joinery let more of the outside in, so windowsills, sash channels and the tops of baseboards in these historic blocks pick up a fine gray film that ordinary dusting pushes around instead of lifting. We take it off with dry cloths first, then damp, and keep moisture away from plaster and unsealed wood entirely. Original tile grout and older bathroom fixtures get pH-neutral products rather than anything acidic. Beyond that, this is Orlando: the air conditioning runs nine or ten months and moves dust through every vent and register, summer humidity leaves closets and bathrooms ready to grow mildew, and oak pollen in spring settles on blinds and porch doors within a day of being wiped.",
+    "suburb.lake-nona.intro": "We clean homes all over Lake Nona, from the sidewalk-fronted blocks of Laureate Park to the gated streets of Eagle Creek. Almost everything here was built recently, which changes what the job actually is. We’re rarely trying to rescue twenty-year-old grout. We’re keeping new finishes looking new, on a regular schedule, and getting empty houses ready before the moving truck arrives. That means cleaning for pale floors, big glass showers and open plans that show every smudge from the front door.",
+    "suburb.lake-nona.homes": "Rooms here are open and tall, so a single downstairs sweep runs kitchen to dining to living with nothing to break it up, and that whole floor is usually one continuous run of tile or plank. Upstairs is carpet, a loft, and bathrooms with frameless glass and light grout that stays light if someone stays on top of it. Laureate Park sits on narrow lots with deep front porches and garages off the rear lane, so the homes go up rather than out and our crew works three levels. Eagle Creek, Isles of Lake Nona and Lake Nona South lean larger and wider, with big kitchen islands and sliders onto screened lanais. Storey Park and The Preserve at Laureate Park bring the same young fittings: quartz counters, painted shaker cabinets, stainless everywhere.",
+    "suburb.lake-nona.local": "New construction sheds for a long time. Fine drywall and sanding dust keeps working out of attic hatches, closet shelving and A/C vents for months after closing, and it lands on top of baseboards, ceiling fan blades and the tops of kitchen cabinets, which is where we start in a move-in clean. On the narrow Laureate Park streets, parking is tight and driveways are short, so we pull in close to the curb, keep the sidewalk clear and carry our gear in rather than blocking a neighbor. After that it’s ordinary Orlando: humidity that grows mildew in shower corners and along caulk lines, air conditioning running most of the year and pushing dust through the returns, and spring pollen settling on sills and blinds.",
+    "service.standard-cleaning.local": "Humidity is what changes a routine clean here more than anything else. Even in homes with the air running all day, bathrooms hold moisture long enough that a gray film starts along the grout lines and the base of the shower door, so on standard visits we work those surfaces harder than a wipe-down and dry them rather than leaving them damp. The other thing is the slider. Most houses here live half outdoors through a screened lanai, and the door track fills with grit, oak pollen in spring, and whatever the afternoon storms wash in. We clear the track and get the tile just inside it, because that’s where the floor shows first in an Orlando home.",
+    "service.deep-cleaning.local": "Humidity is what makes a deep clean here different from a deep clean anywhere else. Air conditioning runs most of the year, and the moisture it leaves behind settles into grout lines, shower ceilings, silicone caulk, and the underside of toilet tanks as a gray-pink film that regular weekly cleaning never quite lifts. Our house cleaners work those surfaces with a brush and dwell time rather than a quick wipe, and we pull vent registers to get the felted dust off the vanes. The other job that eats a morning here is sliding glass door tracks and window channels, packed with oak pollen and yard grit from spring. We scrape them out, vacuum, then wash them so the doors run quiet again.",
+    "service.apartment-cleaning.local": "Humidity is what makes a condo bathroom here different from one anywhere else. Most units have an interior bath with no window and a fan that only moves so much air, and with the AC running ten or eleven months a year, moisture settles on the ceiling above the shower, in the caulk line, and along the top of the door frame. We wipe those surfaces down rather than just the tile, because that’s where the gray specks start. Balcony sliders get the same attention. Between spring oak pollen and the afternoon storms that blow rain sideways onto the glass, the track fills with a gritty paste, and we clear it out so the door still slides when you want the air.",
+    "service.airbnb-cleaning.local": "Most of the rentals we turn here are the big pool homes near the parks — five and six bedrooms, a screened lanai, and a group of twelve who spent all week between the water and the theme parks. That leaves sunscreen smeared on lanai furniture and door handles, pool water dried in chalky rings on tile, and more towels and bed linens than an ordinary house produces in a month. We plan our turnovers around that laundry volume, because it’s the part that runs long. The other thing Orlando does is grow mildew in a closed house. When guests leave the thermostat high and the doors shut, grout and shower corners come back gray, so we scrub them every turn rather than waiting for a deep clean.",
+    "service.post-construction-cleaning.local": "Drywall dust behaves differently in Orlando air. The air handler runs right through a summer remodel — it has to, or the house turns damp — so fine powder gets pulled into the returns and blown back over everything already wiped, and once it meets that humidity it stops being dust and becomes a film that smears instead of lifting. We work damp cloths, go back over surfaces after the system has cycled, and clear return grilles and vent louvers before we call a room finished. The other thing is flooring. Most homes here sit on tile or terrazzo, and grout takes in that dust slurry and holds it, so those lines get scrubbed rather than mopped or you’ll see gray for months.",
+    "service.pre-listing-cleaning.local": "A listing that sits empty here with the air conditioning turned down picks up a smell within days. Orlando humidity gets into closets, into the drywall behind furniture that just left, into the gaskets on a refrigerator nobody opened all week, and buyers register it at the front door before they see a thing. So we work vacant houses with the air running, wipe down vent covers and closet shelving, and get bathrooms dry rather than just clean. The other thing photographers and buyers head straight for is the lanai. Screen enclosures collect oak pollen and mildew streaks along the frame, and the slider tracks fill with sand and leaf grit, so we clear those before the first showing, not after."
+  },
+  "done": [
+    "research",
+    "front",
+    "suburb",
+    "service"
+  ],
+  "createdAt": "2026-09-08T02:28:46.806Z",
+  "findings": "I'll research this market systematically. Let me start with the areas and neighborhoods.Now let me research subdivisions for each candidate area.## Important limitation up front\n\nMy web search quota was exhausted partway through this research. I completed the work on **areas (a)** and **subdivisions (b)**, and I gathered partial housing-stock data for **(c)**. I was **not** able to run searches on:\n\n- Orlando-wide climate and seasons, dominant housing stock/age/construction citywide, flooring and foundation types, and local soiling conditions (humidity/mold, pollen, hard water, year-round AC)\n- Keyword research **(d)**\n\nI am deliberately **not** filling those gaps from memory or plausible reconstruction. They are marked below as not researched, and they need a second pass when search is available again. Everything else below traces to a page I actually pulled.\n\nOne more note on sourcing: my searches came back through a code interface without sentence-level citation indices, so I've attributed each fact to the source page by name rather than using citation markup.\n\n---\n\n## (a) AREAS — 12 places, all the same kind\n\nNine incorporated municipalities / recognised unincorporated communities, plus three recognised neighborhoods inside the City of Orlando. No housing developments in this list — those are all in (b).\n\n**Suburbs and surrounding municipalities**\n\n| Area (written as locals write it) | Where it sits | Source |\n|---|---|---|\n| **Winter Park** | Just north of downtown Orlando; access via I-4, Aloma Ave, US 17-92, SR-436 | 407apartments Winter Park guide |\n| **Maitland** | North of Winter Park — Dommerich Estates is described as \"north-west of Winter Park\" and inside Maitland | Nextdoor (Dommerich Estates/Hills, 32751) |\n| **Altamonte Springs** | 11 miles north of Orlando, built around the I-4 corridor, Seminole County | Homes.com Altamonte Springs; Market Connect Realty |\n| **Lake Mary** | Seminole County, about 20 miles from Orlando; Sanford about 5 miles away | Homes.com Lake Mary city guide |\n| **Oviedo** | Northeast side of the metro, Seminole County; less than five miles south of Lake Jessup, with subdivisions just north of UCF | Pulte Orlando neighborhoods blog; Your Waypointe |\n| **Apopka** | Northwest edge of Orange County, on the doorstep of Wekiwa Springs State Park | Market Connect Realty; Wikipedia (Apopka) |\n| **Winter Garden** | West of Orlando; forms the northern border of the Horizon West planned area, which is ~20 miles west-southwest of downtown | Florida Neighborhood Realty (Horizon West guide) |\n| **Windermere** | Southwest of Orlando on an isthmus among the Butler Chain of Lakes; east of Horizon West | Pulte; Florida Neighborhood Realty |\n| **Dr. Phillips** | Southwest Orlando, unincorporated Orange County, between Universal to the north and the Bay Hill golf enclaves to the south; Sand Lake Road / Turkey Lake Road corridor | Market Connect Realty; realtyinorlando |\n\n**Neighborhoods inside the City of Orlando**\n\n| Area | Where it sits | Source |\n|---|---|---|\n| **College Park** | City neighborhood annexed 1923 or 1925; contains the Lake Adair–Lake Concord and Lake Ivanhoe historic residential districts | Wikipedia, List of neighborhoods in Orlando |\n| **Baldwin Park** | City neighborhood on the site of the former Naval Training Center Orlando; next door to the Audubon Park Garden District | Wikipedia list; Pulte |\n| **Lake Nona** | Orlando's south side, south of the SR-417 expressway and west of Narcoossee Road, around Lake Nona Medical City | Pozek Group; nonaorlandoproperties |\n\n*A note on Horizon West:* the pages describe it as a planned community of villages bordered by Winter Garden, Windermere and Disney — some sources treat it as an area in its own right, others as part of Winter Garden. Because the Facebook page and Erica Diaz Team page both describe it as a **master-planned community composed of villages**, I've treated it as a container of developments under Winter Garden in (b) rather than as a peer municipality. Flagging that as a judgement call you may want to revisit — locally it functions like its own market.\n\n---\n\n## (b) SUBDIVISIONS AND DEVELOPMENTS\n\nOnly names I found on a page. Where I found nothing, I say so rather than guess.\n\n**Winter Park — NO verified subdivision names found.** This is a real gap, not an omission. My searches for \"Winter Park subdivisions\" returned pages about **Winter Park, Colorado** (Grand County — Winter Park Highlands, Leland Creek, Tabernash), which I have discarded entirely. What I did verify about Winter Park is descriptive, not nominal: Corcoran describes brick streets, live oak trees, housing from mid-century Florida ranch to lakeside mansions, with the most sought-after properties on a chain of lakes linked by canals or within walking distance of Park Avenue. Homes.com's Winter Park page lists **Aloma** and **Lake Howell** as adjacent named areas. Needs a dedicated re-search.\n\n**Maitland**\n- Dommerich Estates — dates to 1957 (neighborhoods.com)\n- Dommerich Hills (neighborhoods.com; Nextdoor)\n- Indian Hills — named as a neighborhood in Maitland, southeast of Dommerich (Nextdoor)\n\nOnly three, and I'd want more before building a page.\n\n**Altamonte Springs**\n- Spring Lake Hills — gated, in the city's centre, views of the private Spring Lake (Homes.com)\n- Sabal Point — backs the Charles Lee Sabal Point Sanctuary (Market Connect Realty)\n- Springs Landing (Market Connect Realty)\n- Lake Marion Golf (Market Connect Realty)\n- Uptown Altamonte — condos and townhomes near Cranes Roost (Market Connect Realty)\n- Lake Orienta — named as an Altamonte Springs lake/area (Homes.com)\n\n**Lake Mary**\n- Heathrow — guard-gated, golf-oriented, custom homes and luxury estates (Pozek Group; Nickley Group)\n- Timacuan — upscale, on a golf course (Homes.com)\n- Magnolia Plantation (Nickley Group)\n- Griffin Park (Nickley Group; Pozek Group)\n- Griffin Farm (Pozek Group)\n- Steeplechase (Pozek Group)\n- The Forest — 55+ (Homes.com)\n\n**Oviedo**\n- Live Oak Reserve — resort-style pool and sports park (Homes.com)\n- Carillon — just over 800 homes, north of UCF (Your Waypointe)\n- Brighton Park — around 300 custom homes, described as the most upscale subdivision within Carillon (Your Waypointe)\n- Aloma Woods — partially gated, 200+ homes (Your Waypointe)\n- Chapman Groves — 108 homes with large lots (Your Waypointe)\n- Cardinal Glen — gated, 40 lots, custom homes (Your Waypointe)\n- Oviedo Gardens — new construction, 2,537–5,169 sq ft (NewHomeSource)\n\n**Apopka**\n- Errol Estates (Market Connect Realty)\n- Wekiva Springs (Market Connect Realty)\n- Sweetwater (Market Connect Realty)\n- Magnolia Park (Market Connect Realty)\n- Silver Oaks — single-family with both alley and front entrances, near SR-414/429 (Hoodle)\n\n**Winter Garden (including the Horizon West villages)**\n- Stoneybrook West — golf course community, made up of several subdivisions (Erica Diaz Team)\n- Summerlake — part of Horizon West; townhomes from around $380,000 (Erica Diaz Team; DJ & Lindsey)\n- Hamlin — larger single-family, $650,000+, still has new construction (DJ & Lindsey)\n- Waterleigh — largely built out, $400,000–$580,000 range (DJ & Lindsey)\n\n**Windermere**\n- Isleworth — multi-million-dollar Mediterranean and French Provincial estates (Homes.com)\n- Keene's Pointe (Homes.com)\n- Lake Butler Sound (Homes.com)\n- Lake Down Cove (Homes.com)\n- Waterstone on Lake Butler (Homes.com)\n- Lakes of Windermere and Lake Burden — townhomes and condos (Homes.com)\n- Tildens Grove — gated, custom homes on oversized lots (realtyinorlando)\n\n**Dr. Phillips**\n- Bay Hill — golf community, home of the Arnold Palmer Invitational (Florida Neighborhood Realty; maxliferealty)\n- Cypress Point (realtyinorlando)\n- Isle of Osprey (realtyinorlando)\n- Turtle Creek (realtyinorlando)\n- Bay Lakes at Granada — ringed by Granada Boulevard, entrance at Sand Lake Rd / S Apopka Vineland Rd (Florida Neighborhood Realty)\n- Vizcaya (maxliferealty)\n- Orange Tree (maxliferealty)\n\n**Lake Nona**\n- Laureate Park — New Urbanism layout, narrow lots, deep sidewalks, walkable Village Center (nonaorlandoproperties)\n- The Preserve at Laureate Park — a small gated section, not guard-gated (nonaorlandoproperties)\n- Eagle Creek — gated (Pozek; nonaorlandoproperties)\n- Isles of Lake Nona — gated (nonaorlandoproperties)\n- Storey Park (Pozek)\n- Lake Nona South (Pozek)\n\n**College Park — no conventional subdivisions found.** What the pages give instead are two nationally defined historic districts inside it: the **Lake Adair–Lake Concord Historic District** and the **Lake Ivanhoe Historic Residential District** (Wikipedia). Those are the right names to use for this area; I found no platted subdivision names.\n\n**Baldwin Park — no sub-areas found.** Baldwin Park is itself the master-planned redevelopment of the former Naval Training Center (Wikipedia list). Pulte notes Baldwin Park has a lake of the same name plus nearby Lake Susannah, and sits next to the Audubon Park Garden District. If it needs internal names, that's a further research task.\n\n---\n\n## (c) HOUSING AND LOCAL CONDITIONS\n\n### Orlando as a whole — NOT RESEARCHED\n\nI could not run the climate, housing-stock, flooring/foundation or soiling-condition searches before the quota ran out. I will not write this section from memory. Specifically still needed:\n\n- Seasons and rainfall pattern; humidity levels by month\n- Dominant construction type (block vs. frame), typical foundation, typical roof\n- Prevailing flooring types in Central Florida homes\n- Whether the water is hard, and pollen season timing\n- Year-round AC and its consequences (vent/return dust, condensate)\n\nEvery one of those drives real cleaning copy, so this is the highest-value gap to close.\n\n### Area by area — what I did verify\n\nI've separated **[VERIFIED]** facts from **[INFERENCE]** — the cleaning implications are my operational reasoning applied to verified facts, not claims found on a page.\n\n**Winter Park**\n[VERIFIED] Brick streets and live oak trees; housing runs from textbook mid-century Florida ranch to large lakeside estates, the latter split between century-old brick estates and architecturally significant modern homes; prime stock sits on a canal-linked chain of lakes or walking distance from Park Avenue (Corcoran). New construction here is primarily custom infill (Nickley Group). Traffic on the corridors can be heavy at rush hour (407apartments).\n[INFERENCE] Mature live oak canopy over older streets means constant leaf and organic litter on entries and lanais, and shaded exteriors. Mid-century ranch layouts mean original tile and older grout — deep-clean and grout work sell better here than \"quick tidy.\" Brick streets and narrow older lots mean parking a crew vehicle is a real consideration.\n\n**Maitland**\n[VERIFIED] Dommerich Estates dates to 1957 and runs roughly 1,422–5,178 sq ft; Dommerich Hills is midsize, roughly 1,666–3,307 sq ft (neighborhoods.com). One listing describes a custom home built in 1961 with Mid-Century Modern character and contemporary updates, and notes Winter Park Chain of Lakes access (Homes.com).\n[INFERENCE] Wide square-footage spread inside one subdivision means you cannot quote this area off a single home-size assumption. Late-50s/early-60s houses that have been partly renovated produce mixed surfaces in one house — original terrazzo or tile alongside new stone — which is a per-surface pricing problem, not a per-hour one.\n\n**Altamonte Springs**\n[VERIFIED] Housing is mostly ranch-style built between the 1960s and 1980s, plus some New Traditional builds, in quiet subdivisions with landscaped front lawns and sidewalk-lined streets; median around $389,000. Condos are especially plentiful, from studios to three-bedroom units over 2,000 sq ft. Spring Lake Hills is gated, with homes often $600,000 to just over $1 million, four or five bedrooms and sprawling yards (Homes.com). The city spans eras: older ranch neighborhoods along Maitland Blvd and Wymore Rd, condos and townhomes near Uptown Altamonte, larger single-family in Sabal Point, Lake Marion Golf and Springs Landing (Market Connect Realty). Sabal Point backs a nature sanctuary.\n[INFERENCE] The heavy condo share is a distinct service line — smaller square footage, elevator/stair access, no driveway. 1960s–80s ranch stock means aging bathrooms where grout and glass restoration is the upsell. Sabal Point's sanctuary frontage means more insect debris, spider webs and organic litter on screens and lanais than in an interior subdivision.\n\n**Lake Mary**\n[VERIFIED] Most of Lake Mary was developed under master-planned communities and structured associations; real estate is defined largely by master-planned subdivisions and gated communities built from the late 1980s through the present, in Mediterranean Revival, Florida Contemporary and transitional styles, inside HOA-governed communities with consistent streetscape standards (Pozek; Nickley Group). Many core neighborhoods were built in the 1990s–2000s, so roofs, HVAC and plumbing updates vary widely (Pozek). HOA fees range from under $100 to more than $500; median single-family price about $510,000; townhouses also available (Homes.com). Non-HOA enclaves with larger lots exist mainly west of Markham Woods Road and near the Longwood/Lake Mary border (Pozek). Heathrow is guard-gated (Pozek).\n[INFERENCE] Guard-gated Heathrow means crews need advance authorisation at the gate — a scheduling and no-access risk worth building into the booking flow. 1990s–2000s stock with uneven HVAC updates means dustier interiors in homes with older systems. HOA-standardised streetscapes mean recurring-service households are the norm; The Forest being 55+ implies lighter-soil, higher-frequency, trust-sensitive work.\n\n**Oviedo**\n[VERIFIED] Suburban living with rural charm; lower crime than the national average and easy access to Orlando (Homes.com). Subdivision profiles: Live Oak Reserve has a resort-style pool and sports park; Carillon just over 800 homes; Brighton Park around 300 custom homes; Aloma Woods 200+ homes and partially gated; Chapman Groves 108 homes on large lots; Cardinal Glen gated with 40 lots; a Centex-built subdivision on the north side has 200+ homes; Oviedo Gardens homes run 2,537–5,169 sq ft (Your Waypointe; NewHomeSource).\n[INFERENCE] Oviedo Gardens' 2,500–5,100 sq ft range puts many homes in the large-home tier, where deep cleans take a full crew rather than a pair. Partially gated and gated pockets (Aloma Woods, Cardinal Glen) again mean access codes. Large-lot subdivisions like Chapman Groves mean more tracked-in yard debris at entries.\n\n**Apopka**\n[VERIFIED] Inventory runs from post-war ranches near the historic downtown to new-construction estates on former grove land off Kelly Park Road; cypress-shaded lakes anchor several of the older subdivisions; the newest lean into golf, gated pods, and larger lot sizes. Errol Estates, Wekiva Springs, Sweetwater and Magnolia Park are gated, as are the newest subdivisions off Kelly Park Road (Market Connect Realty). Apopka carries the \"Indoor Foliage Capital of the World\" nickname, and industrial-scale greenhouses supply a meaningful share of the country's houseplant inventory, giving the city a working-agriculture backbone (Market Connect Realty; Wikipedia). Population 54,873 in 2020, estimated 65,552 by 2025 (Wikipedia).\n[INFERENCE] This is the clearest area-specific soiling story I verified anywhere: active agricultural and greenhouse acreage plus cypress-shaded lakefront lots means more plant and soil debris tracked indoors and more organic film on screens, lanais and glass than in a sealed inland subdivision. The two-era split — post-war ranch downtown vs. new gated estates off Kelly Park Road — is effectively two different products in one city. Rapid population growth (roughly +19% in five years) marks this as an expanding market.\n\n**Winter Garden / Horizon West**\n[VERIFIED] Horizon West is a planned community composed of villages, each made up of several communities; it sits about 20 miles west-southwest of downtown Orlando along SR-429, bordered by Winter Garden to the north, Windermere to the east, and Walt Disney World to the south, with 20–25 minute commutes downtown via the Western Beltway (Facebook page; Florida Neighborhood Realty). Winter Garden has a charming downtown district with historic homes as well as modern apartments (Erica Diaz Team). Prices in Horizon West run roughly $380,000 for Summerlake townhomes to $650,000+ for larger single-family in Hamlin, with Waterleigh $400,000–$580,000; Hamlin and newer phases still have new construction from national builders (DJ & Lindsey). Stoneybrook West homes commonly feature granite countertops, stainless appliances and hardwood floors (Erica Diaz Team).\n[INFERENCE] Verified hardwood in Stoneybrook West and granite/stainless finishes across the area mean surface-specific method matters — hardwood cannot take the wet mop used on tile, and stainless and granite are the two surfaces homeowners most often complain about streaking. Active new construction in Hamlin means a genuine post-construction cleaning demand alongside recurring service. Proximity to Disney raises the odds of short-term-rental turnovers in the mix.\n\n**Windermere**\n[VERIFIED] The town is made up of multiple subdivisions, many of which are gated, with monthly HOA fees from under $100 to over $1,000. Isleworth is sprawling multi-million-dollar Mediterranean and French Provincial estates with meticulous landscaping and lake views. Lake Down Cove, Keene's Pointe, Lake Butler Sound and Waterstone on Lake Butler feature Colonial Revival, New Traditional and Contemporary homes. Lake Burden and Lakes of Windermere have townhomes and condos. Single-family prices run about $540,000 to $9 million; large custom homes with private lake access typically $1.7 million and up (Homes.com). Tildens Grove is gated with custom homes on oversized lots (realtyinorlando). The town sits on an isthmus surrounded by named lakes including Lake Down, Lake Butler, Lake Bessie and Lake Tibet (Pulte).\n[INFERENCE] Highest-value and most access-controlled area on the list: guard gates plus HOA fees over $1,000/month means vetted, insured, background-checked crews and pre-cleared vehicle access are prerequisites, not selling points. $1.7M+ lakefront estates mean multi-hour, multi-staff jobs and extensive glass facing the water. The townhome/condo pockets at Lake Burden and Lakes of Windermere give you an entry-price service tier inside the same brand-name town.\n\n**Dr. Phillips**\n[VERIFIED] Reads in three registers: Bay Hill and Isleworth-adjacent estates, mid-century ranch neighborhoods off Turkey Lake Road, and newer builds on the Butler Chain lakefront — which trade on quite different terms despite sharing one name; gated subdivisions are central to the area (Market Connect Realty). Prices span roughly $350K to $5M+ (maxliferealty). Surrounded by the Butler and Sand Lake chains of lakes, with luxury homes and lakeside properties (realtyinorlando). Universal Studios is roughly 1–2 miles east of Bay Lakes at Granada via Sand Lake Road, with I-4 access minutes away and Disney about 5 miles southwest (Florida Neighborhood Realty). Sand Lake Road is nationally branded as Restaurant Row (maxliferealty).\n[INFERENCE] Three housing registers in one name means one service page cannot address the whole area — mid-century ranches off Turkey Lake Road and $5M lakefront estates are different jobs. Being 1–2 miles from Universal on a major commercial corridor means heavy traffic on Sand Lake Road affects crew routing and arrival windows.\n\n**College Park**\n[VERIFIED] Annexed 1923 or 1925 and contains two nationally defined historic districts — Lake Adair–Lake Concord and Lake Ivanhoe Historic Residential (Wikipedia). Described as having a small-town feel, local shops and lakes (Trulia).\n[INFERENCE] A neighborhood platted in the 1920s with designated historic residential districts means genuinely old housing stock — original wood floors, plaster, older tile, single-pane glass and period fixtures. That is the profile where owners want careful, method-specific cleaning rather than volume work, and where crews need to know what not to put chemicals on. Narrow 1920s streets and detached-garage or street-only parking are practical access constraints.\n\n**Baldwin Park**\n[VERIFIED] Built on the former Naval Training Center Orlando site; annexation date recorded as 1947 (Wikipedia). Described as a self-contained community with parks and lakes (Trulia), with Lake Baldwin plus nearby Lake Susannah, adjacent to the Audubon Park Garden District (Pulte).\n[INFERENCE] A single-era redevelopment of a former military base means a large stock of homes of similar age and construction — good news for standardised pricing and route density, since one crew can serve many similar homes without re-scoping each. \"Self-contained\" with walkable parks and lakes suggests alley-loaded and garage-rear layouts common to New Urbanist plans, which affects where a crew parks.\n\n**Lake Nona**\n[VERIFIED] South of the SR-417 expressway and west of Narcoossee Road, adjacent to Medical City — a 650-acre health and life sciences park — and the Lake Nona Town Center (nonaorlandoproperties). Laureate Park is the only Lake Nona neighborhood built in New Urbanism style, meaning narrow lots, deep sidewalks and walkable amenities; it has public streets and is not gated, though The Preserve at Laureate Park is a small non-guard-gated section; for gated communities the alternatives are Eagle Creek or Isles of Lake Nona. Most Lake Nona neighborhoods are CDD communities: Laureate Park's CDD runs about $1,385/year on top of HOA dues of roughly $171/month, and Eagle Creek, Storey Park and Lake Nona South carry CDD line items in the $1,200–$2,400 range (Pozek). The area has 44 miles of hike and bike trails. Lake Nona Central is described as modern living with a technology and wellness focus (Trulia; Niche).\n[INFERENCE] Newest housing stock of any area here, so the demand is recurring maintenance cleaning and move-in cleans, not restoration of old grout. Narrow Laureate Park lots with deep sidewalks and street parking mean tight vehicle access on service days. Medical City next door means a professional, shift-working, dual-income customer base — the segment most likely to buy recurring service and to need weekday access arrangements.\n\n### Background only — never for the website\n\n- **Crime/safety context:** Oviedo has lower crime rates than the national average (Homes.com); Altamonte Springs' Spring Lake Hills area and Audubon Park drew positive resident safety comments (Homes.com; Niche). Relevant only as evidence these are workable, stable service territories.\n- **Market capacity context:** Greater Orlando had 2,673,376 residents in 2020 and is the 22nd-largest US metro (Wikipedia). Apopka grew from 54,873 in 2020 to an estimated 65,552 by 2025 (Wikipedia). Median home prices — Lake Mary ~$510,000, Altamonte Springs ~$389,000, Windermere $540,000 to $9M — indicate a broad range of household budgets across the territory.\n- **No flood, income or poverty data was researched.** I did not search it and am not reporting it.\n\n---\n\n## (d) KEYWORDS — NOT RESEARCHED\n\nI ran out of search quota before doing any keyword or competitor-title research, so I have no evidence for this section and won't guess at it. The one relevant fragment I can honestly report is that competitor and guide pages in this market use the area names exactly as I've listed them in (a) — including **\"Dr. Phillips\"** with the abbreviated title and **\"St. Cloud\"** appearing in a local neighborhood index (407apartments) — which is the form local search phrasing would follow.\n\nWhat still needs searching: the \"cleaning services + [area]\" family across all 12 areas, plus house cleaning, maid service, deep cleaning, move-out cleaning, and any Central Florida–specific phrasing (e.g. whether vacation-rental or lanai/screen-enclosure wording appears in competitor titles near the Disney and Universal corridors, which the Winter Garden and Dr. Phillips findings suggest it might).\n\n---\n\n## Recommended next pass\n\n1. Orlando climate and housing conditions — the entire Orlando-wide part of (c), which is the section that generates the persuasive copy.\n2. Keyword and competitor-title research for (d).\n3. Winter Park subdivision names — the only area in (a) where I found zero verified development names, and a wealthy, high-priority territory. Search it with \"Florida\" or \"Orange County\" forced into the query to keep Colorado results out.\n4. More names for Maitland, which yielded only three.",
+  "research": {
+    "suburbs": [
+      {
+        "name": "Maitland",
+        "slug": "maitland",
+        "subdivisions": [
+          "Dommerich Estates",
+          "Dommerich Hills",
+          "Indian Hills"
+        ],
+        "housingCharacter": "Dommerich Estates dates to 1957 with homes running roughly 1,422–5,178 sq ft, while Dommerich Hills is midsize at roughly 1,666–3,307 sq ft. Custom homes from the early 1960s with Mid-Century Modern character and contemporary updates are part of the mix, some with Winter Park Chain of Lakes access.",
+        "conditions": [
+          {
+            "condition": "Wide square-footage spread inside a single subdivision",
+            "implication": "You cannot quote this area off a single home-size assumption.",
+            "copySafe": true
+          },
+          {
+            "condition": "Late-1950s and early-1960s houses that have been partly renovated",
+            "implication": "Mixed surfaces in one house — original terrazzo or tile alongside new stone — making this a per-surface pricing problem rather than a per-hour one.",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Altamonte Springs",
+        "slug": "altamonte-springs",
+        "subdivisions": [
+          "Spring Lake Hills",
+          "Sabal Point",
+          "Springs Landing",
+          "Lake Marion Golf",
+          "Uptown Altamonte",
+          "Lake Orienta"
+        ],
+        "housingCharacter": "Housing is mostly ranch-style built between the 1960s and 1980s, plus some New Traditional builds, in quiet subdivisions with landscaped front lawns and sidewalk-lined streets. Condos are especially plentiful, from studios to three-bedroom units over 2,000 sq ft, with older ranch neighborhoods along Maitland Blvd and Wymore Rd, condos and townhomes near Uptown Altamonte, and larger single-family homes in Sabal Point, Lake Marion Golf and Springs Landing.",
+        "conditions": [
+          {
+            "condition": "Heavy condo share of the housing stock",
+            "implication": "A distinct service line — smaller square footage, elevator or stair access, no driveway.",
+            "copySafe": true
+          },
+          {
+            "condition": "1960s–80s ranch stock with aging bathrooms",
+            "implication": "Grout and glass restoration is the natural upsell.",
+            "copySafe": true
+          },
+          {
+            "condition": "Sabal Point backs the Charles Lee Sabal Point Sanctuary",
+            "implication": "More insect debris, spider webs and organic litter on screens and lanais than in an interior subdivision.",
+            "copySafe": true
+          },
+          {
+            "condition": "Spring Lake Hills is gated, with homes often $600,000 to just over $1 million; area median around $389,000",
+            "implication": "Indicates a broad range of household budgets within one city.",
+            "copySafe": false
+          }
+        ]
+      },
+      {
+        "name": "Lake Mary",
+        "slug": "lake-mary",
+        "subdivisions": [
+          "Heathrow",
+          "Timacuan",
+          "Magnolia Plantation",
+          "Griffin Park",
+          "Griffin Farm",
+          "Steeplechase",
+          "The Forest"
+        ],
+        "housingCharacter": "Most of Lake Mary was developed under master-planned communities and structured associations, with real estate defined largely by master-planned subdivisions and gated communities built from the late 1980s through the present in Mediterranean Revival, Florida Contemporary and transitional styles inside HOA-governed communities with consistent streetscape standards. Many core neighborhoods were built in the 1990s–2000s, so roofs, HVAC and plumbing updates vary widely; non-HOA enclaves with larger lots exist mainly west of Markham Woods Road and near the Longwood border.",
+        "conditions": [
+          {
+            "condition": "Heathrow is guard-gated",
+            "implication": "Crews need advance authorisation at the gate — a scheduling and no-access risk worth building into the booking flow.",
+            "copySafe": true
+          },
+          {
+            "condition": "1990s–2000s stock with uneven HVAC updates",
+            "implication": "Dustier interiors in homes with older systems.",
+            "copySafe": true
+          },
+          {
+            "condition": "HOA-standardised streetscapes; The Forest is a 55+ community",
+            "implication": "Recurring-service households are the norm, and 55+ implies lighter-soil, higher-frequency, trust-sensitive work.",
+            "copySafe": true
+          },
+          {
+            "condition": "HOA fees range from under $100 to more than $500; median single-family price about $510,000",
+            "implication": "Indicates household budget capacity across the territory.",
+            "copySafe": false
+          }
+        ]
+      },
+      {
+        "name": "Oviedo",
+        "slug": "oviedo",
+        "subdivisions": [
+          "Live Oak Reserve",
+          "Carillon",
+          "Brighton Park",
+          "Aloma Woods",
+          "Chapman Groves",
+          "Cardinal Glen",
+          "Oviedo Gardens"
+        ],
+        "housingCharacter": "Suburban living with rural charm on the northeast side of the metro. Subdivisions range from Carillon's 800-plus homes and Brighton Park's roughly 300 custom homes to Chapman Groves' 108 homes on large lots and Cardinal Glen's 40 gated custom lots, with new construction at Oviedo Gardens running 2,537–5,169 sq ft.",
+        "conditions": [
+          {
+            "condition": "Oviedo Gardens homes run 2,537–5,169 sq ft",
+            "implication": "Puts many homes in the large-home tier, where deep cleans take a full crew rather than a pair.",
+            "copySafe": true
+          },
+          {
+            "condition": "Partially gated and gated pockets at Aloma Woods and Cardinal Glen",
+            "implication": "Access codes must be arranged in advance.",
+            "copySafe": true
+          },
+          {
+            "condition": "Large-lot subdivisions such as Chapman Groves",
+            "implication": "More tracked-in yard debris at entries.",
+            "copySafe": true
+          },
+          {
+            "condition": "Lower crime rates than the national average",
+            "implication": "Evidence this is a workable, stable service territory.",
+            "copySafe": false
+          }
+        ]
+      },
+      {
+        "name": "Apopka",
+        "slug": "apopka",
+        "subdivisions": [
+          "Errol Estates",
+          "Wekiva Springs",
+          "Sweetwater",
+          "Magnolia Park",
+          "Silver Oaks"
+        ],
+        "housingCharacter": "Inventory runs from post-war ranches near the historic downtown to new-construction estates on former grove land off Kelly Park Road. Cypress-shaded lakes anchor several of the older subdivisions, while the newest developments lean into golf, gated pods and larger lot sizes.",
+        "conditions": [
+          {
+            "condition": "Active agricultural and industrial-scale greenhouse acreage — the \"Indoor Foliage Capital of the World\" — plus cypress-shaded lakefront lots",
+            "implication": "More plant and soil debris tracked indoors and more organic film on screens, lanais and glass than in a sealed inland subdivision.",
+            "copySafe": true
+          },
+          {
+            "condition": "Two-era split: post-war ranch downtown versus new gated estates off Kelly Park Road",
+            "implication": "Effectively two different products in one city, requiring different service offers.",
+            "copySafe": true
+          },
+          {
+            "condition": "Population grew from 54,873 in 2020 to an estimated 65,552 by 2025",
+            "implication": "Marks this as an expanding market worth working.",
+            "copySafe": false
+          }
+        ]
+      },
+      {
+        "name": "Winter Garden",
+        "slug": "winter-garden",
+        "subdivisions": [
+          "Stoneybrook West",
+          "Summerlake",
+          "Hamlin",
+          "Waterleigh"
+        ],
+        "housingCharacter": "A charming downtown district with historic homes alongside modern apartments, plus the Horizon West planned community of villages to the south — Summerlake townhomes from around $380,000, Waterleigh largely built out at $400,000–$580,000, and larger single-family homes at Hamlin from $650,000 with new construction still underway from national builders. Stoneybrook West homes commonly feature granite countertops, stainless appliances and hardwood floors.",
+        "conditions": [
+          {
+            "condition": "Hardwood floors in Stoneybrook West and granite and stainless finishes across the area",
+            "implication": "Surface-specific method matters — hardwood cannot take the wet mop used on tile, and stainless and granite are the two surfaces homeowners most often complain about streaking.",
+            "copySafe": true
+          },
+          {
+            "condition": "Active new construction in Hamlin and newer Horizon West phases",
+            "implication": "Genuine post-construction cleaning demand alongside recurring service.",
+            "copySafe": true
+          },
+          {
+            "condition": "Proximity to Walt Disney World to the south",
+            "implication": "Raises the odds of short-term-rental turnovers in the service mix.",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Windermere",
+        "slug": "windermere",
+        "subdivisions": [
+          "Isleworth",
+          "Keene's Pointe",
+          "Lake Butler Sound",
+          "Lake Down Cove",
+          "Waterstone on Lake Butler",
+          "Lakes of Windermere",
+          "Lake Burden",
+          "Tildens Grove"
+        ],
+        "housingCharacter": "The town is made up of multiple subdivisions, many of them gated, sitting on an isthmus among the Butler Chain of Lakes. Isleworth is sprawling multi-million-dollar Mediterranean and French Provincial estates with meticulous landscaping and lake views; Lake Down Cove, Keene's Pointe, Lake Butler Sound and Waterstone on Lake Butler feature Colonial Revival, New Traditional and Contemporary homes; Lake Burden and Lakes of Windermere offer townhomes and condos.",
+        "conditions": [
+          {
+            "condition": "Guard gates throughout and monthly HOA fees from under $100 to over $1,000",
+            "implication": "Vetted, insured, background-checked crews and pre-cleared vehicle access are prerequisites, not selling points.",
+            "copySafe": true
+          },
+          {
+            "condition": "Large custom lakefront estates typically $1.7 million and up",
+            "implication": "Multi-hour, multi-staff jobs with extensive glass facing the water.",
+            "copySafe": true
+          },
+          {
+            "condition": "Townhome and condo pockets at Lake Burden and Lakes of Windermere",
+            "implication": "Provides an entry-price service tier inside the same brand-name town.",
+            "copySafe": true
+          },
+          {
+            "condition": "Single-family prices run about $540,000 to $9 million",
+            "implication": "Indicates the upper end of household budgets in the territory.",
+            "copySafe": false
+          }
+        ]
+      },
+      {
+        "name": "Dr. Phillips",
+        "slug": "dr-phillips",
+        "subdivisions": [
+          "Bay Hill",
+          "Cypress Point",
+          "Isle of Osprey",
+          "Turtle Creek",
+          "Bay Lakes at Granada",
+          "Vizcaya",
+          "Orange Tree"
+        ],
+        "housingCharacter": "Reads in three registers: Bay Hill and Isleworth-adjacent estates, mid-century ranch neighborhoods off Turkey Lake Road, and newer builds on the Butler Chain lakefront. Gated subdivisions are central to the area, which is surrounded by the Butler and Sand Lake chains of lakes with luxury and lakeside properties.",
+        "conditions": [
+          {
+            "condition": "Three distinct housing registers under one area name",
+            "implication": "One service page cannot address the whole area — mid-century ranches off Turkey Lake Road and multi-million-dollar lakefront estates are different jobs.",
+            "copySafe": true
+          },
+          {
+            "condition": "Located 1–2 miles from Universal on the Sand Lake Road commercial corridor (Restaurant Row)",
+            "implication": "Heavy traffic affects crew routing and arrival windows.",
+            "copySafe": true
+          },
+          {
+            "condition": "Prices span roughly $350K to $5M+",
+            "implication": "Indicates a very broad range of household budgets within one area.",
+            "copySafe": false
+          }
+        ]
+      },
+      {
+        "name": "College Park",
+        "slug": "college-park",
+        "subdivisions": [
+          "Lake Adair–Lake Concord Historic District",
+          "Lake Ivanhoe Historic Residential District"
+        ],
+        "housingCharacter": "A City of Orlando neighborhood annexed in 1923 or 1925 containing two nationally defined historic districts, with genuinely old housing stock — original wood floors, plaster, older tile, single-pane glass and period fixtures. Described as having a small-town feel with local shops and lakes.",
+        "conditions": [
+          {
+            "condition": "1920s-platted housing with designated historic residential districts",
+            "implication": "Owners want careful, method-specific cleaning rather than volume work, and crews need to know what not to put chemicals on.",
+            "copySafe": true
+          },
+          {
+            "condition": "Narrow 1920s streets with detached-garage or street-only parking",
+            "implication": "Practical access constraints for crew vehicles.",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Lake Nona",
+        "slug": "lake-nona",
+        "subdivisions": [
+          "Laureate Park",
+          "The Preserve at Laureate Park",
+          "Eagle Creek",
+          "Isles of Lake Nona",
+          "Storey Park",
+          "Lake Nona South"
+        ],
+        "housingCharacter": "The newest housing stock of any area in the metro, sitting south of the SR-417 expressway and west of Narcoossee Road beside Medical City and the Lake Nona Town Center. Laureate Park is the only Lake Nona neighborhood built in New Urbanism style with narrow lots, deep sidewalks and walkable amenities on public, non-gated streets; Eagle Creek and Isles of Lake Nona are the gated alternatives, and most neighborhoods are CDD communities.",
+        "conditions": [
+          {
+            "condition": "Newest housing stock of any area in the metro",
+            "implication": "Demand is recurring maintenance cleaning and move-in cleans, not restoration of old grout.",
+            "copySafe": true
+          },
+          {
+            "condition": "Narrow Laureate Park lots with deep sidewalks and street parking",
+            "implication": "Tight vehicle access on service days.",
+            "copySafe": true
+          },
+          {
+            "condition": "Medical City, a 650-acre health and life sciences park, next door",
+            "implication": "A professional, shift-working, dual-income customer base — the segment most likely to buy recurring service and to need weekday access arrangements.",
+            "copySafe": false
+          },
+          {
+            "condition": "CDD line items of $1,200–$2,400 a year on top of HOA dues (Laureate Park about $1,385/year plus roughly $171/month)",
+            "implication": "Background on household fixed costs when judging price sensitivity.",
+            "copySafe": false
+          }
+        ]
+      }
+    ],
+    "conditions": [],
+    "zips": [],
+    "keywords": []
+  }
+}
