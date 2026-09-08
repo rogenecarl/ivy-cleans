@@ -1,51 +1,8 @@
 import Link from "next/link";
 import type { SuburbData } from "@/data/suburb";
 
-/*
- * Section 6890e115 (post-664.css): deep-bg2.jpg with no position/size/repeat
- * override (CSS defaults 0 0 / auto / repeat) — byte-identical to
- * deep-cleaning's Benefits.tsx section. Padding 6/3/2rem symmetric. Heading
- * (156617a3) centered 4.5/4/2.8rem. Its own per-id widget-container override
- * is mb-0/lg:mb-[1rem] (NOT deep-cleaning Benefits.tsx's 3rem), but — task-3
- * fidelity pass finding, see suburb/OtherServices.tsx for the full citation
- * — that alone undercounts the live gap by post-6.css's kit-wide
- * `.elementor-widget:not(:last-child){margin-block-end:2rem}` rule.
- * Rendered as flat `mb-[2rem] lg:mb-[3rem]` (kit-2rem alone below lg;
- * kit-2rem + this widget's own 1rem at lg+), confirmed against a live probe
- * at every width. Intro paragraphs
- * (6abbf289, both dump paragraphs in one text-editor widget) left-aligned
- * font-light 2/1.9/1.7rem. The wrapper's own per-id override is mb-[-2rem]
- * lg:mb-0 (every text-editor wrapper on THIS page uses that sign, opposite
- * of deep-cleaning's page) — but this wrapper is ALSO a not-last-child
- * widget (its own kit-block-end applies, same mechanism as the heading
- * above; unlike SuburbHero.tsx's copy-block, whose own kit floor is
- * eclipsed by a LARGER following sibling margin and so needed no fix, this
- * wrapper's own follower — the plain row below — has margin-top:0, so the
- * kit floor is NOT eclipsed and shows through). Rendered as `mb-0
- * lg:mb-[2rem]` (net of -2rem/0 own-override + kit-2rem), confirmed live.
- *
- * Inner section 757efb0b: mb-[2rem] md:mb-[4rem] — byte-identical to
- * deep-cleaning Benefits.tsx's own two-column row. Left column 49b8f61d
- * (pb-[1rem] md:pr-[1rem] md:pb-0) carries listIntro (64c5b3f0, same
- * "mb-0 lg:mb-[2rem]" fix as above — its own follower, the icon-list, also
- * carries no margin-top of its own to eclipse the kit floor) + icon-list
- * 5fe2ef46 — green #5A8E00, no padding-inline-end override, so the li
- * markup matches deep-cleaning Benefits.tsx's exactly (icon-box spacing
- * only, no extra gap). Right column 40ad43ca (pt-[1rem] md:pt-0
- * md:pl-[1rem]) carries the image — deep-bg4.jpg, same asset
- * deep-cleaning.ts uses for benefitsBgImage, hardcoded here since it is a
- * site-wide constant, not per-suburb content.
- *
- * Closing paragraph (55addc2b) matches the intro paragraphs' style/wrapper,
- * including the same kit-floor fix (its own follower, the CTA button below,
- * has only a 1rem margin-top at lg — smaller than the 2rem kit floor, so it
- * does not eclipse it either).
- * Middle CTA button (2e17d4a5, dump line 34 — flagged in task-1's handoff
- * notes as not its own SuburbData field): margin-top lg:mt-[1rem] only
- * (0 at md/mobile), byte-identical to deep-cleaning Benefits.tsx's own
- * button. Reuses the same hardcoded "Set an appointment 👈" text as the hero
- * and closing CTAs — same convention, not threaded through ctaLabel.
- */
+// post-664.css 6890e115: deep-bg2.jpg (CSS default position/repeat), padding 6/3/2rem. Heading 156617a3 mb 2rem/3rem;
+// paragraphs 6abbf289 mb 0/2rem (kit floor shows through since the follower has no margin-top).
 export default function Benefits({
   benefits,
   bookHref,
@@ -71,9 +28,7 @@ export default function Benefits({
           ))}
         </div>
 
-        {/* The two-column benefits list and the eco-friendly closing line that
-            sat here were cut (Abdi's review, item 7): identical on every area
-            page of every city, and covered by the generated paragraph above. */}
+        {/* the benefits list and eco line that sat here were cut: identical on every area page */}
         <div className="text-center">
           <Link
             href={bookHref}

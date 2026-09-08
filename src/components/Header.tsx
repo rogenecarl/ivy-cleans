@@ -10,18 +10,10 @@ const linkClass =
 
 export default function Header({ site }: { site: SiteData["site"] }) {
   const [open, setOpen] = useState(false);
-  /*
-   * The services dropdown comes from site.serviceNav, which the registry
-   * builds — NOT from slicing site.nav by index, which capped this menu at
-   * two entries and left five service pages unreachable.
-   */
+  // services come from site.serviceNav, not a slice of site.nav
   const dropdown = site.serviceNav;
   const topLevel = site.nav;
-  /*
-   * The mobile menu is one flat list, so the services are spliced in directly
-   * after "Cleaning Services" — the position they occupied when they lived in
-   * site.nav, so the running order is unchanged.
-   */
+  // mobile menu is flat: services go right after Cleaning Services
   const servicesIndex = site.nav.findIndex((n) => n.label === "Cleaning Services");
   const mobileNav =
     servicesIndex === -1
@@ -34,9 +26,7 @@ export default function Header({ site }: { site: SiteData["site"] }) {
   return (
     <header className="bg-brand sticky top-0 z-50">
       <div className="ec">
-        {/* desktop + tablet nav: the live nav-menu widget only collapses to the
-            toggle at <=767 (probe @1024 and @768: the horizontal items are visible
-            at x=10/116/371/619, 18px) — it used to collapse at <=1024 here */}
+        {/* nav collapses to the toggle at <=767 only */}
         <nav className="hidden md:block">
           <ul className="flex items-center gap-[2.5rem]">
             {topLevel.map((item, i) => (
@@ -46,10 +36,7 @@ export default function Header({ site }: { site: SiteData["site"] }) {
                   <div className="group relative">
                     <Link href={item.href} className={linkClass}>
                       {item.label}
-                      {/* live sub-arrow: a <span> with padding-left:10px (a fixed
-                          px value) wrapping a ~0.6em glyph — probe: span w=19 at
-                          14.976px @1440, w=21 at 18px @1920, and the item measures
-                          175/203 wide against our 171.8/201 before this */}
+                      {/* sub-arrow: 10px padding-left around a ~0.6em glyph */}
                       <span className="pl-[10px]">
                         <CaretDownIcon className="h-[0.6em] w-[0.6em]" />
                       </span>

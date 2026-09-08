@@ -2,23 +2,8 @@ import Link from "next/link";
 import type { TokenSource } from "@/content/interpolate";
 import { t } from "@/content/interpolate";
 
-/*
- * Section 71b51dd4 (post-8.css): cleaning-bg2.jpg `top center / cover` with
- * padding 6rem 0 6rem (>=1280), 3rem 0 1rem (768–1024), 2rem 0 0 (<=767).
- *
- * The artwork is `uploads/2023/06/cleaning-bg2.jpg` (1920x589, green-tinted
- * living room). WordPress has a *second, unrelated* file with the same
- * basename — `uploads/2023/11/cleaning-bg2.jpg` (1920x972, pale pink texture)
- * — which the front page's 78ce8a9 section uses (BeforeAfter.tsx) and which is
- * what `public/images/cleaning-bg2.jpg` holds. Pointing this section at that
- * one rendered white copy on near-white pink; probe r8 showed geometry already
- * pixel-identical to live (x/width/height/padding/doc-height match at
- * 1920/1440/1024/768/390) with the bg-image URL as the only delta. Hence the
- * date-qualified filename here — do NOT collapse the two.
- * Heading 2ddd8298 and body 11f8346 are both #FFFFFF over the artwork.
- * The h2 widget's `margin-bottom:2rem` and the body's trailing paragraph
- * margin are both kept by elementor's flex widget-wrap — hence `flex flex-col`.
- */
+// post-8.css 71b51dd4: uploads/2023/06/cleaning-bg2.jpg — not the 2023/11 file of the same name BeforeAfter uses.
+// Padding 6rem / 3rem 0 1rem / 2rem 0 0. Heading 2ddd8298 and body 11f8346 are white.
 export default function HouseCleaning({
   houseCleaning,
   bits,
@@ -27,12 +12,7 @@ export default function HouseCleaning({
 }: {
   houseCleaning: string[];
   bits: TokenSource;
-  /*
-   * The two service-page hrefs arrive built (page-side cityHref) rather than
-   * being t()'d here: only the page knows whether this city is live (public
-   * paths) or a draft being previewed under /<cityKey>. The LABELS stay
-   * token-built, they carry no path.
-   */
+  // hrefs arrive built by the page (cityHref); labels are token-built
   deepHref: string;
   moveOutHref: string;
 }) {

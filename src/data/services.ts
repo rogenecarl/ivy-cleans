@@ -11,24 +11,14 @@ export type ServicesData = {
   services: Service[];
 };
 
-/* AI-class copy (per the content contract) comes from city sections; only
- * the card titles, images and dimensions are fixed template structure.
- * Alt templates use {cityLower} verbatim (no slugging) — for a multi-word
- * city ("St. Louis Park") they render with spaces/periods, faithfully
- * reproducing the live site's inconsistent alt conventions. */
+// AI-class copy comes from city sections; titles, images and sizes are template. Alt templates use {cityLower} verbatim, like live.
 export function servicesData(c: CityContent): ServicesData {
   return {
     heroParagraphs: sl(c, 'services.heroParagraphs'),
 
     serviceIntro: sl(c, 'services.serviceIntro'),
 
-    /*
-     * These slot ids (services.cards.*) are the contract Plan 3's writer schemas
-     * must emit — renaming one here without updating the generator breaks builds.
-     * s()/sl() throw when the builder runs (render/build time for the city
-     * being rendered), so a missing slot fails that city's page or build —
-     * never the whole process.
-     */
+    // slot ids are the contract the writer schemas emit; s()/sl() throw on a missing slot for that city only
     services: [
       { title: "Dusting", text: s(c, 'services.cards.dusting'), image: "/images/dusting.jpg", alt: t("home cleaning services {cityLower} {stateLower}", c), width: 401, height: 275 },
       // empty on the live site — fidelity, not an oversight (Vacuuming, Window Cleaning)

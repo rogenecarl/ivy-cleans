@@ -4,11 +4,7 @@ import type { TokenSource } from "@/content/interpolate";
 import CtaButton from "./CtaButton";
 import { PhoneIcon } from "./Icons";
 
-/**
- * Compact variant — button + "Prefer to call?" + phone, in the flow of the
- * host section (Packages / BeforeAfter on the live site) so it sits on that
- * section's own background.
- */
+/** Compact variant: button + "Prefer to call?" + phone, inside the host section. */
 export function CtaCompact({
   site,
   light = false,
@@ -19,11 +15,7 @@ export function CtaCompact({
   variant?: "band" | "packages";
 }) {
   const tone = light ? "text-white" : "text-black";
-  /*
-   * Live probe gaps around the button widget:
-   *   CtaBand / BeforeAfter — 1rem lead (on top of the host's 2rem), 3rem to the
-   *   "prefer to call" line.  Packages (7d490e5) — 5rem lead, 2rem after.
-   */
+  // lead/trail gaps: 1rem/3rem in CtaBand and BeforeAfter, 5rem/2rem in Packages (7d490e5)
   const buttonBox =
     variant === "packages" ? "pt-[2rem] mb-[2rem] md:pt-[5rem]" : "mb-[3rem] pt-[1rem]";
   return (
@@ -31,10 +23,7 @@ export function CtaCompact({
       <div className={buttonBox}>
         <CtaButton size="lg" site={site} />
       </div>
-      {/*
-        live: the "prefer to call" icon-list sits on a 2.6rem/1.2em line and its widget-container
-        carries margin-bottom:-1.5rem, so only 0.5rem of the 2rem widget spacing survives.
-      */}
+      {/* icon-list line 2.6rem/1.2em with margin-bottom -1.5rem */}
       <p className="mb-[0.5rem] flex items-center justify-center text-[1.8rem] leading-[1.2em]! lg:text-[2.6rem]">
         <PhoneIcon className="mr-[0.5rem] h-[1.8rem] w-[1.8rem] lg:h-[2.2rem] lg:w-[2.2rem]" />
         Prefer to call? We&rsquo;re available now.
@@ -60,9 +49,7 @@ export default function CtaBand({
     >
       <div className="ec">
         {/* b165434/022049e/24e2e95: widget-container margin-bottom -1rem below 768px */}
-        {/* A <p>, not the live <h2> (Abdi's review, item 11): this band repeats
-            on the front page, and three identical h2s are noise in the
-            document outline, not structure. Same classes, so the look holds. */}
+        {/* a <p>: this band repeats on the front page */}
         <p className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold text-white md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           {t("Ready For a Sparkling Clean House? Book Your Cleaning Service {city}", bits)}
         </p>

@@ -1,23 +1,5 @@
-// Verbatim from docs/superpowers/reference/ivycleans-live/book-now.html and
-// book.html (+ book-now-content-dump.txt / book-content-dump.txt for
-// heading/copy order). Both pages carry the IDENTICAL 10-field Elementor
-// form (same ids/names/labels/options/placeholders/required) — the only
-// difference in the reference markup is the Elementor size class
-// (elementor-size-md on /book-now, elementor-size-sm on /book), which
-// BookingForm's `size` prop switches. Two details were grep-verified against
-// both HTML files before transcription:
-//   (a) the "Message" placeholder in the content dump belongs to field 6,
-//       the ADDRESS field (id="form-field-field_1872bc3") — both
-//       book-now.html:443 and book.html:412 read:
-//       `<input ... id="form-field-field_1872bc3" ... placeholder="Message"
-//       value=" " required="required">`. This is a live authoring quirk
-//       (the address field's placeholder literally says "Message"), not a
-//       transcription error, and is preserved verbatim.
-//   (b) field 5 ("How Soon Are You Looking To Have This Cleaned?") does open
-//       on a blank/space option: both files read
-//       `<option value=" " selected="selected"> </option>` before the ASAP
-//       option (book-now.html:431, book.html:400) — a single space for both
-//       value and the option's text content.
+// Verbatim from book-now.html / book.html. Same 10-field form on both; only the size class differs (BookingForm).
+// Live quirks kept: the address field's placeholder is "Message", and field 5 opens on a blank option.
 
 import type { CityContent } from "../content/types";
 import { t } from "../content/interpolate";
@@ -88,25 +70,7 @@ export function bookData(c: CityContent): BookData {
       h2: "Book Now",
     },
 
-    /*
-     * /book only — the lead-in block the live page renders between the "Book Now"
-     * H2 and the form. Verbatim from book.html:
-     *   :319  <p class="elementor-heading-title ...">A Couple of Questions For
-     *         Your FREE Quote! </p>              (widget #6d970af1)
-     *   :323  <p>You&#8217;re just 3 steps away from a clean house!</p>
-     *         <p><strong>Prefer To Call? Sure! </strong></p>
-     *         <p><strong>We&#8217;re Available Monday-Friday 7 am-7 pm</strong></p>
-     *         <p><a href="tel:6124240391"><strong>(612) 424-0391</strong></a></p>
-     *                                            (widget #30422d1e)
-     * Cross-checked against book-content-dump.txt:32-37, whose (trimmed) lines are
-     * byte-identical. Elementor's trailing markup spaces ("Quote! ", "Sure! ") are
-     * dropped for the same reason bookSubmitLabel drops "Claim "'s — they are
-     * whitespace inside the tag, not part of the label, and HTML collapses them.
-     * /book-now has NO equivalent block: book-now.html:365 goes straight from
-     * section #925b984 to the form widget #a295442 (verified by grepping the whole
-     * `data-elementor-id="2336"` subtree — one section, one column, one widget).
-     * phone/phoneHref are FACT-class (CityContent.phoneDisplay/phoneHref).
-     */
+    // /book only: lead-in block between the H2 and the form (book.html:319-323, widgets 6d970af1 / 30422d1e)
     bookLeadIn: {
       heading: "A Couple of Questions For Your FREE Quote!",
       intro: "You’re just 3 steps away from a clean house!",
@@ -116,21 +80,13 @@ export function bookData(c: CityContent): BookData {
       phoneHref: c.phoneHref,
     },
 
-    /*
-     * /book only — button widget #5dafbb39 (book.html:325-333). Its widget classes
-     * are `elementor-align-center elementor-hidden-desktop elementor-hidden-tablet`
-     * and the button is `elementor-button-link elementor-size-sm` with a
-     * `fas fa-phone` icon. See BookSection for why "hidden desktop + tablet" is
-     * NOT the same as "mobile only" on this kit.
-     */
+    // /book only: button widget 5dafbb39 — see BookSection for its visibility
     bookCallNow: {
       label: "Call Now",
       href: c.phoneHref,
     },
 
-    // The 10 fields in live order, verbatim from book-now.html /
-    // book.html (identical on both pages apart from the elementor-size-md /
-    // elementor-size-sm class, which lives in BookingForm, not here).
+    // the 10 fields in live order
     bookFields: [
       {
         kind: "select",
@@ -261,21 +217,12 @@ export function bookData(c: CityContent): BookData {
       },
     ],
 
-    // Verbatim button text on BOTH pages (book-now.html / book.html:
-    // `<span class="elementor-button-text">Claim </span>` — the trailing space
-    // inside the span is Elementor markup whitespace, not part of the label).
+    // live: `<span class="elementor-button-text">Claim </span>`, trailing space dropped
     bookSubmitLabel: "Claim",
 
-    // OUR copy (user-approved) for the post-submit state — there is no live
-    // equivalent since both forms' real submission target is unreachable from
-    // this static clone. The phone number embedded in `body` is FACT-class
-    // (CityContent.phone) tokenized through t(), same format as `phone` below.
+    // our copy for the post-submit state
     comingSoon: {
-      // NOT RENDERED ON ANY PATH TODAY. `heading`/`body` are the original
-      // pre-capture "the form goes nowhere yet" copy; now that the form really
-      // submits, the panel shows successHeading/successBody or errorHeading
-      // instead. Kept because they are the approved copy for that state, but
-      // do not reach for `heading` on the error path — that was the bug.
+      // heading/body are not rendered on any path today; kept as approved copy
       heading: "Online booking is coming soon!",
       body: t(
         "In the meantime, call us at {phone} or email Support@ivycleans.com.",
@@ -287,14 +234,7 @@ export function bookData(c: CityContent): BookData {
       emailHref: "mailto:Support@ivycleans.com",
       successHeading: "Thanks, we’ve got your request.",
       successBody: "Someone from our team will be in touch shortly.",
-      // The FAILURE heading, and the reason it is not `heading` above: the
-      // error panel used to reuse "Online booking is coming soon!", so a
-      // customer whose ten-field submission had just been LOST was told the
-      // feature does not exist yet — no hint that anything had gone wrong, no
-      // reason to call. Mirrors src/data/contact.ts's contactResult.errorHeading
-      // word for word rather than inventing a third variant; the panel keeps
-      // the phone/email fallback line below it, which the contact form has no
-      // room for.
+      // the failure heading, same words as contact.ts
       errorHeading: "Something went wrong.",
     },
   };

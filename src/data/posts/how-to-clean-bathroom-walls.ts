@@ -1,6 +1,4 @@
-// Verbatim from docs/superpowers/reference/ivycleans-live/
-// post-how-to-clean-bathroom-walls.html (elementor-page-952, the shared blog-post template).
-// Copy, typos and trailing \u00a0 are the live page's own; do not tidy them.
+// Verbatim from docs/superpowers/reference/ivycleans-live/post-how-to-clean-bathroom-walls.html; typos and trailing \u00a0 kept.
 import type { PostArticleData } from "./types";
 
 export const post: PostArticleData = {
@@ -14,9 +12,7 @@ export const post: PostArticleData = {
   info: { author: "aj", date: "September 11, 2023", time: "1:16 pm", commentCount: "No Comments" },
   authorBox: { name: "aj", avatar: "/images/avatar-aj.jpg", href: "https://ivycleans.com/author/aj/" },
   blocks: [
-    // figure 1 is a dead lh5.googleusercontent.com hotlink:
-    // live serves it too, but it 404s there (probed naturalWidth 0), so the live
-    // page shows a broken-image box. Omitted rather than mirrored broken.
+    // figure 1 is a dead googleusercontent hotlink (404 on live too); omitted
     { type: "p", text: ["Cleaning bathroom walls is an essential task to maintain cleanliness and hygiene in your bathroom. Whether you have ceramic tile walls, painted walls, or wallpapered walls, regular cleaning is crucial to remove dirt, stains, and grime.\u00a0"] },
     { type: "p", text: ["By following the right cleaning methods and using the necessary supplies, you can ensure spotless and fresh bathroom walls. This blog will help you better understand how to clean bathroom walls to help you ", { a: ["achieve a sparkling clean bathroom"], href: "https://ivycleans.com/how-to-clean-bathroom-tiles/" }, ". We’ll also provide you with some regular maintenance tips to keep your bathroom walls clean and prevent the growth of mold and mildew.\u00a0"] },
     { type: "h2", text: [{ b: ["Why Clean Bathroom Walls?"] }] },

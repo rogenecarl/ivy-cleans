@@ -32,24 +32,9 @@ export function siteData(c: CityContent): SiteData {
       phone: c.phone,
       phoneHref: c.phoneHref,
       email: "Support@ivycleans.com",
-      /*
-       * Every internal href below goes through cityHref(): a live city is
-       * served from its own host and keeps the public path (identity), a draft
-       * city gets the `/<cityKey>` prefix so its preview stays browsable.
-       */
+      // every internal href goes through cityHref
       bookingUrl: cityHref(c, "/book-now"),
-      /*
-       * TOP-LEVEL items only. The individual service pages are NOT in here —
-       * they live in `serviceNav` below and hang off the "Cleaning Services"
-       * item as its dropdown.
-       *
-       * They used to sit at indices 2 and 3, and both headers sliced them out
-       * by literal index (`[site.nav[2], site.nav[3]]`). That coupling meant
-       * reordering this array silently rendered the wrong menu, and it capped
-       * the dropdown at exactly two entries no matter how many services
-       * existed — which is why five of the seven service pages shipped
-       * unreachable. Keep the two lists separate.
-       */
+      // top-level items only; services hang off Cleaning Services via serviceNav, never sliced from here by index
       nav: [
         { label: "Home", href: cityHref(c, "/home") },
         { label: "Cleaning Services", href: cityHref(c, "/cleaning-services") },
@@ -57,14 +42,7 @@ export function siteData(c: CityContent): SiteData {
         { label: "Contact", href: cityHref(c, "/contact") },
         { label: "FAQ", href: cityHref(c, "/faq") },
       ],
-      /*
-       * Built from the service registry rather than written out here, so the
-       * menu cannot drift from the pages that actually exist: every slug is
-       * one the services/[serviceSlug] route serves, in the client's own
-       * ordering. Labels are the service names as the client gave them, with
-       * no city in any of them -- the city is already in the domain, the page
-       * heading and the copy.
-       */
+      // built from the registry so the menu can't drift from the pages
       serviceNav: allServices().map((s) => ({
         label: s.name,
         href: cityHref(c, `/services/${s.slug}`),
@@ -79,31 +57,10 @@ export function siteData(c: CityContent): SiteData {
       ],
     },
     innerSite: {
-      /*
-       * The live Minneapolis site ran a SECOND line here (612-482-5001),
-       * distinct from the hero's number, and this stayed literal because
-       * "whether a new city gets one number or two" was an open question for
-       * the client.
-       *
-       * THAT QUESTION IS ANSWERED: one number per city. It was answered the
-       * expensive way — Orlando shipped with a Minneapolis number on
-       * /orlando/home, on a public URL, because a literal here reaches every
-       * city that will ever be generated.
-       *
-       * The live site's trailing space in `tel: +1...` is not reproduced: it
-       * was verbatim fidelity to a hand-authored href, and a tel: link is a
-       * dialled number, not a design detail.
-       */
+      // one number per city (the live Minneapolis site had a second line here)
       phone: c.phone,
       phoneHref: c.phoneHref,
-      /*
-       * The inner footer's icon-list phone (d439f43 on both home.html and
-       * cleaning-services.html) is a *different* number from the hero/CTA "Call
-       * Us Now!" buttons above — 612-424-0391, rendered as plain text with no
-       * tel: href on the live page (unlike the hero/CTA buttons, which are real
-       * <a href="tel:..."> links). InnerFooter renders this in a <span>, so no
-       * href field is kept here.
-       */
+      // inner footer phone: plain text on live, no tel: href
       footerPhone: c.phone,
       email: "support@ivycleans.com",
       bookUrl: cityHref(c, "/book"),

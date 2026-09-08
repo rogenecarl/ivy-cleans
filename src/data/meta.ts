@@ -1,24 +1,7 @@
-/*
- * Meta descriptions from generated copy — Abdi's Orlando review, item 9.
- *
- * Every page used to carry a template description: the front page's was the
- * OLD Minneapolis hero truncated mid-word ("…Our experienced"), under a hero
- * that had been rewritten; every area page's was one sentence with the area
- * name swapped in. The generated copy on the same page is a better snippet
- * and costs nothing to reuse, so descriptions are now cut from it here.
- *
- * Google shows roughly 155 characters of a description before truncating,
- * and cutting mid-word is what the old front-page one did. So: whole
- * sentences while they fit, and if the very first sentence is already too
- * long, a clean cut at a word boundary with an ellipsis.
- */
+// Meta descriptions cut from generated copy: whole sentences while they fit in ~155 chars, else a word-boundary cut with an ellipsis.
 export const META_DESCRIPTION_MAX = 155
 
-/*
- * Sentence ends are [.!?] followed by whitespace, EXCEPT after the
- * abbreviations that turn up in place names and copy — "St. Louis Park" is a
- * Minneapolis area, and "Dr." and "Mt." are common enough in addresses.
- */
+// sentence ends at [.!?] + whitespace, except after abbreviations ("St. Louis Park")
 const ABBREVIATIONS = /\b(?:St|Mt|Ft|Dr|Mr|Mrs|Ms|No|vs|Ste|Ave|Blvd)\.$/
 
 function sentences(text: string): string[] {

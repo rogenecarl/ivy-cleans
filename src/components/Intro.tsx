@@ -21,9 +21,7 @@ export default function Intro({
           <h2 className="mb-0 text-[2.8rem] leading-[1.2em] font-bold md:mb-[1rem] md:text-[4rem] lg:text-[4.5rem]">
             Your Happiness is our Priority
           </h2>
-          {/* video widget keeps the kit's own 2rem trailing margin even as the
-              column's last child (live probe: content-stack sums to container
-              height only with this margin included, both @1440 and @390) */}
+          {/* the video widget keeps its 2rem trailing margin even as last child */}
           <div className="mb-[2rem]">
             <IntroVideo bits={bits} />
           </div>
@@ -39,11 +37,7 @@ export default function Intro({
           <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
             {t("Professional Cleaning Services {city}, {state}", bits)}
           </h2>
-          {/*
-            9ed19e9 widget-container margin-bottom: 3rem desktop / 0 at <=1024 /
-            -3rem at <=767, on top of the kit's 2rem widget spacing. Live probe gap
-            from the last paragraph to the card row: 41.5px @1440 (5rem), 10px @390.
-          */}
+          {/* 9ed19e9 margin-bottom 3rem / 0 / -3rem on top of the 2rem widget spacing */}
           <div className="text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:mx-[4rem] lg:text-[2rem]">
             {serviceIntro.map((p) => (
               <p key={p.slice(0, 40)} className="mb-[2rem] last:mb-0">

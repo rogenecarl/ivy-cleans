@@ -1,32 +1,9 @@
 import Image from "next/image";
 import type { MoveOutData } from "@/data/move-out";
 
-/*
- * Section 5f8003a (post-241.css): padding 6rem 0 6rem desktop, 3rem 0 1rem
- * tablet, 2rem 0 0 mobile. Heading (de63694) centered black, 4.5/4/2.8rem,
- * 1rem bottom margin above 767px. Intro (b715131) left-aligned, font-light
- * 2/1.9/1.7rem.
- *
- * Inner section b8893ba (bottom margin 0 desktop / 2rem tablet / 1rem
- * mobile): qualities column (a8c3534, 54.837% at >=768px) holds the 5
- * elementor-position-left image-box widgets (a672bb6/af8ecb4/75032cf/
- * 6c41eb6/3d3bc44) — icon figure 17% of the box width (25% at mobile) with a
- * 2rem right margin, title 2rem/700/black with a 10px bottom margin,
- * description 1.4rem/300/black. Each widget carries a 2rem bottom margin
- * (1rem at mobile) except the last, which has none. Image column (4f24343,
- * 45.125%) holds out-img3.jpg (692x901), whose widget takes margin
- * 0 -11rem 0 2rem above 1280px so the photo bleeds off the right edge. Neither
- * column overrides align-items, so the shorter image column sits at the top of
- * the row rather than centred.
- */
-/*
- * The last two image-box descriptions carry a `<br><br>` paragraph break in
- * the live markup (after "...at the end of the job." and "...ready for the
- * next occupants."). The data strings stay byte-verbatim, so the break is
- * reproduced here by index; without it those two boxes render 2 and 1 lines
- * short of live. The theme hides every <br> below 768px, so at mobile the two
- * descriptions run on as a single paragraph, as they do live.
- */
+// post-241.css 5f8003a: padding 6rem / 3rem 0 1rem / 2rem 0 0; heading de63694; intro b715131.
+// Inner b8893ba: qualities a8c3534 54.837%, image 4f24343 45.125%, photo bleeds right above 1280.
+// the last two descriptions carry a <br><br> in the live markup, hidden below 768
 const descriptionBreakAfter: Record<number, string> = {
   3: "at the end of the job.",
   4: "ready for the next occupants.",

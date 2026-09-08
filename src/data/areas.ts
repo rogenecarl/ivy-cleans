@@ -7,15 +7,7 @@ export type AreasData = {
   areas: Area[];
 };
 
-/*
- * RESEARCH-class: the suburb list is per-city (Claude research in Plan 3).
- * Slugs are stored, never derived — the live site's URL patterns vary
- * (house-cleaning-*, cleaning-services-*, cleaning-service-*, *-cleaning-services).
- * Suburb pages are still out of scope, so a city with `hasSuburbPages: false`
- * renders these names UNLINKED (ServiceArea/Locations honour the flag) — the
- * hrefs below are still computed so the data shape stays uniform, they are
- * simply not turned into anchors. Minneapolis's 24 routes are the only real ones.
- */
+// per-city suburb list; slugs are stored, never derived. hasSuburbPages false renders the names unlinked.
 export function areasData(c: CityContent): AreasData {
   return {
     areas: c.research.suburbs.map((sub) => ({

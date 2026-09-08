@@ -55,10 +55,7 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
-  // container: keeps the portalled content inside [data-admin-root] so
-  // admin.css's scoped resets reach it -- see portal-container.ts. Without it
-  // Tailwind v4 resolves the unset border-color to currentColor and the panel
-  // draws text-coloured borders.
+  // container: keep the portal inside [data-admin-root] so admin.css's scoped resets reach it (see portal-container.ts)
   return (
     <SheetPortal container={getAdminPortalContainer()}>
       <SheetOverlay />

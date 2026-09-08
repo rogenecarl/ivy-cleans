@@ -1,12 +1,7 @@
 import Image from "next/image";
 import { Raleway } from "next/font/google";
 
-/*
- * post-2035.css 744760e: `.elementor-heading-title{font-family:"Raleway",Sans-serif}`
- * — the only place on the front page where the kit's Raleway is used (live probe
- * confirms computed font-family Raleway on this heading). Scoped to this heading
- * so no other route's markup changes.
- */
+// post-2035.css 744760e: Raleway, the only place on the front page
 const raleway = Raleway({ subsets: ["latin"], weight: ["700"], display: "swap" });
 
 export default function FeaturedIn() {
@@ -22,12 +17,7 @@ export default function FeaturedIn() {
         >
           FEATURED IN:
         </h3>
-        {/* Asset refreshed 2026-08-11 from the live site, which replaced the
-            original 1824x51 export (still in the reference dump) with a
-            1600x45 version whose logos are drawn larger. Live keeps the old
-            width="1824" attr, whose presentational width upscales the bitmap
-            back to 1824px (capped by max-width:100%) — w-[1824px] mirrors
-            that; w-auto would render the natural 1600px and shrink the logos. */}
+        {/* asset refreshed 2026-08-11 (1600x45); live keeps width="1824", which upscales it — w-[1824px] mirrors that */}
         <Image
           src="/images/Group-5.png"
           alt=""

@@ -1,9 +1,4 @@
-// Placeholder-grade copy, expected to be rewritten with real marketing copy.
-// Structure and token placement follow src/data/deep-cleaning.ts exactly.
-// whatIs.text is a plain static string and stays canonical in every city;
-// whatIs.local is the one generated field (content-strategy C) and is read
-// with sOpt, not s, because a city that never ran the service stage has no
-// such slot and s() would throw on every one of its service pages.
+// Placeholder-grade copy, same structure as deep-cleaning.ts. whatIs.local is the one generated field, read with sOpt.
 
 import type { CityContent } from '../../content/types'
 import { sOpt, serviceSlots } from '../../content/slots'

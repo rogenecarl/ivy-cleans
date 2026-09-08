@@ -8,9 +8,7 @@ export default function Values({ bits }: { bits: TokenSource }) {
       className="bg-cover bg-top pt-[1rem] md:py-[2rem] lg:py-[6rem] xl:py-[5rem]"
       style={{ backgroundImage: "url(/images/Rectangle-12.jpg)" }}
     >
-      {/* post-2035.css `.sec08 > .elementor-container{max-width:128rem!important}` —
-          a rem cap riding the ladder: 1280 @1920, 1064.96 @1440 (the 1065px this
-          used to hard-code) */}
+      {/* post-2035.css .sec08 container: max-width 128rem */}
       <div className="ec mx-auto max-w-[128rem]! text-center">
         {/* 7e03a53: widget-container margin-bottom -1rem below 768px */}
         <h2 className="mb-[1rem] text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">

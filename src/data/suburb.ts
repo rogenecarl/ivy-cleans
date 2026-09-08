@@ -1,34 +1,6 @@
-// Verbatim copy from
-// docs/superpowers/reference/ivycleans-live/suburb-savage-content-dump.txt
-// (elementor page id 664, the live /cleaning-service-savage-mn/ page) plus
-// the <title>/meta-description pair read directly from suburb-savage.html
-// (the dump has no head tags). Typos and ’ (U+2019) apostrophes are
-// preserved exactly as on the live site.
-//
-// Tokens: {suburb} is the suburb's display name; {ST} is the metro city's
-// two-letter state code (Savage's own state, since a suburb always sits in
-// its metro's state); {city}/{citySlug} come from the metro CityContent via
-// t(). Every literal below traces to a specific dump line — see the inline
-// citations.
-//
-// Three blocks are now AI-class, not pure token substitution (Task 17):
-// hero.paragraphs, houseCleaning.paragraph, and benefits.paragraphs read the
-// per-area `suburb.<slug>.intro` / `.homes` / `.local` slots the suburb
-// pipeline stage generates (src/pipeline/stages.ts, Task 16). Everything
-// else — CTA labels, otherServices, workInAction, closing — stays template:
-// not everything needs generating, and that copy is still bound by the
-// reference-fidelity rules. The template literals in those three blocks are
-// NOT dead code: they are the fallback for a city whose suburb research
-// predates the generation stage. Migrated Minneapolis has 24 live areas with
-// empty `subdivisions`/`housingCharacter`/`conditions` and no generated
-// copy at all — reading its slots unconditionally would throw on every one
-// of those pages, so each block falls back to the token-substituted literal
-// when the slot is absent (see sOpt in src/content/slots.ts).
-//
-// Unlike deep-cleaning.ts / move-out.ts, this builder takes a second
-// argument (the suburb ref) because the page repeats per-suburb, not once
-// per city — SuburbRef is never stored on CityContent itself, callers pass
-// one entry from c.research.suburbs.
+// Template copy verbatim from suburb-savage-content-dump.txt (page 664); tokens {suburb} {ST} {city}.
+// hero/houseCleaning/benefits read the generated suburb.<slug>.intro/.homes/.local slots and fall back to
+// the template when absent (Minneapolis has no generated area copy). Takes the suburb ref: it repeats per area.
 
 import type { CityContent, MarketPhoto } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
@@ -57,18 +29,10 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
   const local = sOpt(c, localSlot)
 
   return {
-    // <title> / meta description read from suburb-savage.html (not in the
-    // plain-text dump). Note the title has a comma before {ST}; the
-    // description does not — reproduced as on the live page.
+    // title/description from suburb-savage.html
     suburbMeta: {
       title: `House Cleaning Service In ${name}, ${c.state}`,
-      /*
-       * Abdi's review, item 9: the template description was identical on
-       * every area of every city bar the name. The opening of the generated
-       * `homes` slot — what the houses in THIS place are like — is a better
-       * snippet and costs nothing. The template line stays only as the
-       * fallback for a city with no generated area copy (Minneapolis).
-       */
+      // generated homes copy when present; the template line is only the fallback
       description:
         homes !== undefined
           ? metaDescription(homes)
@@ -92,9 +56,7 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       ctaLabel: CTA_LABEL,
     },
 
-    // dump lines 22-23. `homes` (suburb.<slug>.homes) is Task 16's generated
-    // per-area "what the homes here are like" copy; falls back to the
-    // Savage template when absent.
+    // dump lines 22-23; generated homes slot when present
     houseCleaning: {
       heading: `House Cleaning ${name} ${c.state}`,
       paragraph:
@@ -106,9 +68,7 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
             ),
     },
 
-    // dump lines 24-33. `local` (suburb.<slug>.local) is Task 16's generated
-    // per-area local-conditions copy; falls back to the Savage template
-    // (static, no city/suburb mention) when absent.
+    // dump lines 24-33; generated local slot when present
     benefits: {
       heading: `Benefits of House Cleaning ${name}`,
       paragraphs:
@@ -120,15 +80,7 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
               // Static — no city/suburb mention (dump line 26).
               'The benefits of our house cleaning really come in because the service is so comprehensive. Areas that aren’t typically cleaned are covered, wiped down, and sanitized. Ivy cleans specializes in improving the cleanliness of clients’ homes. To offer the most comprehensive service available, making sure that there isn’t a single box we leave unchecked.',
             ],
-      /*
-       * Abdi's review, item 7. The bulleted benefits list ("Reducing the
-       * number of allergens…", dump lines 27-32) and the eco-friendly closing
-       * line (dump line 33) that used to follow are gone: both were
-       * byte-identical on every area page of every city, and the generated
-       * `local` paragraph above already says what they said, about THIS
-       * place. Template copy that is the same on Lake Mary, Windermere and
-       * Maitland is a fingerprint, not a benefit.
-       */
+      // the benefits list (dump 27-32) and eco line (33) are gone: identical on every area page
     },
 
     // dump lines 35-38
@@ -147,33 +99,14 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       ],
     },
 
-    /*
-     * The gallery was five hardcoded Minneapolis images from the live site's
-     * swiper — "same on every suburb page", and therefore the same on every
-     * page of every city. Five identical stock photos across a hundred
-     * domains is a fingerprint, not content; Orlando's ten area pages all
-     * carried them, with no alt text and two repeated.
-     *
-     * Now the operator's own photos of this market (Facts.ops.photos), or
-     * NOTHING. An empty gallery is better than a shared one, and a photo of
-     * the actual crew is the cheapest trust signal a local business has.
-     */
+    // the operator's own photos, or nothing
     workInAction: {
       heading: 'Our Work In Action',
-      /* copied, not aliased: suburbData's contract is that every call returns
-         independent objects (tests/suburb-data.test.ts), and handing back the
-         document's own array would let a caller mutate the loaded doc */
+      // copied so callers can't mutate the loaded doc
       images: [...(c.ops?.photos ?? [])],
     },
 
-    /*
-     * dump lines 40-42 — minus the heading. The live line, "We understand that
-     * every home in {suburb} is unique, which is why we offer customized
-     * cleaning services to meet your specific needs.", is on the banned
-     * list (src/content/quality.ts) and shipped on every area page anyway,
-     * because checkQuality only reads generated slots. Item 7 cuts it; the
-     * replacement is deliberately short and says only the area name.
-     */
+    // dump lines 40-42 minus the heading, which was a banned phrase
     closing: {
       heading: `Ready to book in ${name}?`,
       paragraph: t('Contact us today to discuss your deep cleaning requirements in {city}.', c),

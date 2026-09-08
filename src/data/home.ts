@@ -17,22 +17,12 @@ export type HomeData = {
   workImages: MarketPhoto[];
 };
 
-/*
- * CITY-class copy: whole paragraphs are the live site's copy verbatim, with
- * only the {city}/{state} tokens inserted where "Minneapolis"/"MN" appeared.
- * Strings without a city mention are intentionally left un-wrapped literals.
- */
+// live copy verbatim with {city}/{state} tokens; strings without a city mention stay literal
 export function homeData(c: CityContent): HomeData {
   return {
     homeMeta: {
       title: t("Cleaning Service in {city}, {state} | Ivy Cleans", c),
-      /*
-       * The SECOND hero paragraph, deliberately (Abdi's review, item 9): this
-       * page renders the same hero as the front page, and the front page's
-       * description is the first paragraph. Two pages with one description
-       * would be a duplicate for no reason; the second paragraph is just as
-       * much this city's own copy.
-       */
+      // second hero paragraph: the front page's description is the first
       description: metaDescription(sl(c, "services.heroParagraphs")[1]),
     },
 
@@ -77,16 +67,10 @@ export function homeData(c: CityContent): HomeData {
       "We have full assurance that you will observe the excellence in our services, encompassing our team and thorough cleaning procedures. As a result, we extend a 100% satisfaction guarantee, with no inquiries asked. If, within the initial 24 hours following completion of the service, you are dissatisfied, we will refund your payment in its entirety.",
     ],
 
-    /* RESEARCH-class: the raw ZIP list is per-city fact data, not model-written
-       copy — it renders as a compact list (see Locations.tsx), so no slot or
-       model call is needed for it. */
+    // per-city fact data, not model copy
     zips: c.research.zips,
 
-    /* OPS-class: the operator's own photos of their own jobs, from the ops
-       block. The five Minneapolis before-and-afters that used to be hardcoded
-       here now live in content/minneapolis.json, where they belong — they are
-       that market's photos, not the template's. A city with none renders no
-       gallery (see WorkCarousel). */
+    // the market's own photos (content/<city>.json ops.photos), or none
     workImages: [...(c.ops?.photos ?? [])],
   };
 }

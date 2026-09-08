@@ -3,38 +3,15 @@ import Link from "next/link";
 import type { SiteData } from "@/data/site";
 import { EnvelopeIcon, PhoneIcon } from "@/components/Icons";
 
-/*
- * Inner-template footer. The live footer template ships four sections but the
- * first two (f18b62f "Services"/"Book Now" + ae38e06 copyright) carry
- * elementor-hidden-desktop/laptop/tablet_extra/tablet/mobile — i.e. they never
- * render at any breakpoint. What is visible is d439f43 (logo + contact /
- * Links / Get In Touch) followed by 6466cfa (copyright + "Ivy Cleans"), on the
- * template's #FDECE7 background with #37745F type throughout.
- *
- * Round-7 live probe (ivycleans.com/home + /cleaning-services, identical, at
- * 1440 / 1024 / 768 / 390 — root font 8.32px at 1440, 10px at the rest):
- *
- *   section d439f43 padding : 4rem/3rem @>=1025 | 3rem/1rem @768-1024 | 1rem/0 @mobile
- *   section 6466cfa padding : 0 top, 1rem bottom at every width
- *   every column           : the widget-wrap's flat 10px gutter (our .ec padding)
- *   widget bottom margins  : 2rem (logo image adds another 1rem >=768)
- *   heading (Links/GIT)    : 3rem @>=1025 | 2rem @768-1024 | 1.8rem @mobile, 1.2em
- *   Links items            : line-height 20px flat, no padding, 1rem apart
- *   contact items          : 1.8rem @>=768 / 1.6rem @mobile, 1.2em, 1.5rem/1rem apart
- *   social icons           : 3rem @>=768 / 2.8rem @mobile, 20px apart, rows 2rem
- *   copyright lines        : 1.4rem then 1.6rem/600, both 1.2em, 2rem apart
- *
- * Totals it reproduces: 332.94px @1440 and 654.67px @390 (live: 332.94 / 654.67).
- */
+// Inner footer: d439f43 (logo/contact, links, get in touch) + 6466cfa (copyright), #FDECE7 / #37745F.
+// d439f43 padding 4rem/3rem, 3rem/1rem at 768-1024, 1rem/0 mobile; 6466cfa 0/1rem.
 /* live: the footer H4s measure font-weight 600 (not the kit's h4 default of 700).
    The 2rem bottom margin is the heading widget's own, at every width. */
 const headingClass =
   "mb-[2rem] text-[1.8rem] leading-[1.2em] font-semibold md:text-[2rem] lg:text-[3rem]";
 const itemClass =
   "flex items-start text-[1.6rem] leading-[1.2em] md:text-[1.8rem]";
-/* live .elementor-icon-list-icon: a 1.25em-wide, 1em-tall box holding a 1em
-   glyph, then a flat 5px before the label; the box is nudged 0.1em down so the
-   glyph centres on the first 1.2em line. */
+// icon box 1.25em x 1em, 5px before the label, nudged 0.1em down
 const iconClass =
   "mt-[0.1em] ml-[0.125em] mr-[calc(0.125em+5px)] h-[1em] w-[1em] shrink-0";
 
@@ -47,14 +24,7 @@ export default function InnerFooter({
 }) {
   return (
     <footer className="text-herogreen bg-[#FDECE7] pt-[1rem] pb-[1rem] md:pt-[3rem] lg:pt-[4rem]">
-      {/* live's box model puts the 10px gutter on each column's widget-wrap and
-          leaves `.elementor-container` unpadded, so the thirds divide the full
-          container width. `.ec` folds both together, which double-counts the
-          gutter once the row splits into columns — drop its horizontal padding
-          from 768 up, where the columns supply their own (probe @1440: column 2
-          x=565.0 w=310.02 live, 568.3/303.3 before, 564.98/310.03 after).
-          `.ec` is an unlayered rule in globals.css, so it beats a plain
-          `md:px-0` utility — the trailing `!` is required. */}
+      {/* columns carry their own 10px gutter from 768 up, so drop .ec's; `!` beats the unlayered .ec rule */}
       <div className="ec flex flex-wrap md:px-0!">
         {/* logo + contact */}
         <div className="w-full text-center md:w-1/3 md:px-[10px] md:text-start">
@@ -72,9 +42,7 @@ export default function InnerFooter({
               <PhoneIcon className={iconClass} />
               <span>{innerSite.footerPhone}</span>
             </li>
-            {/* Client instruction 2026-08-22: the office address is no longer
-                shown in the footer, phone and email only. This is a deliberate
-                divergence from the live site, which does render it here. */}
+            {/* client instruction 2026-08-22: no office address in the footer */}
             <li className={`${itemClass} justify-center md:justify-start`}>
               <EnvelopeIcon className={iconClass} />
               {/* live renders the email as plain text — no mailto anchor */}
@@ -133,9 +101,7 @@ export default function InnerFooter({
         </div>
       </div>
 
-      {/* copyright — live renders both lines as headings, so they are 1.2em; the
-          `!` defeats globals.css's unlayered `p { line-height: 1.5 }`, which
-          otherwise beats any layered leading-* utility. */}
+      {/* both lines are headings on live (1.2em); `!` beats globals.css's unlayered p rule */}
       <div className="ec text-center md:mt-[1rem] lg:mt-[3rem]">
         <p className="mb-[2rem] text-[1.4rem] leading-[1.2em]!">
           {innerSite.copyright}

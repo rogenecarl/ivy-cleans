@@ -1,6 +1,4 @@
-// Verbatim from docs/superpowers/reference/ivycleans-live/
-// post-how-to-clean-cabinets-before-painting.html (elementor-page-952, the shared blog-post template).
-// Copy, typos and trailing \u00a0 are the live page's own; do not tidy them.
+// Verbatim from docs/superpowers/reference/ivycleans-live/post-how-to-clean-cabinets-before-painting.html; typos and trailing \u00a0 kept.
 import type { PostArticleData } from "./types";
 
 export const post: PostArticleData = {
@@ -14,9 +12,7 @@ export const post: PostArticleData = {
   info: { author: "aj", date: "September 9, 2023", time: "2:08 am", commentCount: "No Comments" },
   authorBox: { name: "aj", avatar: "/images/avatar-aj.jpg", href: "https://ivycleans.com/author/aj/" },
   blocks: [
-    // figure 1 is a dead lh5.googleusercontent.com hotlink:
-    // live serves it too, but it 404s there (probed naturalWidth 0), so the live
-    // page shows a broken-image box. Omitted rather than mirrored broken.
+    // figure 1 is a dead googleusercontent hotlink (404 on live too); omitted
     { type: "p", text: ["Cleaning cabinets before painting is an essential step in achieving a professional and long-lasting finish. Properly cleaning the cabinets ensures that the paint adheres properly, removes dirt and grease build-up, and creates a smooth surface for the paint application.\u00a0"] },
     { type: "h2", text: [{ b: ["Cleaning Ensures Proper Adhesion"] }] },
     { type: "p", text: ["Cleaning cabinets helps to remove any dirt, dust, or debris that may have accumulated over time. This is ", { a: ["important as it ensures a clean"], href: "https://ivycleans.com/the-importance-of-professional-home-cleaning-services-benefits-and-advantages/" }, " surface for the paint to adhere to."] },

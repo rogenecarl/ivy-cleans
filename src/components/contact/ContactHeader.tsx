@@ -1,29 +1,7 @@
 import type { ContactData } from "@/data/contact";
 
-/*
- * contact.html splits contactHeader's four fields across two different
- * spots in the DOM, even though the data brief bundles them as one object:
- *   - "banner" variant: the page's first top-level section (#e3d54f1, #EEF7F4
- *     band). Holds the eyebrow #cf79f67 ("GET IN TOUCH WITH OUR TEAM",
- *     1.6rem/600 uppercase #BF360C/rust, widget-container margin 0 0 -0.5rem
- *     0) and h2 #3567bdd ("Contact Us", 3.6rem/600 desktop -> 2.8rem <=1024
- *     -> 2.5rem <=767, color #37745F/herogreen). Net gap eyebrow->h2 is
- *     Elementor's 2rem widget spacing minus the eyebrow's -0.5rem margin =
- *     1.5rem (same fold as /blog's BLOGS/H2 pair).
- *   - "form" variant: the lead-in copy that sits directly above the form,
- *     inside the second section's left column (#2e9a1fb) — h2 #918eedb
- *     ("We would love to hear from you!", 2.4rem/600 desktop -> 2.2rem
- *     <=1024, no further 767 override, color #37745F) and paragraph
- *     #0940d0f (1.6rem, color #37745F). Its widget-container margin
- *     0 0 -2rem 0 cancels the *inner* <p>'s own 2rem bottom margin, not the
- *     widget gap: the live DOM probe measures the rendered copy block ending
- *     at y=385.9 and the form starting at y=402.6 at 1440 — a 2rem (16.64px)
- *     gap — so this clone spends that gap as `mb-[2rem]` on the paragraph
- *     itself. No widget-container override on #918eedb itself, so the
- *     default 2rem gap stands between it and the paragraph.
- * Both variants live in this one component (per the task brief's data
- * shape) and are placed by the page where post-34.css puts them.
- */
+// contact.html: "banner" = section e3d54f1 (eyebrow cf79f67, h2 3567bdd); "form" = column 2e9a1fb lead-in (h2 918eedb, p 0940d0f).
+// post-34.css margins folded into mb-[1.5rem] / mb-[2rem].
 export default function ContactHeader({
   variant,
   contactHeader,

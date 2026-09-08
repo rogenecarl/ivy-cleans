@@ -1,19 +1,12 @@
 import type { ContactData } from "@/data/contact";
 
-/*
- * contact.html's google_maps widget (#8472915): iframe copied verbatim
- * (src/title/aria-label all "ivy cleans", loading="lazy" on the live
- * markup). post-34.css sets a fixed height:400px on this widget's iframe
- * (the only rule scoped to #8472915).
- */
+// contact.html #8472915: iframe verbatim, post-34.css height 400px
 export default function ContactMap({
   contactMap,
 }: {
   contactMap: ContactData["contactMap"];
 }) {
-  // contactMap.src is city-sourced (CityContent.maps.contact ?? ""); an
-  // empty string omits the iframe entirely rather than rendering a broken
-  // embed. Minneapolis's value is always non-empty, so bytes are unchanged.
+  // empty src omits the iframe
   if (contactMap.src === "") return null;
   return (
     <iframe

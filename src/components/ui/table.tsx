@@ -72,10 +72,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        /* px-6 py-3 and small uppercase labels, matching peaktransport's admin
-         * tables. shadcn's default (h-10 px-2, foreground-coloured, same size
-         * as the data) crowds the columns and gives the header the same
-         * visual weight as the rows it labels. */
+        /* px-6 py-3, small uppercase labels — peaktransport's admin tables */
         "px-6 py-3 text-left align-middle text-xs font-medium tracking-wider whitespace-nowrap text-muted-foreground uppercase [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
@@ -89,9 +86,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        /* px-6 py-3.5, matching peaktransport. shadcn's p-2 is 8px on every
-         * side, which reads as cramped once a row carries an avatar and two
-         * lines of text. */
+        /* px-6 py-3.5, matching peaktransport */
         "px-6 py-3.5 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}

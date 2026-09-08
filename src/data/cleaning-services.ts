@@ -9,11 +9,7 @@ export const tiers = ["Basic", "Deep", "Moving"] as const;
 export type ChecklistItem = { label: string; basic: boolean; deep: boolean; moving: boolean };
 export type Room = { name: string; items: ChecklistItem[] };
 
-// Extracted from docs/superpowers/reference/ivycleans-live/cleaning-services.html
-// via a scratch script that walked each room's package3 rows and read the
-// check-circle (text-success-500, included) vs x-circle (text-gray-300,
-// excluded) SVG per Basic/Deep/Moving cell. See task-6-report.md for the
-// full matrix used to spot-check this data against the source HTML.
+// Extracted from cleaning-services.html: check-circle = included, x-circle = excluded, per Basic/Deep/Moving cell
 export const rooms: Room[] = [
   {
     name: "Living Rooms / Bedrooms / Hallways",

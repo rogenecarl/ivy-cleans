@@ -5,54 +5,14 @@ import Image from "next/image";
 import { ChevronRightIcon } from "@/components/Icons";
 import type { MarketPhoto } from "@/content/types";
 
-/*
- * Two live sections: 5d80ea1 holds only the heading (zero padding, the usual
- * 1rem heading-container margin at >=768), then 6153513 holds the carousel.
- * post-8.css pins that one down exactly:
- *   .elementor-element-6153513 > .elementor-container{max-width:1205px;
- *                                                     min-height:395px}
- * Both are flat px, so the section is 395px tall at every one of the seven
- * probed widths and the container is 1205px wide from 1280 up, then simply the
- * viewport (1024 / 768 / 390). The column is vertically centred inside the
- * 395px (live: 22.62px of slack above the slides at 1440, 45 at 1024, 31.75 at
- * 390 — always half the leftover).
- *
- * Widget 741355c data-settings: slides_to_show 3, slides_to_scroll 3,
- * infinite yes, autoplay yes @5000ms, pause_on_hover yes, pause_on_interaction
- * yes, navigation "both" (arrows + dots), speed 500, arrows position inside.
- * Elementor feeds swiper `breakpoints[767] = tablet` and
- * `breakpoints[1024] = desktop` over a mobile base, which is exactly what the
- * live probe shows: 1-up below 767, 2-up at 768 (slides 374 of 748), 3-up from
- * 1024 up (334.66 of 1004 at 1024, 395 of 1185 at >=1280). Note 1024 is
- * already 3-up — the carousel's desktop threshold is *not* the site's 1025.
- */
+// post-8.css: heading 5d80ea1, carousel 6153513 (max 1205px, min-height 395px).
+// swiper 741355c: 3-up from 1024, 2-up from 767, 1-up below; autoplay 5s, pauses on hover/interaction.
 const MAX_PER_VIEW = 3;
 
-/*
- * Window math — why no nav state can ever show a blank pane.
- *
- * slides_to_scroll === slides_to_show, so the carousel moves a *page* at a
- * time: page p shows slides p*perView … p*perView+perView-1 and there are
- * pageCount = ceil(TOTAL / perView) pages. Because the loop is infinite the
- * final page wraps back into the head of the list, exactly like swiper's
- * cloned slides:
- *   perView 3 -> 2 pages: [0,1,2] [3,4,0]
- *   perView 2 -> 3 pages: [0,1]   [2,3]   [4,0]
- *   perView 1 -> 5 pages: [0] [1] [2] [3] [4]
- * We render those clones literally: RENDERED items where item i is
- * workImages[i % TOTAL]. The last page needs index pageCount*perView-1, and
- * ceil(TOTAL/pv)*pv <= TOTAL + pv - 1, so TOTAL + MAX_PER_VIEW - 1 items are
- * always enough for every perView — the window is never short, at any width.
- *
- * The track is width:100% of the viewport box; its children overflow it
- * (shrink-0 at 1/perView each), so a translateX percentage resolves against
- * the *container* width. One page is exactly perView * (100/perView)% = 100%,
- * which is why the transform is -page*100% for every breakpoint.
- */
+// Moves a page at a time; the last page wraps into the head like swiper's clones,
+// so TOTAL + MAX_PER_VIEW - 1 rendered items fill every page at every width.
 
-/* the slide widths below are plain CSS, but the page size (and therefore the
-   dot count and the wrap point) has to be known in JS, so read the same two
-   swiper breakpoints from matchMedia */
+// the page size has to be known in JS for the dots and the wrap point
 const QUERIES = ["(min-width: 1024px)", "(min-width: 767px)"];
 
 function subscribePerView(onChange: () => void) {
@@ -71,16 +31,7 @@ function readPerView(): number {
    perView, so the first paint is correct at all three widths regardless. */
 const serverPerView = () => MAX_PER_VIEW;
 
-/*
- * The carousel itself (this component's second <section>, everything below)
- * is also reused, unstyled-heading-free, by the suburb pages' "Our Work In
- * Action" gallery (src/components/suburb/WorkInAction.tsx) — that page's own
- * heading uses a completely different treatment (43px flat, no responsive
- * variance, see that file's own citation) so it renders its own heading
- * separately and only needs the carousel/container piece below. Extracted as
- * WorkCarouselGallery so this file's default export (used by /home, heading
- * included) is unchanged byte-for-byte.
- */
+// Also used by the suburb gallery, which renders its own heading.
 export function WorkCarouselGallery({ workImages }: { workImages: readonly MarketPhoto[] }) {
   const TOTAL = workImages.length;
   const RENDERED = TOTAL + MAX_PER_VIEW - 1;
@@ -127,21 +78,7 @@ export function WorkCarouselGallery({ workImages }: { workImages: readonly Marke
     return () => window.clearTimeout(id);
   }, [autoplay, hovered, page, pageCount]);
 
-  /*
-   * A city with no photos of its own renders no gallery at all.
-   *
-   * The alternative was to keep the five Minneapolis photos as a fallback, and
-   * that is exactly the fingerprint this change removes: the same basement,
-   * the same oven, the same bathtub on 100 domains is a network signal, and
-   * the photos are of jobs that city never did. Nothing is better than
-   * somebody else's before-and-afters.
-   *
-   * It has to sit BELOW the hooks, not above them — an early return before
-   * useSyncExternalStore/useState/useEffect would change the hook count
-   * between a city with photos and one without. Everything above tolerates
-   * TOTAL === 0 (pageCount 0 stops the autoplay effect at its own guard); it
-   * is only the render that would divide by it.
-   */
+  // below the hooks on purpose: an early return would change the hook count
   if (TOTAL === 0) return null;
 
   return (
@@ -223,9 +160,7 @@ export function WorkCarouselGallery({ workImages }: { workImages: readonly Marke
   );
 }
 
-/* Default export unchanged: the heading section (verbatim, byte-identical to
-   before this file's carousel body was extracted above) plus the extracted
-   gallery. Used by /home only. */
+// /home: heading + gallery
 export default function WorkCarousel({ workImages }: { workImages: readonly MarketPhoto[] }) {
   if (workImages.length === 0) return null;
   return (

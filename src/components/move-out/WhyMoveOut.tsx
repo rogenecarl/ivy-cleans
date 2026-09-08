@@ -2,27 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { MoveOutData } from "@/data/move-out";
 
-/*
- * Section ebf286a (post-241.css): bg #F9FFFD, padding 6/3/2rem. Heading
- * (2977147) centered black, 4.5/4/2.8rem — bottom margin 1rem desktop,
- * 0 tablet, -1rem mobile. Two alternating image/text rows, matching the live
- * DOM exactly:
- *   - Row 1 (inner section d25e9c0): out-img1.jpg (column 5828e94, left,
- *     47.674% at >=768px) + paragraphs 41-42 (column 51cf507/widget
- *     63c8400, right, 52.326%, padding 1rem all round, vertically centred).
- *     The image widget (357c257) carries margin 0 2rem 0 -12rem above
- *     1280px, so the photo bleeds left of the container.
- *   - Row 2 (inner section c34f37e, elementor-reverse-mobile): paragraphs
- *     43-44 (column 10e25f6/widget a96318f, left at >=768px, padding 1rem)
- *     + out-img2.jpg (column d42746d/widget 71fc621, right, 47.674%, margin
- *     0 -12rem 0 2rem above 1280px) — "reverse-mobile" puts the image above
- *     the text on mobile, reproduced here via order-1/order-2.
- * The CTA button (608ce98) is a sibling of the two inner sections (a direct
- * child of column f95a6f3), so it centres across the whole container rather
- * than within the right column — the live page's third "Set an
- * appointment 👈" → /book body CTA — with a top margin of 5rem desktop /
- * 3rem tablet / 0 mobile.
- */
+// post-241.css ebf286a: #F9FFFD, padding 6/3/2rem; heading 2977147 mb 1rem / 0 / -1rem.
+// Row 1 d25e9c0: out-img1.jpg (5828e94, 47.674%, bleeds -12rem left above 1280) + text 51cf507/63c8400 52.326%.
+// Row 2 c34f37e reverse-mobile: text 10e25f6/a96318f + out-img2.jpg (d42746d/71fc621, bleeds right). Button 608ce98 mt 5/3/0rem.
 export default function WhyMoveOut({
   whyMoveOut,
   bookHref,

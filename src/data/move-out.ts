@@ -1,13 +1,5 @@
-// Verbatim copy from docs/superpowers/reference/ivycleans-live/move-out-content-dump.txt
-// (lines 32-93) and move-out.html (meta description, elementor-241). "IVYCleans"
-// casing, curly apostrophes (client’s, that’s, don’t, etc.), and lowercase
-// sentence starts ("we understand...", "our expertise...") are preserved exactly
-// as on the live site.
-//
-// CITY-class copy: whole paragraphs are the live site's copy verbatim, with
-// only the {city}/{state} tokens inserted where "Minneapolis"/"MN" appeared.
-// Strings without a city mention are intentionally left un-wrapped literals.
-// Entire page is STATIC+CITY per the content contract — no AI slots here.
+// Verbatim from move-out-content-dump.txt (lines 32-93) and move-out.html; casing and curly apostrophes kept.
+// {city}/{state} tokens where Minneapolis/MN appeared; no generated slots on this page.
 
 import type { CityContent } from '../content/types'
 import { t } from '../content/interpolate'

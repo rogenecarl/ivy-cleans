@@ -1,12 +1,4 @@
-/*
- * Live splits this into two top-level sections, and the split is load-bearing:
- * 2fad378 holds only the heading (padding 4rem 0 0 at every breakpoint, widget
- * 0935ef1 with a 1rem container margin at >=768 and 0 below), then b092bd1
- * holds only the body f34e879 with zero section padding. Because each section
- * carries its own widget-wrap gutter, the heading and the copy are 10+10px
- * further apart than a single section would put them.
- * Heading is 4.5/4/2.8rem; the body is 2/1.9/1.7rem at weight 300.
- */
+// two live sections: 2fad378 heading (padding 4rem 0 0) and b092bd1 body, kept separate for the 10+10px gutters
 export default function Principles({ principles }: { principles: string[] }) {
   return (
     <>

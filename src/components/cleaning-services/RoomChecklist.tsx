@@ -36,11 +36,7 @@ function XIcon() {
   );
 }
 
-/* post-30.css custom CSS: `.package2` (the room header rows) and `.package3`
-   (the item rows) carry left/right 1px rgb(134,198,176) borders, `.package3`
-   also a 1px #e5e7eb rule underneath, and the single `.last-package` row
-   closes the table with a green bottom border, 4px radius and a shadow.
-   Columns stay 40/20/20/20 down to 390px — the table never stacks. */
+// post-30.css: .package2/.package3 side borders rgb(134,198,176), .package3 1px #e5e7eb rule, .last-package closes the table
 const SIDE_BORDER = "border-r border-l border-[rgb(134,198,176)]";
 
 export default function RoomChecklist({ room, last = false }: { room: Room; last?: boolean }) {
@@ -72,9 +68,7 @@ export default function RoomChecklist({ room, last = false }: { room: Room; last
               }`}
             >
               <div className="w-[40%] p-[1.2rem_1.6rem]">
-                {/* globals.css' unlayered `p { line-height: 1.5 }` outranks
-                    Tailwind's leading-* utilities, so the live 1.2em (label
-                    measures h=58 for 3 lines @390) has to be set inline. */}
+                {/* inline: globals.css's unlayered p rule beats leading-* */}
                 <p
                   className="text-herogreen text-[1.6rem] font-normal"
                   style={{ lineHeight: "1.2em" }}

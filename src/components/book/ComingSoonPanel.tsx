@@ -1,20 +1,6 @@
 import type { BookData } from "@/data/book";
 
-/*
- * Shown by BookingForm in place of the field list after submit.
- *
- * Two states. `success` is the normal path. `error` is shown ONLY when the
- * lead did not survive: a storage failure or a rate-limit rejection. A failed
- * notification email is NOT an error here, because the lead is saved either
- * way.
- *
- * The error state says SOMETHING WENT WRONG (comingSoon.errorHeading, the
- * same words src/data/contact.ts uses) and then gives the phone and email.
- * It used to render `comingSoon.heading` — "Online booking is coming soon!" —
- * which told a customer whose submission had just been lost that the feature
- * they had spent ten fields on does not exist yet, and gave them no reason to
- * pick up the phone.
- */
+// Shown after submit. `error` only when the lead was not saved (storage failure or rate limit); a failed email is not an error.
 export default function SubmitResultPanel({
   comingSoon,
   state,

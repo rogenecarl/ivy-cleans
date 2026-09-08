@@ -1,32 +1,8 @@
 import Image from "next/image";
 import type { SuburbData } from "@/data/suburb";
 
-/*
- * Section 618aca1e (post-664.css): padding pt-0 pb-[2rem] md:py-[3rem]
- * lg:py-[6rem] — byte-identical to WhatIs.tsx's own section padding. Row
- * (no dedicated CSS id beyond the default 10px column gutter) is the same
- * -m-[10px] flex-wrap pattern WhatIs.tsx uses. Columns 4973a706/55e99051
- * measure 55.266%/44.697% at >=1025 and 50/50 at 768-1024 — identical
- * percentages to WhatIs.tsx's own two-column split. Image widget (5fc0950e)
- * carries margin-left -6.5rem above 1280px (0 below), same as WhatIs.tsx's
- * de9c0ac; the image itself (deep-img1.jpg, 770x555) is the SAME file
- * WhatIs.tsx renders — not per-suburb content, hardcoded here as it is there.
- * Text column (55e99051) carries margin-left 4rem above 1024px, same as
- * WhatIs.tsx. Heading (b436479) left-aligned 4.5/4/2.8rem. Its own per-id
- * widget-container override is mb-0/lg:mb-[1rem] (NOT WhatIs.tsx's 3rem),
- * but — task-3 fidelity pass finding, see OtherServices.tsx for the full
- * citation — that alone undercounts the live gap by post-6.css's kit-wide
- * `.elementor-widget:not(:last-child){margin-block-end:2rem}` rule.
- * Rendered as flat `mb-[2rem] lg:mb-[3rem]` (kit-2rem alone below lg;
- * kit-2rem + this widget's own 1rem at lg+), confirmed against a live probe
- * at every width. Paragraph (5a58344c) left-aligned font-light 2/1.9/1.7rem,
- * wrapper mb-[-2rem] lg:mb-0 (same sign convention WhatIs.tsx uses) — left
- * UNCHANGED, deliberately: unlike the heading above, this wrapper IS the
- * last widget in its column's wrap (nothing follows it), so post-6.css's
- * `:not(:last-child)` kit-floor rule does not apply to it at all (confirmed
- * live: no shortfall found here, contrast Benefits.tsx's analogous wrapper,
- * which DOES need the fix because it has a following sibling).
- */
+// post-664.css 618aca1e: same section, columns (4973a706/55e99051 55.266%/44.697%) and deep-img1.jpg bleed as WhatIs.tsx.
+// Heading b436479 mb 2rem/3rem (kit 2rem + own 1rem at lg); paragraph 5a58344c is the column's last widget, no kit floor.
 export default function HouseCleaning({
   houseCleaning,
 }: {

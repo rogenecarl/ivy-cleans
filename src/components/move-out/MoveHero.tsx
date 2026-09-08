@@ -1,20 +1,8 @@
 import Link from "next/link";
 import type { MoveOutData } from "@/data/move-out";
 
-/*
- * Section 8e7126c (post-241.css): out-bg1.jpg (top center / no-repeat /
- * cover) with padding 6/3/2rem on top and zero bottom padding at every
- * breakpoint. h1 (72b9aa8) is centered, uppercase, herogreen, 7.2/4/3rem,
- * with a -2rem widget margin at mobile only. First paragraph (52f5c93) is
- * centered, max-w 120rem, 2/1.9/1.7rem font-light; CTA (d3dbf9e) sits
- * directly below it with a 3rem top margin (0 at mobile).
- *
- * The remaining four paragraphs live in inner section 9683b22 — a WHITE
- * card pushed down 28rem (7rem tablet / 1rem mobile) so the kitchen art
- * shows through above it. Its column (e188474) is padded
- * 6rem 7.4rem / 3rem / 2rem, and the text widget (29455cb) is left-aligned
- * 2/1.9/1.7rem font-light.
- */
+// post-241.css 8e7126c: out-bg1.jpg, padding 6/3/2rem top. h1 72b9aa8 7.2/4/3rem; paragraph 52f5c93 max-w 120rem; CTA d3dbf9e 3rem top.
+// Inner 9683b22: white card pushed down 28rem/7rem/1rem, column e188474 padded 6rem 7.4rem / 3rem / 2rem.
 export default function MoveHero({
   moveHero,
   bookHref,
@@ -24,10 +12,7 @@ export default function MoveHero({
   bookHref: string;
 }) {
   const [first, ...rest] = moveHero.paragraphs;
-  /*
-   * live markup: `Minneapolis Move Out <br> Cleaning Services`. The theme
-   * hides every <br> below 768px, hence max-md:hidden.
-   */
+  // live: `Minneapolis Move Out <br> Cleaning Services`, <br> hidden below 768
   const h1Words = moveHero.h1.split(" ");
   return (
     <section className="bg-[url(/images/out-bg1.jpg)] bg-top bg-cover bg-no-repeat pt-[2rem] pb-0 md:pt-[3rem] lg:pt-[6rem]">

@@ -3,39 +3,9 @@ import Link from "next/link";
 import { CheckItemIcon } from "@/components/Icons";
 import type { ServiceContent } from "@/data/service-types";
 
-/*
- * Section b30eca6 ("deep-sec03"): deep-bg2.jpg background declared with no
- * position/size/repeat overrides, so it keeps the CSS defaults (0 0 / auto /
- * repeat). Padding 6/3/2rem. Heading (c019ab6) centered 4.5/4/2.8rem with a
- * 1rem bottom margin at desktop only; intro paragraphs (648bcac)
- * left-aligned 2/1.9/1.7rem font-light. NOTE: the live text-editor widget
- * also contains an injected Vavada Casino / beadspinnerstore.com spam
- * paragraph between the two real paragraphs and the list intro —
- * deliberately excluded here, so this section is ~1 paragraph shorter than
- * live.
- *
- * Inner section 878b0c4 (margin-bottom 4rem, 2rem at mobile) splits 50/50:
- * column 77a4832 (padding-right 1rem; padding-bottom 1rem at mobile) carries
- * the listIntro (045ef5e) + icon-list 43f5286; column b086ade
- * (padding-left 1rem; padding-top 1rem at mobile) carries the deep-bg4.jpg
- * image. Neither column overrides align-items, so both sit at the top.
- *
- * Icon list 43f5286: text 2/1.9/1.7rem font-light black, line-height 1.4em;
- * icon 2/1.9/1.7rem in #5A8E00 inside a 1.25em-wide box (icon size + the
- * 0.25em --e-icon-list-icon-margin, measured 20.8px at 1440), no extra icon
- * padding; items separated by 1.5rem (0.75rem padding-bottom + 0.75rem
- * margin-top); --icon-vertical-offset 1px.
- *
- * Spacing model throughout both pages: every non-last Elementor widget adds
- * a 2rem bottom margin (width-initial widgets excepted), each text-editor
- * <p> adds its own 2rem, and the per-widget widget-container margins from
- * the page CSS stack on top. The wrappers below are flow-root so those
- * paragraph margins do not collapse out, exactly as they cannot on the live
- * page (widgets are flex items of .elementor-widget-wrap).
- *
- * Outro (11ebcf1) matches the intro paragraph style; button (216a703) is
- * centered with a 1rem top margin at desktop only.
- */
+// b30eca6: deep-bg2.jpg (CSS defaults), padding 6/3/2rem. Heading c019ab6; intro 648bcac (live also carries an injected spam paragraph, excluded).
+// Inner 878b0c4 50/50: listIntro 045ef5e + list 43f5286 (2/1.9/1.7rem, #5A8E00 icons in a 1.25em box, 1.5rem apart) | deep-bg4.jpg.
+// Wrappers are flow-root so paragraph margins don't collapse, as on live. Outro 11ebcf1; button 216a703 1rem top on desktop.
 export default function Benefits({
   benefits,
   benefitsBgImage,

@@ -1,38 +1,14 @@
 import Image from "next/image";
 import type { ServiceContent } from "@/data/service-types";
 
-/*
- * Section a759e86: padding 6rem 0 (3rem <=1024, 0/2rem <=767). This is a
- * TOP-LEVEL two-column row, so the column percentages are taken from the
- * elementor container (119rem = the .ec border box), not from .ec's content
- * box — hence the -mx-[10px] row and the px-[10px] "populated" wrappers,
- * which reproduce Elementor's default 10px column gutter exactly.
- * Columns measure 55.266%/44.697% at >=1024 (50/50 at 768-1024, stacked
- * below). The image widget (de9c0ac) carries margin-left -6.5rem above
- * 1280px, so the photo bleeds left of the container; the text column's
- * populated wrap (f1cdaa6) carries margin-left 4rem above 1024px.
- * Heading (4ce0b2c) left-aligned, 4.5/4/2.8rem, 1rem bottom margin at
- * desktop only; paragraph (c9c902e) left-aligned, 2/1.9/1.7rem font-light.
- */
+// a759e86: padding 6rem/3rem/2rem; columns 55.266%/44.697% from 1024; image de9c0ac bleeds -6.5rem left above 1280;
+// text wrap f1cdaa6 4rem left above 1024. Heading 4ce0b2c 4.5/4/2.8rem, paragraph c9c902e 2/1.9/1.7rem.
 export default function WhatIs({
   whatIs,
 }: {
   whatIs: ServiceContent["whatIs"];
 }) {
-  /*
-   * The live heading markup is `What is Deep <br> House Cleaning?` — a hard
-   * break after the third word. Without it the line fits ("What is Deep
-   * House" measures 380px against a 389px column) and the heading wraps one
-   * word later than live, so the break is reproduced here rather than in the
-   * data string, which stays byte-verbatim. The live theme hides every <br>
-   * below 768px, so the break is suppressed at mobile and the heading wraps
-   * naturally there.
-   *
-   * The word count is data-driven (whatIs.h2BreakAfter) because 3 is a
-   * measurement of that ONE string: the other headings are longer and would
-   * break inside a proper noun or leave a line opening on a dangling "&".
-   * Deep cleaning supplies no value, so it keeps the live break at 3.
-   */
+  // live breaks the heading with a <br> after word N (whatIs.h2BreakAfter), hidden below 768 like the theme
   const breakAfter = whatIs.h2BreakAfter ?? 3;
   const h2Words = whatIs.h2.split(" ");
   return (
@@ -62,19 +38,7 @@ export default function WhatIs({
                 <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
                   {whatIs.text}
                 </p>
-                {/*
-                  * The one per-city paragraph on a service page: what these
-                  * homes, this climate or these habits change about the job
-                  * (content-strategy C). Same <p> as the canonical text above
-                  * rather than a section of its own -- the surrounding layout
-                  * is traced byte-for-byte to the live Elementor design, and
-                  * a new section would mean deriving spacing that has no
-                  * reference to derive it from.
-                  *
-                  * Rendered only when present. A city that never ran the
-                  * service stage -- Minneapolis, which is live -- renders
-                  * exactly what it renders today, with no empty <p>.
-                  */}
+                {/* the one per-city paragraph on a service page; same <p>, omitted when absent */}
                 {whatIs.local && (
                   <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
                     {whatIs.local}

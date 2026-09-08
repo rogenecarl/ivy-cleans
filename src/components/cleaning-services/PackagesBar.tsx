@@ -2,17 +2,8 @@ import Link from "next/link";
 import type { SiteData } from "@/data/site";
 import { tiers } from "@/data/cleaning-services";
 
-/*
- * The `.package` section: its container carries the table's top border and
- * 4px top radius (post-30.css "Start custom CSS"). Columns are 40/20/20/20 at
- * every width — the table never stacks — but below 768 live renders only the
- * "Packages" cell: the three tier columns and their Book Now buttons are
- * hidden, leaving a 55px-tall strip (measured @390).
- *
- * `.ec`'s 10px padding is deliberately not used here: live's table spans the
- * container edge to edge (x=225..1215 @1440, x=10..380 @390), so the wrapper
- * is the bare 119rem container and only the section keeps its 1rem gutter.
- */
+// .package: table top border + 4px radius; columns 40/20/20/20; below 768 only the Packages cell shows.
+// Bare 119rem container without .ec padding: live spans edge to edge.
 export default function PackagesBar({
   innerSite,
 }: {

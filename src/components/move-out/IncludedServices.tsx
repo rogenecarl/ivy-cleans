@@ -1,18 +1,8 @@
 import { CheckItemIcon } from "@/components/Icons";
 import type { MoveOutData } from "@/data/move-out";
 
-/*
- * Section 86d3a37 (post-241.css): out-bg2.jpg (no-repeat / cover),
- * positioned top center above 767px and top right at mobile. Padding
- * 6rem/9rem (desktop top/bottom), 3rem/3rem tablet, 2rem/2rem mobile.
- * Heading (ebc9f75) centered black, 4.5/4/2.8rem, 2rem bottom margin at
- * desktop only. The column (c71099b) sets justify-content:flex-end on its
- * widget-wrap, so the 50%-wide checklist (54c1f4f, 65% tablet / 100%
- * mobile) is pushed to the RIGHT of the container, leaving the art visible
- * on the left. Items 2/1.9/1.7rem font-light black at line-height 1.4em,
- * icon color #4D9682 with a 0.5rem icon padding (rather than the 8px
- * default), 2.5rem between items and --icon-vertical-offset 4px.
- */
+// post-241.css 86d3a37: out-bg2.jpg (top right on mobile), padding 6rem/9rem, 3rem, 2rem. Heading ebc9f75.
+// Column c71099b justify-content flex-end: checklist 54c1f4f (50% / 65% / 100%) sits right. Icons #4D9682, 0.5rem padding, items 2.5rem apart.
 export default function IncludedServices({
   included,
 }: {

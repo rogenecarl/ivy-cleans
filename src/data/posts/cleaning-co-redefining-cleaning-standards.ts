@@ -1,6 +1,4 @@
-// Verbatim from docs/superpowers/reference/ivycleans-live/
-// post-cleaning-co-redefining-cleaning-standards.html (elementor-page-952, the shared blog-post template).
-// Copy, typos and trailing \u00a0 are the live page's own; do not tidy them.
+// Verbatim from docs/superpowers/reference/ivycleans-live/post-cleaning-co-redefining-cleaning-standards.html; typos and trailing \u00a0 kept.
 import type { PostArticleData } from "./types";
 
 export const post: PostArticleData = {

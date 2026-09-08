@@ -3,23 +3,8 @@ import Link from "next/link";
 import type { SiteData } from "@/data/site";
 import { TileIcon } from "./Icons";
 
-/*
- * Live template post-2338: one boxed section with three real elementor columns
- * whose widths are percentages of the 132rem container — not the justify-between
- * flex row this used to be, which put the phone/email/CTA a few px off at 1440
- * and ~130px off at 1920:
- *
- *   f38703e (logo)     15% | 16% <=1280 | 17% 768-1024 | 100% <=767
- *   5ac9804 (contact)  61.014% | 45% 768-1024 | 100% <=767
- *                      (widget-wrap justify-content:center, align-items:center)
- *   f4e0a01 (CTA)      23.65% | 24% <=1280 | 38% 768-1024 | 100% <=767
- *
- * Each column carries elementor's own 10px widget-wrap padding, so the section
- * container itself gets none (hence max-w-[132rem] here rather than `.ec`).
- * Live probe @1920 confirms both derivations: the contact group's centre lands
- * on the column centre (900.69 vs 900.70) and the CTA anchor's right edge on the
- * column's 10px content edge (1605.5 vs 1605.6).
- */
+// post-2338: three columns of the 132rem container — logo f38703e 15%/16%/17%/100%, contact 5ac9804 61.014%/45%/100%,
+// CTA f4e0a01 23.65%/24%/38%/100%; each carries its own 10px gutter.
 export default function TopBar({
   site,
   homeHref,
@@ -30,9 +15,7 @@ export default function TopBar({
 }) {
   return (
     <div className="bg-white">
-      {/* the columns are elementor flex items: at 1025-1280 they sum to 101.014%
-          and *shrink* to fit rather than wrap (live @1280 keeps one row), so the
-          wrapping is mobile-only */}
+      {/* columns shrink to fit at 1025-1280; wrapping is mobile-only */}
       <div className="mx-auto flex max-w-[132rem] flex-wrap items-center md:flex-nowrap">
         {/* 889f16a: img max-width 16.5rem, 10rem at <=1024 (live: 165 @1920,
             137.27 @1440, 100 @1024); text-align start, centred at <=767 */}
@@ -50,9 +33,7 @@ export default function TopBar({
           </Link>
         </div>
         <div className="flex w-full flex-wrap items-center justify-between px-[10px] md:w-[45%] md:justify-center md:py-[10px] lg:w-[61.014%]">
-          {/* f223d44: widget-container margin 0 3rem 0 0 (desktop) / 0 0 2rem 0
-              (<=1024) / 0 1rem 0 0 (<=767, where the box is 50% wide);
-              icon-box-wrapper gap 15px (a fixed px value, not a rem one) */}
+          {/* f223d44: margin 0 3rem 0 0 / 0 0 2rem 0 / 0 1rem 0 0; icon-box gap 15px */}
           <div className="flex w-1/2 flex-col items-center pr-[1rem] text-center md:mb-[2rem] md:w-auto md:flex-row md:items-start md:gap-[15px] md:pr-0 md:text-left lg:mr-[3rem] lg:mb-0">
             <TileIcon kind="phone" />
             <div className="w-full min-w-0 md:w-auto">
@@ -64,9 +45,7 @@ export default function TopBar({
               </p>
             </div>
           </div>
-          {/* 0d98ab4: same icon-box widget; at <=767 both boxes are 50% wide with
-              a 1rem inner margin (live probe @390: each description box is 175 wide
-              at x=10 and x=205, i.e. 185 - 10) */}
+          {/* 0d98ab4: both boxes 50% wide with a 1rem inner margin at <=767 */}
           <div className="flex w-1/2 flex-col items-center pl-[1rem] text-center md:w-auto md:flex-row md:items-start md:gap-[15px] md:pl-0 md:text-left">
             <TileIcon kind="email" />
             <div className="w-full min-w-0 md:w-auto">

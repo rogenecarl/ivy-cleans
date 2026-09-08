@@ -1,16 +1,5 @@
-// Verbatim copy from docs/superpowers/reference/ivycleans-live/deep-cleaning-content-dump.txt
-// (lines 32-95) and deep-cleaning.html (meta description). Typos and lowercase
-// "cleans" mid-sentence are preserved exactly as on the live site.
-//
-// IMPORTANT: dump lines 42-43 are an injected spam paragraph (Vavada Casino /
-// beadspinnerstore.com / Cyrillic text) that must never be reproduced here.
-// The Benefits `intro` below skips straight from the line-41 paragraph to the
-// line-44 `listIntro`.
-//
-// CITY-class copy: whole paragraphs are the live site's copy verbatim, with
-// only the {city}/{state} tokens inserted where "Minneapolis"/"MN" appeared.
-// Strings without a city mention are intentionally left un-wrapped literals.
-// whatIs.text is this page's one AI-class slot (see below).
+// Verbatim from deep-cleaning-content-dump.txt (lines 32-95) and deep-cleaning.html. Dump lines 42-43 are injected spam — never reproduce.
+// {city}/{state} tokens where Minneapolis/MN appeared; whatIs.local is the one generated slot.
 
 import type { CityContent } from '../content/types'
 import { sOpt, serviceSlots } from '../content/slots'
@@ -41,33 +30,13 @@ export function deepCleaningData(c: CityContent): ServiceContent {
     whatIs: {
       h2: "What is Deep House Cleaning?",
       // AI-class slot — part of the Plan 3 writer-schema contract.
-      /*
-       * STATIC, and byte-verbatim from the live site's deep-cleaning page
-       * (docs/superpowers/reference/ivycleans-live/deep-cleaning-content-dump.txt).
-       *
-       * This was generated per city by a `deep` stage until that stage was
-       * removed. Generating it violated content-strategy.md's own rule for
-       * service pages -- "the explanation of what a deep clean IS should be
-       * the same everywhere; that's the canonical text and duplicating it per
-       * city would cannibalise" -- and the eval measured the consequence: 73
-       * characters shared verbatim between Houston and Miami.
-       *
-       * It also did the local section's job badly. The generated versions
-       * spent their second half on city-specific conditions, which is exactly
-       * what whatIs.local below now carries, capped at two conditions and
-       * forbidden from re-explaining the service.
-       *
-       * Minneapolis's stored deep.whatIs was byte-identical to this, so its
-       * live page renders unchanged.
-       */
+      // static and canonical in every city; the per-city part is whatIs.local
       text: "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.",
       image: "/images/deep-img1.jpg",
       local: sOpt(c, serviceSlots('deep-cleaning')[0]),
     },
 
-    // Right-column background image in the Benefits section (elementor-element-2c321bb,
-    // deep-bg4.jpg). Not part of the `benefits` object per the task-2 interface, kept as
-    // its own export since it's presentational rather than copy.
+    // Benefits right-column image (2c321bb)
     benefitsBgImage: "/images/deep-bg4.jpg",
 
     benefits: {
@@ -107,13 +76,7 @@ export function deepCleaningData(c: CityContent): ServiceContent {
       contact: t("Contact us today to discuss your deep cleaning requirements in {city}.", c),
     },
 
-    /*
-     * Elementor quirk on the live page: the <a href="https://ivycleans.com/how-to-clean-a-bathroom/">
-     * anchor (dump line 67, elementor-element-c1f51fd markup) does NOT wrap the bathroom
-     * list item's text — it wraps the ENTIRE next <li> ("Cleaning and disinfecting of
-     * kitchen appliances, including stoves, ovens, and refrigerators", services.items[3]),
-     * icon included. Reproduced as-is in ServicesList.tsx rather than "corrected."
-     */
+    // live quirk: the bathroom anchor wraps the ENTIRE next <li>; reproduced via servicesLinkedItemIndex
     servicesLinkHref: "https://ivycleans.com/how-to-clean-a-bathroom/",
     servicesLinkedItemIndex: 3,
 

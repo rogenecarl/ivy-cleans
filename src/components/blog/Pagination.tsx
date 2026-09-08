@@ -1,13 +1,5 @@
-/*
- * blog.html's `.elementor-pagination`: page 1 is the current, unlinked
- * `<span aria-current="page">`; pages 2-5 are `<a href="https://ivycleans.com/blog/N/">`
- * (live hrefs, dead for now — no /blog/[page] route exists yet). Each item
- * carries a visually-hidden "Page" label ahead of the number
- * (`elementor-screen-only` on the live site, `sr-only` here). Plain `<a>`
- * (not next/link's `Link`) so the trailing slash in `/blog/N/` survives —
- * `Link` normalizes it away under this app's default `trailingSlash: false`,
- * and there's no `/blog/[page]` route for it to prefetch anyway.
- */
+// blog.html .elementor-pagination: page 1 is a span, 2-5 are live hrefs (no /blog/[page] route yet).
+// Plain <a> so the trailing slash survives.
 const otherPages = [2, 3, 4, 5];
 
 export default function Pagination() {
@@ -16,13 +8,7 @@ export default function Pagination() {
       aria-label="Pagination"
       className="mt-[3rem] text-center text-[1.8rem] leading-[1.2em] font-normal md:mt-[5rem]"
     >
-      {/*
-        post-32.css gives `.page-numbers` inner-only gutters —
-        `:not(:first-child){margin-left:calc(1rem/2)}` +
-        `:not(:last-child){margin-right:calc(1rem/2)}` — so the row has no
-        outer margin; `first:ml-0 last:mr-0` reproduces that. The current
-        page is plain #374151/400 on live, not a highlighted colour.
-      */}
+      {/* post-32.css .page-numbers: inner-only calc(1rem/2) gutters; current page is plain #374151 */}
       <span aria-current="page" className="mx-[0.5rem] text-[#374151] first:ml-0 last:mr-0">
         <span className="sr-only">Page</span>1
       </span>

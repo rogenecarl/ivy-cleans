@@ -1,17 +1,5 @@
 // src/data/services/registry.ts
-/*
- * The seven services, their URL slugs, and how each one renders.
- *
- * Slugs are the client's, verbatim, and are STORED rather than derived from
- * the display name: "Move In / Move Out Cleaning" does not slugify to
- * "move-in-move-out-cleaning" by any rule worth writing, and the live site
- * already proved that guessing URL patterns from names does not hold.
- *
- * Two kinds of entry. Six services render through the shared template in
- * src/components/service/ and supply a ServiceContent builder. Move-out keeps
- * its own five components, because its structure genuinely differs and putting
- * it on the template would change a page that is live today.
- */
+// The seven services. Slugs are the client's, stored not derived. Six render through the shared template; move-out is bespoke.
 import type { CityContent } from '@/content/types'
 import type { ServiceContent } from '@/data/service-types'
 import { deepCleaningData } from '@/data/deep-cleaning'
@@ -33,17 +21,7 @@ export const SERVICE_SLUGS = [
 
 export type ServiceSlug = (typeof SERVICE_SLUGS)[number]
 
-/*
- * `name` is the menu label for every service, with NO city in it.
- *
- * Two of these used to carry one -- the nav read "Deep Cleaning Minneapolis"
- * and "Minneapolis Move Out Cleaning Services", matching the live WordPress
- * header byte-for-byte, while the other five read as plain names. Five one way
- * and two the other looked like an oversight in a seven-item menu, so the
- * whole list now uses the client's own service names. The PAGES still say the
- * city where it belongs (see the h1 in data/deep-cleaning.ts) -- this is the
- * menu only.
- */
+// menu label, no city in it
 type ServiceEntryBase = { slug: ServiceSlug; name: string }
 
 export type ServiceEntry =
@@ -83,27 +61,12 @@ export function serviceBySlug(slug: string): ServiceEntry | undefined {
   return ENTRIES.find((e) => e.slug === slug)
 }
 
-/*
- * Every service, in SERVICE_SLUGS order (which is the client's own ordering).
- *
- * This is what the header dropdown is built from, so the menu and the pages
- * cannot drift apart: a service added here appears in the nav automatically,
- * and one that is removed cannot leave a dead link behind. Returns a copy so a
- * caller cannot mutate the registry.
- */
+// every service in SERVICE_SLUGS order; the header dropdown is built from this. Returns a copy.
 export function allServices(): ServiceEntry[] {
   return [...ENTRIES]
 }
 
-/**
- * The <title> pattern for every service page — Abdi's review, item 12.
- *
- * "Deep Clean Orlando" said too little; "Deep Cleaning Services in Orlando,
- * FL | Ivy Cleans" says the service, the place and the brand, which is what
- * a title is for. Built from the registry name so the tab, the nav and the
- * breadcrumb all call the service the same thing. generateMetadata applies
- * it to all seven, over whatever the data builders still carry.
- */
+/** "{Service} Services in {City}, {ST} | Ivy Cleans" — from the registry name so tab, nav and breadcrumb agree. */
 export function serviceTitle(
   entry: Pick<ServiceEntry, 'name'>,
   c: Pick<CityContent, 'city' | 'state'>,

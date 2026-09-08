@@ -1,12 +1,4 @@
-/*
- * Shape of one blog post on the live site's shared post template
- * (elementor-page-952 / post-952.css).
- *
- * Body copy is stored as inline RUNS rather than plain strings because the
- * live posts mark up bold, italic and links mid-sentence — a flat string
- * cannot carry them, and the earlier single-post version of this file had no
- * way to express the 16 in-body links these posts contain.
- */
+// One blog post on the shared post template (page 952). Body copy is inline runs so bold/italic/links survive.
 export type Inline =
   | string
   // <strong>/<b>: live resolves these with `font-weight: bolder`, so the same
@@ -22,19 +14,13 @@ export type ArticleBlock =
   | {
       type: "img";
       src: string;
-      // The width the editor asked for (inline `style="width:NNNpx"` when
-      // present, else the width attribute); height is that width divided by
-      // the file's own aspect, which is what live measures — a 600x400 file
-      // sized to 841px renders 560.7 tall, not the 561 its attribute claims.
+      // the editor's width (inline style, else the attribute); height follows the file's own aspect
       width: number;
       height: number;
       alt: string;
       // wp-block-image alignment class; "none" is a bare wp-block-image.
       align: "left" | "center" | "right" | "none";
-      // Set when the inline style pinned `height:NNNpx`. Live honours it
-      // literally, so the figure keeps that height while max-width squeezes
-      // its width on mobile. Without it the height scales with the width,
-      // which is what `height:auto` and bare width/height attributes both do.
+      // set when the inline style pinned a height: kept while max-width squeezes the width
       fixedHeight?: true;
     };
 

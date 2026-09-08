@@ -1,17 +1,8 @@
 import Link from "next/link";
 import type { ServiceContent } from "@/data/service-types";
 
-/*
- * Section 1edd646 (post-245.css): deep-bg1.jpg (bottom center / no-repeat /
- * cover) with padding 6rem 0 50rem / 3rem 0 30rem / 2rem 0 18rem across
- * desktop / tablet / mobile — the outsized bottom padding is what exposes the
- * living-room art below the copy. h1 (ef6f308) is centered, uppercase,
- * herogreen, 7.2/4/3rem, and picks up a -2rem widget-container margin at
- * mobile only. Copy block (c79e633) is centered, max-w 106rem,
- * 2/1.9/1.7rem font-light; its paragraphs carry the theme's 2rem bottom
- * margin, which the widget-container's -2rem cancels at tablet. Button
- * (51884af) margin-top 3rem at desktop/tablet, 0 at mobile.
- */
+// post-245.css 1edd646: deep-bg1.jpg, padding 6rem 0 50rem / 3rem 0 30rem / 2rem 0 18rem. h1 ef6f308 7.2/4/3rem (-2rem mobile);
+// copy c79e633 max-w 106rem; button 51884af 3rem top, 0 mobile.
 export default function Hero({
   hero,
   bookHref,

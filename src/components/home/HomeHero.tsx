@@ -3,23 +3,8 @@ import type { SiteData } from "@/data/site";
 import type { TokenSource } from "@/content/interpolate";
 import { t } from "@/content/interpolate";
 
-/*
- * Section 219b11a0 (post-8.css): cleaning-bg-desktop.jpg, swapped for
- * cleaning-bg-mbl.jpg below 768px, both `top center / cover`. Padding
- * 8rem 0 13rem (>=1280), 3rem 0 3rem (768–1024), 2rem 0 1rem (<=767).
- *
- * Box model (live probe at 1920/1600/1440/1280/1024/768/390): `.ec` stands in
- * for `.elementor-container` *plus* the widget-wrap's 10px gutter. Every live
- * widget-wrap is `display:flex`, so a text widget's trailing paragraph margin
- * is kept instead of collapsing into the next widget — hence `flex flex-col`
- * here and on the copy column. Widget rhythm: the h1 widget has
- * `margin-bottom:2rem` at >=768 and 0 below (its container cancels it with
- * -2rem); the nested section 7259eefa adds `margin-top:1rem` at >=1280 only.
- *
- * Columns: 55.098% copy / 44.86% art. Below 1025 the art column keeps its
- * 44.86% while the copy column goes to 65%, so it wraps onto its own line and
- * live measures it 1px tall there (390: 100% wide, also 1px).
- */
+// post-8.css 219b11a0: cleaning-bg-desktop.jpg (-mbl below 768), padding 8rem 0 13rem / 3rem / 2rem 0 1rem.
+// Columns 55.098% / 44.86%; below 1025 the copy column is 65% and the art wraps. flex-col keeps widget margins from collapsing.
 export default function HomeHero({
   heroParagraphs,
   innerSite,

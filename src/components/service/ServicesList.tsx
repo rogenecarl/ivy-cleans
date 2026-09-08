@@ -3,33 +3,10 @@ import Link from "next/link";
 import { CheckItemIcon } from "@/components/Icons";
 import type { ServiceContent } from "@/data/service-types";
 
-/*
- * Section ada1bba ("deep-sec03"): deep-bg3.jpg (top center / no-repeat /
- * cover) is what makes the white heading/checklist text legible; padding
- * 6/3/2rem. Heading (6bde336) centered white 4.5/4/2.8rem, 1rem bottom
- * margin at desktop only. Inner section eaa3b3e (margin-top 1rem, 0 at
- * mobile): 50/50 columns — image (d0c112e, 586x613) in column 4bec5f9
- * (padding-right 1rem; padding-bottom 1rem at mobile), listIntro (bc7b0ff,
- * 2/1.9/1.7rem font-BOLD white) + checklist (c1f51fd) in column 9219e61,
- * which is vertically centred and takes padding-left 1rem plus a further
- * margin-left 2rem above 1024px (3rem combined).
- *
- * Icon list c1f51fd matches 43f5286 except that both icon and text are
- * #FFFFFF and the icon's padding-inline-end is 1rem rather than the 8px
- * default.
- *
- * Section 8822d40 (note/contact/CTA) uses deep-bg4.jpg with padding
- * 8rem 0 60rem / 3rem 0 24rem / 2rem 0 11rem — the huge bottom padding
- * exposes the art. Black text (9a171df h3 2.9/2.5/2rem font-light,
- * 576efa4 paragraph 2/1.9/1.7rem font-light) and a centered button whose
- * top margin is 1rem at desktop, 3rem at tablet, 0 at mobile.
- *
- * Special case: on the live page the anchor
- * <a href="https://ivycleans.com/how-to-clean-a-bathroom/"> does not wrap
- * the bathroom item's text — it wraps the ENTIRE following <li> ("Cleaning
- * and disinfecting of kitchen appliances..."), icon included. Reproduced
- * as-is via servicesLinkedItemIndex rather than "fixed."
- */
+// ada1bba: deep-bg3.jpg, padding 6/3/2rem; heading 6bde336 white. Inner eaa3b3e 50/50: image d0c112e, bold white intro bc7b0ff + list c1f51fd
+// (white, 1rem icon end padding), text column centred with 1rem + 2rem left above 1024.
+// 8822d40: deep-bg4.jpg, padding 8rem 0 60rem / 3rem 0 24rem / 2rem 0 11rem; h3 9a171df, paragraph 576efa4, centred button.
+// Live quirk kept: the bathroom link wraps the ENTIRE next <li> (servicesLinkedItemIndex).
 export default function ServicesList({
   services,
   servicesLinkHref,

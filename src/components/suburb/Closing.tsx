@@ -1,26 +1,8 @@
 import Link from "next/link";
 import type { SuburbData } from "@/data/suburb";
 
-/*
- * Section 202a0f88 (post-664.css): deep-bg4.jpg (top center / no-repeat /
- * cover), padding pt 8/3/2rem, pb 60/24/11rem — byte-identical to
- * DeepServices.tsx's own closing section. Heading (7e11ad40) centered
- * font-light black 2.9/2.5/2rem. Its own per-id widget-container override is
- * mb-0/lg:mb-[1rem] (NOT DeepServices.tsx's implicit 2/3rem), but — task-3
- * fidelity pass finding, see suburb/OtherServices.tsx for the full citation
- * — that alone undercounts the live gap by post-6.css's kit-wide
- * `.elementor-widget:not(:last-child){margin-block-end:2rem}` rule.
- * Rendered as flat `mb-[2rem] lg:mb-[3rem]` (kit-2rem alone below lg;
- * kit-2rem + this widget's own 1rem at lg+), confirmed against a live probe
- * at every width. Paragraph (763de813) centered
- * font-light black 2/1.9/1.7rem. Its wrapper's own per-id override is
- * mb-[-2rem] lg:mb-0 (this page's consistent sign convention), plus the same
- * not-last-child kit-floor fix as Benefits.tsx's wrappers (the CTA button
- * below has only a 1rem margin-top at lg, smaller than the 2rem kit floor,
- * so it does not eclipse it), rendered as `mb-0 lg:mb-[2rem]`. Button
- * (2ea2c822) margin-top md:mt-[3rem] lg:mt-[1rem] — byte-identical to
- * DeepServices.tsx's own closing button, unchanged.
- */
+// post-664.css 202a0f88: deep-bg4.jpg, padding 8/3/2rem top, 60/24/11rem bottom. Heading 7e11ad40 font-light 2.9/2.5/2rem,
+// mb 2rem/3rem; paragraph 763de813 mb 0/2rem; button 2ea2c822 mt 3rem md / 1rem lg.
 export default function Closing({
   closing,
   bookHref,

@@ -1,32 +1,7 @@
 import type { MarketReview } from "@/content/types";
 
-/*
- * What people in THIS market said, from the ops block — not a Google widget.
- *
- * Until this component existed in this form, the front page rendered
- * src/data/reviews.ts: a static snapshot of Minneapolis's Google widget —
- * nine named Minneapolis customers with their avatars and profile links, a
- * 4.6 / 85 summary, and a one-star opening "DO NOT use this company" — on
- * EVERY city's front page. Orlando's own reviews, typed into the ops form,
- * went to the prompts and nowhere else.
- *
- * Two rules follow from the data this now reads:
- *
- * 1. NO Google chrome. An ops review is a quote, a first name, an area and
- *    an optional month. It has no star rating, no avatar, no profile URL and
- *    no aggregate score, and dressing it in the widget's stars and wordmark
- *    would be inventing a rating the business never received. Testimonials,
- *    plainly presented, are what the data supports.
- *
- * 2. Nothing below three. One or two quotes under "What Our Satisfied Clients
- *    Are Saying" reads as a business that has barely started; an absent
- *    section reads as nothing. Until a market has three, the honest state of
- *    its front page is no reviews section at all.
- *
- * Server component: there is no carousel, so no client state. The heading is
- * the live site's, verbatim; the section's background and padding match the
- * widget section it replaces so the page rhythm around it is unchanged.
- */
+// The market's own reviews from the ops block. No stars, avatars or Google wordmark: an ops review has no rating,
+// so drawing one would invent it. Nothing renders below three.
 export const MIN_REVIEWS = 3;
 
 /** "2025-06" -> "June 2025"; anything else is the operator's text, verbatim. */

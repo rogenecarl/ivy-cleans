@@ -17,37 +17,19 @@ export default function ServiceArea({
   mapSrc: string | null;
   /** False for a city whose suburb pages do not exist — names render unlinked. */
   hasSuburbPages: boolean;
-  /**
-   * The front page's own headings are the default. A service page passes its
-   * own h2 ("Where we do Deep Cleaning in Orlando") and gets no eyebrow — the
-   * "Near Me" line above the default title is front-page copy, not a caption
-   * for this list.
-   */
+  /** Service pages pass their own h2 and get no eyebrow. */
   heading?: { title: string };
   /** Fragment target; the front page sets "areas" so breadcrumbs can point here. */
   id?: string;
 }) {
-  /*
-   * The 2-column icon list fills COLUMN-first (grid-flow-col), so the row count
-   * is what decides the split — half the list, rounded up. Minneapolis's 24
-   * entries give 12, i.e. exactly the `grid-rows-12` the live page ships.
-   *
-   * TAILWIND DECISION (plan Task 5 Step 2): the literal `grid-rows-12` stays in
-   * the className. Tailwind v4 extracts utilities by scanning source text, so a
-   * template-built `grid-rows-${rows}` would generate no CSS at all — and for
-   * Minneapolis the class must appear in the markup byte-for-byte anyway. Any
-   * other row count is expressed as an inline grid-template-rows, which
-   * overrides the class; `undefined` when rows === 12 means React emits NO
-   * style attribute, keeping Minneapolis's HTML identical.
-   */
+  // column-first grid, rows = half the list. `grid-rows-12` stays literal for Tailwind's
+  // scanner and Minneapolis's markup; any other count goes inline.
   const rows = Math.ceil(areas.length / 2);
   const rowsStyle =
     rows === 12 ? undefined : { gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` };
   const itemClass =
     "hover:text-rust flex items-start gap-[0.5rem] text-[1.7rem] leading-[1.2em] font-semibold lg:text-[2rem]";
-  /* Same box and type, minus the link-only hover colour — dead text must not
-     look clickable. Only reachable when hasSuburbPages is false, i.e. never for
-     the live city, so it carries no fidelity risk. */
+  // no hover colour: unlinked names must not look clickable
   const plainItemClass =
     "flex items-start gap-[0.5rem] text-[1.7rem] leading-[1.2em] font-semibold lg:text-[2rem]";
   return (
@@ -67,22 +49,11 @@ export default function ServiceArea({
         <h2 className="mb-[1rem] text-center text-[2.8rem] leading-[1.2em] font-bold md:mb-[2rem] md:text-[4rem] lg:text-[4.5rem]">
           {heading?.title ?? "Areas We Serve"}
         </h2>
-        {/* live 8c1d4ea: inner section holding the map (80c999d, col-50) and the
-            areas list (117763a, col-50); stacked below 768px, a row from 768px up.
-            117763a: align-items center from 1024px (flex-start 768-1023, per
-            @media(max-width:1024px)); 80c999d carries the 10rem column gap as its
-            own margin-right, only above 1024px (reset to 0 at <=1024). */}
+        {/* 8c1d4ea: map 80c999d + list 117763a, stacked below 768 */}
         <div className="md:flex md:items-start lg:items-center">
-          {/* left col-50: b84b01e — width 55.725% (768px up), margin-right 10rem
-              (>1024px only). Each inner column keeps its own 10px kit widget-wrap
-              padding, nested inside the outer `.ec`'s own 10px — live column box
-              height @1440 is 495.04 (iframe) + 20 (this padding) = 515.0, which is
-              exactly what the container-height/first-item-offset back-solve from
-              the live probe requires. */}
+          {/* b84b01e: 55.725% wide, 10rem right margin above 1024 */}
           <div className="mb-[1rem] p-[10px] md:mb-0 md:w-[55.725%] lg:mr-[10rem]">
-            {/* b84b01e iframe: height 59.5rem (768px up), 35rem below 768px.
-                mapSrc is city-sourced (CityContent.maps.front); null omits
-                the iframe entirely rather than rendering a broken embed. */}
+            {/* b84b01e iframe; null mapSrc omits it */}
             {mapSrc !== null && (
               <iframe
                 loading="lazy"
@@ -93,24 +64,14 @@ export default function ServiceArea({
               />
             )}
           </div>
-          {/* right col-50: 08a872b icon-list — the 10px column padding only shows up
-              in the row layout (>=768px); below that the live list column width
-              back-solves to the full 370px content width (no extra inset) */}
+          {/* 08a872b icon list */}
           <div className="md:w-[44.234%] md:p-[10px]">
-            {/*
-              live 08a872b: icon-list rows are separated by 2.5rem (padding-block-end +
-              margin-block-start of 2.5rem/2 each) from 768px up and 2rem below it (live
-              probe pitch 40.75 @1440 / 40.4 @390 against a 20px line box);
-              --e-icon-list-icon-size:2rem with a 25%-of-size right margin.
-            */}
+            {/* 08a872b: rows 2.5rem apart from 768, 2rem below */}
             <ul
               className="mx-auto grid max-w-[47rem] grid-flow-col grid-cols-2 grid-rows-12 gap-x-[2rem] gap-y-[2rem] md:gap-y-[2.5rem]"
               style={rowsStyle}
             >
-              {/* The two branches repeat their children rather than sharing a
-                  fragment: a fragment makes React emit an extra <!-- --> text
-                  separator inside the anchor, which is a byte diff on the
-                  live-parity front page. */}
+              {/* no shared fragment: it adds a <!-- --> inside the anchor */}
               {areas.map((a) =>
                 hasSuburbPages ? (
                   <li key={a.name}>

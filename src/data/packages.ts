@@ -4,15 +4,7 @@ import { serviceBySlug, type ServiceSlug } from './services/registry'
 
 export type Pkg = { title: string; text: string; icon: string; href: string };
 
-/*
- * Abdi's review, item 13: the live page listed ten cards but the site has
- * seven service pages, so Condo, Rental, Renovation, Eco-Friendly, Commercial
- * and Maid Service were headings with nowhere to go. Now exactly the seven
- * in SERVICE_SLUGS, each titled as the registry names it (so the card, the
- * nav, the tab and the breadcrumb agree) and each linked to its page. The
- * card text is still the old register; it is regenerated when the voice
- * pass reaches it, not paraphrased here.
- */
+// Exactly the seven registered services, titled as the registry names them and linked to their pages.
 function card(slug: ServiceSlug, text: string, icon: string, c: CityContent): Pkg {
   const entry = serviceBySlug(slug)
   if (entry === undefined) throw new Error(`packages: "${slug}" is not a registered service`)

@@ -1,55 +1,12 @@
-/*
- * Display-only reproduction of blog-post.html's #respond comment form
- * (WordPress's default comment-form markup, not covered by post-952.css —
- * that stylesheet only carries the post-template layout). Field set/labels
- * verbatim: "Leave a Reply" heading, comment-notes line (email-notes span
- * wired to the email input's aria-describedby, matching the live markup),
- * Comment textarea, Name/Email/Website inputs, the "Save my name..."
- * consent checkbox, and the "Post Comment" submit — including the live
- * `required` attributes on Comment/Name/Email (Website is optional on the
- * live form too). No `action`, no submit handler — this is a static clone
- * with no backend to post to.
- *
- * The form sits at the foot of the same Elementor column as the article, so
- * it repeats PostArticle's 119rem container and 60px column padding (0 at
- * <=767) and carries the column's 50px bottom margin. Everything else is
- * theme/browser default and was measured off the live page with a Playwright
- * computed-style probe at 1440x900 and 390x844 (round-4 fidelity pass):
- * the whole form inherits the 1rem root size (labels, inputs, notes and the
- * submit are all 1rem, not a scaled-up size), #reply-title matches the post
- * body's h2 (22px/700 #374151), fields are 1px #666 / 3px radius with
- * 0.5rem 1rem padding, and the submit is an outline button — transparent
- * fill, 1px #cc3366 border, 5px radius, 1rem/700 uppercase #cc3366 text with
- * 1.1rem 2.4rem padding. Sibling paragraphs are spaced 2rem apart.
- */
-/*
- * Elementor renders #comments' list only when the post actually has a
- * response. In this set that is always a single WordPress pingback — an
- * `<li class="pingback">` holding the literal "Pingback:" prefix and a link
- * to the post that referenced this one — under an h2.title-comments reading
- * "One Response".
- *
- * Measured off live at 1440 and 390 (guide-to-basement-cleaning-services-near-you):
- * h2.title-comments is the post body's h2 (22px/1.2em/700 #374151, 0.5rem top
- * / 1rem bottom margin); ul.comment-list has no marker, margin or padding and
- * drops to 0.9rem/1.5rem — markedly smaller than the 18px body copy, which is
- * why it is set here rather than inherited; .comment-body carries a flat
- * `30px 0 30px 60px` padding at every width; and the link is the site link
- * colour at 1.2em with no underline. The list adds no bottom margin — the
- * 4.1px gap live shows before #respond is the reply title's own 0.5rem.
- */
+// blog-post.html #respond, display-only. Same container and padding as PostArticle; sizes measured live at 1440/390.
+// #comments renders only when the post has a response — always a single pingback in this set
 type Responses = { heading: string; items: { prefix: string; text: string; href: string }[] };
 
 const FIELD_CLASS =
   "w-full rounded-[3px] border border-[#666] px-[1rem] py-[0.5rem] text-[1rem] leading-[1.5] text-black";
 
 export default function CommentFormDisplay({ responses }: { responses?: Responses }) {
-  /*
-   * mt is 2rem (Elementor's widget gap) plus the heading's own 0.5rem top
-   * margin, folded into one value so the two don't collapse across the
-   * section boundary — live has 20.8px between the divider and #reply-title
-   * at 1440.
-   */
+  // 2rem widget gap + the heading's 0.5rem, as one value
   return (
     <section className="mt-[2.5rem] mb-[50px] bg-white">
       <div className="mx-auto max-w-[119rem]">
@@ -78,9 +35,7 @@ export default function CommentFormDisplay({ responses }: { responses?: Response
               </ol>
             </>
           )}
-          {/* The 0.5rem top margin is folded into the section's mt only when
-              this heading is the section's first element; behind a response
-              list it is an ordinary sibling and keeps its own margin. */}
+          {/* top margin is folded into the section only when this heading comes first */}
           <h2
             className={`${responses ? "mt-[0.5rem]" : "mt-0"} mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]`}
           >

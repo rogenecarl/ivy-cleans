@@ -1,15 +1,7 @@
 import type { CityContent } from "../content/types";
 import { cityHref } from "../content/interpolate";
 
-// Verbatim copy from docs/superpowers/reference/ivycleans-live/blog.html (listing
-// cards, per-<article> parse) and blog-post.html / blog-post-content-dump.txt
-// (single post body). Typos, mid-sentence excerpt cutoffs, and the "Breakfrom
-// your routine" missing-space quirk are preserved exactly as on the live site.
-//
-// SPAM EXCLUSION: the live listing's first card ("Maintaining a Clean Gaming
-// Environment: Vavada Casino's Approach to Digital Hygiene", /vavada-casino/)
-// is injected spam and is intentionally NOT reproduced here — blogCards has 8
-// entries, not 9.
+// Verbatim from blog.html and blog-post.html; typos kept. The live listing's first card is injected spam (/vavada-casino/), excluded — 8 cards.
 
 export const blogMeta: { title: string; description?: string } = {
   title: "Blog - Ivy Cleans",
@@ -121,27 +113,9 @@ export const blogCards: BlogCard[] = [
   },
 ];
 
-/*
- * The single post that used to live here (its copy, its blocks and its
- * ArticleBlock type) now sits in src/data/posts/, one module per slug, so
- * every post the site links to renders through the same template instead of
- * one hardcoded route. See src/data/posts/index.ts.
- */
+// posts live in src/data/posts/, one module per slug
 
-/**
- * The blog cards, with every href scoped to this city.
- *
- * `blogCards` above keeps the ROOT-relative hrefs, because that is what
- * src/pipeline/stages.ts reserves slugs from — a slug is the same string in
- * every tenant. Anything that RENDERS a link must use this instead.
- *
- * Orlando's homepage shipped linking to
- * /do-i-need-to-be-home-during-a-deep-cleaning-service at the root, which
- * 404s on the preview host and leaves the tenant entirely on a real domain.
- * Every other link in src/data already went through cityHref; these were the
- * exceptions because they were transcribed from the live site's markup
- * rather than built.
- */
+/** The cards with hrefs scoped to this city. `blogCards` keeps root-relative hrefs for slug reservation in stages.ts; anything that renders a link uses this. */
 export function blogCardsFor(c: Pick<CityContent, 'city' | 'status'>): BlogCard[] {
   return blogCards.map((card) => ({ ...card, href: cityHref(c, card.href) }))
 }

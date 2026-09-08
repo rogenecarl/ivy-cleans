@@ -2,34 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { BlogCard } from "@/data/blog";
 
-/*
- * blog.html's `.elementor-posts--skin-cards` grid: cards_columns 3/2/1
- * (post-32.css elementor-element-552a44b) with a 30px column-gap / 35px
- * row-gap. Each `<article class="elementor-post__card">` is: thumbnail
- * link (only `has-post-thumbnail` posts render one) -> badge (top-right,
- * 20px margin) -> avatar -> text block (title, excerpt, "Read More »")
- * -> meta-data footer (date, then comment count separated by "•", per
- * `.elementor-post__meta-data span + span:before{content:"•"}`). Cards
- * without a thumb skip the thumbnail/badge/avatar entirely, matching the
- * live markup (post-1088 "How to Clean Cabinets Before Painting" etc.).
- *
- * Sizes/colors below that are NOT in post-32.css come from Elementor's own
- * posts-cards skin stylesheet, which isn't in the captured reference set;
- * they were measured off the live page with a Playwright computed-style
- * probe at 1440x900 and 390x844 (round-4 fidelity pass) and are fixed px,
- * not rem — they do not track the root font-size ladder:
- *   card             3px radius, #fff, shadow from post-32.css custom CSS
- *   thumbnail link   margin-bottom 25px; `.elementor-post__text` margin-top 20px
- *   badge            #69727d bg, #fff, 12px/400 uppercase, 7.2px 14.4px, pill
- *   avatar           60x60 circle, 30px from the card's left edge, centred
- *                    on the thumbnail's bottom edge (no border on live)
- *   title            21px/600, 1.2 line-height, 25px bottom margin; its <a>
- *                    renders in the link colour #cc3366 (verified by pixel
- *                    sampling the live screenshot, not just computed style)
- *   excerpt          14px/400, 21px line-height, #777, 25px bottom margin
- *   read more        1.6rem/700 uppercase #cc3366, 20px bottom margin
- *   meta-data        12px/400 #adadad, 1px #eaeaea top rule, 15px 30px padding
- */
+// blog.html posts-cards grid, post-32.css 552a44b: 3/2/1 columns, 30px/35px gaps. Cards without a thumb skip thumbnail, badge and avatar.
+// Skin sizes are fixed px measured live: badge 12px pill, avatar 60px, title 21px/600 #cc3366, excerpt 14px #777, meta 12px #adadad.
 export default function BlogCardGrid({ cards }: { cards: BlogCard[] }) {
   return (
     <div
@@ -80,11 +54,7 @@ function Card({ card }: { card: BlogCard }) {
           )}
         </div>
       )}
-      {/*
-        `.elementor-post__text` takes the card's leftover height (top-aligned
-        content) so the meta-data rule always sits flush with the card's
-        bottom edge and every card in a row ends level, as on live.
-      */}
+      {/* text block takes the leftover height so the meta rule sits flush at the bottom */}
       <div
         className={`flex-1 px-[30px] ${card.thumb ? "mt-[45px]" : "mt-[20px]"}`}
       >

@@ -12,15 +12,8 @@ import { post as postWhatIsIncludedInADeepCleaningOfAHouse } from "./what-is-inc
 
 export type { Inline, ArticleBlock, PostArticleData } from "./types";
 
-/*
- * Every blog post the built site links to, keyed by the slug the live site
- * serves it at (root-level, no /blog prefix). Two more slugs appear in
- * blogCards — how-to-clean-smoke-detectors and what-to-do-in-st-louis-park-mn
- * — but those two are NOT on this template: live builds them as bespoke
- * Elementor pages (elementor-page-2248 / -2262) with none of the post-title,
- * post-info, share, author-box or comment widgets this template renders. They
- * are deliberately absent here rather than rendered through the wrong layout.
- */
+// Every post the site links to, keyed by root-level slug. how-to-clean-smoke-detectors and what-to-do-in-st-louis-park-mn
+// are bespoke Elementor pages on live, not this template, so they are absent here.
 export const posts: Record<string, PostArticleData> = {
   "how-to-clean-bathroom-walls": postHowToCleanBathroomWalls,
   "how-to-clean-cabinets-before-painting": postHowToCleanCabinetsBeforePainting,

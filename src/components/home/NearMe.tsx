@@ -3,21 +3,8 @@ import type { TokenSource } from "@/content/interpolate";
 import { t } from "@/content/interpolate";
 import Features from "@/components/home/Features";
 
-/*
- * Section 102673a0 (post-8.css): move-out-bg.jpg `top center / cover`, padding
- * 8rem 0 10rem (>=1280), 3rem 0 1rem (768–1024), 2rem 0 0 (<=767). It wraps
- * both the "Cleaning Services Near Me" copy and the nested feature list
- * (1e52af1a), which is why <Features /> renders from here rather than as its
- * own section — the artwork has to run behind both.
- *
- * Widget rhythm (live probe): the h2 widget 25a9d3d has `margin-bottom:2rem`
- * plus a 1rem container margin at >=768 (3rem net) and 2rem at <=767. The copy
- * widget 2d274d3f keeps its last paragraph's 2rem *and* adds its own 2rem at
- * >=1280 (4rem net), but at <=1024 its widget-container carries
- * `margin-bottom:-2rem`, which cancels that trailing paragraph margin and
- * leaves 2rem. `flex flex-col` reproduces elementor's flex widget-wrap, where
- * these margins never collapse into one another.
- */
+// post-8.css 102673a0: move-out-bg.jpg, padding 8rem 0 10rem / 3rem 0 1rem / 2rem 0 0; wraps Features too.
+// h2 25a9d3d 3rem net below (2rem mobile); copy 2d274d3f 4rem net from 1280, 2rem below.
 export default function NearMe({
   nearMe,
   features,

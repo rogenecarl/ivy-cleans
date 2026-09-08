@@ -2,26 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ServiceContent } from "@/data/service-types";
 
-/*
- * Section 6c3aa11: padding 6/3/2rem. Heading (531e5f2) centered black,
- * 4.5/4/2.8rem with a 1rem bottom margin at desktop only. The two paragraphs
- * + listIntro (4dbfd96) share one left-aligned, font-light 2/1.9/1.7rem
- * text-editor, so they carry the theme's 2rem paragraph margin and the
- * widget's -2rem cancel below 1024px.
- *
- * The 4 qualities (f2a8d5d/39d1f70/8a54988/02d6856) are image-box widgets at
- * width 25% (100% below 768px — there is no 50% tablet step on the live
- * page), each with a 2rem widget bottom margin and 1rem side padding.
- * Their icon bottom margins differ per widget (1.1 / 1.6 / 1 / 1rem), and
- * the last widget drops its bottom margin at mobile. Title 2rem/700/black
- * with a 10px bottom margin, description 1.4rem/300/black.
- *
- * Section e130476 (closing/contact/CTA) carries deep-bg5.jpg (top center /
- * no-repeat / cover) behind white text, padding 6/3/2rem. Closing (3235761)
- * is centered white 2.4/2/1.9rem font-light at line-height 1.4em. Contact
- * (744c033) is right-aligned on desktop, centered on tablet/mobile. Button
- * (eb13f95) top margin 1rem desktop / 3rem tablet / 0 mobile.
- */
+// 6c3aa11: padding 6/3/2rem; heading 531e5f2; paragraphs + listIntro 4dbfd96 in one text widget.
+// Qualities f2a8d5d/39d1f70/8a54988/02d6856: image boxes at 25% (100% below 768), icon margins 1.1/1.6/1/1rem.
+// Closing section e130476: deep-bg5.jpg, white text; closing 3235761, contact 744c033 right-aligned on desktop, button eb13f95.
 const qualityIconMargin = ["mb-[1.1rem]", "mb-[1.6rem]", "mb-[1rem]", "mb-[1rem]"];
 
 export default function WhyChoose({

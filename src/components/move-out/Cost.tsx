@@ -1,14 +1,7 @@
 import Link from "next/link";
 import type { MoveOutData } from "@/data/move-out";
 
-/*
- * Section 2e0aad8 (post-241.css): padding 6/3/2rem. Heading (4a76afe)
- * centered white, 2.8/4/4.5rem. Paragraphs (ba5f52c) left-aligned white,
- * full-width, font-light 2/1.9/1.7rem — no image (out-img3.jpg lives in the
- * live DOM's WhyIvy side column). Button (aff666b) centered, 1rem top
- * margin. Background is out-bg3.jpg (top center / no-repeat / cover), the
- * dark art the white text sits on.
- */
+// post-241.css 2e0aad8: out-bg3.jpg, padding 6/3/2rem. Heading 4a76afe white 2.8/4/4.5rem; paragraphs ba5f52c white full width; button aff666b 1rem top.
 export default function Cost({
   cost,
   bookHref,
