@@ -21,6 +21,28 @@ export const STAGE_NAMES: Record<string, string> = {
   service: 'Service pages',
 }
 
+/**
+ * Roughly how long each stage runs, shown next to a stage that has not
+ * started yet.
+ *
+ * Not decoration. Research is ~3 minutes of web search — measured at 4.6 on a
+ * real Orlando run — and it is the FIRST thing an operator sees. Without a
+ * number to compare against, two minutes of one spinner is indistinguishable
+ * from a hang, and the honest response to that is to tell them what to expect
+ * rather than to animate harder.
+ *
+ * Deliberately vague ("~3 min", not "2:58"): these vary with how much the
+ * search finds and how many areas survive the uniqueness gate, and a precise
+ * estimate that is wrong is worse than a rough one that is right.
+ */
+export const STAGE_EXPECTED: Record<string, string> = {
+  research: '~3 min',
+  front: '~30s',
+  deep: '~30s',
+  suburb: '~20s each',
+  service: '~10s each',
+}
+
 /** Falls back to the stage's own label, so an unmapped stage still renders. */
 export function stageName(id: string, label: string): string {
   return STAGE_NAMES[id] ?? label

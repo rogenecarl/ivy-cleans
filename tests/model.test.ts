@@ -7,7 +7,13 @@ import {
   FrontSectionsSchema,
   ResearchSchema,
 } from '../src/pipeline/schemas'
-import { AnthropicModelClient, StubModelClient, makeClient, type ResearchEvent } from '../src/pipeline/model'
+import {
+  AnthropicModelClient,
+  StubModelClient,
+  makeClient,
+  searchQuery,
+  type ResearchEvent,
+} from '../src/pipeline/model'
 
 // NOTE: this file must never instantiate a *working* AnthropicModelClient
 // (real apiKey + a call that would hit the network). Every AnthropicModelClient
@@ -167,6 +173,53 @@ describe('StubModelClient', () => {
     const client = new StubModelClient({ research: {}, generated: {} })
 
     await expect(client.research('prompt text', 'missing-stage')).rejects.toThrow(/missing-stage/)
+  })
+
+  describe('searchQuery — what the operator sees while research runs', () => {
+    /*
+     * The research stage is the longest in the pipeline (~3 minutes, ~106K
+     * input tokens) and the only one that streams progress. A real Orlando run
+     * logged 27 events, EVERY one of them the generic "Searching the web…"
+     * fallback — so the screen showed three identical lines for three minutes,
+     * which is indistinguishable from a hang.
+     *
+     * The cause was that the query was only ever read from accumulated
+     * input_json_delta text, and that accumulation came back empty or partial.
+     * Nothing tested it because the streaming path needs a live API call.
+     * Extracting the parse is what makes it testable.
+     */
+    test('reads the query from an already-parsed input object', () => {
+      // The shape when the stream delivers input on content_block_start.
+      expect(searchQuery({ query: 'orlando fl master planned communities' })).toBe(
+        'orlando fl master planned communities',
+      )
+    })
+
+    test('reads the query from accumulated JSON text', () => {
+      // The shape when input arrives as input_json_delta fragments.
+      expect(searchQuery('{"query":"lake nona housing stock"}')).toBe('lake nona housing stock')
+    })
+
+    test('returns null for the empty accumulation that caused the bug', () => {
+      expect(searchQuery('')).toBeNull()
+      expect(searchQuery(undefined)).toBeNull()
+      expect(searchQuery(null)).toBeNull()
+    })
+
+    test('returns null for partial JSON rather than throwing', () => {
+      // A content_block_stop can arrive before the fragments finish.
+      expect(searchQuery('{"query":"orlando f')).toBeNull()
+    })
+
+    test('returns null when there is no query field, or it is not a string', () => {
+      expect(searchQuery({ other: 'thing' })).toBeNull()
+      expect(searchQuery({ query: 42 })).toBeNull()
+      expect(searchQuery({ query: '   ' })).toBeNull()
+    })
+
+    test('trims, so a padded query does not render with leading space', () => {
+      expect(searchQuery({ query: '  orlando suburbs  ' })).toBe('orlando suburbs')
+    })
   })
 
   test('StubModelClient replays canned research events through onEvent, in order', async () => {

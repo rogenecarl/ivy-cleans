@@ -16,7 +16,7 @@ import {
   runStageAction,
 } from '../../actions'
 import { ADMIN_BASE } from '@/lib/admin-routes'
-import { stageName } from '../../../stage-names'
+import { STAGE_EXPECTED, stageName } from '../../../stage-names'
 import { ErrorText, Pill } from '../../../ui'
 
 /*
@@ -356,13 +356,21 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
                           {items.done} of {items.total}
                         </span>
                       )}
-                      {(isRunning || elapsed !== undefined) && (
-                        <span className="w-9 text-right">
+                      {isRunning || elapsed !== undefined ? (
+                        <span className="w-16 text-right">
                           {isRunning && stageStartedAt !== null
                             ? duration(now - stageStartedAt)
                             : elapsed !== undefined
                               ? duration(elapsed)
                               : ''}
+                        </span>
+                      ) : (
+                        // Not started yet: say how long it usually takes. A
+                        // number to wait against is what stops a slow stage
+                        // reading as a stuck one — research is ~3 minutes and
+                        // it is the first thing an operator ever sees.
+                        <span className="w-16 text-right opacity-60">
+                          {STAGE_EXPECTED[stage.id] ?? ''}
                         </span>
                       )}
                     </span>

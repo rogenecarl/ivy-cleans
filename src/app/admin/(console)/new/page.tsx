@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorText } from '../../ui'
+import { SubmitButton } from '../../submit-button'
 import { requireAdmin } from '@/lib/auth-server'
 
 /*
@@ -245,9 +246,16 @@ export default async function NewCityPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit" size="lg" className="min-h-11 sm:min-h-9">
+              {/*
+                * SubmitButton, not a bare <Button type="submit">. Every other
+                * form in this admin uses it (see its own header); this one
+                * did not, so the button that starts a several-minute pipeline
+                * was the single place in the console with no feedback at all
+                * on click.
+                */}
+              <SubmitButton pendingLabel="Creating…" className="sm:min-h-9">
                 Create &amp; generate
-              </Button>
+              </SubmitButton>
               <Button asChild variant="outline" size="lg" className="min-h-11 sm:min-h-9">
                 <Link href={ADMIN_SITES}>Cancel</Link>
               </Button>

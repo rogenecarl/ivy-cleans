@@ -24,6 +24,40 @@ export type GenerateArgs<T> = {
 /** A single unit of research-call activity, surfaced to callers for a live progress feed. */
 export type ResearchEvent = { kind: 'search' | 'reading'; label: string }
 
+/**
+ * The search query out of a server_tool_use block's input, or null.
+ *
+ * Accepts BOTH shapes the stream may deliver it in — an already-parsed object
+ * on `content_block_start`, or the JSON text accumulated from
+ * `input_json_delta` fragments — because which one arrives is not something
+ * this code should have to guess at, and guessing wrong is invisible.
+ *
+ * It WAS invisible. A real Orlando run logged 27 research events and every
+ * one of them fell back to the generic "Searching the web…" label, so the
+ * longest stage in the pipeline showed three identical lines for three
+ * minutes — indistinguishable from a hang. The old code read the query only
+ * from the accumulated text, and that accumulation came back empty. Nothing
+ * caught it because the streaming path needs a live API call to exercise;
+ * pulling the parse out here is what gives it a test.
+ */
+export function searchQuery(input: unknown): string | null {
+  let value: unknown = input
+  if (typeof input === 'string') {
+    if (input.trim() === '') return null
+    try {
+      value = JSON.parse(input)
+    } catch {
+      // A content_block_stop can arrive before the fragments finish.
+      return null
+    }
+  }
+  if (value === null || typeof value !== 'object') return null
+  const query = (value as { query?: unknown }).query
+  if (typeof query !== 'string') return null
+  const trimmed = query.trim()
+  return trimmed === '' ? null : trimmed
+}
+
 export interface ModelClient {
   /** Web-grounded research call (server tool). Returns raw findings text. */
   research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string>
@@ -154,8 +188,14 @@ export class AnthropicModelClient implements ModelClient {
         // Event-handler errors must never kill the research call.
         try {
           if (event.type === 'content_block_start') {
-            if (event.content_block.type === 'server_tool_use') toolInputs.set(event.index, '')
-            else if (event.content_block.type === 'web_search_tool_result')
+            if (event.content_block.type === 'server_tool_use') {
+              // The query is sometimes complete right here. Emit it now and
+              // stop tracking this index, so the stop handler cannot emit a
+              // second line for the same search.
+              const query = searchQuery((event.content_block as { input?: unknown }).input)
+              if (query !== null) onEvent({ kind: 'search', label: `Searching: ${query}` })
+              else toolInputs.set(event.index, '')
+            } else if (event.content_block.type === 'web_search_tool_result')
               onEvent({ kind: 'reading', label: 'Reading search results…' })
           } else if (
             event.type === 'content_block_delta' &&
@@ -166,14 +206,8 @@ export class AnthropicModelClient implements ModelClient {
           } else if (event.type === 'content_block_stop' && toolInputs.has(event.index)) {
             const raw = toolInputs.get(event.index)!
             toolInputs.delete(event.index)
-            let label = 'Searching the web…'
-            try {
-              const query = (JSON.parse(raw) as { query?: unknown }).query
-              if (typeof query === 'string' && query.trim() !== '') label = `Searching: ${query}`
-            } catch {
-              /* partial json — keep the generic label */
-            }
-            onEvent({ kind: 'search', label })
+            const query = searchQuery(raw)
+            onEvent({ kind: 'search', label: query === null ? 'Searching the web…' : `Searching: ${query}` })
           }
         } catch {
           /* swallow — a broken event handler must never kill the research call */
