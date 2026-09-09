@@ -14,9 +14,11 @@ import { loadCityFixture } from './fixtures/cities/load'
 import { suburbData } from '../src/data/suburb'
 import { suburbSlots } from '../src/content/slots'
 import { BANNED_PHRASES } from '../src/content/quality'
+import { pickOtherServices } from '../src/data/other-services'
 
 const minneapolis = await getCity('minneapolis')
 const miami = await loadCityFixture('miami')
+const orlando = await getCity('orlando')
 
 const dumpPath = path.join(
   process.cwd(),
@@ -79,10 +81,12 @@ describe('suburbData', () => {
       expect(text).not.toContain('eco-friendly cleaning products')
     })
 
-    test('otherServices hrefs and labels (live city: unprefixed)', () => {
+    test('otherServices: three links, unprefixed for a live city; defaults when the area has no research', () => {
+      // Savage carries no housingCharacter or conditions, so it gets the default three
       expect(data.otherServices.links).toEqual([
-        { label: 'Move-Out Cleanings Savage', href: '/services/move-in-move-out-cleaning' },
         { label: 'Deep Cleaning Savage', href: '/services/deep-cleaning' },
+        { label: 'Standard Cleaning Savage', href: '/services/standard-cleaning' },
+        { label: 'Move In / Move Out Cleaning Savage', href: '/services/move-in-move-out-cleaning' },
       ])
     })
 
@@ -143,10 +147,11 @@ describe('suburbData', () => {
     })
 
     test('otherServices links carry the draft-preview prefix via cityHref', () => {
-      expect(data.otherServices.links).toEqual([
-        { label: 'Move-Out Cleanings Coconut Grove', href: '/miami/services/move-in-move-out-cleaning' },
-        { label: 'Deep Cleaning Coconut Grove', href: '/miami/services/deep-cleaning' },
-      ])
+      expect(data.otherServices.links).toHaveLength(3)
+      for (const link of data.otherServices.links) {
+        expect(link.href.startsWith('/miami/services/')).toBe(true)
+        expect(link.label.endsWith(' Coconut Grove')).toBe(true)
+      }
     })
   })
 
@@ -157,6 +162,53 @@ describe('suburbData', () => {
    * suburbData produces, for every area of a live and a draft city, against
    * the same list.
    */
+  describe('otherServices picked by rule (15E)', () => {
+    const area = (housingCharacter: string, conditions: string[] = []) => ({
+      housingCharacter,
+      conditions: conditions.map((condition) => ({ condition, implication: '', copySafe: true })),
+    })
+
+    test('rentals and vacation homes pull in Airbnb cleaning first', () => {
+      expect(pickOtherServices(area('Five-bedroom vacation rentals near the parks, most managed for investors.'))).toEqual([
+        'airbnb-cleaning',
+        'deep-cleaning',
+        'standard-cleaning',
+      ])
+    })
+
+    test('new construction pulls in post-construction cleaning', () => {
+      expect(pickOtherServices(area('The newest housing stock in the metro; new construction on former grove land.'))).toEqual([
+        'post-construction-cleaning',
+        'deep-cleaning',
+        'standard-cleaning',
+      ])
+    })
+
+    test('condos and townhomes pull in apartment cleaning, and a condition can trigger a rule too', () => {
+      expect(pickOtherServices(area('Mid-century ranches.', ['Downtown high-rise condos face the lake']))).toEqual([
+        'apartment-cleaning',
+        'deep-cleaning',
+        'standard-cleaning',
+      ])
+    })
+
+    test('at most two rule picks, always three links, never a duplicate', () => {
+      const picks = pickOtherServices(area('Short-term rentals beside new construction and townhomes.'))
+      expect(picks).toEqual(['airbnb-cleaning', 'post-construction-cleaning', 'deep-cleaning'])
+      expect(new Set(picks).size).toBe(3)
+    })
+
+    test('no research, or research that matches nothing, gives the default three', () => {
+      expect(pickOtherServices(undefined)).toEqual(['deep-cleaning', 'standard-cleaning', 'move-in-move-out-cleaning'])
+      expect(pickOtherServices(area('1950s ramblers on quiet streets.'))).toEqual(['deep-cleaning', 'standard-cleaning', 'move-in-move-out-cleaning'])
+    })
+
+    test('Orlando siblings do not all link the same services', () => {
+      const lists = orlando.research.suburbs.map((s) => pickOtherServices(s).join(','))
+      expect(new Set(lists).size).toBeGreaterThan(1)
+    })
+  })
+
   describe('template copy against the banned list', () => {
     const strings = (value: unknown): string[] =>
       typeof value === 'string'

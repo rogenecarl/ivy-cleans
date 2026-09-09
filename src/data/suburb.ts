@@ -6,6 +6,8 @@ import type { CityContent, MarketPhoto } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
 import { sOpt, suburbSlots } from '../content/slots'
 import { metaDescription } from './meta'
+import { pickOtherServices } from './other-services'
+import { serviceBySlug } from './services/registry'
 
 export type SuburbRef = { name: string; slug: string }
 
@@ -84,19 +86,14 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
     },
 
     // dump lines 35-38
+    // three services chosen from this area's research, so sibling pages differ
     otherServices: {
       heading: 'Our Different Services',
       intro: `Other Services Offered In ${name} Include:`,
-      links: [
-        {
-          label: `Move-Out Cleanings ${name}`,
-          href: cityHref(c, '/services/move-in-move-out-cleaning'),
-        },
-        {
-          label: `Deep Cleaning ${name}`,
-          href: cityHref(c, '/services/deep-cleaning'),
-        },
-      ],
+      links: pickOtherServices(c.research.suburbs.find((s) => s.slug === suburb.slug)).map((slug) => ({
+        label: `${serviceBySlug(slug)?.name ?? slug} ${name}`,
+        href: cityHref(c, `/services/${slug}`),
+      })),
     },
 
     // the operator's own photos, or nothing
