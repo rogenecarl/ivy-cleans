@@ -21,7 +21,8 @@ export const MODELS = { writing: 'claude-opus-5', research: 'claude-sonnet-5' } 
 
 // Web searches per research pass. Research is three small passes (city-wide, the area list, one per area) rather
 // than one long call: each pass gets its own budget so none starves another, and search results never pile up.
-export const SEARCH_BUDGET = { metro: 4, areas: 3, area: 3 } as const
+// a burst of parallel searches past max_uses gets the whole batch rejected, so each budget has headroom
+export const SEARCH_BUDGET = { metro: 6, areas: 5, area: 4 } as const
 
 export type ResearchOptions = { maxSearches: number }
 
@@ -146,8 +147,6 @@ export class AnthropicModelClient implements ModelClient {
       system: RESEARCH_SYSTEM,
       messages: [{ role: 'user', content: prompt }],
       tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: options.maxSearches }],
-      // one search per turn: a burst of parallel searches past max_uses gets the whole batch rejected
-      tool_choice: { type: 'auto', disable_parallel_tool_use: true },
       ...fallbackFor(MODELS.research),
     })
     if (onEvent) {

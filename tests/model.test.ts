@@ -187,7 +187,7 @@ describe('StubModelClient', () => {
       expect(SEARCH_BUDGET.areas).toBeGreaterThanOrEqual(1)
       expect(SEARCH_BUDGET.area).toBeGreaterThanOrEqual(1)
       // one long call let search results pile up in context; the whole point is that no pass is big
-      for (const n of Object.values(SEARCH_BUDGET)) expect(n).toBeLessThanOrEqual(4)
+      for (const n of Object.values(SEARCH_BUDGET)) expect(n).toBeLessThanOrEqual(6)
     })
 
     test('research is transcription and runs on Sonnet; every sentence a reader sees is written by Opus', () => {
