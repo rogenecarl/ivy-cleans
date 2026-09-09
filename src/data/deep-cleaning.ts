@@ -3,6 +3,7 @@
 
 import type { CityContent } from '../content/types'
 import { sOpt, serviceSlots } from '../content/slots'
+import { slotLinks } from '../content/links'
 import { t } from '../content/interpolate'
 import type { ServiceContent } from './service-types'
 
@@ -33,6 +34,7 @@ export function deepCleaningData(c: CityContent): ServiceContent {
       text: "A deep clean is the visit that gets to everything a regular clean walks past. We pull out what moves and clean behind it, wipe down baseboards, door frames, switch plates and the tops of cabinets, scrub the grout, degrease the range hood and the inside of the oven, and get the buildup off shower glass and around the taps. Vents and ceiling fans get dusted, and blinds and window tracks get done rather than skipped. It takes longer than a standard visit because it’s doing the work a standard visit isn’t for: the dirt that has settled in over months, not the week’s mess.",
       image: "/images/deep-img1.jpg",
       local: sOpt(c, serviceSlots('deep-cleaning')[0]),
+      localLinks: slotLinks(c, serviceSlots('deep-cleaning')[0]),
     },
 
     // Benefits right-column image (2c321bb)

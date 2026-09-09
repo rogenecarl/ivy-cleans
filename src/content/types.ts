@@ -20,6 +20,9 @@ export type MarketReview = { quote: string; firstName: string; area: string; dat
 // a photo of this crew or market; alt written by the operator
 export type MarketPhoto = { path: string; alt: string }
 
+/** A prose link: `anchor` appears verbatim in its slot's text; `href` is a path on this site. */
+export type SlotLink = { anchor: string; href: string }
+
 export type MarketOps = {
   zips?: string[]
   servingSince?: string
@@ -50,6 +53,8 @@ export type CityContent = {
   }
   // generated copy by slot id; static copy stays in src/data with {tokens}
   sections: Record<string, string | string[]>
+  // prose links by slot id, accepted at generation; absent on documents that predate them
+  links?: Record<string, SlotLink[]>
   /** Full state name for SEO copy, e.g. "Minnesota" (spec finding 5). */
   stateName: string
   /** Display-format phone used by the booking pages, e.g. "(612) 424-0391" (finding 6b). */

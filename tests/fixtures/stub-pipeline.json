@@ -90,30 +90,49 @@
     "suburb.house-cleaning-north-stubville": {
       "intro": "North Stubville sits along the ridge above the fixture line, and it's one of the districts our crews know best. The neighbourhood grew up around wide corner lots and deep front porches, and most owners here are more particular about their yards than their floors — which is exactly the kind of house we like showing up to.",
       "homes": "The mock bungalows through Assertion Acres and Mock Meadows date to the early fixture era: one story, original hardwood under decades of wax, and closets sized for a smaller wardrobe than anyone owns today. Newer construction in Stub Village Estates and Canned Creek runs larger, with open kitchens and engineered flooring that scratches if it's mopped wrong. Placeholder Heights and Fixture Court split the difference — mid-size ranch homes with finished basements that trap whatever the ground floor tracks downstairs. We adjust our approach street by street rather than running one routine across the whole area.",
-      "local": "Six months of test season keep North Stubville's original single-pane windows sealed shut, and fixture dust builds up on the deep porch rails and sills faster than most owners notice until it's tracked indoors on shoes. The older hardwood in Assertion Acres also holds onto grit in its gaps, so a surface pass just pushes it around instead of lifting it out. We work the window tracks and baseboards on every visit and go after the floor seams with a different tool than we use on the newer builds."
+      "local": "Six months of test season keep North Stubville's original single-pane windows sealed shut, and fixture dust builds up on the deep porch rails and sills faster than most owners notice until it's tracked indoors on shoes. The older hardwood in Assertion Acres also holds onto grit in its gaps, so a surface pass just pushes it around instead of lifting it out. We work the window tracks and baseboards on every visit and go after the floor seams with a different tool than we use on the newer builds.",
+      "links": [
+        {
+          "slot": "intro",
+          "anchor": "more particular about their yards than their floors",
+          "service": "standard-cleaning"
+        },
+        {
+          "slot": "homes",
+          "anchor": "a phrase that is not in the copy",
+          "service": "deep-cleaning"
+        }
+      ]
     },
     "suburb.cleaning-services-mock-hollow": {
       "intro": "Mock Hollow's stub-frame duplexes sit close enough together that a cleaning crew has to work quietly, and we've built our schedule there around that. It's a smaller footprint than North Stubville, but the shared walls and tight setbacks mean the little things — a scuffed shared entry, a dusty shared vent — matter more to how the whole street looks.",
       "homes": "Mock Hollow Commons and Mock Hollow Terrace are both built to the same duplex pattern: narrow galley kitchens, laminate counters original to the fixture era, and shared stairwells that see twice the foot traffic of a single-family entry. Bedrooms upstairs run small, so closets and under-bed space get used hard, and that's where lint and fixture dust collect fastest. Because the units share a wall, sound and vibration from one side loosens dust into the other, which is not something North Stubville's detached bungalows ever have to deal with.",
-      "local": "The shared walls and stairwells in Mock Hollow Commons and Mock Hollow Terrace mean dust and fixture-season grit move between units in a way a standalone house never sees, so a clean on one side doesn't hold if the shared entry is neglected. We treat the shared stairwells and vents as part of every job rather than an extra, and we work the narrow galley kitchens with brushes that fit between the original laminate counters and the wall, which a wider tool just skips over."
+      "local": "The shared walls and stairwells in Mock Hollow Commons and Mock Hollow Terrace mean dust and fixture-season grit move between units in a way a standalone house never sees, so a clean on one side doesn't hold if the shared entry is neglected. We treat the shared stairwells and vents as part of every job rather than an extra, and we work the narrow galley kitchens with brushes that fit between the original laminate counters and the wall, which a wider tool just skips over.",
+      "links": []
     },
     "service.standard-cleaning": {
-      "local": "A standard visit in Fixture City is shaped by the test season, which runs six months and drags fine assertion grit in through every door. Crews here spend longer on entry mats, sills and the tops of baseboards than they would in a drier fixture, and less time on the kitchens, which stay comparatively clean. The stub-frame construction common across the district means skirting gaps collect that grit rather than shedding it, so a standard clean here always includes a pass along the base of every wall."
+      "local": "A standard visit in Fixture City is shaped by the test season, which runs six months and drags fine assertion grit in through every door. Crews here spend longer on entry mats, sills and the tops of baseboards than they would in a drier fixture, and less time on the kitchens, which stay comparatively clean. The stub-frame construction common across the district means skirting gaps collect that grit rather than shedding it, so a standard clean here always includes a pass along the base of every wall.",
+      "links": []
     },
     "service.deep-cleaning": {
-      "local": "Deep cleans in Fixture City almost always start in the bathrooms. Six months of test season keeps indoor humidity high enough that grout darkens between visits, and the single-pane windows most of the older stock still carries sweat through the assertion months, leaving frames that need scraping rather than wiping. Crews budget most of a morning for a three-bathroom house here. In a drier fixture the same house would be an afternoon."
+      "local": "Deep cleans in Fixture City almost always start in the bathrooms. Six months of test season keeps indoor humidity high enough that grout darkens between visits, and the single-pane windows most of the older stock still carries sweat through the assertion months, leaving frames that need scraping rather than wiping. Crews budget most of a morning for a three-bathroom house here. In a drier fixture the same house would be an afternoon.",
+      "links": []
     },
     "service.apartment-cleaning": {
-      "local": "Apartment work in Fixture City is dominated by shared stairwells. The duplex pattern through Mock Hollow puts two front doors on one landing, so grit tracked in by one household lands on both mats, and the carpeted common runs hold it. Crews here carry a second vacuum head for stair edges, which is not standard in fixtures with detached stock. Kitchens in these units are small and stay tidy; the floors and the entry are where the time goes."
+      "local": "Apartment work in Fixture City is dominated by shared stairwells. The duplex pattern through Mock Hollow puts two front doors on one landing, so grit tracked in by one household lands on both mats, and the carpeted common runs hold it. Crews here carry a second vacuum head for stair edges, which is not standard in fixtures with detached stock. Kitchens in these units are small and stay tidy; the floors and the entry are where the time goes.",
+      "links": []
     },
     "service.airbnb-cleaning": {
-      "local": "Turnovers in Fixture City run tight against the test season, when arrivals cluster and the same fine grit that settles on sills settles on every surface a guest photographs. Crews strip and remake first, then work the windows, because the single-pane stock through North Stubville shows streaks in the low assertion light that a guest will notice and a host will hear about. A same-day turnover here needs two people rather than one."
+      "local": "Turnovers in Fixture City run tight against the test season, when arrivals cluster and the same fine grit that settles on sills settles on every surface a guest photographs. Crews strip and remake first, then work the windows, because the single-pane stock through North Stubville shows streaks in the low assertion light that a guest will notice and a host will hear about. A same-day turnover here needs two people rather than one.",
+      "links": []
     },
     "service.post-construction-cleaning": {
-      "local": "Post-construction work in Fixture City is a dust problem before it is a cleaning problem. The stub-frame builds going up across the district shed a fine assertion grit that stays airborne for days and settles again after the first pass, so crews here work the ceilings and light fittings, wait, then work them again. Budget two visits rather than one. Fixtures with slab-and-brick construction rarely need the second."
+      "local": "Post-construction work in Fixture City is a dust problem before it is a cleaning problem. The stub-frame builds going up across the district shed a fine assertion grit that stays airborne for days and settles again after the first pass, so crews here work the ceilings and light fittings, wait, then work them again. Budget two visits rather than one. Fixtures with slab-and-brick construction rarely need the second.",
+      "links": []
     },
     "service.pre-listing-cleaning": {
-      "local": "A pre-listing clean in Fixture City is aimed at the windows. Six months of test season leaves the original single-pane glass through North Stubville hazed enough to grey a listing photograph, and buyers here read that as neglect rather than weather. Crews do the glass first, inside and out, then the floors. The kitchens in this stock photograph well with very little work, so the time goes where the camera goes."
+      "local": "A pre-listing clean in Fixture City is aimed at the windows. Six months of test season leaves the original single-pane glass through North Stubville hazed enough to grey a listing photograph, and buyers here read that as neglect rather than weather. Crews do the glass first, inside and out, then the floors. The kitchens in this stock photograph well with very little work, so the time goes where the camera goes.",
+      "links": []
     }
   },
   "events": {

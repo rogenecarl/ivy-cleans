@@ -1,6 +1,7 @@
 // zod v4 structured-output schemas, .strict() everywhere. NO min/max/length: the API rejects them; put counts in the prompt.
 
 import { z } from 'zod'
+import { SERVICE_SLUGS } from '../data/services/registry'
 
 // A local fact and what it means for cleaning. copySafe false = operator judgement only, never printed.
 // Per-market operations facts, entered by a human. Optional means 'may be absent', never 'may be ignored'.
@@ -101,6 +102,16 @@ export const SuburbCopySchema = z
     homes: z.string(),
     /** Local conditions and what we do about them. 90–130 words. */
     local: z.string(),
+    /** Up to three phrases already in the copy above, each pointing at a service. Checked in code; bad ones dropped. */
+    links: z.array(
+      z
+        .object({
+          slot: z.enum(['intro', 'homes', 'local']),
+          anchor: z.string(),
+          service: z.enum(SERVICE_SLUGS),
+        })
+        .strict(),
+    ),
   })
   .strict()
 export type SuburbCopyOutput = z.infer<typeof SuburbCopySchema>
@@ -110,6 +121,8 @@ export const ServiceCopySchema = z
   .object({
     /** 90-130 words. What this city's homes, climate or habits change. */
     local: z.string(),
+    /** Up to two phrases already in the copy that name an area, each with that area's name. Checked in code. */
+    links: z.array(z.object({ anchor: z.string(), area: z.string() }).strict()),
   })
   .strict()
 export type ServiceCopyOutput = z.infer<typeof ServiceCopySchema>

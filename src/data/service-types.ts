@@ -1,3 +1,4 @@
+import type { SlotLink } from '../content/types'
 // src/data/service-types.ts
 // Shape every service page's content builder returns (DeepCleaningData, renamed).
 export type ServiceQuality = {
@@ -13,7 +14,7 @@ export type ServiceContent = {
   hero: { h1: string; paragraphs: string[] }
   /* words on the first line before the desktop <br> in WhatIs; default 3. Break after an ampersand, never inside a proper noun. */
   /* the one generated field on a service page (service.<slug>.local); `text` stays canonical. Optional: Minneapolis has none. */
-  whatIs: { h2: string; text: string; image: string; h2BreakAfter?: number; local?: string }
+  whatIs: { h2: string; text: string; image: string; h2BreakAfter?: number; local?: string; localLinks?: SlotLink[] }
   benefitsBgImage: string
   benefits: {
     h2: string

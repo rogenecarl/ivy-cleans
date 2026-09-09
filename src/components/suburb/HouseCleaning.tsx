@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { SuburbData } from "@/data/suburb";
+import Linked from "@/components/Linked";
 
 // post-664.css 618aca1e: same section, columns (4973a706/55e99051 55.266%/44.697%) and deep-img1.jpg bleed as WhatIs.tsx.
 // Heading b436479 mb 2rem/3rem (kit 2rem + own 1rem at lg); paragraph 5a58344c is the column's last widget, no kit floor.
@@ -32,7 +33,7 @@ export default function HouseCleaning({
               </h2>
               <div className="flow-root mb-[-2rem] lg:mb-0">
                 <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
-                  {houseCleaning.paragraph}
+                  <Linked text={houseCleaning.paragraph} links={houseCleaning.links} />
                 </p>
               </div>
             </div>

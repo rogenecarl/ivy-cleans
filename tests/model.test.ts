@@ -112,7 +112,7 @@ describe('FrontSectionsSchema', () => {
 })
 
 describe('ServiceCopySchema', () => {
-  const valid = { local: 'What changes here...' }
+  const valid = { local: 'What changes here...', links: [] }
 
   test('accepts a valid example', () => {
     expect(ServiceCopySchema.parse(valid)).toEqual(valid)
@@ -133,7 +133,7 @@ describe('ServiceCopySchema', () => {
 
 describe('StubModelClient', () => {
   test('generate returns canned data validated through the schema', async () => {
-    const canned = { local: 'Stubville deep cleaning removes years of buildup.' }
+    const canned = { local: 'Stubville deep cleaning removes years of buildup.', links: [] }
     const client = new StubModelClient({
       research: {},
       generated: { 'service.deep-cleaning': canned },

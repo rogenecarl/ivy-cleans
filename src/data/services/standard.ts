@@ -2,6 +2,7 @@
 
 import type { CityContent } from '../../content/types'
 import { sOpt, serviceSlots } from '../../content/slots'
+import { slotLinks } from '../../content/links'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -31,6 +32,7 @@ export function standardCleaningData(c: CityContent): ServiceContent {
       text: "Standard cleaning is our recurring maintenance service, the regular upkeep that keeps a home looking its best between deeper cleans. Instead of the wider scope of a deep clean, standard cleaning focuses on the everyday spaces that get used the most, including kitchens, bathrooms, living areas, and bedrooms. It follows a repeatable checklist, so every visit brings the same dependable results, whether it is your first appointment or your fiftieth.",
       image: "/images/deep-img1.jpg",
       local: sOpt(c, serviceSlots('standard-cleaning')[0]),
+      localLinks: slotLinks(c, serviceSlots('standard-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

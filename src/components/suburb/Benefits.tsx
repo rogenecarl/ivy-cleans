@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SuburbData } from "@/data/suburb";
+import Linked from "@/components/Linked";
 
 // post-664.css 6890e115: deep-bg2.jpg (CSS default position/repeat), padding 6/3/2rem. Heading 156617a3 mb 2rem/3rem;
 // paragraphs 6abbf289 mb 0/2rem (kit floor shows through since the follower has no margin-top).
@@ -23,7 +24,7 @@ export default function Benefits({
               key={p.slice(0, 40)}
               className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]"
             >
-              {p}
+              <Linked text={p} links={benefits.links} />
             </p>
           ))}
         </div>

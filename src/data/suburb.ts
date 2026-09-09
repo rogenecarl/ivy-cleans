@@ -2,7 +2,8 @@
 // hero/houseCleaning/benefits read the generated suburb.<slug>.intro/.homes/.local slots and fall back to
 // the template when absent (Minneapolis has no generated area copy). Takes the suburb ref: it repeats per area.
 
-import type { CityContent, MarketPhoto, Suburb } from '../content/types'
+import type { CityContent, MarketPhoto, SlotLink, Suburb } from '../content/types'
+import { slotLinks } from '../content/links'
 import { cityHref, t } from '../content/interpolate'
 import { sOpt, suburbSlots } from '../content/slots'
 import { metaDescription } from './meta'
@@ -13,9 +14,9 @@ export type SuburbRef = { name: string; slug: string }
 
 export type SuburbData = {
   suburbMeta: { title: string; description: string }
-  hero: { titleLines: [string, string]; paragraphs: string[]; ctaLabel: string }
-  houseCleaning: { heading: string; paragraph: string }
-  benefits: { heading: string; paragraphs: string[] }
+  hero: { titleLines: [string, string]; paragraphs: string[]; links: SlotLink[]; ctaLabel: string }
+  houseCleaning: { heading: string; paragraph: string; links: SlotLink[] }
+  benefits: { heading: string; paragraphs: string[]; links: SlotLink[] }
   otherServices: { heading: string; intro: string; links: { label: string; href: string }[] }
   nearby: { heading: string; links: { label: string; href: string }[] }
   workInAction: { heading: string; images: MarketPhoto[] }
@@ -56,12 +57,14 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
               ),
               'Contact us today to book your quote.',
             ],
+      links: slotLinks(c, introSlot),
       ctaLabel: CTA_LABEL,
     },
 
     // dump lines 22-23; generated homes slot when present
     houseCleaning: {
       heading: `House Cleaning ${name} ${c.state}`,
+      links: slotLinks(c, homesSlot),
       paragraph:
         homes !== undefined
           ? homes
@@ -74,6 +77,7 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
     // dump lines 24-33; generated local slot when present
     benefits: {
       heading: `Benefits of House Cleaning ${name}`,
+      links: slotLinks(c, localSlot),
       paragraphs:
         local !== undefined
           ? [local]

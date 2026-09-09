@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SuburbData } from "@/data/suburb";
+import Linked from "@/components/Linked";
 
 // post-664.css 3d1cf513: deep-bg1.jpg, padding 6rem 0 50rem / 3rem 0 30rem / 2rem 0 18rem. h1 275ed2e4 7.2/4/3rem;
 // copy 762e0136 max-w 106rem; button 48377b61 3rem top from md. Title lines joined by a space: live wraps naturally.
@@ -23,7 +24,7 @@ export default function SuburbHero({
               key={p.slice(0, 40)}
               className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]"
             >
-              {p}
+              <Linked text={p} links={hero.links} />
             </p>
           ))}
         </div>

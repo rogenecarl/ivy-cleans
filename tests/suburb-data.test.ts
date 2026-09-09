@@ -74,7 +74,7 @@ describe('suburbData', () => {
      * templated: a benefits block is heading + paragraphs and nothing else.
      */
     test('benefits carries no list and no eco line any more', () => {
-      expect(Object.keys(data.benefits).sort()).toEqual(['heading', 'paragraphs'])
+      expect(Object.keys(data.benefits).sort()).toEqual(['heading', 'links', 'paragraphs'])
       const text = JSON.stringify(data)
       expect(text).not.toContain('Reducing the number of allergens')
       expect(text).not.toContain('There are many benefits to deep cleaning')

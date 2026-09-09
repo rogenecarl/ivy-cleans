@@ -198,6 +198,10 @@ The brief it receives, for one service at a time:
 > Working through every condition on the list is what makes six service pages read the same: they all get the same list, and only the service is different. The reader came for one service, not a weather report.
 >
 > If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in [CITY] is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.
+>
+> links — up to two phrases you have already written above that name one of the areas listed, each with that area's name exactly as listed. The phrase must appear word for word in your paragraph and contain the area name. If none, return an empty list.
+
+The brief also lists the branch's areas "for reference", so a service page that mentions marble in Windermere can link to Windermere's own page. Same rule as the area pages: the model chooses, code checks the phrase is there verbatim and names a real area, at most two per page.
 
 **The two-condition cap is load-bearing.** Every service receives the identical condition list; without an instruction to choose, the safe move is to cover all of them, and six pages converge on the same facts in the same order. On the first real Houston run four of six sections used all four conditions before the cap was added.
 
@@ -247,6 +251,10 @@ The brief it receives, for one area at a time:
 >
 >    STRUCTURAL EXAMPLE — note only the movement, condition to what it does indoors to the cleaning. Write entirely different sentences and carry over no Houston detail:
 >    Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds.
+>
+> 4. links — up to three phrases you have ALREADY WRITTEN in the three paragraphs above that naturally describe a service this branch offers. For each, give the paragraph it sits in (intro, homes or local), the phrase word for word as it appears there, and the service it belongs to, one of: [THE SEVEN SERVICE SLUGS]. At least three words, at most sixty characters, and it must read as something a reader would click. Do not write a phrase in order to link it — if nothing fits, return an empty list.
+
+**On the links.** The model only chooses; code decides. A phrase is kept only if it appears word for word in that paragraph, is at least three words, and is not a second link to the same service or the same phrase twice — anything else is dropped and the page is still valid without it. At most three per area page. The accepted ones render as links to the service page on this same site, never anywhere else.
 
 **Two things in this brief are load-bearing.**
 

@@ -26,7 +26,8 @@ import {
   suburbSlots,
   type StageId,
 } from '../content/slots'
-import { serviceBySlug } from '../data/services/registry'
+import { SERVICE_SLUGS, serviceBySlug } from '../data/services/registry'
+import { MAX_SERVICE_LINKS, MAX_SUBURB_LINKS, acceptLinks } from '../content/links'
 import { postSlugs } from '../data/posts'
 import { blogCards } from '../data/blog'
 import { posts as recentPosts } from '../data/recent-posts'
@@ -328,7 +329,9 @@ Produce three paragraphs.
 3. local — 90 to 130 words. The conditions above, turned into cleaning. What gets into these homes, where it settles, and what we do about it. Lead with what is specific to ${suburb.name} before anything that is true of ${facts.city} generally.
 
    STRUCTURAL EXAMPLE — note only the movement, condition to what it does indoors to the cleaning. Write entirely different sentences and carry over no Houston detail:
-   ${EXEMPLAR_LOCAL}`
+   ${EXEMPLAR_LOCAL}
+
+4. links — up to three phrases you have ALREADY WRITTEN in the three paragraphs above that naturally describe a service this branch offers. For each, give the paragraph it sits in (intro, homes or local), the phrase word for word as it appears there, and the service it belongs to, one of: ${SERVICE_SLUGS.join(', ')}. At least three words, at most sixty characters, and it must read as something a reader would click. Do not write a phrase in order to link it — if nothing fits, return an empty list.`
 }
 
 /** Prompts read as prose to the model, so a small count is spelled out. */
@@ -361,17 +364,25 @@ export function buildServiceLocalPrompt(
       ? ''
       : `\n\nLOCAL CONDITIONS in ${facts.city}, with what each one means for cleaning:\n${conditionLines}`
 
+  const areaNames = research.suburbs.map((s) => s.name)
+  const areasSection =
+    areaNames.length === 0
+      ? ''
+      : `\n\nAREAS this branch serves, for reference. Name one only where it genuinely belongs in the sentence:\n${areaNames.join(', ')}`
+
   return `Write the "In ${facts.city}" section for the ${entry.name} page.
 ${opsBlock(facts)}
 The page already explains what ${entry.name} is, what is included, and how it is priced. That copy is fixed and shared by every city. Do not repeat any of it.
 
-Your section answers one question: what is different about ${entry.name} in ${facts.city} specifically, because of the homes here, the climate, or how people live?${conditionsSection}
+Your section answers one question: what is different about ${entry.name} in ${facts.city} specifically, because of the homes here, the climate, or how people live?${conditionsSection}${areasSection}
 
 90 to 130 words. Use AT MOST TWO of the conditions above — the two that change THIS job most — and ignore the rest. Lead with the more specific of the two.
 
 Working through every condition on the list is what makes six service pages read the same: they all get the same list, and only the service is different. The reader came for one service, not a weather report.
 
-If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.`
+If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.
+
+links — up to two phrases you have already written above that name one of the areas listed, each with that area's name exactly as listed. The phrase must appear word for word in your paragraph and contain the area name. If none, return an empty list.`
 }
 
 // ── Stage execution ──
@@ -671,6 +682,15 @@ async function executeStage(
         draft.sections[homesSlot] = out.homes
         draft.sections[localSlot] = out.local
 
+        const slotOf = { intro: introSlot, homes: homesSlot, local: localSlot } as const
+        for (const slot of [introSlot, homesSlot, localSlot]) delete draft.links?.[slot]
+        const accepted = acceptLinks(
+          out.links.map((l) => ({ slot: slotOf[l.slot], anchor: l.anchor, href: `/services/${l.service}` })),
+          { [introSlot]: out.intro, [homesSlot]: out.homes, [localSlot]: out.local },
+          MAX_SUBURB_LINKS
+        )
+        if (Object.keys(accepted).length > 0) draft.links = { ...(draft.links ?? {}), ...accepted }
+
         // Save per area: this is what makes the loop resumable.
         await saveDraft(key, draft)
 
@@ -730,6 +750,21 @@ async function executeStage(
 
         draft.sections[localSlot] = out.local
 
+        delete draft.links?.[localSlot]
+        const areaSlug = new Map(research.suburbs.map((s) => [s.name.trim().toLowerCase(), s.slug]))
+        const accepted = acceptLinks(
+          out.links.flatMap((l) => {
+            const area = l.area.trim().toLowerCase()
+            const slug = areaSlug.get(area)
+            return slug !== undefined && l.anchor.toLowerCase().includes(area)
+              ? [{ slot: localSlot, anchor: l.anchor, href: `/${slug}` }]
+              : []
+          }),
+          { [localSlot]: out.local },
+          MAX_SERVICE_LINKS
+        )
+        if (accepted[localSlot]) draft.links = { ...(draft.links ?? {}), ...accepted }
+
         // Save per service: this is what makes the loop resumable.
         await saveDraft(key, draft)
 
@@ -788,7 +823,10 @@ export async function runStage(
 // strip a stage's outputs and `done` entry; ownership computed against the draft's own research
 function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
   draft.done = draft.done.filter((s) => s !== stage)
-  for (const slot of stageSlots(draft.research)[stage]) delete draft.sections[slot]
+  for (const slot of stageSlots(draft.research)[stage]) {
+    delete draft.sections[slot]
+    delete draft.links?.[slot]
+  }
   if (stage === 'research') delete draft.research
 }
 

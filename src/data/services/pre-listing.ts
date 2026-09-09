@@ -2,6 +2,7 @@
 
 import type { CityContent } from '../../content/types'
 import { sOpt, serviceSlots } from '../../content/slots'
+import { slotLinks } from '../../content/links'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -34,6 +35,7 @@ export function preListingCleaningData(c: CityContent): ServiceContent {
       text: "Real estate and pre listing cleaning is a detailed service that prepares a home for photos, showings, and open houses. Buyers form an impression within the first few minutes of a walk through, so this service targets streak free windows and mirrors, spotless kitchens and bathrooms, decluttered and wiped down surfaces, and fresh smelling, well presented rooms. These are the details that photograph well and hold up under a buyer’s close look, timed around your agent’s listing and showing schedule.",
       image: "/images/deep-img1.jpg",
       local: sOpt(c, serviceSlots('pre-listing-cleaning')[0]),
+      localLinks: slotLinks(c, serviceSlots('pre-listing-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",

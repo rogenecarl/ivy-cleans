@@ -13,7 +13,7 @@ import {
   serviceSlots,
   stageSlots,
 } from './slots'
-import type { CityContent } from './types'
+import type { CityContent, SlotLink } from './types'
 import { citySlug } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
 import { checkQuality } from './quality'
@@ -27,6 +27,7 @@ export type DraftDoc = {
   findings?: string
   research?: ResearchOutput
   sections: Record<string, string | string[]>
+  links?: Record<string, SlotLink[]>
   done: string[]
   /** ISO timestamp, set once at creation by createDraft(). */
   createdAt: string
@@ -240,6 +241,12 @@ export async function finalizeDraft(key: string): Promise<void> {
     },
     sections,
   }
+  // only links whose slot made it into the document
+  const links: Record<string, SlotLink[]> = {}
+  for (const [slot, list] of Object.entries(draft.links ?? {})) {
+    if (slot in sections && list.length > 0) links[slot] = list
+  }
+  if (Object.keys(links).length > 0) doc.links = links
   if (facts.address !== undefined) {
     doc.contactAddress = facts.address
   }

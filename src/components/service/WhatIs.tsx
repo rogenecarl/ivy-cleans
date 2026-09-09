@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ServiceContent } from "@/data/service-types";
+import Linked from "@/components/Linked";
 
 // a759e86: padding 6rem/3rem/2rem; columns 55.266%/44.697% from 1024; image de9c0ac bleeds -6.5rem left above 1280;
 // text wrap f1cdaa6 4rem left above 1024. Heading 4ce0b2c 4.5/4/2.8rem, paragraph c9c902e 2/1.9/1.7rem.
@@ -41,7 +42,7 @@ export default function WhatIs({
                 {/* the one per-city paragraph on a service page; same <p>, omitted when absent */}
                 {whatIs.local && (
                   <p className="mb-[2rem] text-[1.7rem] leading-[1.5em] font-light md:text-[1.9rem] lg:text-[2rem]">
-                    {whatIs.local}
+                    <Linked text={whatIs.local} links={whatIs.localLinks} />
                   </p>
                 )}
               </div>

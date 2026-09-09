@@ -1068,6 +1068,12 @@ describe('ops survive publish', () => {
       zips: ['55401', '55402'],
       reviews: [{ quote: 'Spotless, every time.', firstName: 'Dan', area: 'Edina' }],
     })
+    // the stub's one verbatim prose link survives finalize; its made-up second one was dropped
+    expect(finalized.links).toEqual({
+      'suburb.house-cleaning-north-stubville.intro': [
+        { anchor: 'more particular about their yards than their floors', href: '/services/standard-cleaning' },
+      ],
+    })
 
     await retireSiblings()
     expect(await publishLogic(KEY)).toEqual({ ok: true })

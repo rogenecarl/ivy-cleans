@@ -187,6 +187,39 @@ export function validateCityContent(raw: unknown): CityContent {
     }
   }
 
+  // -- links (optional): anchor verbatim in its slot, href a path on this site --
+  const links = doc.links
+  if (links !== undefined) {
+    if (links === null || typeof links !== 'object' || Array.isArray(links)) {
+      errors.push('links must be an object keyed by slot id')
+    } else {
+      for (const [slot, list] of Object.entries(links as Record<string, unknown>)) {
+        const text = (sections as Record<string, unknown> | null)?.[slot]
+        if (!isString(text)) {
+          errors.push(`links.${slot} has no string section to link from`)
+          continue
+        }
+        if (!Array.isArray(list)) {
+          errors.push(`links.${slot} must be an array`)
+          continue
+        }
+        list.forEach((entry, i) => {
+          const link = entry as Record<string, unknown>
+          if (entry === null || typeof entry !== 'object' || !isString(link.anchor) || !isString(link.href)) {
+            errors.push(`links.${slot}[${i}] must be { anchor: string, href: string }`)
+            return
+          }
+          if (!text.includes(link.anchor)) {
+            errors.push(`links.${slot}[${i}] anchor "${link.anchor}" is not in the copy verbatim`)
+          }
+          if (!/^\/(?!\/)/.test(link.href)) {
+            errors.push(`links.${slot}[${i}] href "${link.href}" must be a path on this site — no link may leave the tenant`)
+          }
+        })
+      }
+    }
+  }
+
   // -- maps: three keys, each string | null --
   const maps = doc.maps
   if (maps === null || typeof maps !== 'object') {

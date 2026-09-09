@@ -2,6 +2,7 @@
 
 import type { CityContent } from '../../content/types'
 import { sOpt, serviceSlots } from '../../content/slots'
+import { slotLinks } from '../../content/links'
 import { t } from '../../content/interpolate'
 import type { ServiceContent } from '../service-types'
 
@@ -34,6 +35,7 @@ export function airbnbCleaningData(c: CityContent): ServiceContent {
       text: "Airbnb and short term rental cleaning is a turnover service built around the gap between one guest checking out and the next checking in. It goes beyond a standard tidy up. Beds are stripped and remade with fresh linens, bathrooms and kitchens are reset to a hotel-level standard, host-provided amenities like toiletries, coffee, and paper products are checked and restocked, and every room is inspected against a consistent checklist so the space looks exactly as advertised for the next guest.",
       image: "/images/deep-img1.jpg",
       local: sOpt(c, serviceSlots('airbnb-cleaning')[0]),
+      localLinks: slotLinks(c, serviceSlots('airbnb-cleaning')[0]),
     },
 
     benefitsBgImage: "/images/deep-bg4.jpg",
