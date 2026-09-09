@@ -10,7 +10,6 @@ import {
 import domainsJson from '../../../../../content/_domains.json'
 import { listCities, type CityRow } from '@/pipeline/admin-logic'
 import { STAGE_IDS } from '@/pipeline/stages'
-import { leadQueryToSearch } from '@/leads/filters'
 import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
 import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
 import type { LeadCounts, SiteSettingsRecord } from '@/leads/types'
@@ -63,7 +62,7 @@ export default async function SitesPage({
   const rows = await listCities()
 
   // lead data is an enhancement: the cities table must survive a Postgres outage. On failure `leadsUnavailable`
-  // suppresses the leads column and readiness chips rather than computing them from empty data.
+  // suppresses the readiness chips rather than computing them from empty data.
   let counts: Record<string, LeadCounts> = {}
   let settingsByCity: Record<string, SiteSettingsRecord> = {}
   let leadsUnavailable = false
@@ -140,9 +139,9 @@ export default async function SitesPage({
           <TriangleAlert className="size-4 text-amber-700" aria-hidden="true" />
           <AlertTitle>Lead data is unavailable</AlertTitle>
           <AlertDescription className="text-amber-800">
-            Lead counts and readiness chips are not shown below. This is different from zero
-            leads: it means the leads store could not be reached. The sites table and every
-            action on it are unaffected.
+            Readiness chips are not shown below. This is different from a healthy site: it
+            means the leads store could not be reached. The sites table and every action on it
+            are unaffected.
           </AlertDescription>
         </Alert>
       )}
@@ -191,12 +190,11 @@ export default async function SitesPage({
                   <TableHead>City</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Domain</TableHead>
-                  <TableHead>Leads</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paged.items.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
+                {paged.items.map(({ row, primary, previewable, domain, readiness }) => {
                   return (
                     <TableRow key={row.key}>
                       <TableCell>
@@ -219,28 +217,6 @@ export default async function SitesPage({
                       </TableCell>
                       <TableCell className="text-[0.8rem]">
                         {domain ?? <span className="text-muted-foreground">not attached</span>}
-                      </TableCell>
-                      <TableCell>
-                        {cityCounts ? (
-                          <>
-                            <Link
-                              href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
-                                city: row.key,
-                                status: null,
-                                formType: null,
-                                includeTest: false,
-                              })}`}
-                              className="cursor-pointer font-medium hover:underline"
-                            >
-                              {cityCounts.unworked}
-                            </Link>
-                            <span className="ml-1 text-[0.75rem] text-muted-foreground">
-                              / {cityCounts.total}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">unavailable</span>
-                        )}
                       </TableCell>
                       <TableCell>
                         {/* one menu, not three buttons per row; the mobile cards keep the buttons (thumb-sized) */}
@@ -282,7 +258,7 @@ export default async function SitesPage({
 
           {/* Mobile cards */}
           <div className="flex flex-col gap-3 p-4 md:hidden">
-            {paged.items.map(({ row, primary, previewable, domain, cityCounts, readiness }) => {
+            {paged.items.map(({ row, primary, previewable, domain, readiness }) => {
               return (
                 <div key={row.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
@@ -301,29 +277,9 @@ export default async function SitesPage({
                       {row.doneCount ?? 0}/{STAGE_IDS.length} stages done
                     </p>
                   )}
-                  <div className="grid grid-cols-2 gap-2 text-[0.8rem]">
-                    <div>
-                      <p className="text-[0.7rem] text-muted-foreground uppercase">Domain</p>
-                      <p>{domain ?? <span className="text-muted-foreground">not attached</span>}</p>
-                    </div>
-                    <div>
-                      <p className="text-[0.7rem] text-muted-foreground uppercase">Leads</p>
-                      {cityCounts ? (
-                        <Link
-                          href={`${ADMIN_BASE}/leads?${leadQueryToSearch({
-                            city: row.key,
-                            status: null,
-                            formType: null,
-                            includeTest: false,
-                          })}`}
-                          className="cursor-pointer font-medium hover:underline"
-                        >
-                          {cityCounts.unworked} / {cityCounts.total}
-                        </Link>
-                      ) : (
-                        <span className="text-muted-foreground">unavailable</span>
-                      )}
-                    </div>
+                  <div className="text-[0.8rem]">
+                    <p className="text-[0.7rem] text-muted-foreground uppercase">Domain</p>
+                    <p>{domain ?? <span className="text-muted-foreground">not attached</span>}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {previewable && (
