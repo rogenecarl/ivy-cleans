@@ -1,5 +1,6 @@
 import type { CityContent } from "../content/types";
 import { cityHref } from "../content/interpolate";
+import { postSlugs } from "./posts";
 
 // Verbatim from blog.html and blog-post.html; typos kept. The live listing's first card is injected spam (/vavada-casino/), excluded — 8 cards.
 
@@ -115,7 +116,10 @@ export const blogCards: BlogCard[] = [
 
 // posts live in src/data/posts/, one module per slug
 
-/** The cards with hrefs scoped to this city. `blogCards` keeps root-relative hrefs for slug reservation in stages.ts; anything that renders a link uses this. */
+/** The cards the listing renders: only posts this site serves, hrefs scoped to this city. `blogCards` keeps the
+ * full live list with root-relative hrefs for slug reservation in stages.ts. */
 export function blogCardsFor(c: Pick<CityContent, 'city' | 'status'>): BlogCard[] {
-  return blogCards.map((card) => ({ ...card, href: cityHref(c, card.href) }))
+  return blogCards
+    .filter((card) => postSlugs.includes(card.href.slice(1)))
+    .map((card) => ({ ...card, href: cityHref(c, card.href) }))
 }

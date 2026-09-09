@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "check:duplication": "node scripts/check-duplication.mjs"
+    "check:duplication": "node scripts/check-duplication.mjs",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
