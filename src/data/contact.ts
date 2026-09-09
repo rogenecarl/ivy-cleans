@@ -2,6 +2,7 @@
 
 import type { CityContent } from '../content/types'
 import { realAddress } from '../content/interpolate'
+import { mapSrc } from "./maps";
 
 export type ContactField =
   | {
@@ -111,7 +112,7 @@ export function contactData(c: CityContent): ContactData {
 
     // contact.html map widget 8472915; src from CityContent.maps.contact
     contactMap: {
-      src: c.maps.contact ?? "",
+      src: mapSrc(c, "contact") ?? "",
       title: "ivy cleans",
     },
 

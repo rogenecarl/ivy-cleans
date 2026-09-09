@@ -16,6 +16,7 @@ import Locations from "@/components/home/Locations";
 import WorkCarousel from "@/components/home/WorkCarousel";
 import HomeFaqStatic from "@/components/home/HomeFaqStatic";
 import HomeCta from "@/components/home/HomeCta";
+import { mapSrc } from "@/data/maps";
 
 export async function generateMetadata({
   params,
@@ -69,7 +70,7 @@ export default async function HomePage({ params }: { params: CityParams }) {
       <Locations
         areas={areas}
         zips={zips}
-        mapSrc={c.maps.home}
+        mapSrc={mapSrc(c, "home")}
         hasSuburbPages={c.hasSuburbPages}
       />
       <WorkCarousel workImages={workImages} />

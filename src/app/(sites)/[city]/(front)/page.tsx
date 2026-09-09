@@ -10,6 +10,9 @@ import Values from "@/components/Values";
 import BeforeAfter from "@/components/BeforeAfter";
 import Reviews from "@/components/Reviews";
 import Faq from "@/components/Faq";
+import JsonLd from "@/components/JsonLd";
+import { localBusinessJsonLd } from "@/data/structured-data";
+import { mapSrc } from "@/data/maps";
 import BlogPreview from "@/components/BlogPreview";
 import { cityBits } from "@/content/store";
 import { cityFromParams, type CityParams } from "@/content/city-param";
@@ -55,7 +58,7 @@ export default async function Home({ params }: { params: CityParams }) {
         id="areas"
         areas={areas}
         bits={bits}
-        mapSrc={c.maps.front}
+        mapSrc={mapSrc(c, "front")}
         hasSuburbPages={c.hasSuburbPages}
       />
       <Values bits={bits} />
@@ -65,6 +68,7 @@ export default async function Home({ params }: { params: CityParams }) {
       <Faq />
       <CtaBand site={site} bits={bits} />
       <BlogPreview c={c} />
+      <JsonLd data={localBusinessJsonLd(c)} />
     </main>
   );
 }

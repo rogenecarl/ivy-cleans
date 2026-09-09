@@ -20,6 +20,9 @@ import ServiceArea from "@/components/ServiceArea";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
 import { areasData } from "@/data/areas";
+import { mapSrc } from "@/data/maps";
+import { serviceJsonLd } from "@/data/structured-data";
+import JsonLd from "@/components/JsonLd";
 import { cityBits } from "@/content/store";
 import type { ServiceEntry } from "@/data/services/registry";
 
@@ -72,6 +75,7 @@ export default async function ServicePage({ params }: { params: ServiceParams })
         <MoveOutPage c={c} />
       )}
       <WhereWeDoIt c={c} entry={entry} />
+      <JsonLd data={serviceJsonLd(c, entry)} />
     </>
   );
 }
@@ -82,7 +86,7 @@ function WhereWeDoIt({ c, entry }: { c: CityContent; entry: ServiceEntry }) {
     <ServiceArea
       areas={areasData(c).areas}
       bits={cityBits(c)}
-      mapSrc={c.maps.front}
+      mapSrc={mapSrc(c, "front")}
       hasSuburbPages={c.hasSuburbPages}
       heading={{ title: `Where we do ${entry.name} in ${c.city}` }}
     />
