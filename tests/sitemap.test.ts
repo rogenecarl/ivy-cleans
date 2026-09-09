@@ -23,7 +23,7 @@ const noAreas = await loadCityFixture('testville')
 describe('sitemapPaths', () => {
   it('lists every static route the app actually serves', () => {
     const paths = sitemapPaths(withAreas)
-    for (const route of ['/', '/home', '/cleaning-services', '/contact', '/faq', '/book', '/book-now', '/blog']) {
+    for (const route of ['/', '/home', '/cleaning-services', '/contact', '/faq', '/book', '/book-now', '/blog', '/privacy-policy']) {
       expect(paths).toContain(route)
     }
   })

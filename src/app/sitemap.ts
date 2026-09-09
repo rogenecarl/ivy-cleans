@@ -21,6 +21,7 @@ export function sitemapPaths(c: CityContent): string[] {
     '/book',
     '/book-now',
     '/blog',
+    '/privacy-policy',
     ...SERVICE_SLUGS.map((slug) => `/services/${slug}`),
     // area pages only when hasSuburbPages: listing URLs that 404 is worse than listing none
     ...(c.hasSuburbPages ? c.research.suburbs.map((s) => `/${s.slug}`) : []),

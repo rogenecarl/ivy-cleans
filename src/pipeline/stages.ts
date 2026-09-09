@@ -405,6 +405,7 @@ export function reservedSlugs(cityName: string): Set<string> {
     'contact',
     'faq',
     'home',
+    'privacy-policy',
     'services',
     ...blogPostSlugs(),
     `deep-cleaning-${slug}`,

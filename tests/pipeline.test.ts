@@ -691,6 +691,7 @@ describe('pipeline stages', () => {
           'contact',
           'faq',
           'home',
+          'privacy-policy',
           'services',
           ...postSlugs,
           ...blogCards.map((c) => c.href.slice(1)),
