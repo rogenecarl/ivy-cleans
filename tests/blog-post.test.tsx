@@ -69,7 +69,7 @@ const flatten = (runs: Inline[]): string =>
  */
 const blockTexts = (b: ArticleBlock): string[] => {
   if (b.type === 'img') return []
-  if (b.type === 'ul' || b.type === 'ol') return b.items.map(flatten)
+  if ('items' in b) return b.items.map(flatten)
   return [flatten(b.text)]
 }
 
