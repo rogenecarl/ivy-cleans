@@ -162,9 +162,15 @@ function numberedExample(paragraphs: string[]): string {
 // Research is three passes. City-wide first (it feeds every page and was the part that ran out of searches),
 // then the area list, then one short pass per area. Keywords come from DataForSEO, not from research.
 
-/** Pass 1: the city as a whole — climate, housing stock, what dirties a home, ZIP codes. */
+function searchBudgetLine(n: number): string {
+  return `You have ${n} web searches for this task. Run them ONE AT A TIME and read each result before choosing the next; a batch of searches fired at once is rejected and you get nothing.`
+}
+
+/** Pass 1: the city as a whole — climate, housing stock, what dirties a home. */
 export function buildMetroResearchPrompt(facts: Facts): string {
-  return `Research ${facts.city}, ${facts.stateName} for a residential cleaning company that serves it. Search the web for each part below and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
+  return `Research ${facts.city}, ${facts.stateName} for a residential cleaning company that serves it. Search the web and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
+
+${searchBudgetLine(SEARCH_BUDGET.metro)}
 ${opsBlock(facts)}
 Report HOUSING AND LOCAL CONDITIONS for ${facts.city} as a whole: the climate and its seasons, the dominant housing stock and typical age and construction of homes, the usual flooring and foundation type, and any local condition that dirties a house — road salt, humidity and mold, hard water, pollen, desert dust, blowing sand, coastal salt air, wildfire smoke, year-round air conditioning.
 
@@ -178,6 +184,8 @@ Do NOT research or report phone numbers, street addresses, business names, price
 /** Pass 2: the areas, and which of them border which. */
 export function buildAreasResearchPrompt(facts: Facts): string {
   return `Research the areas a residential cleaning company based in ${facts.city}, ${facts.stateName} would realistically serve. Search the web and report what you find. Everything you report must come from the pages you searched — never from memory. If the web results do not support an item, leave it out.
+
+${searchBudgetLine(SEARCH_BUDGET.areas)}
 ${opsBlock(facts)}
 AREAS — 8 to 10 real, named places: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), note roughly where it sits relative to ${facts.city}, and name the two to four OTHER areas from your list it borders or sits next to — the site links neighbouring area pages to each other, and only real adjacency counts.
 
@@ -190,6 +198,8 @@ Do NOT report phone numbers, street addresses, business names, prices, or contac
 export function buildAreaResearchPrompt(facts: Facts, area: string, allAreas: readonly string[]): string {
   const others = allAreas.filter((a) => a !== area)
   return `Research ${area}, an area near ${facts.city}, ${facts.stateName}, for a residential cleaning company that serves it. Search the web and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, say so plainly.
+
+${searchBudgetLine(SEARCH_BUDGET.area)}
 
 Report three things about ${area} only.
 
@@ -611,6 +621,9 @@ async function executeStage(
         model: MODELS.research,
       })
       const areaNames = [...new Set(areas.map((a) => a.name.trim()).filter((n) => n !== ''))]
+      if (areaNames.length === 0) {
+        throw new Error(`research found no areas for ${facts.city} — the areas pass returned nothing usable; re-run research`)
+      }
       const perArea: Record<string, string> = {}
       for (const name of areaNames) {
         perArea[name] = await pass(`area:${normalizeSlug(name)}`, MODEL_KEYS.researchArea(normalizeSlug(name)), buildAreaResearchPrompt(facts, name, areaNames), SEARCH_BUDGET.area, `${name}: subdivisions, housing, conditions`)
