@@ -115,7 +115,8 @@ export class AnthropicModelClient implements ModelClient {
         'AnthropicModelClient requires an API key: set ANTHROPIC_API_KEY in .env.local, or pass one explicitly to the constructor.'
       )
     }
-    this.client = new Anthropic({ apiKey })
+    // research passes are long and cheap to retry; the SDK's default of 2 gave up on an 'Overloaded' mid-run
+    this.client = new Anthropic({ apiKey, maxRetries: 6 })
   }
 
   async generate<T>(args: GenerateArgs<T>): Promise<T> {
