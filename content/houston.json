@@ -16,142 +16,764 @@
   "research": {
     "suburbs": [
       {
-        "name": "Katy",
-        "slug": "house-cleaning-katy",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "name": "Houston Heights",
+        "slug": "houston-heights",
+        "subdivisions": [
+          "Norhill District",
+          "Woodland Heights Historic District",
+          "Germantown Historic District",
+          "Heights South Historic District",
+          "Woodland Heights",
+          "Highland Park",
+          "Woodland Heights Annex",
+          "Grota Homestead",
+          "Woodland Terrace",
+          "Willborg"
+        ],
+        "housingCharacter": "One- or two-story single-family residences in styles including Queen Anne, Craftsman, Folk National, and Folk Victorian, dating mostly to the early 1900s (documented homes from 1907, 1912, 1918); a mix of original bungalows (as small as ~1,100 sq ft), fully renovated historic homes (up to 4,500 sq ft after additions), and new construction including townhomes.",
+        "neighbors": [
+          "lazybrook-timbergrove",
+          "memorial",
+          "montrose"
+        ],
+        "conditions": [
+          {
+            "condition": "Historic-district exterior modification guidelines preserve original wood siding, porches, and older windows on many homes",
+            "implication": "More exterior dust/pollen infiltration and delicate original surfaces that need gentler cleaning approaches than a modern build",
+            "copySafe": true
+          },
+          {
+            "condition": "Active infill/teardown construction on adjacent lots due to uneven deed restrictions and Houston's 2001 lot-size reform",
+            "implication": "Ongoing construction dust and debris tracked from neighboring demolition/rebuild sites onto surviving historic homes, a recurring fine-dust cleaning need",
+            "copySafe": true
+          },
+          {
+            "condition": "Heights Boulevard esplanade and hike-and-bike trail runs through the neighborhood's center",
+            "implication": "Homes near this corridor likely see more street-level foot/bike traffic and associated tracked-in dirt at entryways",
+            "copySafe": true
+          }
+        ]
       },
       {
-        "name": "The Woodlands",
-        "slug": "cleaning-services-the-woodlands",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Sugar Land",
-        "slug": "cleaning-service-sugar-land",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Cinco Ranch",
-        "slug": "cinco-ranch-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Missouri City",
-        "slug": "house-cleaning-missouri-city",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Spring",
-        "slug": "cleaning-services-spring",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Pearland",
-        "slug": "cleaning-service-pearland",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Pecan Grove",
-        "slug": "pecan-grove-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "Fulshear",
-        "slug": "house-cleaning-fulshear",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
-      },
-      {
-        "name": "The Heights",
-        "slug": "cleaning-services-the-heights",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "name": "Lazybrook/Timbergrove",
+        "slug": "lazybrook-timbergrove",
+        "subdivisions": [
+          "Lazybrook",
+          "Timbergrove Manor",
+          "Heritage Creek",
+          "Timbergrove Heights",
+          "Timbergrove Terrace",
+          "Timbergrove Point",
+          "Timbergrove Gardens"
+        ],
+        "housingCharacter": "Classic ranch-style brick homes from the 1950s and 60s on large lots with mature trees, median size around 1,900 sq ft, alongside newer chic, modern multi-story townhome developments.",
+        "neighbors": [
+          "houston-heights"
+        ],
+        "conditions": [
+          {
+            "condition": "Deed-restricted neighborhoods along the wooded banks of White Oak Bayou with heavy pine and tree cover",
+            "implication": "Heavier pollen, pine needle debris, sap, and leaf litter tracked indoors and accumulating on windowsills, patios, and gutters year-round",
+            "copySafe": true
+          },
+          {
+            "condition": "Flood risk varies street to street, with some construction occurring in the 100-year floodplain along White Oak Bayou",
+            "implication": "Post-storm jobs may involve bayou silt/mud tracked in near ground level and humidity-driven mildew on lower walls/baseboards near the bayou",
+            "copySafe": false
+          },
+          {
+            "condition": "New townhome construction and teardown-rebuild activity alongside older ranch homes",
+            "implication": "Construction/renovation dust (drywall dust, sawdust, fine debris) requiring extra post-construction-style cleaning for some jobs",
+            "copySafe": true
+          },
+          {
+            "condition": "Mix of large-lot older ranch homes and denser multi-story new townhomes",
+            "implication": "Crews should expect a mix of single-story large-yard homes with more exterior/yard-adjacent debris versus narrow-lot townhomes with more stairs and smaller footprints",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "River Oaks",
-        "slug": "cleaning-service-river-oaks",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "slug": "river-oaks",
+        "subdivisions": [
+          "Country Club Estates",
+          "Tall Timbers"
+        ],
+        "housingCharacter": "Developed in the 1920s, with architecture ranging from Tudor-style residences to Southern Colonial mansions on large, often wooded lots (some over an acre); active teardown of older estates for new builds with soaring ceilings and modern amenities.",
+        "neighbors": [
+          "memorial",
+          "montrose",
+          "tanglewood"
+        ],
+        "conditions": [
+          {
+            "condition": "Dense canopy of mature oak trees throughout the neighborhood",
+            "implication": "Heavy leaf/pollen/sap debris on windowsills, patios, and entryways, plus shaded, damp exteriors that can encourage mildew on siding, walkways, and outdoor furniture",
+            "copySafe": true
+          },
+          {
+            "condition": "Large, wooded lots with winding interior streets, especially in Tall Timbers",
+            "implication": "Bigger properties to service per job and longer walks from street parking to the door",
+            "copySafe": true
+          },
+          {
+            "condition": "Active teardown and new-construction activity replacing older estates",
+            "implication": "Construction dust and debris likely on streets and adjacent properties, and newly built homes may need post-construction-style detail cleaning even after 'move-in ready'",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Memorial",
+        "slug": "memorial",
+        "subdivisions": [
+          "Sherwood Forest",
+          "Stablewood",
+          "Bayou Woods",
+          "Gaywood",
+          "Hedwig Shadows",
+          "Westwick",
+          "Crestwood",
+          "Nottingham",
+          "Nottingham Forest",
+          "Heritage Oaks",
+          "Walnut Bend",
+          "Westchester",
+          "Memorial Valley",
+          "Bunker Hill Village",
+          "Hedwig Village",
+          "Hunters Creek Village",
+          "Piney Point Village"
+        ],
+        "housingCharacter": "Housing spans 1950s-60s ranch-style homes through 1980s-to-present custom-built estate residences in Traditional, French Chateau, Mediterranean, and Contemporary styles, on large lots often a half-acre or more, with some neighborhood averages around 5,100+ sq ft.",
+        "neighbors": [
+          "houston-heights",
+          "river-oaks",
+          "montrose",
+          "tanglewood"
+        ],
+        "conditions": [
+          {
+            "condition": "Mature pine/oak tree canopy shading many established neighborhoods",
+            "implication": "Heavy leaf, pollen, and pine-needle buildup on roofs, gutters, patios, and window screens; shaded/damp exteriors prone to algae and mold growth on siding and walkways",
+            "copySafe": true
+          },
+          {
+            "condition": "Bayou-adjacent flood history, including Hurricane Harvey reservoir releases affecting neighborhoods like Nottingham Forest and Westchester",
+            "implication": "Homes on lower lots near the bayou can face periodic flood-recovery cleaning needs (mud, silt, moisture/mold remediation)",
+            "copySafe": false
+          },
+          {
+            "condition": "Heavy black gumbo clay soil that swells when wet and shrinks when dry",
+            "implication": "Muddy yard run-off and foundation shifting can track more soil/dust indoors near entryways after rain, especially on older homes without updated drainage",
+            "copySafe": true
+          },
+          {
+            "condition": "Gated/private-guarded subdivisions and autonomous Villages with their own police departments",
+            "implication": "Crews should expect some neighborhoods to have their own security patrols or private guard-gates requiring ID checks or advance notice for access",
+            "copySafe": true
+          },
+          {
+            "condition": "Large lots, some up to 100,000 sq ft in the Memorial Villages",
+            "implication": "Exterior work covers substantially more area than a typical Houston lot, and long driveways/privacy landscaping may add walking distance for crews",
+            "copySafe": true
+          },
+          {
+            "condition": "Mixed old and new construction with many original homes torn down for larger custom builds",
+            "implication": "Nearby active construction can introduce fine drywall/concrete dust into adjacent occupied homes, and newly finished custom builds often need post-construction-style detail cleaning",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Montrose",
-        "slug": "montrose-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "slug": "montrose",
+        "subdivisions": [
+          "Montrose Addition",
+          "First Montrose Commons",
+          "Courtlandt Place",
+          "Audubon Place",
+          "Westmoreland",
+          "Avondale East",
+          "Avondale West",
+          "Hyde Park"
+        ],
+        "housingCharacter": "Wide range of eras and styles from Georgian, Colonial, Tudor Revival, Mediterranean, and Prairie mansions to Craftsman bungalows, contemporary condos, and new-construction townhomes; individual listing sizes vary enormously with no consistent typical square footage.",
+        "neighbors": [
+          "houston-heights",
+          "river-oaks",
+          "memorial",
+          "tanglewood"
+        ],
+        "conditions": [
+          {
+            "condition": "Old streetcar-suburb layout platted in 1911 with landscaped boulevard esplanades and mature landscaping",
+            "implication": "More leaf litter, pollen, and tree debris tracked indoors, plus older homes with tighter street parking that can complicate crew access and equipment carry-in",
+            "copySafe": true
+          },
+          {
+            "condition": "Several city-designated historic districts with early deed restrictions on exterior modifications",
+            "implication": "Older homes may have original wood floors, plaster walls, and vintage fixtures requiring gentler, non-abrasive cleaning products",
+            "copySafe": true
+          },
+          {
+            "condition": "Gated, one-block enclaves such as Courtlandt Place",
+            "implication": "Crews need advance gate codes/access coordination and scheduling flexibility since access isn't a simple street pull-up",
+            "copySafe": true
+          },
+          {
+            "condition": "Active new-build townhome and remodel construction next to century-old homes",
+            "implication": "Post-construction dust and debris is a live issue on many blocks, and newly finished units may need heavier-duty post-reno deep-clean protocols",
+            "copySafe": true
+          },
+          {
+            "condition": "Dense, highly walkable urban core with heavy restaurant/bar traffic near main corridors",
+            "implication": "More foot traffic, street-level grime, and urban pollution/soot near busy corridors versus quieter interior residential blocks, plus tighter urban parking for cleaning vehicles",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Tanglewood",
+        "slug": "tanglewood",
+        "subdivisions": [
+          "Tanglewood Hollow",
+          "West Oaks",
+          "Tanglewood Circle"
+        ],
+        "housingCharacter": "Originated in the late 1940s with one-story ranch-style homes, most since replaced with larger two-story English-style brick and Mediterranean-style homes; living space ranges from about 2,000 to over 10,000 sq ft on lots typically exceeding 15,000 sq ft.",
+        "neighbors": [
+          "river-oaks",
+          "memorial",
+          "montrose"
+        ],
+        "conditions": [
+          {
+            "condition": "Hundreds of mature live oak trees canopying broad, winding streets",
+            "implication": "Heavier leaf/pollen/sap debris on patios, gutters, and exterior glass, more shaded and mildew-prone siding and walkways, and a live-oak pollen season that leaves a film on windows and outdoor furniture",
+            "copySafe": true
+          },
+          {
+            "condition": "Ongoing teardown of one-story homes and construction of large custom luxury estates",
+            "implication": "Construction dust drifting onto neighboring properties, and post-construction 'builder's clean' opportunities on newly finished custom homes",
+            "copySafe": true
+          },
+          {
+            "condition": "24-hour private security patrol staffed by off-duty police officers monitoring the neighborhood",
+            "implication": "Crews should expect to be visibly identifiable (branded vehicle/uniform) and possibly coordinate arrival with homeowners or the association to avoid patrol inquiries",
+            "copySafe": true
+          },
+          {
+            "condition": "Conflicting reports on drainage/flooding — some sources describe strong drainage capacity, others describe flooding as an annual worry",
+            "implication": "Crews should expect occasional storm-driven scheduling disruptions and post-storm exterior grime/mud despite the area's reputation for better-than-average drainage",
+            "copySafe": false
+          },
+          {
+            "condition": "Curving, non-grid streets with cul-de-sacs",
+            "implication": "Route planning/navigation may take slightly longer, and cul-de-sacs mean less street-parking flexibility for a crew's vehicle near some homes",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Katy",
+        "slug": "katy",
+        "subdivisions": [
+          "Cinco Ranch",
+          "Kelliwood",
+          "Elyson",
+          "Sunterra",
+          "Seven Meadows",
+          "Grange"
+        ],
+        "housingCharacter": "A patchwork of over 200 subdivisions organized into larger master-planned neighborhoods with an attractive mix of modern and traditional styles; one active community's homes range from 1,600 to 4,300 sq ft, with heavy ongoing new construction across dozens of communities.",
+        "neighbors": [
+          "cypress"
+        ],
+        "conditions": [
+          {
+            "condition": "Gated communities and waterfront properties present throughout the area",
+            "implication": "Crews should expect some homes to require advance notice/gate codes or guard check-in, and lakefront/waterfront homes may need extra attention to patios, windows, and outdoor furniture exposed to water spray, humidity, and algae grit",
+            "copySafe": true
+          },
+          {
+            "condition": "Very high volume of active new-home construction across dozens of communities",
+            "implication": "A steady pipeline of new construction clean or post-drywall-dust jobs, and ongoing construction traffic/dust in surrounding streets for homes near active building phases",
+            "copySafe": true
+          },
+          {
+            "condition": "Large, amenitized master-planned communities emphasizing safety and community",
+            "implication": "HOA rules in these communities may govern vendor parking, work hours, or contractor registration that a scheduling crew should anticipate",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Cypress",
+        "slug": "cypress",
+        "subdivisions": [
+          "Bridgeland",
+          "Towne Lake",
+          "Coles Crossing",
+          "Dunham Pointe",
+          "Canyon Lakes West",
+          "Marvida",
+          "Stone Gate",
+          "Cypress Creek Lakes",
+          "Miramesa",
+          "Fairfield",
+          "Longwood Village"
+        ],
+        "housingCharacter": "Spans roughly 50 square miles of world-class master-planned developments; homes range from new construction up to 8,251 sq ft to established neighborhoods dating to the early 1980s, predominantly single-family with HOAs common.",
+        "neighbors": [
+          "katy"
+        ],
+        "conditions": [
+          {
+            "condition": "Mature tree canopy in the northeastern part of Cypress versus grassy ranch land in the southeast",
+            "implication": "Homes in tree-heavy sections see more leaf litter, pollen, and organic debris tracked indoors and on exterior windows/gutters, while grassier areas deal more with dust and dirt",
+            "copySafe": true
+          },
+          {
+            "condition": "Lakefront/waterfront living, notably Towne Lake's central lake and marina-style features",
+            "implication": "Lakefront homes can bring in extra humidity, waterline grit, and outdoor gear that tracks debris and moisture indoors",
+            "copySafe": true
+          },
+          {
+            "condition": "Ongoing new construction in several communities like Bridgeland and Marvida",
+            "implication": "Homes in active-build sections and their surrounding streets are likely to experience ongoing construction dust and dirt from unfinished landscaping/roads nearby",
+            "copySafe": true
+          },
+          {
+            "condition": "A select number of true guard-gated neighborhoods",
+            "implication": "Crews should expect check-in procedures, possible visitor lists/gate codes, and scheduling coordination for guard-gated or manned-entrance neighborhoods",
+            "copySafe": true
+          },
+          {
+            "condition": "Equestrian-friendly subdivisions with multi-acre estates",
+            "implication": "Larger acreage/equestrian properties imply more outdoor-to-indoor dirt transfer (mud, hay, animal hair) and longer driveways/more entry points to manage",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Sugar Land",
+        "slug": "sugar-land",
+        "subdivisions": [
+          "New Territory",
+          "Greatwood",
+          "First Colony",
+          "Sugar Creek",
+          "Riverstone",
+          "Telfair",
+          "Avalon",
+          "Lake Pointe Town Center",
+          "River Park",
+          "Alkire Lake",
+          "Colony Bend",
+          "Colony Woods",
+          "Huntington",
+          "Cullinan Park",
+          "Commonwealth"
+        ],
+        "housingCharacter": "Dominated by master-planned communities subdivided into many named sections, with era and size varying widely by community — e.g. New Territory's 1990s two-story homes around 3,000+ sq ft, Telfair's homes averaging about 3,500 sq ft built 2006-2014, and Riverstone homes ranging roughly 1,460 to 5,676 sq ft.",
+        "neighbors": [
+          "missouri-city"
+        ],
+        "conditions": [
+          {
+            "condition": "Gated access common across multiple communities",
+            "implication": "Crews should expect to coordinate gate codes/visitor lists and build in extra arrival time at some addresses",
+            "copySafe": true
+          },
+          {
+            "condition": "Numerous communities built around constructed lakes offering waterfront homes",
+            "implication": "Waterfront/lake-adjacent homes likely see more humidity, condensation on windows/patio doors, and outdoor-surface grime (algae, waterfowl mess) near docks and patios",
+            "copySafe": true
+          },
+          {
+            "condition": "Mature tree canopy of live oaks, water oaks, and pecans in older established communities",
+            "implication": "Heavier leaf, pollen, and sap debris on roofs, gutters, decks and exterior windows compared to newer, less-landscaped subdivisions",
+            "copySafe": true
+          },
+          {
+            "condition": "Flood-prone Gulf Coast clay soil near the Brazos River, with standing water in yards a year-round problem",
+            "implication": "Muddy entryways/patios after storms, humidity-driven mold/mildew risk in bathrooms and closets, and elevated mold risk for any home that has taken on water",
+            "copySafe": false
+          },
+          {
+            "condition": "Active new-home construction pipeline in newer sections like Telfair and parts of Riverstone",
+            "implication": "Crews should expect fresh-build drywall dust and construction grit in these newer sections",
+            "copySafe": true
+          }
+        ]
+      },
+      {
+        "name": "Missouri City",
+        "slug": "missouri-city",
+        "subdivisions": [
+          "Sienna",
+          "Quail Valley",
+          "Lake Olympia",
+          "Riverstone",
+          "Lakes of Brightwater",
+          "Jade Island – Lake Olympia",
+          "Colony Meadows",
+          "Steep Bank Village",
+          "Hunters Glen",
+          "Olympia Estates"
+        ],
+        "housingCharacter": "Mix of 1970s-1990s homes (including older Quail Valley slab homes) and newer large-scale master-planned developments like Sienna and Lake Olympia (opened 1984); floor plans run as large as 6,000+ sq ft in Quail Valley golf course homes.",
+        "neighbors": [
+          "sugar-land"
+        ],
+        "conditions": [
+          {
+            "condition": "Lakefront communities with mature trees, such as Lake Olympia's 130 acres of lakes",
+            "implication": "Heavy tree canopy near lakefront lots means more leaf litter, pollen, and organic debris tracked indoors and collecting on window sills, patios, and gutters, plus more humidity-related dust/mildew on exterior-facing surfaces",
+            "copySafe": true
+          },
+          {
+            "condition": "Gated sections within communities like Lake Olympia",
+            "implication": "Crews scheduling recurring service in gated lakefront enclaves need to plan for gate-access coordination/scheduling delays",
+            "copySafe": true
+          },
+          {
+            "condition": "Active new construction underway in areas like Lake Olympia",
+            "implication": "Fresh-construction dust (drywall dust, sawdust, fine grit) is a realistic recurring issue for first cleans and nearby occupied homes",
+            "copySafe": true
+          },
+          {
+            "condition": "Floodplain exposure along Oyster Creek, with homes in 100-year and 500-year floodplains",
+            "implication": "Homes in these floodplain pockets can face periodic post-storm silt/mud tracked indoors and elevated interior humidity/mold risk after heavy rain events",
+            "copySafe": false
+          },
+          {
+            "condition": "Older slab-on-grade housing stock with reported sub-slab moisture intrusion in pockets like Buffalo Run and Lake Olympia",
+            "implication": "Elevated sub-floor moisture can correlate with musty odors or mildew along baseboards that a routine clean should flag",
+            "copySafe": true
+          }
+        ]
       }
     ],
     "zips": [
-      "77002",
-      "77003",
-      "77004",
-      "77005",
-      "77006",
-      "77007",
-      "77008",
-      "77009",
-      "77019",
-      "77023",
-      "77024",
-      "77025",
-      "77027",
-      "77035",
-      "77036",
-      "77055",
-      "77056",
       "77057",
-      "77063",
-      "77070",
-      "77077",
-      "77079",
-      "77080",
-      "77084",
-      "77095",
-      "77096",
-      "77098"
+      "77056",
+      "77449",
+      "77429",
+      "77498"
     ],
-    "mapEmbedUrl": null,
-    "conditions": []
+    "conditions": [
+      {
+        "condition": "Humid subtropical climate with long, hot summers (averaging 95°F in August) and mild winters (63°F average highs in January), with relative humidity averaging around mid-70s% nearly year-round",
+        "implication": "There is no real seasonal shutdown — homes get dirty on a nearly continuous cycle rather than following a sharp spring/fall pattern seen in colder climates",
+        "copySafe": true
+      },
+      {
+        "condition": "Heavy, spread-out annual rainfall (about 49.77 inches/year)",
+        "implication": "Increases the odds of tracked-in mud and wet-shoe traffic on floors across most months, not just a rainy season",
+        "copySafe": true
+      },
+      {
+        "condition": "Housing stock centered on a median 1982 construction year, with a strong newer-home pipeline concentrated in the Sun Belt building pattern",
+        "implication": "Most target homes are past their original finishes but not historic — expect aging but not antique plumbing and moderate-to-large single-family floor plans, alongside continuing new construction",
+        "copySafe": true
+      },
+      {
+        "condition": "Slab-on-expansive-clay-soil construction (Beaumont and Lissie clay formations) causing shrink-swell foundation movement and uneven floors",
+        "implication": "Grout lines and transition strips accumulate dirt unevenly, making grout cleaning of cracked or lifted tile a recurring, relevant service need rather than an edge case",
+        "copySafe": true
+      },
+      {
+        "condition": "Hard water averaging around 135 ppm, well above the 17 ppm hard-water threshold, with limescale buildup accelerated by the humid climate",
+        "implication": "Glass shower doors and chrome/nickel fixtures need scale-specific treatment (not just general glass cleaner) to stay clear, as a recurring metro-wide condition",
+        "copySafe": true
+      },
+      {
+        "condition": "Nearly year-round pollen season combined with air conditioners running 8-10 months per year",
+        "implication": "Dust and allergen buildup on surfaces, vents, ceiling fans, and window sills is a constant, low-grade problem rather than a seasonal event, supporting a case for regular rather than occasional cleaning service",
+        "copySafe": true
+      },
+      {
+        "condition": "High ambient humidity (75%+ for much of the year) shortens the effective mold-growth window on damp surfaces to as little as 24-48 hours",
+        "implication": "Bathrooms, laundry areas, and window sills need more frequent attention to prevent grout and caulk discoloration, and routine cleaning has genuine preventive value in catching early mildew",
+        "copySafe": true
+      },
+      {
+        "condition": "Housing stock is large and single-family dominant (1,040,576 units, 42.7% detached single-family)",
+        "implication": "Consistent with a sizable addressable market for residential cleaning across the metro",
+        "copySafe": false
+      },
+      {
+        "condition": "Flood damage claims are spread broadly across the metro, with 75% of a studied area's damages occurring outside the 100-year floodplain",
+        "implication": "Flood/storm risk and its cleaning-adjacent mold aftermath is spread widely rather than concentrated in a few high-risk pockets, relevant to service-area planning",
+        "copySafe": false
+      }
+    ],
+    "mapEmbedUrl": null
   },
   "sections": {
     "services.heroParagraphs": [
-      "As a local and insured business, Ivy Cleans is proud to provide residential cleaning and commercial janitorial services throughout Houston and the communities that ring it. Our experienced team understands what this city does to a home — the Gulf humidity, the pollen, the clay tracked in off a driveway — and we clean with that knowledge in hand. We attend to every surface, every baseboard, every corner behind a door, and our customers receive a home that feels genuinely cared for. Having built our reputation one house at a time, we can assertively declare that our standard of work is unmatched.",
-      "That is why we hold fast to the belief that our house cleaning services stand among the finest in the Houston area. The foundation of our work is honest effort, plain and open communication, and results you can see the moment you walk through the door. A studio near the loop or a five-bedroom home out on the west side receives the same care and the same thoroughness. Examine any part of how we operate, and you will find nothing we would hesitate to show you.",
-      "Do you have a mess that needs cleaning? Or are you hoping for a fresher household or workplace? Is there a cleaning project sitting on your list?",
-      "Whether it’s your home or your business, give our professional cleaning company a call today, request your quote, and put our skills to an effective test!",
-      "Reach out to Ivy Cleans today, ask us for an estimate, and let us show you what a proper clean looks like!"
+      "We’re a local, insured cleaning company, and our crews work homes and businesses all over Houston — pier-and-beam bungalows, brick ranch houses, subdivisions out west, and offices that get their turn after everyone has gone home for the day. Our team has been at this long enough to know where Gulf Coast humidity leaves its mark: shower grout, window tracks, the top edge of a door, the underside of a ceiling fan blade. What you get is a home cleaned corner to corner, the same rooms checked on every visit, and people who tell you plainly what was done.",
+      "That’s why we’re comfortable having our work looked at closely by anyone in Houston. It comes down to steady effort, straight talk about what a job actually needs, and results you shouldn’t have to be shown to notice. A one-bedroom apartment gets the same order of rooms and the same walkthrough at the end as a five-bedroom house. Nothing about our standard shifts because the square footage is small.",
+      "Has the mildew crept back into your shower grout again? When did anyone last wipe the blades of every ceiling fan? Is February pollen still sitting along your windowsills?",
+      "Home or business, call our professional cleaning company today and ask us for a quote on the work you need.",
+      "Reach out to Ivy Cleans and we’ll put together an estimate for your place, whatever shape it’s in."
     ],
     "services.serviceIntro": [
-      "Ivy Cleans provides a full range of professional cleaning services across Houston and the surrounding cities, from recurring home cleaning and dependable maid service to move-in and move-out work, top-to-bottom deep cleaning, post-renovation cleanup, short-term-rental turnovers, and steady office upkeep for small businesses. Our professional house cleaners bring years of experience along with quality products and commercial-grade equipment suited to each surface. We know Houston keeps long hours and longer commutes, so we schedule weekly, biweekly, monthly, or one-time visits around the way you actually live.",
-      "Houston homes take in a remarkable amount of dust, from the yellow film of live oak pollen every spring to the fine grit that rides in on humid air and settles across ceiling fans, blinds, and vents that run nearly year-round. Our dusting service clears those surfaces properly so the air in your home feels lighter to breathe.",
-      "Between the heavy gumbo clay that clings to shoes after a downpour and the many months when the heat keeps everyone indoors with the air conditioning humming, Houston floors work hard. Our vacuuming service lifts embedded grit from carpet and hard flooring alike, leaving rooms that feel clean underfoot rather than merely tidy.",
-      "Few cities test a bathroom like ours. Gulf humidity lingers in tile grout and around tubs, mildew takes hold in a shower that never fully dries, and mineral deposits cloud glass and fixtures. Our bathroom cleaning removes that buildup along with the germs and bacteria behind it, giving your family a safe, healthy space.",
-      "Houston windows rarely stay clear for long. Pollen sticks to the glass in spring, driving summer rain leaves muddy spatter along the sills, and the haze of traffic and industry dulls whatever is left. Our professional window cleaning removes the film and the streaks, and the difference in daylight through your rooms is immediate."
+      "Ivy Cleans handles a wide range of professional cleaning in Houston and the towns around it: recurring house cleaning, deep cleans, move-out work, maid service, commercial jobs, and the routine office upkeep that keeps a workplace presentable. Our house cleaners have real years behind them, and they bring products and equipment matched to the surface in front of them, from sealed stone counters to hardwood that swells through an August of high dew points. Schedules fill up here, so we book weekly, biweekly, monthly, or one time only.",
+      "Oak pollen coats this city from mid-February onward, and it doesn’t stop at the front door — it rides in on shoes, on the dog, and straight through the return vents. Ceiling fans running most of the year keep it circulating. We dust surfaces, blades, blinds, baseboards, and the ledges nobody sees from floor level.",
+      "Between summer downpours, gumbo clay churned into mud in the yard, and long weeks spent indoors because the heat index says so, Houston floors take a beating. Our vacuuming pulls grit, sand, and pet hair out of carpet and rug pile, and we run the edges, the stair treads, and under the furniture.",
+      "Bathrooms here rarely get a chance to dry out. Damp air hangs around after every shower, and hard water leaves chalky rings on faucets, showerheads, and glass doors. We scrub tile and grout, strip soap scum, disinfect toilets and handles, and knock back mildew before it spreads, leaving a room that’s safe and healthy for your family.",
+      "Houston windows pick up a film of spring pollen, hazy salt-heavy air drifting in off the Gulf, freeway grit, and the mineral spotting sprinklers leave behind on ground-floor panes. Our window cleaners take the glass, frames, sills, and tracks back to clear, and the rooms behind them come out noticeably brighter."
     ],
-    "services.cards.dusting": "Dusting matters more here than most people expect. Warm air moves through Houston homes for the better part of the year, carrying pollen, mold spores, and fine outdoor particles onto shelves, plantation shutters, and the tops of door frames where they quietly accumulate. Our dusting service works through those overlooked places with proper cloths and care, so your rooms look settled and the air inside your home is kinder to allergy sufferers.",
-    "services.cards.vacuuming": "Vacuuming is a service Houston households cannot skip. Wet lawns and dark clay soil come inside on shoes and paws after every storm, and long stretches of triple-digit heat mean families live almost entirely indoors, working the carpet daily. Our professional cleaners vacuum thoroughly along edges, beneath furniture, and across every traffic path, so your floors are free of grit and your home feels fresh again.",
-    "services.cards.bathroom": "Bathroom cleaning is the task Houston homeowners dread most, and with good reason. Damp coastal air keeps showers from drying out, so mildew shadows the grout while hard water leaves chalky rings on faucets and glass doors. Our team scrubs tile, tubs, toilets, and fixtures down to the surface and disinfects as we go, handing back a bathroom that is sanitary, bright, and safe for everyone in the house.",
-    "services.cards.window": "Window cleaning transforms a Houston home, whether it’s a bungalow with original wood sashes or a high-rise unit facing the skyline. Oak pollen, mud from summer thunderstorms, and the gray haze that hangs over the freeways build a film that dims every room behind the glass. Our window cleaners leave panes, frames, and sills clear and streak-free, so your home fills with the daylight you are paying for.",
-    "services.cards.upholstery": "Upholstery holds onto Houston in ways you can smell before you see it. Humidity settles into sofa cushions and dining chairs, sunscreen and sweat transfer on hot afternoons, and pollen works deep into the weave each spring. Our upholstery cleaning draws out that trapped soil and odor with methods matched to the fabric, so your furniture looks refreshed, feels dry, and no longer carries the season indoors with it.",
-    "deep.whatIs": "Deep cleaning is a comprehensive service that reaches well past the tidying of a routine visit. We work through every surface, floor, carpet, and piece of furniture in your home, drawing out the dirt, dust, and allergens an ordinary clean leaves sitting in baseboards, grout, vents, and upholstery. Houston gives us plenty to find. Gulf humidity keeps bathrooms and closets damp enough for mildew to settle in, the air conditioning runs nearly year round and pushes dust through every room, and spring oak pollen coats windowsills and blinds. The result is a healthier, more comfortable home for your family."
+    "services.cards.dusting": "Dust never really settles in a Houston house, because the air conditioning keeps it moving from March into November and carries pollen, construction grit from the lot down the street, and pet dander along with it. We work top to bottom — fan blades, vents, shelves, frames, door trim, and the baseboards most people skip. The result is air that’s easier on your lungs and rooms that stay looking clean longer.",
+    "services.cards.vacuuming": "Carpet in this climate holds more than dirt. The air stays damp enough that grass clippings, sand, and mud from a rainy week grind into the fibers instead of shaking free. We vacuum carpet, area rugs, stairs, and hard floors, using attachments to reach corners, closet floors, and the strip along the baseboard. Floors feel better underfoot and the room stops smelling like whatever was tracked in.",
+    "services.cards.bathroom": "Long showers and Gulf Coast air mean a Houston bathroom can stay damp all day, and mildew finds grout lines and window frames quickly. Hard water piles scale onto fixtures and glass. We scour tubs, tile, sinks, and toilets, disinfect the surfaces hands touch most, polish the mirrors, and clear the drains of hair, so the room is sanitary and genuinely pleasant to walk into.",
+    "services.cards.window": "Between the yellow-green wash of spring pollen, thunderstorms that dry into spotted streaks, and sprinkler spray leaving mineral rings on ground-floor glass, windows here lose their clarity in a hurry. We clean interior and exterior panes where they can be reached safely, wipe down frames and sills, and clear the tracks of grit. More daylight gets in, and your yard looks like a view again.",
+    "services.cards.upholstery": "Upholstery soaks up whatever the air is holding, and in Houston that means humidity, cooking smells, dander, and the fine dust the AC pushes around all summer. Sofas in the rooms families live in through nine months of indoor weather show it first. We vacuum cushions and crevices, treat spots, and freshen couches, armchairs, and dining seats so the fabric looks right and stops carrying odors.",
+    "suburb.houston-heights.intro": "We clean houses all over the Heights, from small original bungalows on the side streets to renovated two-stories near Heights Boulevard. What shapes the work here is usually the lot next door. Teardowns and infill builds run more or less constantly, and the fine gray dust from a demolition drifts in through original wood windows, then settles on baseboards, blinds and picture rails. We keep after it, because in a house built in 1912 that dust finds every ledge and seam.",
+    "suburb.houston-heights.homes": "Streets in the Norhill District and Woodland Terrace still hold the original stock: Craftsman and Folk Victorian cottages near 1,100 square feet, with narrow hallways, tall baseboards, deep porches and older windows that trap dust in the sash. In the Woodland Heights Historic District and Germantown Historic District you’ll find those same 1907-to-1918 frames opened up and added onto, some pushing 4,500 square feet, where original floors meet new tile and the transitions hold grit. Then there are the townhomes dropped onto split lots, three floors of stairs and glass. Each needs a different pace, and a top-to-bottom deep clean on a 1912 bungalow looks nothing like one on a new townhome.",
+    "suburb.houston-heights.local": "Historic-district rules keep original siding, porches and older windows in place, so more outside dust and pollen works its way in, and it lands on hundred-year-old woodwork that needs a gentler hand than a modern build. Homes along the Heights Boulevard esplanade and hike-and-bike trail catch the worst of the tracked-in dirt at the front door, and with rain spread across most months the entry floors see wet shoes nearly year-round. Humidity in the mid-70s lets mildew take hold on caulk and window sills within a day or two, and hard water leaves scale on glass shower doors and chrome fixtures that general glass cleaner won’t touch. Steady every-other-week cleaning is what keeps ahead of it.",
+    "suburb.lazybrook-timbergrove.intro": "We clean houses on both sides of White Oak Bayou, from the ranch streets of Lazybrook to the newer townhome rows off Timbergrove. The tree cover is the first thing our crews notice — pine needles, sap, and leaf litter ride in on shoes and settle along windowsills and door tracks, and the deed-restricted lots mean big shaded yards feeding straight into the front door. Staying ahead of that takes a steady cleaning schedule rather than one annual scrub.",
+    "suburb.lazybrook-timbergrove.homes": "Most of the older streets — Lazybrook, Timbergrove Manor, Heritage Creek — are 1950s and 60s brick ranches, single story, somewhere near 1,900 square feet on lots wide enough for a real yard. Rooms are boxy and separate rather than open plan, the floors are usually a patchwork of original hardwood, replaced tile, and carpet in the bedrooms, and the bathrooms have been redone once or twice since, so we’re cleaning fittings that are aging without being antique. Then there’s the newer side: the multi-story townhomes in Timbergrove Heights and Timbergrove Point, narrow footprints, three flights of stairs, tall glass, and often the fine drywall dust a remodel leaves behind still sitting in the corners.",
+    "suburb.lazybrook-timbergrove.local": "Pine and hardwood cover along the bayou drops pollen and needle debris onto porches and window ledges in every month of the year, and it walks straight inside. When a teardown goes up next door, sawdust and drywall dust drift over the fence into vents and blinds. The clay soil under these slabs keeps moving, so tile lifts and grout lines pick up dirt unevenly — we scrub those by hand instead of mopping over them. Houston water is hard enough that we treat scale off glass shower doors and chrome fixtures with a descaler, and with humidity in the seventies most of the year we check caulk and sills for early mildew.",
+    "suburb.river-oaks.intro": "We clean homes across River Oaks, from Tudor front halls off the boulevards to the new builds going up where an older estate stood a year ago. The tree canopy shapes most of the work here. Oak debris, pollen and sap collect on windowsills, entry tile and patio doors, and a good share of it walks straight inside on shoes. Deep lots and long driveways mean our team carries equipment further from the street than we do almost anywhere else we work in Houston.",
+    "suburb.river-oaks.homes": "Houses here run from 1920s Tudor and Southern Colonial estates to homes gutted or rebuilt in the last few years, and both turn up on the same street. In Country Club Estates the rooms are formal and deep — long entry halls, paneled libraries, wide stair runs with turned balusters that trap dust in the carving. Tall Timbers sits on bigger wooded lots off winding streets, so floor plans spread sideways and there’s more hardwood and tile per visit than the square footage suggests. Plenty of these homes still wear their eighties fittings: original tile, glass shower enclosures, chrome that has dulled. Slab movement over the clay lifts tile edges, and grout lines take dirt unevenly because of it.",
+    "suburb.river-oaks.local": "The canopy drops leaves, pollen and sap onto sills, entry tile and patios all year, and the shade keeps walkways, siding and outdoor furniture damp enough to gray over with mildew. When a teardown starts two doors down, that grit rides in on shoes, and a new build handed over move-in ready still needs a detail clean along baseboards, window tracks and tall trim. Humidity in the mid-seventies gives mildew a day or two to take hold in a shower, and water near 135 ppm leaves scale on glass doors and nickel fixtures that needs descaling, not glass spray. With the air conditioning running most of the year, we wipe vents, fan blades and sills every visit.",
+    "suburb.memorial.intro": "We clean houses across Memorial, and the first thing our team plans for here is access. Several of the Villages run their own police departments, and some streets sit behind a private guard gate, so we send names ahead and check in like anyone else. Then there’s the walk — a half-acre lot with a curving drive means hauling equipment a good distance before the first room gets touched. We build that into every visit, whether it’s a one-time deep clean or a regular cleaning schedule.",
+    "suburb.memorial.homes": "Streets like Sherwood Forest and Nottingham Forest still hold the 1950s and 60s ranch homes they started with — single story, long hallways, original bathrooms with tile set in narrow grout lines and chrome fixtures that show every water spot. A few blocks away in Stablewood or Piney Point Village, you get the custom builds: two-story entries, stone floors, five thousand square feet and up, marble counters and glass shower enclosures in every bedroom suite. Walnut Bend sits somewhere in the middle, mostly 1970s and 80s houses with updated kitchens over older plumbing. Room count matters more than square footage in this work — big houses here are big because there are more rooms, not because the rooms are enormous.",
+    "suburb.memorial.local": "The pine and oak canopy over Gaywood and Hedwig Village keeps needles, leaf grit and pollen on the walks year round, and it rides indoors on shoes to settle along baseboards and window tracks. Black gumbo clay is the bigger nuisance — after a rain the back door turns to mud, and it prints onto tile and wood for days. Teardowns on the next lot push fine drywall and concrete dust through window screens, so post-construction dust cleanup is ordinary work for us here, not a rarity. Add the metro constants: hard water leaves scale on shower glass that needs a descaler rather than glass cleaner, humidity gives mildew a two-day head start in bathrooms, and the air conditioning coats fan blades and sills.",
+    "suburb.montrose.intro": "We clean houses all over Montrose, from the bungalow blocks off the esplanades to the townhomes going up three at a time on a single old lot. The 1911 street grid was drawn for streetcars, not for cargo vans, so we plan the carry-in before we arrive — where to park, which gate, which set of stairs. Mature oaks and pecans shade most of these streets, and what falls from them ends up on your floors.",
+    "suburb.montrose.homes": "Almost nothing here matches its neighbor. First Montrose Commons and Westmoreland run to Craftsman bungalows and Prairie-influenced two-stories with original pine floors, plaster walls that don’t forgive an abrasive pad, and bathrooms whose tile has been in place since long before anyone thought about grout sealer. Courtlandt Place and Audubon Place hold larger Georgian and Mediterranean houses behind their own gates, with tall windows, deep baseboards, and more square footage than the block suggests. Then there are the new townhomes in Avondale East and Avondale West — three floors, hard-surface flooring throughout, glass shower panels, and stairs on every trip. Those all take a slower deep clean the first time we come, because the older ones hide dirt in millwork and the new ones show every streak.",
+    "suburb.montrose.local": "Leaf litter and pollen come off those esplanade trees ten months a year and ride in on shoes, settling along baseboards and in the gaps of lifted tile. On blocks where a lot has been scraped, construction dust from the lot next door works through window seals and lands on every horizontal surface, and it takes vacuuming and wiping in passes, not one wipe. Closer to the restaurant and bar corridors, street grime and soot come in heavier than they do on the quiet interior streets. Add humidity that sits in the mid-seventies most of the year — mildew can take hold in a shower corner in a day or two — and hard water that clouds glass panels and chrome. Regular cleaning keeps that in check.",
+    "suburb.tanglewood.intro": "We clean houses across Tanglewood, and the live oaks set the pace of the work. Hundreds of them arch over these winding streets, and what they shed lands on patio glass, entry mats and window sills all year. Add air conditioning running eight to ten months, and the dust never really stops arriving. That’s why most of the homes we look after here run on a repeating cleaning schedule rather than one big annual push. Our crews come in marked vehicles and uniforms, which the neighborhood’s round-the-clock security patrol tends to appreciate.",
+    "suburb.tanglewood.homes": "The neighborhood started in the late 1940s as one-story ranch houses, and most of those have since come down. What stands now along Tanglewood Hollow and around Tanglewood Circle leans toward two-story English brick and Mediterranean-style homes, anywhere from about 2,000 square feet to well over 10,000, on lots bigger than 15,000 square feet. West Oaks holds the same mix of eras side by side. In practice that means long stair runs, two-story entries with glass we reach on poles, wide stone and tile floors, and upstairs bathrooms whose fixtures are into their second or third decade. On streets where a teardown has just finished, we also handle a builder’s clean before the furniture arrives.",
+    "suburb.tanglewood.local": "Live oak pollen and sap leave a film on exterior glass and patio furniture, and the shade those canopies throw keeps walkways and siding damp enough to grow mildew. A teardown a few doors down sends fine construction dust drifting in through open doors and into return vents. Inside, the standing humidity gives mildew a day or two to take hold in bathrooms and laundry rooms, so we scrub grout and caulk lines while the discoloration is still early. Hard water near 135 ppm builds scale that ordinary glass cleaner won’t lift, so shower doors and nickel fixtures get a descaling treatment. With rain spread across most months, entry floors and shifted tile transitions get real time too.",
+    "suburb.katy.intro": "We clean houses all over Katy, on the older established streets and in the sections still being built out. A good share of the work here starts at a gate — a code, a call ahead, or a guard with a list — so we sort that out before a crew ever loads up. And in neighborhoods with active building phases nearby, drywall dust and grit drift in off the street constantly, which is why so much of what we do out here is getting construction dust out of a finished house.",
+    "suburb.katy.homes": "Katy is a couple hundred subdivisions stitched into a handful of master-planned communities, and the difference shows once we’re inside. Kelliwood and Seven Meadows sit on the older side — houses well past their original finishes, aging but not antique fixtures, and tile that has shifted where the slab moved on the clay below, so grout lines and transition strips collect dirt unevenly and get worked by hand. Cinco Ranch spans both ends. Elyson, Sunterra and Grange are the newer end, with plans running from about 1,600 square feet to well over 4,000: two-story entries, open kitchens, and window walls that take a ladder and a squeegee rather than a quick wipe, and we’re often in one the week before a family moves in.",
+    "suburb.katy.local": "Waterfront lots take the brunt of the weather here — patios, outdoor furniture and the glass facing the water pick up algae grit and spray film that needs scrubbing rather than a rinse. Near active building phases, fine construction dust rides in on shoes and settles on baseboards, blinds and fan blades within days of a wipe-down. HOA rules on vendor parking and work hours decide when we show up, so we plan around them. Past that, it’s Houston: close to fifty inches of rain spread through the year means muddy floors most months, mid-70s humidity gives mildew a day or two to set into bathroom caulk, and hard water leaves scale on glass shower doors and chrome fixtures.",
+    "suburb.cypress.intro": "We clean houses across the fifty or so square miles that make up Cypress, from guard-gated streets where we check in at a manned entrance to the newest cul-de-sacs where the sod isn’t down yet. That spread is the whole job here. A crew can leave a four-bedroom on a shaded 1980s street in the morning and spend the afternoon on a floor plan close to 8,000 square feet with three staircases and four full baths. We plan our visits around both.",
+    "suburb.cypress.homes": "The median house here went up around 1982, which puts Coles Crossing, Fairfield and Longwood Village in the range we see most: sizable single-family floor plans past their original finishes, tile through the entry and kitchen, carpet in the bedrooms, and bathrooms on their second set of fixtures. Newer sections in Bridgeland, Marvida and Dunham Pointe run bigger and more open, with two-story great rooms, wide plank floors and oversized showers behind clear glass. Towne Lake adds waterfront lots with back doors that never stay shut. Nearly every street answers to an HOA, so we park where we’re told and keep our gear off the lawn. The first clean after the builder hands over keys is its own kind of work.",
+    "suburb.cypress.local": "In the northeast, where the tree canopy is mature, leaf litter, seed and pollen ride in on shoes and film up exterior glass; out toward the grassy southeast it’s fine dirt instead, and it settles on baseboards and blind slats. Homes near active building in Bridgeland and Marvida collect gritty construction dust that keeps returning until the roads and landscaping are finished. Lakefront houses off Towne Lake bring in waterline grit and damp gear, and the acreage properties add mud, hay and animal hair at every entry. Then there’s mid-70s humidity most of the year, which gives mildew a two-day head start in showers, and hard water that needs scale-specific treatment on glass shower doors and chrome fixtures.",
+    "suburb.sugar-land.intro": "Our crews clean homes across Sugar Land every week, and a good share of those addresses sit behind a gate. We ask for the code or a spot on the visitor list when you book, and we build the extra minutes into the route so a gate doesn’t eat into the clean. Once we’re inside, the work is what it always is: floors, baths, kitchens, and the dust that never really stops here.",
+    "suburb.sugar-land.homes": "New Territory is full of 1990s two-stories over 3,000 square feet, with long upstairs hallways, carpeted game rooms, and stair rails that hold more dust than anyone expects. Telfair runs newer and bigger, averaging around 3,500 square feet from the 2006 to 2014 build years, with open kitchens and wide tile fields that show every footprint. Riverstone swings from about 1,460 square feet to nearly 5,700, so no two visits there look alike. In First Colony and Sugar Creek the houses land either side of the early 1980s: original floor plans, updated kitchens, and tubs and shower doors that three sets of owners have already scrubbed. Grout, baseboards, and ceiling fans are where the age shows first.",
+    "suburb.sugar-land.local": "Homes on the water at Alkire Lake and in Riverstone fog their patio doors most mornings and collect algae and waterfowl mess on the slab outside, so we spend longer on glass and thresholds there. Under the live oaks and pecans in Sugar Creek and Colony Bend, leaf grit and sap ride in on shoes and settle along baseboards. Out on the newer streets in Telfair, fine drywall dust from the lots still under construction drifts onto blinds and vent covers. Then there’s the rest of it: close to fifty inches of rain a year keeps floors muddy most months, hard water leaves scale on shower glass and chrome that ordinary cleaner won’t lift, and at this humidity mildew can claim a caulk line in two days.",
+    "suburb.missouri-city.intro": "We clean houses in Missouri City every week, in Hunters Glen, out along the lakes, and in the newer sections still filling in with construction. What we notice most is the tree cover. Lots near the water sit under mature canopy, so leaf litter, seed pods and pollen pile up on porches and window sills, and every bit of it comes indoors on shoes and on the dog. Floors here need more attention than the square footage alone suggests.",
+    "suburb.missouri-city.homes": "Quail Valley is the older end of town, slab houses built around the golf course, a few of them past 6,000 square feet, with original tile in the entry halls and bathrooms remodeled once or twice since. Hunters Glen and Steep Bank Village run smaller and tighter, mostly seventies and eighties construction with carpet in the bedrooms and grout that has held decades of traffic. Sienna and Riverstone are the other end: open plans, two-story entries, hard flooring nearly everywhere and more glass than anyone wants to wipe twice. Median build year here is around 1982, so most kitchens and baths are past their first finishes without being old enough to be delicate. Recurring cleaning on a set schedule keeps that much square footage from getting ahead of you.",
+    "suburb.missouri-city.local": "Lakefront lots take the worst of it: debris blows off the water and out of the canopy, then grinds into entry tile and window tracks. In the gated sections at Lake Olympia we sort out gate access before a recurring visit. Building is still going on out there too, and drywall dust that settles on trim and vents has to be lifted with damp cloths, not swept around. Older slabs near Lake Olympia and Quail Valley can push moisture up, so we check baseboards for musty edges. After that it’s the metro standard: mud in most months, year-round pollen through eight to ten months of air conditioning, and hard water, which is why we scrub scale off glass shower doors rather than wiping them.",
+    "service.standard-cleaning.local": "Houston water runs hard, around 135 ppm, so the glass shower door is where a standard clean earns its keep here. General glass cleaner just pushes the scale around; we work the doors and the chrome and nickel fixtures with a descaler and dry them down, so the film doesn’t haze over again within the week. The other thing we watch is the humidity. Sitting in the mid‑70s most of the year, damp caulk and grout can show mildew in a day or two, so window sills, tub surrounds and the laundry area get looked at every visit rather than occasionally. In a Sugar Land bathroom used twice a day, catching that early is most of the job.",
+    "service.deep-cleaning.local": "The first thing our crews go after in a Houston deep clean is scale. Water here runs around 135 ppm hard, so glass shower doors haze over and chrome fixtures film in a way ordinary glass cleaner won’t touch — clearing them takes a descaler, real dwell time, and scrubbing at the door track and shower head. We plan extra time for that in a Katy primary bath with a big frameless enclosure. The other thing the climate creates is mildew. With humidity in the mid‑70s most of the year, damp grout and caulk can darken in a day or two, so we scrub the caulk bead at the tub, the grout, and the window sills where condensation sits rather than wiping and moving on.",
+    "service.apartment-cleaning.local": "Most of the units we clean here have a glass shower door and chrome or nickel fixtures, and the water in Houston runs hard — around 135 ppm — so scale hazes both within weeks. Ordinary glass cleaner only smears it around, so we bring a descaling product and work the door, the track and the fixtures until the glass is clear again rather than just wet. The second thing that shapes this job in an apartment is air. A bathroom or laundry closet with no window and one exhaust fan sits in mid‑70s humidity for most of the year, and damp caulk can gray over in a day or two. In a Montrose fourplex or a newer Katy rental, that means we scrub grout lines and caulk seams every visit, not occasionally.",
+    "service.airbnb-cleaning.local": "Guest photos punish a cloudy shower door, and the water here runs hard enough that scale films over glass and chrome faster than any general glass cleaner will lift it. So on a turnover we treat the shower glass, faucets and tub surround with a descaler and squeegee it dry, because a rental takes back-to-back showers with nobody wiping it down between them. The other thing we watch is damp. With humidity sitting in the mid-70s most of the year, a towel balled up on tile or a curtain left closed after checkout can start mildew inside a day or two. We open the bathroom up, dry the caulk lines and window sills, and keep an eye on grout in the Katy rentals we turn over week after week.",
+    "service.post-construction-cleaning.local": "Drywall dust behaves differently in this humidity. It doesn’t stay a dry powder — it grabs onto window glass, cabinet boxes and baseboards and turns to a film that a dry cloth only smears, so we work wet, then dry the surface behind us instead of leaving damp trim and fresh caulk sitting. On a gut remodel in Houston Heights, that means bathrooms and the laundry area get finished last and dried out, since mildew can find damp grout in a day or two here. The other thing is your air conditioner, which has been running the whole build and pulling fine dust into returns, vents and fan blades. We do those after the surfaces, not before, or the system hands it all back.",
+    "service.pre-listing-cleaning.local": "Buyers walk into a bathroom and look straight at the shower door. Our water runs hard enough here that scale films over glass and dulls chrome within weeks, and general glass cleaner only smears it around. Before listing photos, we treat that buildup with a scale-specific product so the glass reads clear in pictures and stays clear through the open house. The other thing we plan extra time for is grout. Slab foundations moving on this clay leave tile lines and transition strips sitting slightly uneven, so grime collects in a pattern that looks like neglect even in a well-kept Sugar Land house. We scrub those lines by hand instead of mopping over them and hoping the light is kind."
+  },
+  "links": {
+    "suburb.houston-heights.intro": [
+      {
+        "anchor": "the fine gray dust from a demolition",
+        "href": "/services/post-construction-cleaning"
+      }
+    ],
+    "suburb.houston-heights.homes": [
+      {
+        "anchor": "a top-to-bottom deep clean",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.houston-heights.local": [
+      {
+        "anchor": "Steady every-other-week cleaning",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.lazybrook-timbergrove.intro": [
+      {
+        "anchor": "a steady cleaning schedule",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.lazybrook-timbergrove.homes": [
+      {
+        "anchor": "the fine drywall dust a remodel leaves behind",
+        "href": "/services/post-construction-cleaning"
+      }
+    ],
+    "suburb.lazybrook-timbergrove.local": [
+      {
+        "anchor": "scale off glass shower doors",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.river-oaks.local": [
+      {
+        "anchor": "still needs a detail clean along baseboards",
+        "href": "/services/post-construction-cleaning"
+      },
+      {
+        "anchor": "we wipe vents, fan blades and sills every visit",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.river-oaks.homes": [
+      {
+        "anchor": "grout lines take dirt unevenly",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.memorial.intro": [
+      {
+        "anchor": "a regular cleaning schedule",
+        "href": "/services/standard-cleaning"
+      },
+      {
+        "anchor": "a one-time deep clean",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.memorial.local": [
+      {
+        "anchor": "post-construction dust cleanup",
+        "href": "/services/post-construction-cleaning"
+      }
+    ],
+    "suburb.montrose.homes": [
+      {
+        "anchor": "a slower deep clean",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.montrose.local": [
+      {
+        "anchor": "construction dust from the lot next door",
+        "href": "/services/post-construction-cleaning"
+      },
+      {
+        "anchor": "Regular cleaning keeps that in check",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.tanglewood.intro": [
+      {
+        "anchor": "a repeating cleaning schedule",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.tanglewood.homes": [
+      {
+        "anchor": "a builder’s clean before the furniture arrives",
+        "href": "/services/post-construction-cleaning"
+      }
+    ],
+    "suburb.tanglewood.local": [
+      {
+        "anchor": "we scrub grout and caulk lines",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.katy.intro": [
+      {
+        "anchor": "getting construction dust out of a finished house",
+        "href": "/services/post-construction-cleaning"
+      }
+    ],
+    "suburb.katy.homes": [
+      {
+        "anchor": "the week before a family moves in",
+        "href": "/services/move-in-move-out-cleaning"
+      }
+    ],
+    "suburb.katy.local": [
+      {
+        "anchor": "scale on glass shower doors and chrome fixtures",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.cypress.homes": [
+      {
+        "anchor": "The first clean after the builder hands over keys",
+        "href": "/services/post-construction-cleaning"
+      }
+    ],
+    "suburb.cypress.local": [
+      {
+        "anchor": "scale-specific treatment on glass shower doors",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.sugar-land.intro": [
+      {
+        "anchor": "floors, baths, kitchens",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.sugar-land.local": [
+      {
+        "anchor": "fine drywall dust from the lots still under construction",
+        "href": "/services/post-construction-cleaning"
+      },
+      {
+        "anchor": "scale on shower glass and chrome",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "suburb.missouri-city.homes": [
+      {
+        "anchor": "Recurring cleaning on a set schedule",
+        "href": "/services/standard-cleaning"
+      }
+    ],
+    "suburb.missouri-city.local": [
+      {
+        "anchor": "drywall dust that settles on trim and vents",
+        "href": "/services/post-construction-cleaning"
+      },
+      {
+        "anchor": "scrub scale off glass shower doors",
+        "href": "/services/deep-cleaning"
+      }
+    ],
+    "service.standard-cleaning.local": [
+      {
+        "anchor": "In a Sugar Land bathroom",
+        "href": "/sugar-land"
+      }
+    ],
+    "service.deep-cleaning.local": [
+      {
+        "anchor": "in a Katy primary bath",
+        "href": "/katy"
+      }
+    ],
+    "service.apartment-cleaning.local": [
+      {
+        "anchor": "In a Montrose fourplex",
+        "href": "/montrose"
+      },
+      {
+        "anchor": "a newer Katy rental",
+        "href": "/katy"
+      }
+    ],
+    "service.airbnb-cleaning.local": [
+      {
+        "anchor": "the Katy rentals we turn over",
+        "href": "/katy"
+      }
+    ],
+    "service.post-construction-cleaning.local": [
+      {
+        "anchor": "a gut remodel in Houston Heights",
+        "href": "/houston-heights"
+      }
+    ],
+    "service.pre-listing-cleaning.local": [
+      {
+        "anchor": "a well-kept Sugar Land house",
+        "href": "/sugar-land"
+      }
+    ]
   }
 }

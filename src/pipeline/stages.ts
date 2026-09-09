@@ -163,7 +163,7 @@ function numberedExample(paragraphs: string[]): string {
 // then the area list, then one short pass per area. Keywords come from DataForSEO, not from research.
 
 function searchBudgetLine(n: number): string {
-  return `You have ${n} web searches for this task. Run them ONE AT A TIME and read each result before choosing the next; a batch of searches fired at once is rejected and you get nothing.`
+  return `You have ${n} web searches for this task, no more. Run them ONE AT A TIME and read each result before choosing the next; a batch fired at once is rejected. When the tool reports the limit is reached, do not try again — write up what you have found so far.`
 }
 
 /** Pass 1: the city as a whole — climate, housing stock, what dirties a home. */

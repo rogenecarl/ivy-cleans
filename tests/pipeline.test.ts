@@ -559,7 +559,7 @@ describe('pipeline stages', () => {
 
     it('a failing stage appends an error event and still rejects', async () => {
       const failing: ModelClient = {
-      usage: { calls: 0, inputTokens: 0, outputTokens: 0 },
+      usage: { calls: 0, inputTokens: 0, outputTokens: 0, byModel: {} },
         research: async () => {
           throw new Error('boom')
         },
@@ -1728,7 +1728,7 @@ describe('the research passes', () => {
     it('a partial failure mid-loop does not lose already-completed areas, and resuming retries only the failed one', async () => {
       const inner = new StubModelClient(fixtures)
       const flaky: ModelClient = {
-      usage: { calls: 0, inputTokens: 0, outputTokens: 0 },
+      usage: { calls: 0, inputTokens: 0, outputTokens: 0, byModel: {} },
         research: (prompt, key, onEvent) => inner.research(prompt, key, onEvent),
         generate: async (args) => {
           if (args.key === `suburb.${MOCK_HOLLOW}`) {
@@ -1858,7 +1858,7 @@ describe('the research passes', () => {
     it('a genuine (non-precondition) model error still propagates and leaves the stage undone', async () => {
       const inner = new StubModelClient(fixtures)
       const failing: ModelClient = {
-      usage: { calls: 0, inputTokens: 0, outputTokens: 0 },
+      usage: { calls: 0, inputTokens: 0, outputTokens: 0, byModel: {} },
         research: (prompt, key, onEvent) => inner.research(prompt, key, onEvent),
         generate: async (args) => {
           if (args.key === `suburb.${NORTH}`) throw new Error('simulated API error')

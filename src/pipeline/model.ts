@@ -22,7 +22,7 @@ export const MODELS = { writing: 'claude-opus-5', research: 'claude-sonnet-5' } 
 // Web searches per research pass. Research is three small passes (city-wide, the area list, one per area) rather
 // than one long call: each pass gets its own budget so none starves another, and search results never pile up.
 // a burst of parallel searches past max_uses gets the whole batch rejected, so each budget has headroom
-export const SEARCH_BUDGET = { metro: 6, areas: 5, area: 4 } as const
+export const SEARCH_BUDGET = { metro: 4, areas: 3, area: 3 } as const
 
 export type ResearchOptions = { maxSearches: number }
 
@@ -65,6 +65,8 @@ export interface UsageTally {
   calls: number
   inputTokens: number
   outputTokens: number
+  /** the same, per model — research and writing are priced differently */
+  byModel: Record<string, { calls: number; inputTokens: number; outputTokens: number }>
 }
 
 const RESEARCH_SYSTEM =
@@ -93,13 +95,18 @@ function concatText(content: Array<{ type: string; text?: string }>): string {
 
 export class AnthropicModelClient implements ModelClient {
   private readonly client: Anthropic
-  readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0 }
+  readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0, byModel: {} }
 
-  /** Fold one response's usage into the running tally. */
-  private count(message: { usage?: { input_tokens?: number; output_tokens?: number } }): void {
+  private count(model: string, message: { usage?: { input_tokens?: number; output_tokens?: number } }): void {
+    const input = message.usage?.input_tokens ?? 0
+    const output = message.usage?.output_tokens ?? 0
     this.usage.calls += 1
-    this.usage.inputTokens += message.usage?.input_tokens ?? 0
-    this.usage.outputTokens += message.usage?.output_tokens ?? 0
+    this.usage.inputTokens += input
+    this.usage.outputTokens += output
+    const m = (this.usage.byModel[model] ??= { calls: 0, inputTokens: 0, outputTokens: 0 })
+    m.calls += 1
+    m.inputTokens += input
+    m.outputTokens += output
   }
 
   constructor(apiKey: string | undefined = process.env.ANTHROPIC_API_KEY) {
@@ -125,7 +132,7 @@ export class AnthropicModelClient implements ModelClient {
       ...fallbackFor(args.model ?? MODELS.writing),
     })
     const message = await stream.finalMessage()
-    this.count(message)
+    this.count(args.model ?? MODELS.writing, message)
     if (message.stop_reason === 'refusal') {
       throw refusalError(message.stop_details)
     }
@@ -181,7 +188,7 @@ export class AnthropicModelClient implements ModelClient {
       })
     }
     const message = await stream.finalMessage()
-    this.count(message)
+    this.count(MODELS.research, message)
     if (message.stop_reason === 'refusal') {
       throw refusalError(message.stop_details)
     }
@@ -191,7 +198,7 @@ export class AnthropicModelClient implements ModelClient {
 
 export class StubModelClient implements ModelClient {
   /** Calls are counted; tokens stay zero because the stub spends nothing. */
-  readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0 }
+  readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0, byModel: {} }
 
   constructor(
     private readonly fixtures: {
