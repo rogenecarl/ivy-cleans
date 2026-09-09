@@ -175,6 +175,12 @@ export function validateCityContent(raw: unknown): CityContent {
     for (const [key, value] of Object.entries(sections as Record<string, unknown>)) {
       if (!isStringOrStringArray(value)) {
         errors.push(`sections.${key} must be a string or string[]`)
+        continue
+      }
+      // generated copy never links anywhere: no URL, no domain, and never another city's site
+      for (const text of Array.isArray(value) ? value : [value]) {
+        const hit = /https?:\/\/\S+|\bwww\.\S+|\bivycleans\.com\b/i.exec(text)
+        if (hit) errors.push(`sections.${key} carries a link or domain ("${hit[0]}"); generated copy must not link anywhere`)
       }
     }
   }

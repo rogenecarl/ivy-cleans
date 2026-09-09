@@ -18,17 +18,17 @@ export default function CommentFormDisplay({ responses }: { responses?: Response
               </h2>
               <ol className="m-0 list-none p-0 text-[0.9rem] leading-[1.5rem] text-[#374151]">
                 {responses.items.map((item) => (
-                  <li key={item.href}>
+                  <li key={item.text}>
                     <div className="py-[30px] pl-[60px]">
                       {item.prefix}{" "}
-                      {/* live's comment stylesheet makes the pingback link a block, so it
-                          drops onto its own line under the "Pingback:" prefix */}
-                      <a
-                        href={item.href}
-                        className="block text-[#cc3366] leading-[1.2em] no-underline"
-                      >
-                        {item.text}
-                      </a>
+                      {/* live makes the pingback link a block, on its own line under the prefix */}
+                      {item.href === "" ? (
+                        <span className="block text-[#cc3366] leading-[1.2em]">{item.text}</span>
+                      ) : (
+                        <a href={item.href} className="block text-[#cc3366] leading-[1.2em] no-underline">
+                          {item.text}
+                        </a>
+                      )}
                     </div>
                   </li>
                 ))}

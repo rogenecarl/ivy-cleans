@@ -3,30 +3,15 @@ import { headers } from 'next/headers'
 import { getCity } from '@/content/store'
 import { loadRouting } from '@/content/resolve-rewrite'
 import { cityHref } from '@/content/interpolate'
-import { SERVICE_SLUGS } from '@/data/services/registry'
+import { sitePaths } from '@/data/routes'
 import type { CityContent } from '@/content/types'
 
 // One sitemap per tenant, resolved from the Host header: one deployment serves every city, so there's no build-time
 // answer. headers() opts the route out of caching. Hosts come from loadRouting(), the same tables the proxy uses.
 export const dynamic = 'force-dynamic'
 
-/** Every path a tenant publishes, relative to the city root. Exported for tests. */
-export function sitemapPaths(c: CityContent): string[] {
-  return [
-    '/',
-    '/home',
-    '/cleaning-services',
-    '/contact',
-    '/faq',
-    '/book',
-    '/book-now',
-    '/blog',
-    '/privacy-policy',
-    ...SERVICE_SLUGS.map((slug) => `/services/${slug}`),
-    // area pages only when hasSuburbPages: listing URLs that 404 is worse than listing none
-    ...(c.hasSuburbPages ? c.research.suburbs.map((s) => `/${s.slug}`) : []),
-  ]
-}
+/** Every path a tenant publishes, relative to the city root. */
+export const sitemapPaths = sitePaths
 
 // no lastModified on purpose: claiming every page changed on every fetch is a signal crawlers learn to discount
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

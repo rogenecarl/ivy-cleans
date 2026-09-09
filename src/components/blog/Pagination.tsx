@@ -1,5 +1,4 @@
-// blog.html .elementor-pagination: page 1 is a span, 2-5 are live hrefs (no /blog/[page] route yet).
-// Plain <a> so the trailing slash survives.
+// blog.html .elementor-pagination. Pages 2-5 linked to ivycleans.com/blog/N/ on live; no tenant serves them, so they are text.
 const otherPages = [2, 3, 4, 5];
 
 export default function Pagination() {
@@ -13,14 +12,10 @@ export default function Pagination() {
         <span className="sr-only">Page</span>1
       </span>
       {otherPages.map((n) => (
-        <a
-          key={n}
-          href={`/blog/${n}/`}
-          className="text-link mx-[0.5rem] first:ml-0 last:mr-0 hover:underline"
-        >
+        <span key={n} className="text-link mx-[0.5rem] first:ml-0 last:mr-0">
           <span className="sr-only">Page</span>
           {n}
-        </a>
+        </span>
       ))}
     </nav>
   );

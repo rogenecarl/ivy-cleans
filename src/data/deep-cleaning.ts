@@ -75,9 +75,9 @@ export function deepCleaningData(c: CityContent): ServiceContent {
       contact: t("Contact us today to discuss your deep cleaning requirements in {city}.", c),
     },
 
-    // live quirk: the bathroom anchor wraps the ENTIRE next <li>; reproduced via servicesLinkedItemIndex
-    servicesLinkHref: "https://ivycleans.com/how-to-clean-a-bathroom/",
-    servicesLinkedItemIndex: 3,
+    // live linked one item to an ivycleans.com post no tenant serves; unlinked (no link may leave the tenant)
+    servicesLinkHref: "",
+    servicesLinkedItemIndex: -1,
 
     whyChoose: {
       h2: t("Why Choose Ivy Cleans for Deep Cleaning {city}?", c),

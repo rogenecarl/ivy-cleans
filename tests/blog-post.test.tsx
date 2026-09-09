@@ -145,6 +145,7 @@ describe('PostArticle', () => {
     // value that yields 700 in a paragraph and 900 in a heading off <strong>.
     expect(html).toContain('[font-weight:bolder]')
     expect(html).toContain('<em>')
+    // the raw data still carries the live href; postForCity decides what a tenant renders (cross-site-links.test.tsx)
     expect(html).toContain('href="https://ivycleans.com/how-to-clean-bathroom-tiles/"')
   })
 

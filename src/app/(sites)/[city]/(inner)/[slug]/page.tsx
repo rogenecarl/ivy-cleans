@@ -9,6 +9,7 @@ import { getCity } from "@/content/store";
 import { suburbData, type SuburbRef } from "@/data/suburb";
 import { siteData } from "@/data/site";
 import { posts, postSlugs, type PostArticleData } from "@/data/posts";
+import { postForCity } from "@/data/posts/tenant";
 import SuburbHero from "@/components/suburb/SuburbHero";
 import HouseCleaning from "@/components/suburb/HouseCleaning";
 import SuburbBenefits from "@/components/suburb/Benefits";
@@ -86,7 +87,8 @@ export default async function InnerSlugPage({ params }: { params: SlugParams }) 
 
 /* The live blog-post template: article, then the comment widget, both inside
    the same Elementor column (see PostArticle / CommentFormDisplay). */
-function PostPage({ c, post }: { c: CityContent; post: PostArticleData }) {
+function PostPage({ c, post: raw }: { c: CityContent; post: PostArticleData }) {
+  const post = postForCity(raw, c);
   return (
     <>
       <Breadcrumbs

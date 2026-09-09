@@ -107,6 +107,16 @@ function Block({ block }: { block: ArticleBlock }) {
   }
 }
 
+// live links the avatar and name to an author archive; a tenant has none, so href "" renders the same box unlinked
+function AuthorLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
+  if (href === "") return <span className={className}>{children}</span>;
+  return (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  );
+}
+
 export default function PostArticle({ post }: { post: PostArticleData }) {
   const { h1, heroImage, info, authorBox, blocks } = post;
   // 50px section margin is top-only here; CommentFormDisplay carries the bottom
@@ -184,7 +194,7 @@ export default function PostArticle({ post }: { post: PostArticleData }) {
           {/* author box 4afee07d */}
           <div className="mt-[2rem] flex items-center rounded-b-[6px] bg-[#f2f2f2] p-[35px_45px]">
             {/* block link around an inline img: 2px/3px taller than the image, like live */}
-            <a href={authorBox.href} className="mr-[45px] h-[40px] shrink-0 md:h-[102px]">
+            <AuthorLink href={authorBox.href} className="mr-[45px] h-[40px] shrink-0 md:h-[102px]">
               <Image
                 src={authorBox.avatar}
                 alt={`Picture of ${authorBox.name}`}
@@ -192,21 +202,23 @@ export default function PostArticle({ post }: { post: PostArticleData }) {
                 height={100}
                 className="h-[37px] w-[37px] rounded-full object-cover md:h-[100px] md:w-[100px]"
               />
-            </a>
+            </AuthorLink>
             <div>
-              <a href={authorBox.href}>
+              <AuthorLink href={authorBox.href}>
                 <h4 className="text-link mt-[0.5rem] mb-[5px] text-[18px] leading-[1.2em] font-bold uppercase">
                   {authorBox.name}
                 </h4>
-              </a>
+              </AuthorLink>
               {/* the empty bio div still takes its 12px margin on live */}
               <div className="mb-[12px]" />
-              <a
-                href={authorBox.href}
-                className="inline-block rounded-[5px] text-[15px] leading-[18px] font-thin text-[#3f444b] uppercase"
-              >
-                All Posts &raquo;
-              </a>
+              {authorBox.href !== "" && (
+                <a
+                  href={authorBox.href}
+                  className="inline-block rounded-[5px] text-[15px] leading-[18px] font-thin text-[#3f444b] uppercase"
+                >
+                  All Posts &raquo;
+                </a>
+              )}
             </div>
           </div>
 
