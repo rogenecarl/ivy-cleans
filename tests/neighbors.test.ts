@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_NEIGHBORS, buildResearchPrompt, buildResearchStructuringPrompt, linkNeighbors } from '../src/pipeline/stages'
+import { MAX_NEIGHBORS, buildAreasResearchPrompt, buildResearchStructuringPrompt, linkNeighbors } from '../src/pipeline/stages'
 import { deriveFacts } from '../src/pipeline/facts'
 import { suburbData } from '../src/data/suburb'
 import { loadCityFixture } from './fixtures/cities/load'
@@ -46,7 +46,7 @@ describe('linkNeighbors', () => {
 
 describe('the prompts ask for neighbours', () => {
   it('research brief part (a) asks which areas border which', () => {
-    expect(buildResearchPrompt(facts)).toContain('it borders or sits next to')
+    expect(buildAreasResearchPrompt(facts)).toContain('it borders or sits next to')
   })
   it('the structuring pass has a neighbors field limited to the suburbs list', () => {
     const prompt = buildResearchStructuringPrompt('findings', facts, [])

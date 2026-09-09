@@ -1,3 +1,4 @@
+import { z } from 'zod'
 // The pipeline stages and their prompts. Each stage is resumable via the draft sidecar; the ModelClient seam is the only way out.
 
 import type { Facts } from './facts'
@@ -10,7 +11,7 @@ import {
   type ResearchOutput,
   type Suburb,
 } from './schemas'
-import type { ModelClient } from './model'
+import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from './model'
 import { appendProgress, clearProgress } from './progress'
 import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
 import { citySlug } from '../content/interpolate'
@@ -158,36 +159,57 @@ function numberedExample(paragraphs: string[]): string {
   return paragraphs.map((p, i) => `${i + 1}. ${p}`).join('\n\n')
 }
 
-// STOPGAP until keywords.ts: the front/deep prompts read research.keywords
-function keywordsPart(city: string): string {
-  return `(d) KEYWORDS — the search phrases people in this area actually type when they are looking to hire a cleaner, in the family of "cleaning services ${city}": house cleaning, maid service, deep cleaning, move-out cleaning, and any local phrasing that shows up in search results or competitor titles.`
-}
+// Research is three passes. City-wide first (it feeds every page and was the part that ran out of searches),
+// then the area list, then one short pass per area. Keywords come from DataForSEO, not from research.
 
-// the web-search brief: the only prompt that reaches the internet
-export function buildResearchPrompt(facts: Facts): string {
-  return `Research the local market for a residential cleaning company that serves ${facts.city}, ${facts.stateName}. Search the web for each part below and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
+/** Pass 1: the city as a whole — climate, housing stock, what dirties a home, ZIP codes. */
+export function buildMetroResearchPrompt(facts: Facts): string {
+  return `Research ${facts.city}, ${facts.stateName} for a residential cleaning company that serves it. Search the web for each part below and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, leave it out and say so.
 ${opsBlock(facts)}
-Report these four things:
-
-(a) AREAS — 8 to 12 real, named places a cleaning company based in ${facts.city} would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to ${facts.city}. For each one, also name the two to four OTHER areas from this list it borders or sits next to — the site links neighbouring area pages to each other, and only real adjacency counts.
-
-  These must be places of the same KIND — municipalities and recognised neighborhoods. A named housing development inside one of them is NOT a separate area; it belongs in (b) under the area that contains it. Cinco Ranch is part of Katy, not a peer of Katy.
-
-(b) SUBDIVISIONS AND DEVELOPMENTS — for each area in (a), the named residential subdivisions, master-planned communities or distinct neighborhoods within it that a resident would recognise. Aim for 3 to 6 per area. These are the most useful facts in this entire brief, and also the easiest to get wrong: report only names you actually found on a page. If you cannot find real ones for an area, say so plainly for that area — an area with no subdivisions found is a useful finding, and an invented development name is the worst possible outcome.
-
-(c) HOUSING AND LOCAL CONDITIONS — twice over.
-
-  For ${facts.city} as a whole: the climate and its seasons, the dominant housing stock and typical age and construction of homes, the usual flooring and foundation type, and any local condition that dirties a house — road salt, humidity and mold, hard water, pollen, desert dust, blowing sand, coastal salt air, wildfire smoke, year-round air conditioning.
-
-  Then for each area in (a) separately: what the homes there are like — when they were built, roughly how large, whether they sit in master-planned communities with HOAs or on older streets — and anything specific to that area that affects how a house gets dirty or how a cleaning crew reaches it.
+Report HOUSING AND LOCAL CONDITIONS for ${facts.city} as a whole: the climate and its seasons, the dominant housing stock and typical age and construction of homes, the usual flooring and foundation type, and any local condition that dirties a house — road salt, humidity and mold, hard water, pollen, desert dust, blowing sand, coastal salt air, wildfire smoke, year-round air conditioning.
 
   For every condition you report, say what it MEANS for cleaning a home. "Humid subtropical climate" on its own is not useful; "humidity keeps bathrooms damp enough that grout and shower glass discolour faster than owners expect" is.
 
   Report income, poverty, flood or crime data ONLY if it is relevant to whether this is a workable market, and mark anything of that kind clearly as background — it will never appear on the website.
 
-${keywordsPart(facts.city)}
-
 Do NOT research or report phone numbers, street addresses, business names, prices, or contact details of any kind — those are supplied separately and anything you found would be wrong.`
+}
+
+/** Pass 2: the areas, and which of them border which. */
+export function buildAreasResearchPrompt(facts: Facts): string {
+  return `Research the areas a residential cleaning company based in ${facts.city}, ${facts.stateName} would realistically serve. Search the web and report what you find. Everything you report must come from the pages you searched — never from memory. If the web results do not support an item, leave it out.
+${opsBlock(facts)}
+AREAS — 8 to 10 real, named places: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), note roughly where it sits relative to ${facts.city}, and name the two to four OTHER areas from your list it borders or sits next to — the site links neighbouring area pages to each other, and only real adjacency counts.
+
+These must be places of the same KIND — municipalities and recognised neighborhoods. A named housing development inside one of them is NOT a separate area. Cinco Ranch is part of Katy, not a peer of Katy.
+
+Do NOT report phone numbers, street addresses, business names, prices, or contact details.`
+}
+
+/** Pass 3, once per area: its subdivisions, housing and conditions. */
+export function buildAreaResearchPrompt(facts: Facts, area: string, allAreas: readonly string[]): string {
+  const others = allAreas.filter((a) => a !== area)
+  return `Research ${area}, an area near ${facts.city}, ${facts.stateName}, for a residential cleaning company that serves it. Search the web and report what you find. Everything you report must come from the pages you searched — never from memory or plausible reconstruction. If the web results do not support an item, say so plainly.
+
+Report three things about ${area} only.
+
+(1) SUBDIVISIONS AND DEVELOPMENTS — the named residential subdivisions, master-planned communities or distinct neighborhoods within ${area} that a resident would recognise. Aim for 3 to 6. These are the most useful facts in this brief, and the easiest to get wrong: report only names you actually found on a page. If you cannot find real ones, say so — an area with no subdivisions found is a useful finding, and an invented development name is the worst possible outcome.
+
+(2) HOUSING — what the homes in ${area} are like: when they were built, roughly how large, whether they sit in master-planned communities with HOAs or on older streets.
+
+(3) LOCAL CONDITIONS — anything specific to ${area} that affects how a house gets dirty or how a cleaning crew reaches it (gated communities, lakefront grit, new construction dust, mature tree canopy). For each, say what it MEANS for cleaning a home.
+
+${others.length ? `The other areas this branch serves are ${others.join(', ')}. If a page says which of these ${area} borders, note it.` : ''}
+
+Do NOT report phone numbers, street addresses, business names, prices, or contact details.`
+}
+
+/** The findings of all passes as one document, in the lettered order the structuring pass expects. */
+export function composeFindings(parts: { metro: string; areas: string; perArea: Record<string, string> }): string {
+  const areaSections = Object.entries(parts.perArea)
+    .map(([name, text]) => `## ${name}\n${text}`)
+    .join('\n\n')
+  return `# (c) part 1 — CITY-WIDE HOUSING AND CONDITIONS\n${parts.metro}\n\n# (a) AREAS\n${parts.areas}\n\n# (b) and (c) part 2 — PER AREA: subdivisions, housing, conditions\n${areaSections}`
 }
 
 // findings -> ResearchSchema. No supplied keywords: the model derives them. A list: it uses that list.
@@ -198,7 +220,7 @@ export function buildResearchStructuringPrompt(
 ): string {
   const keywordsSection =
     keywords.length === 0
-      ? 'keywords — the search phrases from the findings, lowercase, deduplicated, most useful first.'
+      ? 'keywords — return an empty array. Search phrases come from a separate source, never from these findings.'
       : `keywords — use exactly this list, unchanged. It comes from search-volume data, not from the findings:\n${keywords.map((k) => `  ${k}`).join('\n')}`
 
   return `Below are research findings for ${facts.city}, ${facts.stateName}. Convert them into the required JSON.
@@ -388,8 +410,14 @@ links — up to two phrases you have already written above that name one of the 
 // ── Stage execution ──
 
 // ModelClient keys, one per call; `suburb` is keyed per area so fixtures can differ per area
+// the area names out of the areas pass, so each can get its own research pass
+export const AreaListSchema = z.object({ areas: z.array(z.object({ name: z.string() }).strict()) }).strict()
+
 export const MODEL_KEYS = {
-  research: 'research',
+  researchMetro: 'research.metro',
+  researchAreas: 'research.areas',
+  researchAreaList: 'research.structure.areas',
+  researchArea: (slug: string) => `research.area.${slug}`,
   researchStructure: 'research.structure',
   front: 'front',
   suburb: (slug: string) => `suburb.${slug}`,
@@ -556,12 +584,38 @@ async function executeStage(
       await appendProgress(key, {
         stage: 'research',
         kind: 'start',
-        label: `Searching the web for ${facts.city} suburbs, ZIP codes, and local conditions`,
+        label: `Researching ${facts.city}: the city, its areas, then each area in turn`,
       })
-      const findings = await client.research(buildResearchPrompt(facts), MODEL_KEYS.research, (e) => {
-        // Sync callback — cannot await. Task 1's per-key chain serializes these writes.
+      const parts = (draft.researchParts ??= {})
+      const onEvent = (e: ResearchEvent) => {
+        // sync callback; the per-key progress chain serialises the writes
         void appendProgress(key, { stage: 'research', kind: e.kind, label: e.label }).catch(() => {})
+      }
+      // one pass, saved as soon as it lands so an interrupted stage resumes here
+      const pass = async (partKey: string, modelKey: string, prompt: string, maxSearches: number, label: string) => {
+        if (parts[partKey] !== undefined) return parts[partKey]
+        await appendProgress(key, { stage: 'research', kind: 'search', label })
+        const text = await client.research(prompt, modelKey, onEvent, { maxSearches })
+        parts[partKey] = text
+        await saveDraft(key, draft)
+        return text
+      }
+
+      const metro = await pass('metro', MODEL_KEYS.researchMetro, buildMetroResearchPrompt(facts), SEARCH_BUDGET.metro, `${facts.city} as a whole: climate, housing, conditions`)
+      const areasText = await pass('areas', MODEL_KEYS.researchAreas, buildAreasResearchPrompt(facts), SEARCH_BUDGET.areas, `The areas ${facts.city} serves`)
+      const { areas } = await client.generate({
+        schema: AreaListSchema,
+        key: MODEL_KEYS.researchAreaList,
+        system: RESEARCH_STRUCTURE_SYSTEM,
+        prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasText}`,
+        model: MODELS.research,
       })
+      const areaNames = [...new Set(areas.map((a) => a.name.trim()).filter((n) => n !== ''))]
+      const perArea: Record<string, string> = {}
+      for (const name of areaNames) {
+        perArea[name] = await pass(`area:${normalizeSlug(name)}`, MODEL_KEYS.researchArea(normalizeSlug(name)), buildAreaResearchPrompt(facts, name, areaNames), SEARCH_BUDGET.area, `${name}: subdivisions, housing, conditions`)
+      }
+      const findings = composeFindings({ metro, areas: areasText, perArea })
       // persist the raw findings before structuring: the only evidence of what research found
       draft.findings = findings
       await saveDraft(key, draft)
@@ -576,6 +630,7 @@ async function executeStage(
         key: MODEL_KEYS.researchStructure,
         system: RESEARCH_STRUCTURE_SYSTEM,
         prompt: buildResearchStructuringPrompt(findings, facts, []),
+        model: MODELS.research,
       })
       const normalized = normalizeResearchSlugs(structured, facts.city)
       // the gate runs here, before anything downstream can see a skipped area
@@ -827,7 +882,11 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
     delete draft.sections[slot]
     delete draft.links?.[slot]
   }
-  if (stage === 'research') delete draft.research
+  if (stage === 'research') {
+    delete draft.research
+    delete draft.findings
+    delete draft.researchParts
+  }
 }
 
 // re-run a stage. Regenerating research also clears front and suburb: both consumed it.

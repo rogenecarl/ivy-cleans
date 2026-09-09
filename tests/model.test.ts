@@ -10,7 +10,8 @@ import {
 import {
   AnthropicModelClient,
   StubModelClient,
-  MAX_SEARCHES,
+  MODELS,
+  SEARCH_BUDGET,
   makeClient,
   searchQuery,
   type ResearchEvent,
@@ -180,37 +181,18 @@ describe('StubModelClient', () => {
     await expect(client.research('prompt text', 'missing-stage')).rejects.toThrow(/missing-stage/)
   })
 
-  describe('MAX_SEARCHES — the research stage\'s web-search budget', () => {
-    /*
-     * This was 8, and 8 is not enough to satisfy the brief it is paired with.
-     *
-     * A real Orlando run named 14 areas and kept ONE: thirteen were dropped by
-     * the uniqueness gate for having zero researched subdivisions. The
-     * research pass said why, in its own persisted findings:
-     *
-     *   "If you restore the search budget, the highest-value order is:
-     *    1. Subdivisions, one query per area (~10 queries) — the biggest gap
-     *    and the hardest to fake."
-     *   "(d) KEYWORDS — not researched. I ran zero keyword or competitor-title
-     *    searches."
-     *
-     * Part (a) of the brief asks for 8-12 areas and part (b) asks for
-     * subdivisions in each. Subdivisions need roughly one search per area,
-     * because a general "<city> neighborhoods" query returns the LIST and not
-     * the developments inside any of them. Eight searches buys the list and
-     * then runs out — which is also why an earlier attempt to fix this by
-     * strengthening the brief made metro conditions WORSE: the model did not
-     * try harder, it reallocated the same eight searches.
-     */
-    test('covers a search per area at the top of the brief\'s range, plus the metro pass', () => {
-      const AREAS_MAX = 12 // part (a) of buildResearchPrompt
-      expect(MAX_SEARCHES).toBeGreaterThanOrEqual(AREAS_MAX + 3)
+  describe('research runs as three small passes on the cheaper model', () => {
+    test('each pass has its own small search budget, so no pass can starve another', () => {
+      expect(SEARCH_BUDGET.metro).toBeGreaterThanOrEqual(2)
+      expect(SEARCH_BUDGET.areas).toBeGreaterThanOrEqual(1)
+      expect(SEARCH_BUDGET.area).toBeGreaterThanOrEqual(1)
+      // one long call let search results pile up in context; the whole point is that no pass is big
+      for (const n of Object.values(SEARCH_BUDGET)) expect(n).toBeLessThanOrEqual(4)
     })
 
-    test('is bounded, because every search pulls page content into context', () => {
-      // Research is already the expensive stage — ~200K input tokens at eight
-      // searches. This is a real cost lever, not a free dial.
-      expect(MAX_SEARCHES).toBeLessThanOrEqual(24)
+    test('research is transcription and runs on Sonnet; every sentence a reader sees is written by Opus', () => {
+      expect(MODELS.research).toMatch(/sonnet/)
+      expect(MODELS.writing).toMatch(/opus/)
     })
   })
 
@@ -265,14 +247,14 @@ describe('StubModelClient', () => {
     const fixtures = JSON.parse(fs.readFileSync(FIXTURE_PATH, 'utf-8'))
     const client = new StubModelClient(fixtures)
     const seen: ResearchEvent[] = []
-    await client.research('any prompt', 'research', (e) => seen.push(e))
-    expect(seen).toEqual(fixtures.events.research)
+    await client.research('any prompt', 'research.metro', (e) => seen.push(e))
+    expect(seen).toEqual(fixtures.events['research.metro'])
   })
 
   test('StubModelClient research works with no onEvent (backwards compatible)', async () => {
     const fixtures = JSON.parse(fs.readFileSync(FIXTURE_PATH, 'utf-8'))
     const client = new StubModelClient(fixtures)
-    await expect(client.research('any prompt', 'research')).resolves.toBeTypeOf('string')
+    await expect(client.research('any prompt', 'research.metro')).resolves.toBeTypeOf('string')
   })
 })
 
@@ -328,7 +310,7 @@ describe('makeClient', () => {
     const client = makeClient()
 
     expect(client).toBeInstanceOf(StubModelClient)
-    await expect(client.research('prompt', 'research')).resolves.toMatch(/Stubville/)
+    await expect(client.research('prompt', 'research.metro')).resolves.toMatch(/Stubville/)
     // The committed fixture's service copy is about the stub metro; assert it
     // came from the fixture rather than pinning one city name in the prose.
     const svc = await client.generate({

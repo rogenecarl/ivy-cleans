@@ -35,7 +35,9 @@ import {
   SUBURB_SYSTEM,
   SERVICE_SYSTEM,
   buildFrontPrompt,
-  buildResearchPrompt,
+  buildAreaResearchPrompt,
+  buildAreasResearchPrompt,
+  buildMetroResearchPrompt,
   buildResearchStructuringPrompt,
   buildServiceLocalPrompt,
   buildSuburbPrompt,
@@ -334,9 +336,14 @@ describe('pipeline stages', () => {
       for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
     })
 
-    it('calls the model once per stage, research being two calls', () => {
+    it('calls the model once per stage, research being three passes plus two structuring calls', () => {
       expect(client.calls).toEqual([
-        'research:research',
+        'research:research.metro',
+        'research:research.areas',
+        'generate:research.structure.areas',
+        'research:research.area.north-stubville',
+        'research:research.area.mock-hollow',
+        'research:research.area.fixture-heights',
         'generate:research.structure',
         'generate:front',
       ])
@@ -462,7 +469,15 @@ describe('pipeline stages', () => {
       await regenerateStage(client, KEY, 'research')
 
       // Only research re-ran; front/deep are cleared, awaiting their own runs.
-      expect(client.calls).toEqual(['research:research', 'generate:research.structure'])
+      expect(client.calls).toEqual([
+        'research:research.metro',
+        'research:research.areas',
+        'generate:research.structure.areas',
+        'research:research.area.north-stubville',
+        'research:research.area.mock-hollow',
+        'research:research.area.fixture-heights',
+        'generate:research.structure',
+      ])
 
       const draft = await loadDraft(KEY)
       expect(draft.done).toEqual(['research'])
@@ -937,12 +952,17 @@ describe('pipeline stages', () => {
   describe('prompt builders', () => {
     const facts = stubFacts()
 
-    it('the research prompt names the city and state and forbids contact details', () => {
-      const prompt = buildResearchPrompt(facts)
-      expect(prompt).toContain('Ztest Stubville')
-      expect(prompt).toContain('Minnesota')
-      expect(prompt).toMatch(/never from memory/i)
-      expect(prompt).toMatch(/phone numbers, street addresses/i)
+    it('every research pass names the city and state, refuses recall, and forbids contact details', () => {
+      for (const prompt of [
+        buildMetroResearchPrompt(facts),
+        buildAreasResearchPrompt(facts),
+        buildAreaResearchPrompt(facts, 'North Stubville', ['North Stubville', 'Mock Hollow']),
+      ]) {
+        expect(prompt).toContain('Ztest Stubville')
+        expect(prompt).toContain('Minnesota')
+        expect(prompt).toMatch(/never from memory/i)
+        expect(prompt).toMatch(/phone numbers, street addresses/i)
+      }
     })
 
     it('carries NO free-form operator text into the prompt at all', () => {
@@ -1013,7 +1033,8 @@ describe('pipeline stages', () => {
 
     it('omits the notes block entirely when the operator left notes empty', () => {
       const noNotes = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
-      expect(buildResearchPrompt(noNotes)).not.toMatch(/NOTES FROM THE OWNER/)
+      expect(buildMetroResearchPrompt(noNotes)).not.toMatch(/NOTES FROM THE OWNER/)
+      expect(buildAreasResearchPrompt(noNotes)).not.toMatch(/NOTES FROM THE OWNER/)
       expect(buildFrontPrompt(noNotes, fixtureResearch())).not.toMatch(/NOTES FROM THE OWNER/)
     })
   })
@@ -1083,9 +1104,9 @@ describe('pipeline stages', () => {
 describe('research brief no longer asks for ZIP codes', () => {
   it('drops part (d) — a served-ZIP list is an operator decision, not a search result', () => {
     const f = deriveFacts({ city: 'Ztest Stubville', state: 'MN', phoneDigits: '6125550142' })
-    const p = buildResearchPrompt(f)
-    expect(p).not.toMatch(/ZIP/i)
-    expect(p).toMatch(/Report these four things/)
+    for (const p of [buildMetroResearchPrompt(f), buildAreasResearchPrompt(f), buildAreaResearchPrompt(f, 'A', ['A', 'B'])]) {
+      expect(p).not.toMatch(/ZIP/i)
+    }
   })
 })
 
@@ -1155,36 +1176,43 @@ describe('structural examples', () => {
   })
 })
 
-describe('buildResearchPrompt', () => {
+describe('the research passes', () => {
     const facts = stubFacts()
+    const all = () => [
+      buildMetroResearchPrompt(facts),
+      buildAreasResearchPrompt(facts),
+      buildAreaResearchPrompt(facts, 'North Stubville', ['North Stubville', 'Mock Hollow']),
+    ]
 
-    it('asks for subdivisions per area, not just areas', () => {
-      expect(buildResearchPrompt(facts)).toMatch(/SUBDIVISIONS AND DEVELOPMENTS/)
+    it('the per-area pass asks for subdivisions, about that area only', () => {
+      const p = buildAreaResearchPrompt(facts, 'North Stubville', ['North Stubville', 'Mock Hollow'])
+      expect(p).toMatch(/SUBDIVISIONS AND DEVELOPMENTS/)
+      expect(p).toContain('about North Stubville only')
+      expect(p).toContain('Mock Hollow')
     })
 
-    it('rules out a development being listed as a peer of the area containing it', () => {
-      expect(buildResearchPrompt(facts)).toMatch(/not a peer of/i)
+    it('the areas pass rules out a development being listed as a peer of the area containing it', () => {
+      expect(buildAreasResearchPrompt(facts)).toMatch(/not a peer of/i)
     })
 
-    it('requires every condition to state what it means for cleaning', () => {
-      expect(buildResearchPrompt(facts)).toMatch(/what it MEANS for cleaning/)
+    it('the city-wide pass requires every condition to state what it means for cleaning', () => {
+      expect(buildMetroResearchPrompt(facts)).toMatch(/what it MEANS for cleaning/)
     })
 
-    it('no longer asks for landmarks', () => {
-      expect(buildResearchPrompt(facts)).not.toMatch(/LANDMARKS/)
-    })
-
-    it('still asks for keywords until DataForSEO lands (Phase 5 stopgap)', () => {
-      expect(buildResearchPrompt(facts)).toMatch(/KEYWORDS/)
+    it('none of them ask for landmarks or keywords', () => {
+      for (const p of all()) {
+        expect(p).not.toMatch(/LANDMARKS/)
+        expect(p).not.toMatch(/KEYWORDS/)
+      }
     })
   })
 
   describe('buildResearchStructuringPrompt', () => {
     const facts = stubFacts()
 
-    it('with no supplied keywords, emits the findings-derived instruction', () => {
+    it('with no supplied keywords, asks for an empty list rather than invented phrases', () => {
       const prompt = buildResearchStructuringPrompt('findings text', facts, [])
-      expect(prompt).toMatch(/keywords — the search phrases from the findings, lowercase, deduplicated, most useful first\./)
+      expect(prompt).toMatch(/keywords — return an empty array/)
       expect(prompt).not.toMatch(/use exactly this list, unchanged/)
     })
 

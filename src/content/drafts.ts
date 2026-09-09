@@ -25,6 +25,8 @@ export type DraftDoc = {
   facts: Facts
   // raw web-search findings, kept verbatim for debugging a bad city; never rendered
   findings?: string
+  // the findings per research pass, so an interrupted research stage resumes where it stopped
+  researchParts?: Record<string, string>
   research?: ResearchOutput
   sections: Record<string, string | string[]>
   links?: Record<string, SlotLink[]>

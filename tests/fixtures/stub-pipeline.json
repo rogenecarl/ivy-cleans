@@ -1,9 +1,26 @@
 {
   "_comment": "Canned model output for StubModelClient (src/pipeline/model.ts). Every test and every STUB_MODEL=1 run of the admin pipeline reads this file instead of calling Claude, so it must stay valid against src/pipeline/schemas.ts. The city is the fictional Stubville: obviously fake copy, so a stub run that accidentally reaches a real page is unmistakable. Keys match src/pipeline/stages.ts MODEL_KEYS.",
   "research": {
-    "research": "STUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust."
+    "research.metro": "Stubville city-wide findings (fixture data — not from the web).\n\n(1) Housing and conditions: fixture-era bungalows on slab foundations; the test season drags assertion grit indoors for six months, which means entry mats and sills need doing every visit.\n\n(2) ZIP codes: 00001, 00002",
+    "research.areas": "STUBVILLE AREAS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\nNorth Stubville borders Fixture Heights. Mock Hollow borders North Stubville.",
+    "research.area.north-stubville": "NORTH STUBVILLE FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust.",
+    "research.area.mock-hollow": "MOCK HOLLOW FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust.",
+    "research.area.fixture-heights": "FIXTURE HEIGHTS FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust."
   },
   "generated": {
+    "research.structure.areas": {
+      "areas": [
+        {
+          "name": "North Stubville"
+        },
+        {
+          "name": "Mock Hollow"
+        },
+        {
+          "name": "Fixture Heights"
+        }
+      ]
+    },
     "research.structure": {
       "suburbs": [
         {
@@ -136,7 +153,7 @@
     }
   },
   "events": {
-    "research": [
+    "research.metro": [
       {
         "kind": "search",
         "label": "Searching: Stubville Texas suburbs and neighborhoods"

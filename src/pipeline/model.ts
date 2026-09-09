@@ -11,12 +11,19 @@ export type GenerateArgs<T> = {
   system: string
   prompt: string
   key: string
+  /** defaults to the writing model */
+  model?: string
 }
 
-/** A single unit of research-call activity, surfaced to callers for a live progress feed. */
-// Web searches per research run. 8 left Orlando with one area (no subdivisions researched); ~17 covers the brief:
-// the area list + one subdivision search per area + climate/housing. Research cost roughly doubles.
-export const MAX_SEARCHES = 18
+// Research is transcription (find pages, copy names out) and runs on the cheaper model; every sentence a reader
+// sees is written by the writing model.
+export const MODELS = { writing: 'claude-opus-5', research: 'claude-sonnet-5' } as const
+
+// Web searches per research pass. Research is three small passes (city-wide, the area list, one per area) rather
+// than one long call: each pass gets its own budget so none starves another, and search results never pile up.
+export const SEARCH_BUDGET = { metro: 3, areas: 2, area: 2 } as const
+
+export type ResearchOptions = { maxSearches: number }
 
 export type ResearchEvent = { kind: 'search' | 'reading'; label: string }
 
@@ -41,7 +48,12 @@ export function searchQuery(input: unknown): string | null {
 
 export interface ModelClient {
   /** Web-grounded research call (server tool). Returns raw findings text. */
-  research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string>
+  research(
+    prompt: string,
+    key: string,
+    onEvent?: (event: ResearchEvent) => void,
+    options?: ResearchOptions
+  ): Promise<string>
   /** Schema-validated structured generation. */
   generate<T>(args: GenerateArgs<T>): Promise<T>
   // running token tally for this client instance
@@ -53,8 +65,6 @@ export interface UsageTally {
   inputTokens: number
   outputTokens: number
 }
-
-const MODEL = 'claude-opus-5'
 
 const RESEARCH_SYSTEM =
   'You are a local-market researcher for a residential cleaning company. ' +
@@ -98,7 +108,7 @@ export class AnthropicModelClient implements ModelClient {
   async generate<T>(args: GenerateArgs<T>): Promise<T> {
     // no `thinking` (adaptive by default on claude-opus-5), no `temperature` (rejected); fallbacks reroute classifier declines
     const stream = this.client.beta.messages.stream({
-      model: MODEL,
+      model: args.model ?? MODELS.writing,
       max_tokens: 64000,
       system: args.system,
       output_config: {
@@ -118,15 +128,20 @@ export class AnthropicModelClient implements ModelClient {
     return args.schema.parse(JSON.parse(text))
   }
 
-  async research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string> {
-    void key // reserved for future correlation/telemetry; the stub uses it to look up canned findings
+  async research(
+    prompt: string,
+    key: string,
+    onEvent?: (event: ResearchEvent) => void,
+    options: ResearchOptions = { maxSearches: SEARCH_BUDGET.area }
+  ): Promise<string> {
+    void key // the stub uses it to look up canned findings
     // research: server tools without output_config; structured writing is a separate call
     const stream = this.client.beta.messages.stream({
-      model: MODEL,
-      max_tokens: 64000,
+      model: MODELS.research,
+      max_tokens: 32000,
       system: RESEARCH_SYSTEM,
       messages: [{ role: 'user', content: prompt }],
-      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: MAX_SEARCHES }],
+      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: options.maxSearches }],
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
     })
