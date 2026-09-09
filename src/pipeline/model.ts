@@ -70,6 +70,11 @@ const RESEARCH_SYSTEM =
   'You are a local-market researcher for a residential cleaning company. ' +
   'Ground every claim in the web_search results — never invent suburbs, subdivisions, or zip codes.'
 
+// server-side fallback reroutes classifier declines; Opus only — Sonnet 5 rejects the parameter
+function fallbackFor(model: string): { betas?: string[]; fallbacks?: 'default' } {
+  return model === MODELS.writing ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' } : {}
+}
+
 /** Shared refusal → Error mapping for both calls below. */
 function refusalError(stopDetails: { category: string | null } | null): Error {
   const category = stopDetails?.category ?? 'unknown'
@@ -116,8 +121,7 @@ export class AnthropicModelClient implements ModelClient {
         format: zodOutputFormat(args.schema, args.key),
       },
       messages: [{ role: 'user', content: args.prompt }],
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
+      ...fallbackFor(args.model ?? MODELS.writing),
     })
     const message = await stream.finalMessage()
     this.count(message)
@@ -142,8 +146,7 @@ export class AnthropicModelClient implements ModelClient {
       system: RESEARCH_SYSTEM,
       messages: [{ role: 'user', content: prompt }],
       tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: options.maxSearches }],
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
+      ...fallbackFor(MODELS.research),
     })
     if (onEvent) {
       // event shapes per @anthropic-ai/sdk 0.116.0 BetaRawMessageStreamEvent; exercised only by live runs
