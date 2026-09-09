@@ -18,7 +18,8 @@
             "Canned Creek"
           ],
           "housingCharacter": "Mock bungalows from the fixture era, mostly one story, with small fenced yards.",
-          "conditions": []
+          "conditions": [],
+          "neighbors": []
         },
         {
           "name": "Mock Hollow",
@@ -28,14 +29,16 @@
             "Mock Hollow Terrace"
           ],
           "housingCharacter": "Stub-frame duplexes built close together along the fixture line.",
-          "conditions": []
+          "conditions": [],
+          "neighbors": []
         },
         {
           "name": "Fixture Heights",
           "slug": "fixture-heights-cleaning-services",
           "subdivisions": [],
           "housingCharacter": "",
-          "conditions": []
+          "conditions": [],
+          "neighbors": []
         }
       ],
       "conditions": [

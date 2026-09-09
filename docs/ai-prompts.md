@@ -27,7 +27,7 @@ The brief:
 >
 > Report these five things:
 >
-> (a) AREAS — 8 to 12 real, named places a cleaning company based in [CITY] would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to [CITY].
+> (a) AREAS — 8 to 12 real, named places a cleaning company based in [CITY] would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to [CITY]. For each one, also name the two to four OTHER areas from this list it borders or sits next to — the site links neighbouring area pages to each other, and only real adjacency counts.
 >
 > These must be places of the same KIND — municipalities and recognised neighborhoods. A named housing development inside one of them is NOT a separate area; it belongs in (b) under the area that contains it. Cinco Ranch is part of Katy, not a peer of Katy.
 >
@@ -65,7 +65,7 @@ A second pass converts the findings text into the site's data (the areas list wi
 >
 > Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.
 
-The brief this pass receives asks it to turn each area's findings into: a name and a URL slug (the name, lowercased and hyphenated), the subdivisions found inside it, a sentence or two on what the homes there are like, and the local conditions specific to that area — plus the metro-wide conditions, the ZIP list, and the keywords.
+The brief this pass receives asks it to turn each area's findings into: a name and a URL slug (the name, lowercased and hyphenated), the subdivisions found inside it, a sentence or two on what the homes there are like, the local conditions specific to that area, and the two to four other areas from the same list that border it — plus the metro-wide conditions, the ZIP list, and the keywords. Code then turns the neighbour names into links both ways (if Lake Mary lists Sanford, Sanford lists Lake Mary), drops any name that is not an area on the list, and caps each area at four; the area page shows them as "Nearby areas we also serve".
 
 On keywords specifically, this pass is told one of two different things depending on whether real search-volume keywords have been supplied yet: with none supplied (today), it is told to derive keywords from the findings, same as always; once the keyword-research provider is wired in, it will instead be handed an exact list and told to use it unchanged, because at that point asking the model to "find" keywords in findings it was never given any would make no sense.
 

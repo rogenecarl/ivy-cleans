@@ -55,6 +55,8 @@ export const SuburbSchema = z
     slug: z.string(),
     subdivisions: z.array(z.string()),
     housingCharacter: z.string(),
+    /** Other areas from the same list that border this one, by name. Code turns them into slugs and makes them symmetric. */
+    neighbors: z.array(z.string()),
     conditions: z.array(ConditionSchema),
   })
   .strict()

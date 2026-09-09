@@ -5,77 +5,88 @@
       "slug": "house-cleaning-coconut-grove",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Brickell",
       "slug": "cleaning-services-brickell",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Coral Gables",
       "slug": "cleaning-service-coral-gables",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Miami Beach",
       "slug": "miami-beach-cleaning-services",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Key Biscayne",
       "slug": "house-cleaning-key-biscayne",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Hialeah",
       "slug": "cleaning-services-hialeah",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Doral",
       "slug": "cleaning-service-doral",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Kendall",
       "slug": "kendall-cleaning-services",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "West Kendall",
       "slug": "house-cleaning-west-kendall",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "South Miami",
       "slug": "cleaning-services-south-miami",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Homestead",
       "slug": "cleaning-service-homestead",
       "subdivisions": [],
       "housingCharacter": "",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     }
   ],
   "zips": [

@@ -19,7 +19,10 @@
       {
         "name": "North Testburg",
         "slug": "house-cleaning-north-testburg",
-        "subdivisions": ["Fixture Ridge", "Stub Creek Estates"],
+        "subdivisions": [
+          "Fixture Ridge",
+          "Stub Creek Estates"
+        ],
         "housingCharacter": "FIXTURE COPY — mostly 1990s split-levels with attached garages and small fenced yards.",
         "conditions": [
           {
@@ -27,21 +30,26 @@
             "implication": "FIXTURE IMPLICATION — floors need more frequent vacuuming near entryways.",
             "copySafe": true
           }
-        ]
+        ],
+        "neighbors": []
       },
       {
         "name": "Faketon",
         "slug": "cleaning-services-faketon",
-        "subdivisions": ["Placeholder Commons"],
+        "subdivisions": [
+          "Placeholder Commons"
+        ],
         "housingCharacter": "FIXTURE COPY — a mix of older bungalows and newer townhomes near the fixture line.",
-        "conditions": []
+        "conditions": [],
+        "neighbors": []
       },
       {
         "name": "Mockville",
         "slug": "cleaning-service-mockville",
         "subdivisions": [],
         "housingCharacter": "",
-        "conditions": []
+        "conditions": [],
+        "neighbors": []
       }
     ],
     "zips": [],

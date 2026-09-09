@@ -17,6 +17,7 @@ function suburb(over: Partial<Suburb> = {}): Suburb {
     slug: 'katy',
     subdivisions: ['Cinco Ranch', 'Firethorne', 'Seven Meadows', 'Kelliwood'],
     housingCharacter: 'Master-planned, built 2000 onward.',
+    neighbors: [],
     conditions: [],
     ...over,
   }

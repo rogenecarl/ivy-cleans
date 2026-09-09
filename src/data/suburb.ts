@@ -2,7 +2,7 @@
 // hero/houseCleaning/benefits read the generated suburb.<slug>.intro/.homes/.local slots and fall back to
 // the template when absent (Minneapolis has no generated area copy). Takes the suburb ref: it repeats per area.
 
-import type { CityContent, MarketPhoto } from '../content/types'
+import type { CityContent, MarketPhoto, Suburb } from '../content/types'
 import { cityHref, t } from '../content/interpolate'
 import { sOpt, suburbSlots } from '../content/slots'
 import { metaDescription } from './meta'
@@ -17,6 +17,7 @@ export type SuburbData = {
   houseCleaning: { heading: string; paragraph: string }
   benefits: { heading: string; paragraphs: string[] }
   otherServices: { heading: string; intro: string; links: { label: string; href: string }[] }
+  nearby: { heading: string; links: { label: string; href: string }[] }
   workInAction: { heading: string; images: MarketPhoto[] }
   closing: { heading: string; paragraph: string; ctaLabel: string }
 }
@@ -86,6 +87,17 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
     },
 
     // dump lines 35-38
+    // the areas next to this one, linked only when their pages exist
+    nearby: {
+      heading: 'Nearby areas we also serve',
+      links: c.hasSuburbPages
+        ? (c.research.suburbs.find((s) => s.slug === suburb.slug)?.neighbors ?? [])
+            .map((slug) => c.research.suburbs.find((s) => s.slug === slug))
+            .filter((s): s is Suburb => s !== undefined)
+            .map((s) => ({ label: s.name, href: cityHref(c, `/${s.slug}`) }))
+        : [],
+    },
+
     // three services chosen from this area's research, so sibling pages differ
     otherServices: {
       heading: 'Our Different Services',

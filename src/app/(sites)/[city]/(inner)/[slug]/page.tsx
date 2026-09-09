@@ -14,6 +14,7 @@ import SuburbHero from "@/components/suburb/SuburbHero";
 import HouseCleaning from "@/components/suburb/HouseCleaning";
 import SuburbBenefits from "@/components/suburb/Benefits";
 import OtherServices from "@/components/suburb/OtherServices";
+import NearbyAreas from "@/components/suburb/NearbyAreas";
 import WorkInAction from "@/components/suburb/WorkInAction";
 import SuburbClosing from "@/components/suburb/Closing";
 import PostArticle from "@/components/blog/PostArticle";
@@ -102,7 +103,7 @@ function PostPage({ c, post: raw }: { c: CityContent; post: PostArticleData }) {
 
 /* New for Plan 5, Task 2 — one page per suburb.slug (c.research.suburbs). */
 function SuburbPage({ c, suburb }: { c: CityContent; suburb: SuburbRef }) {
-  const { hero, houseCleaning, benefits, otherServices, workInAction, closing } = suburbData(
+  const { hero, houseCleaning, benefits, nearby, otherServices, workInAction, closing } = suburbData(
     c,
     suburb,
   );
@@ -113,6 +114,7 @@ function SuburbPage({ c, suburb }: { c: CityContent; suburb: SuburbRef }) {
       <SuburbHero hero={hero} bookHref={innerSite.bookUrl} />
       <HouseCleaning houseCleaning={houseCleaning} />
       <SuburbBenefits benefits={benefits} bookHref={innerSite.bookUrl} />
+      <NearbyAreas nearby={nearby} />
       <OtherServices otherServices={otherServices} />
       <WorkInAction workInAction={workInAction} />
       <SuburbClosing closing={closing} bookHref={innerSite.bookUrl} />

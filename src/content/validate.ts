@@ -143,10 +143,12 @@ export function validateCityContent(raw: unknown): CityContent {
           !isStringArray((s as Record<string, unknown>).subdivisions) ||
           !isString((s as Record<string, unknown>).housingCharacter) ||
           !Array.isArray((s as Record<string, unknown>).conditions) ||
-          !((s as Record<string, unknown>).conditions as unknown[]).every(isCondition)
+          !((s as Record<string, unknown>).conditions as unknown[]).every(isCondition)  ||
+          ((s as Record<string, unknown>).neighbors !== undefined &&
+            !isStringArray((s as Record<string, unknown>).neighbors))
         ) {
           errors.push(
-            `research.suburbs[${i}] must be { name: string, slug: string, subdivisions: string[], housingCharacter: string, conditions: Condition[] }`,
+            `research.suburbs[${i}] must be { name: string, slug: string, subdivisions: string[], housingCharacter: string, conditions: Condition[], neighbors?: string[] }`,
           )
         }
       })

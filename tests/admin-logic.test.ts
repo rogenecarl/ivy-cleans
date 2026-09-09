@@ -380,9 +380,10 @@ describe('updateSuburbsLogic', () => {
           'Canned Creek',
         ],
         housingCharacter: 'Mock bungalows from the fixture era, mostly one story, with small fenced yards.',
+        neighbors: [],
         conditions: [],
       },
-      { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [] },
+      { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [], neighbors: [] },
     ])
     // The rest of the research object is untouched.
     expect(draft.research?.zips).toEqual(['00001', '00002'])
@@ -414,9 +415,10 @@ describe('updateSuburbsLogic', () => {
           'Canned Creek',
         ],
         housingCharacter: 'Mock bungalows from the fixture era, mostly one story, with small fenced yards.',
+        neighbors: [],
         conditions: [],
       },
-      { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [] },
+      { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [], neighbors: [] },
     ])
     // ...and the sidecar stayed in step, so a later regenerate/finalize does
     // not resurrect the old list.
@@ -457,7 +459,7 @@ describe('updateSuburbsLogic', () => {
 
     const draft = await loadDraft(KEY)
     expect(draft.research?.suburbs).toEqual([
-      { name: 'Contact', slug: 'contact-heights', subdivisions: [], housingCharacter: '', conditions: [] },
+      { name: 'Contact', slug: 'contact-heights', subdivisions: [], housingCharacter: '', conditions: [], neighbors: [] },
     ])
   })
 })
@@ -484,6 +486,7 @@ describe('updateSuburbsLogic — merge behaviour (feature 9 fix)', () => {
         slug: 'katy',
         subdivisions: ['Cinco Ranch', 'Firethorne', 'Cross Creek Ranch'],
         housingCharacter: 'Mostly 2000s-built single-family homes on large lots, heavy HOA presence.',
+        neighbors: [],
         conditions: [
           { condition: 'expansive clay soil', implication: 'seasonal foundation cracking', copySafe: true },
         ],

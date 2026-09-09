@@ -20,7 +20,7 @@ import {
 } from '../content/slots'
 import { getCity, revalidateCity } from '../content/store'
 import { validateCityContent } from '../content/validate'
-import type { CityContent } from '../content/types'
+import type { CityContent, Suburb as StoredSuburb } from '../content/types'
 import { serviceBySlug } from '../data/services/registry'
 import { buildProvisioners, checkDomainLive } from './provision'
 import { deriveFacts } from './facts'
@@ -391,7 +391,7 @@ export function normalizeSuburbs(rows: SuburbRow[]): SuburbRow[] {
 }
 
 // rows carry name + slug; research fields are matched back by slug. An unknown slug is a hand-added row with empty research.
-function mergeSuburbRows(rows: readonly SuburbRow[], existing: readonly Suburb[]): Suburb[] {
+function mergeSuburbRows(rows: readonly SuburbRow[], existing: readonly StoredSuburb[]): Suburb[] {
   const bySlug = new Map(existing.map((s) => [s.slug, s]))
   return rows.map((row) => {
     const prior = bySlug.get(row.slug)
@@ -401,6 +401,7 @@ function mergeSuburbRows(rows: readonly SuburbRow[], existing: readonly Suburb[]
       subdivisions: prior?.subdivisions ?? [],
       housingCharacter: prior?.housingCharacter ?? '',
       conditions: prior?.conditions ?? [],
+      neighbors: prior?.neighbors ?? [],
     }
   })
 }

@@ -33,6 +33,7 @@ describe('ResearchSchema', () => {
         slug: 'edina',
         subdivisions: ['Interlachen'],
         housingCharacter: 'Mid-century ramblers and newer infill construction.',
+        neighbors: [],
         conditions: [{ condition: 'Hard water', implication: 'Faucets need descaling.', copySafe: true }],
       },
     ],

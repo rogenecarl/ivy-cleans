@@ -168,7 +168,7 @@ export function buildResearchPrompt(facts: Facts): string {
 ${opsBlock(facts)}
 Report these four things:
 
-(a) AREAS — 8 to 12 real, named places a cleaning company based in ${facts.city} would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to ${facts.city}.
+(a) AREAS — 8 to 12 real, named places a cleaning company based in ${facts.city} would realistically serve: the surrounding suburbs and the well-known neighborhoods inside the city itself. Prefer places with actual residential housing and enough households to be worth a page. Give each one exactly as it is normally written locally (including any "St." / "Mt." / directional prefix), and note roughly where it sits relative to ${facts.city}. For each one, also name the two to four OTHER areas from this list it borders or sits next to — the site links neighbouring area pages to each other, and only real adjacency counts.
 
   These must be places of the same KIND — municipalities and recognised neighborhoods. A named housing development inside one of them is NOT a separate area; it belongs in (b) under the area that contains it. Cinco Ranch is part of Katy, not a peer of Katy.
 
@@ -210,6 +210,7 @@ suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 t
   subdivisions: the named developments and neighborhoods the findings place inside this area. Empty array if the findings name none — do not fill it from your own knowledge.
   housingCharacter: one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
   conditions: the local conditions the findings give for THIS area specifically, each with what it means for cleaning.
+  neighbors: the two to four OTHER areas from this same suburbs list that the findings say border or sit next to this one, by their exact names. Only areas that are entries in this list; empty array if the findings give no sense of where it sits.
 
 conditions — the METRO-WIDE conditions, the ones true across ${facts.city} rather than of one area. The findings report these in part (c), the first half, before the per-area breakdown. Each needs its condition, its cleaning implication, and its copySafe flag.
   This array is separate from the per-area conditions above and is NOT optional when the findings contain metro-wide material. Climate, humidity, seasons, air conditioning, pollen, hard water, road salt, dust, the dominant construction and flooring of the metro — all of it belongs here.
@@ -460,6 +461,33 @@ export function scoreSuburb(suburb: Suburb): number {
   return suburb.subdivisions.length + safeConditions + housing
 }
 
+export const MAX_NEIGHBORS = 4
+
+// Neighbour names from the model -> slugs of areas that still exist, symmetric, never self, at most MAX_NEIGHBORS,
+// kept in research order. Runs after the gate so a dropped area can't be anyone's neighbour.
+export function linkNeighbors(research: ResearchOutput): ResearchOutput {
+  const order = research.suburbs.map((s) => s.slug)
+  const byName = new Map(research.suburbs.map((s) => [s.name.trim().toLowerCase(), s.slug]))
+  const bySlug = new Set(order)
+  const links = new Map<string, Set<string>>(order.map((slug) => [slug, new Set()]))
+  for (const suburb of research.suburbs) {
+    for (const raw of suburb.neighbors) {
+      const key = raw.trim().toLowerCase()
+      const slug = bySlug.has(normalizeSlug(raw)) ? normalizeSlug(raw) : byName.get(key)
+      if (slug === undefined || slug === suburb.slug) continue
+      links.get(suburb.slug)!.add(slug)
+      links.get(slug)!.add(suburb.slug)
+    }
+  }
+  return {
+    ...research,
+    suburbs: research.suburbs.map((s) => ({
+      ...s,
+      neighbors: order.filter((slug) => links.get(s.slug)!.has(slug)).slice(0, MAX_NEIGHBORS),
+    })),
+  }
+}
+
 export function scoreSuburbs(research: ResearchOutput): ScoredSuburb[] {
   return research.suburbs.map((suburb) => {
     const score = scoreSuburb(suburb)
@@ -540,7 +568,8 @@ async function executeStage(
       })
       const normalized = normalizeResearchSlugs(structured, facts.city)
       // the gate runs here, before anything downstream can see a skipped area
-      const { research: r, scored } = applyUniquenessGate(normalized)
+      const { research: gated, scored } = applyUniquenessGate(normalized)
+      const r = linkNeighbors(gated)
       draft.research = r
       const skipped = scored.filter((s) => s.verdict === 'skip')
       // subdivisions, not landmarks, are the count that matters

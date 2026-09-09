@@ -24,6 +24,7 @@ function validDoc() {
           slug: 'cleaning-services-suburbia',
           subdivisions: ['The Meadows'],
           housingCharacter: 'Mostly 1990s two-story builds on slab, HOA-governed.',
+          neighbors: [],
           conditions: [{ condition: 'Clay soil foundation cracking', implication: 'Extra dust along baseboards', copySafe: true }],
         },
       ],

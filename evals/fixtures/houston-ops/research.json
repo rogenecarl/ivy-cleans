@@ -28,7 +28,8 @@
           "implication": "Fewer deferred-maintenance surprises but more glass and hard floor to clean",
           "copySafe": true
         }
-      ]
+      ],
+      "neighbors": []
     },
     {
       "name": "Sugar Land",
@@ -64,7 +65,8 @@
           "implication": "Turf chemicals and clippings tracked in at entryways",
           "copySafe": true
         }
-      ]
+      ],
+      "neighbors": []
     },
     {
       "name": "Pearland",
@@ -94,7 +96,8 @@
           "implication": "Favours keyed or coded access and flexible scheduling",
           "copySafe": true
         }
-      ]
+      ],
+      "neighbors": []
     },
     {
       "name": "The Woodlands",
@@ -133,7 +136,8 @@
           "implication": "Sell and market the villages by name",
           "copySafe": true
         }
-      ]
+      ],
+      "neighbors": []
     },
     {
       "name": "Missouri City",
@@ -143,7 +147,8 @@
         "First Colony"
       ],
       "housingCharacter": "Southwest of Houston and adjacent to Sugar Land, with the First Colony community overlapping into the city; no further housing-stock detail was verified.",
-      "conditions": []
+      "conditions": [],
+      "neighbors": []
     },
     {
       "name": "Memorial",
@@ -158,7 +163,8 @@
           "implication": "Mixed job types between compact new units and older established homes",
           "copySafe": true
         }
-      ]
+      ],
+      "neighbors": []
     }
   ],
   "conditions": [

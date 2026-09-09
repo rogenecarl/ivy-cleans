@@ -143,6 +143,7 @@ describe('ResearchSchema', () => {
           slug: 'katy',
           subdivisions: ['Cinco Ranch', 'Firethorne', 'Cross Creek Ranch'],
           housingCharacter: 'Master-planned, built 2000 onward, 2,400–3,400 sq ft, tile and LVP.',
+          neighbors: [],
           conditions: [{ condition: 'Ongoing construction nearby', implication: 'Fine grit on sills and blinds', copySafe: true }],
         },
       ],
@@ -294,14 +295,14 @@ describe('pipeline stages', () => {
       // Non-empty subdivisions matter: stageSlots excludes areas that can
       // never be written, so finalize does not demand slots the suburb loop
       // will always skip.
-      const katy: Suburb = { name: 'Katy', slug: 'katy', subdivisions: ['Cinco Ranch'], housingCharacter: '', conditions: [] }
-      const sugarLand: Suburb = { name: 'Sugar Land', slug: 'sugar-land', subdivisions: ['Riverstone'], housingCharacter: '', conditions: [] }
+      const katy: Suburb = { name: 'Katy', slug: 'katy', subdivisions: ['Cinco Ranch'], housingCharacter: '', neighbors: [], conditions: [] }
+      const sugarLand: Suburb = { name: 'Sugar Land', slug: 'sugar-land', subdivisions: ['Riverstone'], housingCharacter: '', neighbors: [], conditions: [] }
       const research: ResearchOutput = { suburbs: [katy, sugarLand], conditions: [], zips: [], keywords: [] }
       expect(stageSlots(research).suburb).toHaveLength(6)
     })
 
     it('emits no slots for an area with no subdivisions — nothing will ever write them', () => {
-      const thin: Suburb = { name: 'Thin', slug: 'thin', subdivisions: [], housingCharacter: '', conditions: [] }
+      const thin: Suburb = { name: 'Thin', slug: 'thin', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] }
       const research: ResearchOutput = { suburbs: [thin], conditions: [], zips: [], keywords: [] }
       expect(stageSlots(research).suburb).toEqual([])
       expect(requiredSlotsFor(research)).not.toContain('suburb.thin.intro')
@@ -584,6 +585,7 @@ describe('pipeline stages', () => {
       const enoughToSurvive = {
         subdivisions: ['A', 'B', 'C', 'D'],
         housingCharacter: 'Present.',
+        neighbors: [],
         conditions: [],
       }
       const structured = {
@@ -640,20 +642,21 @@ describe('pipeline stages', () => {
       const research: ResearchOutput = {
         ...fixtureResearch(),
         suburbs: [
-          { name: 'Contact Corner', slug: 'contact', subdivisions: [], housingCharacter: '', conditions: [] },
+          { name: 'Contact Corner', slug: 'contact', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] },
           {
             name: 'Deep Clean Heights',
             slug: 'deep-cleaning-ztest-stubville',
             subdivisions: [],
             housingCharacter: '',
+            neighbors: [],
             conditions: [],
           },
-          { name: 'Real Suburb', slug: 'real-suburb', subdivisions: [], housingCharacter: '', conditions: [] },
+          { name: 'Real Suburb', slug: 'real-suburb', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] },
         ],
       }
 
       expect(normalizeResearchSlugs(research, 'Ztest Stubville').suburbs).toEqual([
-        { name: 'Real Suburb', slug: 'real-suburb', subdivisions: [], housingCharacter: '', conditions: [] },
+        { name: 'Real Suburb', slug: 'real-suburb', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] },
       ])
     })
 
@@ -665,6 +668,7 @@ describe('pipeline stages', () => {
         slug: 'Mixed CASE_Suburb!',
         subdivisions: ['Cinco Ranch', 'Firethorne'],
         housingCharacter: 'Master-planned, 2000 onward.',
+        neighbors: [],
         conditions: [{ condition: 'Construction nearby', implication: 'Grit on sills', copySafe: true }],
       }
       const research: ResearchOutput = { suburbs: [suburb], conditions: [], zips: [], keywords: [] }
@@ -728,6 +732,7 @@ describe('pipeline stages', () => {
         slug: 'katy',
         subdivisions: ['Cinco Ranch', 'Firethorne', 'Cross Creek Ranch', 'Grand Lakes'],
         housingCharacter: 'Master-planned, 2000 onward, tile and LVP.',
+        neighbors: [],
         conditions: [
           { condition: 'Construction nearby', implication: 'Grit on sills', copySafe: true },
           { condition: 'Barker Reservoir flood pool', implication: 'n/a', copySafe: false },
@@ -737,7 +742,7 @@ describe('pipeline stages', () => {
 
     /** Nothing researched at all — the floor case. */
     function thin(): Suburb {
-      return { name: 'Fulshear', slug: 'fulshear', subdivisions: [], housingCharacter: '', conditions: [] }
+      return { name: 'Fulshear', slug: 'fulshear', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] }
     }
 
     function fixtureResearchWith(suburbs: Suburb[]): ResearchOutput {
@@ -767,6 +772,7 @@ describe('pipeline stages', () => {
         slug: 'build-floor',
         subdivisions: ['A', 'B', 'C', 'D'],
         housingCharacter: 'Present.',
+        neighbors: [],
         conditions: [
           { condition: 'a', implication: 'a', copySafe: true },
           { condition: 'b', implication: 'b', copySafe: true },
@@ -782,6 +788,7 @@ describe('pipeline stages', () => {
         slug: 'review-floor',
         subdivisions: ['A', 'B', 'C', 'D'],
         housingCharacter: '',
+        neighbors: [],
         conditions: [],
       }
       expect(scoreSuburb(reviewFloor)).toBe(4) // 4 + 0 + 0
@@ -794,6 +801,7 @@ describe('pipeline stages', () => {
         slug: 'skip-ceiling',
         subdivisions: ['A', 'B', 'C'],
         housingCharacter: '',
+        neighbors: [],
         conditions: [],
       }
       expect(scoreSuburb(skipCeiling)).toBe(3) // 3 + 0 + 0
@@ -831,6 +839,7 @@ describe('pipeline stages', () => {
         slug: 'no-subdivisions',
         subdivisions: [],
         housingCharacter: 'Present.',
+        neighbors: [],
         conditions: [
           { condition: 'a', implication: 'a', copySafe: true },
           { condition: 'b', implication: 'b', copySafe: true },
@@ -850,6 +859,7 @@ describe('pipeline stages', () => {
         slug: 'no-subdivisions',
         subdivisions: [],
         housingCharacter: 'Present.',
+        neighbors: [],
         conditions: [
           { condition: 'a', implication: 'a', copySafe: true },
           { condition: 'b', implication: 'b', copySafe: true },
@@ -869,7 +879,7 @@ describe('pipeline stages', () => {
      * Proves the "dropped" text is conditional, not unconditionally appended.
      */
     function allGoodFixtures(): StubFixtures {
-      const researched = { subdivisions: ['A', 'B', 'C', 'D'], housingCharacter: 'Present.', conditions: [] }
+      const researched = { subdivisions: ['A', 'B', 'C', 'D'], housingCharacter: 'Present.', neighbors: [], conditions: [] }
       const structured = {
         ...(fixtures.generated['research.structure'] as ResearchOutput),
         suburbs: [
@@ -1211,7 +1221,7 @@ describe('buildResearchPrompt', () => {
       // Simulates what a model following the new prompt returns: no prefix,
       // no suffix, just the hyphenated area name.
       const research: ResearchOutput = {
-        suburbs: [{ name: 'New Suburb', slug: 'new-suburb', subdivisions: [], housingCharacter: '', conditions: [] }],
+        suburbs: [{ name: 'New Suburb', slug: 'new-suburb', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] }],
         conditions: [],
         zips: [],
         keywords: [],
@@ -1241,6 +1251,7 @@ describe('buildResearchPrompt', () => {
       slug: 'katy',
       subdivisions: ['Cinco Ranch', 'Firethorne'],
       housingCharacter: 'Master-planned, built 2000 onward, 2,400-3,400 sq ft, tile and LVP.',
+      neighbors: [],
       conditions: [
         { condition: 'Construction nearby', implication: 'Fine grit on sills and blinds', copySafe: true },
         { condition: 'Barker Reservoir flood pool', implication: 'Background only — never for customer copy', copySafe: false },
@@ -1251,6 +1262,7 @@ describe('buildResearchPrompt', () => {
       slug: 'sugar-land',
       subdivisions: ['Telfair', 'Riverstone'],
       housingCharacter: 'Master-planned communities, built 1990s onward.',
+      neighbors: [],
       conditions: [],
     }
     const research: ResearchOutput = {
@@ -1595,6 +1607,7 @@ describe('buildResearchPrompt', () => {
         slug: 'hand-added',
         subdivisions: [],
         housingCharacter: '',
+        neighbors: [],
         conditions: [],
       }
       draft.research = { ...research, suburbs: [...research.suburbs, handAdded] }
@@ -1740,6 +1753,7 @@ describe('buildResearchPrompt', () => {
         slug: 'blank-ridge',
         subdivisions: [],
         housingCharacter: '',
+        neighbors: [],
         conditions: [],
       })
       await saveDraft(KEY, draft)
@@ -1768,6 +1782,7 @@ describe('buildResearchPrompt', () => {
         slug: 'blank-ridge',
         subdivisions: [],
         housingCharacter: '',
+        neighbors: [],
         conditions: [],
       })
       await saveDraft(KEY, draft)

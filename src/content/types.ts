@@ -9,6 +9,8 @@ export type Suburb = {
   housingCharacter: string
   /** Conditions specific to THIS area. Metro-wide ones live on research.conditions. */
   conditions: Condition[]
+  /** Slugs of the areas next to this one; symmetric. Absent on documents that predate the field. */
+  neighbors?: string[]
 }
 
 // a real customer review; firstName and area make it checkable
