@@ -421,6 +421,8 @@ links — up to two phrases you have already written above that name one of the 
 
 // ModelClient keys, one per call; `suburb` is keyed per area so fixtures can differ per area
 // the area names out of the areas pass, so each can get its own research pass
+export const MAX_AREAS = 10
+
 export const AreaListSchema = z.object({ areas: z.array(z.object({ name: z.string() }).strict()) }).strict()
 
 export const MODEL_KEYS = {
@@ -620,7 +622,8 @@ async function executeStage(
         prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasText}`,
         model: MODELS.research,
       })
-      const areaNames = [...new Set(areas.map((a) => a.name.trim()).filter((n) => n !== ''))]
+      // the brief asks for 8 to 10; the model sometimes lists more, and every extra area is a research pass and a page
+      const areaNames = [...new Set(areas.map((a) => a.name.trim()).filter((n) => n !== ''))].slice(0, MAX_AREAS)
       if (areaNames.length === 0) {
         throw new Error(`research found no areas for ${facts.city} — the areas pass returned nothing usable; re-run research`)
       }
