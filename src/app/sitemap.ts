@@ -5,6 +5,7 @@ import { loadRouting } from '@/content/resolve-rewrite'
 import { cityHref } from '@/content/interpolate'
 import { sitePaths } from '@/data/routes'
 import type { CityContent } from '@/content/types'
+import { listPosts } from '@/blog/store'
 
 // One sitemap per tenant, resolved from the Host header: one deployment serves every city, so there's no build-time
 // answer. headers() opts the route out of caching. Hosts come from loadRouting(), the same tables the proxy uses.
@@ -30,5 +31,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const proto = host.startsWith('localhost') || host.startsWith('127.') ? 'http' : 'https'
   const origin = `${proto}://${host}`
 
-  return sitemapPaths(city).map((path) => ({ url: `${origin}${cityHref(city, path)}` }))
+  let postPaths: string[] = []
+  try {
+    postPaths = (await listPosts(key)).map((p) => `/blog/${p.slug}`)
+  } catch {
+    // store unreachable: the fixed pages still list
+  }
+  return [...sitemapPaths(city), ...postPaths].map((path) => ({ url: `${origin}${cityHref(city, path)}` }))
 }

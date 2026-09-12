@@ -10,7 +10,7 @@ export type BreadcrumbTarget =
   | { kind: 'page'; label: string; path: string }
   | { kind: 'service'; slug: ServiceSlug }
   | { kind: 'area'; name: string; slug: string }
-  | { kind: 'post'; title: string; slug: string }
+  | { kind: 'post'; title: string; slug: string; path?: string }
 
 // no areas index page: the crumb points at the front page's list by fragment
 export const AREAS_PATH = '/#areas'
@@ -42,7 +42,7 @@ export function breadcrumbs(
       return [
         home,
         { label: 'Blog', href: cityHref(c, '/blog') },
-        { label: target.title, href: cityHref(c, `/${target.slug}`) },
+        { label: target.title, href: cityHref(c, target.path ?? `/${target.slug}`) },
       ]
   }
 }

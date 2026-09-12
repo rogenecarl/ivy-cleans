@@ -146,3 +146,29 @@ model Verification {
   @@index([expiresAt])
   @@map("verification")
 }
+
+/// One blog post delivered by the blog tool's webhook, scoped to a city. `text` is the body as plain words for the
+/// cross-city similarity check; `html` is sanitized before it is stored.
+model BlogPost {
+  id              String   @id @default(uuid())
+  cityKey         String
+  externalId      String
+  slug            String
+  title           String
+  html            String
+  text            String
+  excerpt         String
+  metaTitle       String?
+  metaDescription String?
+  imageUrl        String?
+  imageAlt        String?
+  categories      String[] @default([])
+  tags            String[] @default([])
+  publishedAt     DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([cityKey, externalId])
+  @@unique([cityKey, slug])
+  @@index([cityKey, publishedAt(sort: Desc)])
+}

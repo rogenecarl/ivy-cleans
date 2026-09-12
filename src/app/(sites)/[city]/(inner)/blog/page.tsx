@@ -3,6 +3,9 @@ import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
 import { cityFromParams } from "@/content/city-param";
 import { blogMeta, blogCardsFor } from "@/data/blog";
+import { cityKeyOf } from "@/content/interpolate";
+import { listPosts } from "@/blog/store";
+import { postCards } from "@/blog/cards";
 import BlogCardGrid from "@/components/blog/BlogCardGrid";
 import Pagination from "@/components/blog/Pagination";
 
@@ -16,7 +19,9 @@ export default async function BlogPage({ params }: { params: Promise<{ city: str
   // The cards' hrefs have to be scoped to this tenant — the raw list is
   // root-relative and 404s anywhere but the default host. See blogCardsFor.
   const c = await cityFromParams(params);
-  const blogCards = blogCardsFor(c);
+  // the store is optional here: a database outage must not take the blog page down
+  const toolPosts = await listPosts(cityKeyOf(c)).catch(() => []);
+  const blogCards = [...postCards(toolPosts, c), ...blogCardsFor(c)];
   return (
     <>
       <Breadcrumbs trail={breadcrumbs(c, { kind: "page", label: "Blog", path: "/blog" })} />

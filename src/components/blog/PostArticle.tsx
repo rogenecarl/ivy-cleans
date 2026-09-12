@@ -117,8 +117,22 @@ function AuthorLink({ href, className, children }: { href: string; className?: s
   );
 }
 
-export default function PostArticle({ post }: { post: PostArticleData }) {
-  const { h1, heroImage, info, authorBox, blocks } = post;
+export type PostHero = { src: string; width: number; height: number; alt: string; external?: true };
+
+// The post template around any body: file-based posts pass blocks, blog-tool posts pass sanitized HTML.
+export function PostShell({
+  h1,
+  heroImage,
+  info,
+  authorBox,
+  children,
+}: {
+  h1: string;
+  heroImage?: PostHero;
+  info: PostArticleData["info"];
+  authorBox: PostArticleData["authorBox"];
+  children: React.ReactNode;
+}) {
   // 50px section margin is top-only here; CommentFormDisplay carries the bottom
   return (
     <section className="mt-[50px] mb-0 bg-white">
@@ -144,17 +158,13 @@ export default function PostArticle({ post }: { post: PostArticleData }) {
               alt={heroImage.alt}
               width={heroImage.width}
               height={heroImage.height}
+              unoptimized={heroImage.external}
               className="mb-[2rem] aspect-[870/382] w-full object-cover"
             />
           )}
           {/* flow-root widget around a plain container: absorbs the last block's margin and contains the floats, like live */}
           <div className="mb-[2rem] flow-root">
-            <div className="text-[18px] leading-[2.1em] text-[#374151]">
-              {/* fixed content list; index is a stable key */}
-              {blocks.map((block, i) => (
-                <Block key={i} block={block} />
-              ))}
-            </div>
+            <div className="text-[18px] leading-[2.1em] text-[#374151]">{children}</div>
           </div>
 
           {/* share buttons 59aa5822: 5-col grid, 10px gap, 40px tall; display-only like live */}
@@ -230,5 +240,17 @@ export default function PostArticle({ post }: { post: PostArticleData }) {
         </article>
       </div>
     </section>
+  );
+}
+
+export default function PostArticle({ post }: { post: PostArticleData }) {
+  const { h1, heroImage, info, authorBox, blocks } = post;
+  return (
+    <PostShell h1={h1} heroImage={heroImage} info={info} authorBox={authorBox}>
+      {/* fixed content list; index is a stable key */}
+      {blocks.map((block, i) => (
+        <Block key={i} block={block} />
+      ))}
+    </PostShell>
   );
 }

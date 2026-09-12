@@ -34,6 +34,7 @@ function Card({ card }: { card: BlogCard }) {
               src={card.thumb.src}
               alt={card.thumb.alt}
               fill
+              unoptimized={card.thumb.external}
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover"
             />

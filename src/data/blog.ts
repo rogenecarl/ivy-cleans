@@ -17,7 +17,7 @@ export type BlogCard = {
   comments: string;
   category?: string;
   author?: string;
-  thumb?: { src: string; width: number; height: number; alt: string };
+  thumb?: { src: string; width: number; height: number; alt: string; external?: true };
 };
 
 export const blogCards: BlogCard[] = [
