@@ -79,11 +79,22 @@ describe('receiveDelivery', () => {
     expect(d.saved).toEqual([])
   })
 
-  it('skips site pages with 200', async () => {
+  it('skips site pages with 200 and points the tool at the page we already serve', async () => {
     const d = deps()
-    const body = { ...article({ type: 'page', path: '/pricing/' }), event: 'page.published' }
-    const res = await receiveDelivery({ authorization: auth, body, host }, d)
-    expect(res).toEqual({ status: 200, body: { ok: true, skipped: 'page.published' } })
+    const pricing = { ...article({ type: 'page', slug: 'pricing', path: '/pricing/' }), event: 'page.published' }
+    expect(await receiveDelivery({ authorization: auth, body: pricing, host }, d)).toEqual({
+      status: 200,
+      body: { ok: true, skipped: 'page.published', url: 'https://ivycleans.vercel.app/' },
+    })
+    const stPaul = { ...article({ type: 'page', slug: 'st-paul', path: '/locations/st-paul/' }), event: 'page.published' }
+    expect((await receiveDelivery({ authorization: auth, body: stPaul, host }, d)).body.url).toBe(
+      'https://ivycleans.vercel.app/cleaning-service-st-paul',
+    )
+    const unmapped = { ...stPaul, website: { domain: 'ivycleansmiami.com' } }
+    expect(await receiveDelivery({ authorization: auth, body: unmapped, host }, d)).toEqual({
+      status: 200,
+      body: { ok: true, skipped: 'page.published' },
+    })
     expect(d.saved).toEqual([])
   })
 
