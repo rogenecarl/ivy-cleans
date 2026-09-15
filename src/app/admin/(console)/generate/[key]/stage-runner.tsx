@@ -16,6 +16,7 @@ import {
   runStageAction,
 } from '../../actions'
 import { ADMIN_BASE } from '@/lib/admin-routes'
+import { SERVICE_LOCAL_SLUGS } from '@/content/slots'
 import { STAGE_EXPECTED, stageName } from '../../../stage-names'
 import { ErrorText, Pill } from '../../../ui'
 
@@ -27,6 +28,7 @@ type StageMeta = { id: string; label: string }
 
 type Props = {
   cityKey: string
+  cityName: string
   stages: StageMeta[]
   initialDone: string[]
 }
@@ -42,7 +44,28 @@ function duration(ms: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
-export default function StageRunner({ cityKey, stages, initialDone }: Props) {
+// rough per-stage durations behind the "about N min left" line; the two per-item stages scale with their counts
+function expectedMs(stageId: string, areaCount: number): number {
+  switch (stageId) {
+    case 'research':
+      return 180_000
+    case 'front':
+      return 30_000
+    case 'suburb':
+      return 20_000 * areaCount
+    case 'service':
+      return 10_000 * SERVICE_LOCAL_SLUGS.length
+    default:
+      return 30_000
+  }
+}
+
+function remainingLabel(ms: number): string {
+  if (ms < 60_000) return 'under a minute left'
+  return `about ${Math.ceil(ms / 60_000)} min left`
+}
+
+export default function StageRunner({ cityKey, cityName, stages, initialDone }: Props) {
   const [done, setDone] = useState<string[]>(initialDone)
   const [current, setCurrent] = useState<string | null>(null)
   const [failed, setFailed] = useState<{ stage: string; message: string } | null>(null)
@@ -198,10 +221,84 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
   }, [cityKey, finalizePhase])
 
   const allDone = done.length === stages.length
+  const reviewHref = `${ADMIN_BASE}/review/${cityKey}`
+
+  // overall estimate: expected durations of the stages still owed, less what the running one has already used
+  const areaCount = snapshot?.ok && snapshot.research ? snapshot.research.suburbs.length : 10
+  const totalExpected = stages.reduce((sum, stage) => sum + expectedMs(stage.id, areaCount), 0)
+  const doneExpected = stages
+    .filter((stage) => done.includes(stage.id))
+    .reduce((sum, stage) => sum + expectedMs(stage.id, areaCount), 0)
+  const currentExpected = current === null ? 0 : expectedMs(current, areaCount)
+  const currentElapsed = current !== null && stageStartedAt !== null ? now - stageStartedAt : 0
+  const progressMs = doneExpected + Math.min(currentElapsed, currentExpected * 0.95)
+  const fraction = allDone ? 1 : Math.min(progressMs / totalExpected, 0.98)
+  const remainingMs = Math.max(totalExpected - progressMs, 15_000)
+  const activeStage = current ?? failed?.stage ?? null
+  const activeIndex = activeStage === null ? -1 : stages.findIndex((stage) => stage.id === activeStage)
+  const activeName = activeIndex === -1 ? '' : stageName(stages[activeIndex].id, stages[activeIndex].label)
+  const overallLeft = allDone
+    ? `Done · ${stages.length} of ${stages.length} stages`
+    : failed
+      ? `Stopped at stage ${activeIndex + 1} of ${stages.length} · ${activeName}`
+      : current !== null
+        ? `Stage ${activeIndex + 1} of ${stages.length} · ${activeName}`
+        : `${done.length} of ${stages.length} stages`
+  const overallRight =
+    runStartedAt === null
+      ? ''
+      : allDone
+        ? `${duration((runEndedAt ?? now) - runStartedAt)} total`
+        : current !== null
+          ? `${remainingLabel(remainingMs)} · ${duration(now - runStartedAt)} elapsed`
+          : `${duration((runEndedAt ?? now) - runStartedAt)} elapsed`
+
+  // the tab title carries the state for an operator who switched away
+  useEffect(() => {
+    const before = document.title
+    document.title = allDone ? `Ready · ${cityName}` : failed ? `Stopped · ${cityName}` : `${overallLeft} · ${cityName}`
+    return () => {
+      document.title = before
+    }
+  }, [allDone, failed, overallLeft, cityName])
+
+  // ask once, while there is a run to wait for; the browser may decline to prompt without a gesture, which is fine
+  useEffect(() => {
+    if (initialDone.length >= stages.length) return
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return
+    void Notification.requestPermission()
+  }, [initialDone, stages])
+
+  // a desktop notification only when the tab is hidden: in view, the result block is enough
+  useEffect(() => {
+    if (finalizePhase !== 'done') return
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted' || !document.hidden) return
+    const note = new Notification(`${cityName} draft is ready`, { body: 'Click to review it.' })
+    note.onclick = () => {
+      window.focus()
+      window.location.href = reviewHref
+      note.close()
+    }
+  }, [finalizePhase, cityName, reviewHref])
 
   return (
     <>
-      {/* no headline progress bar: five rows already say how far along the run is */}
+      {/* where the whole run is, in one line; the rows below carry the detail */}
+      <div className="mb-3 rounded-md border border-border/60 bg-muted/40 px-3 py-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-[0.85rem] font-medium" data-role="overall">
+            {overallLeft}
+          </span>
+          <span className="shrink-0 font-mono text-[0.75rem] tabular-nums text-muted-foreground">{overallRight}</span>
+        </div>
+        <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={cn('h-full rounded-full transition-[width] duration-500', failed ? 'bg-destructive' : 'bg-primary')}
+            style={{ width: `${Math.round(fraction * 100)}%` }}
+          />
+        </div>
+      </div>
+
       <ol className="divide-y divide-border/40">
         {stages.map((stage) => {
           const isDone = done.includes(stage.id)
@@ -362,18 +459,6 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
         })}
       </ol>
 
-      {/* the ledger: two numbers for the whole run */}
-      <div className="mt-3 flex items-baseline justify-between border-t border-border pt-2.5">
-        <span className="text-[0.75rem] text-muted-foreground">
-          {done.length} of {stages.length} stages
-        </span>
-        {runStartedAt !== null && (
-          <span className="font-mono text-[0.75rem] tabular-nums text-muted-foreground">
-            {duration((runEndedAt ?? now) - runStartedAt)}
-          </span>
-        )}
-      </div>
-
       <div className="mt-6">
         {!allDone && !failed && (
           <p className="text-[0.85rem] text-muted-foreground">
@@ -406,9 +491,25 @@ export default function StageRunner({ cityKey, stages, initialDone }: Props) {
         )}
 
         {allDone && finalizePhase === 'done' && (
-          <Button asChild size="lg" className="min-h-11 sm:min-h-9">
-            <Link href={`${ADMIN_BASE}/review/${cityKey}`}>Draft ready →</Link>
-          </Button>
+          <div className="rounded-md border border-primary/40 p-4" data-role="result">
+            <p className="text-[0.95rem] font-semibold">{cityName} is ready to review</p>
+            <p className="mt-1 text-[0.8rem] text-muted-foreground">
+              Front page, {snapshot?.ok && snapshot.research ? `${areaCount} area pages` : 'the area pages'} and{' '}
+              {SERVICE_LOCAL_SLUGS.length} service pages
+              {runStartedAt !== null && runEndedAt !== null ? `, written in ${duration(runEndedAt - runStartedAt)}` : ''}.
+              Nothing is live until you publish.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button asChild size="lg" className="min-h-11 sm:min-h-9">
+                <Link href={reviewHref}>Draft ready →</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="min-h-11 sm:min-h-9">
+                <a href={`/${cityKey}`} target="_blank" rel="noreferrer">
+                  Open preview
+                </a>
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </>

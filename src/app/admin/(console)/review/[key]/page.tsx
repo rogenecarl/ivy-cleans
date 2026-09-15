@@ -22,6 +22,9 @@ import { requireAdmin } from '@/lib/auth-server'
 // per-stage regenerate, hidden for now (built and tested)
 const SHOW_REGENERATE = false
 
+
+const SHOW_ADVISORY_FINDINGS = false
+
 export const dynamic = 'force-dynamic'
 
 export default async function ReviewPage({ params }: { params: Promise<{ key: string }> }) {
@@ -91,8 +94,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
   }
 
   const invisible = findInvisibleChars(doc.sections)
-  const quality = checkQuality(doc)
-  const thinAreas = scored.filter((entry) => entry.verdict !== 'build')
+  // advisory findings ("worth a look", thin areas) are hidden for now; only what blocks publish is listed
+  const quality = checkQuality(doc).filter((finding) => SHOW_ADVISORY_FINDINGS || finding.blocking)
+  const thinAreas = SHOW_ADVISORY_FINDINGS ? scored.filter((entry) => entry.verdict !== 'build') : []
 
   return (
     <>

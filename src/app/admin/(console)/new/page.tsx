@@ -12,6 +12,9 @@ import { SubmitButton } from '../../submit-button'
 import { requireAdmin } from '@/lib/auth-server'
 
 // New-city form: a plain server-rendered <form action>. Errors come back as ?error=. searchParams is a Promise in Next 16.
+
+const SHOW_OPERATING_FACTS = false
+
 export const dynamic = 'force-dynamic'
 
 export default async function NewCityPage({
@@ -102,92 +105,94 @@ export default async function NewCityPage({
               />
             </div>
 
-            {/* Operating facts, collapsed: all editable later at /admin/sites/<key>, kept here because they feed the first
-              generation. Reviews are not here — none can exist before a house has been cleaned. <details> so it works before hydration. */}
-            <details className="rounded-md border border-border/60 p-4">
-              <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
-                This market is already operating
-                <span className="ml-2 font-normal text-muted-foreground">optional</span>
-                <span className="mt-1 block text-[0.8rem] font-normal text-muted-foreground">
-                  Who cleans there, since when, and where. A competitor can describe the town; only
-                  you can say this. All of it can be added later on the site&rsquo;s settings screen
-                  &mdash; along with customer reviews, which is where those go &mdash; but anything
-                  entered now is used by the first generation.
-                </span>
-              </summary>
+            {/* Operating facts, hidden for now: they are entered later on the site's settings screen. Flip the flag to
+              collect them here again; the action still accepts the fields. */}
+            {SHOW_OPERATING_FACTS && (
+              <details className="rounded-md border border-border/60 p-4">
+                <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
+                  This market is already operating
+                  <span className="ml-2 font-normal text-muted-foreground">optional</span>
+                  <span className="mt-1 block text-[0.8rem] font-normal text-muted-foreground">
+                    Who cleans there, since when, and where. A competitor can describe the town; only
+                    you can say this. All of it can be added later on the site&rsquo;s settings screen
+                    &mdash; along with customer reviews, which is where those go &mdash; but anything
+                    entered now is used by the first generation.
+                  </span>
+                </summary>
 
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <Label htmlFor="zips" className="mb-1.5">
-                    ZIP codes you serve
-                  </Label>
-                  <Textarea
-                    id="zips"
-                    name="zips"
-                    rows={2}
-                    placeholder="77002, 77003, 77004 — commas, spaces or one per line"
-                  />
-                  <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                    Printed as a list on the home page. Anything that isn&rsquo;t five digits is
-                    ignored rather than guessed at.
-                  </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="zips" className="mb-1.5">
+                      ZIP codes you serve
+                    </Label>
+                    <Textarea
+                      id="zips"
+                      name="zips"
+                      rows={2}
+                      placeholder="77002, 77003, 77004 — commas, spaces or one per line"
+                    />
+                    <p className="mt-1 text-[0.75rem] text-muted-foreground">
+                      Printed as a list on the home page. Anything that isn&rsquo;t five digits is
+                      ignored rather than guessed at.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="crewLead" className="mb-1.5">
+                      Crew lead
+                    </Label>
+                    <Input
+                      id="crewLead"
+                      name="crewLead"
+                      className="min-h-11 sm:min-h-9"
+                      placeholder="First name only — Maria"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="servingSince" className="mb-1.5">
+                      Serving since
+                    </Label>
+                    <Input
+                      id="servingSince"
+                      name="servingSince"
+                      className="min-h-11 sm:min-h-9"
+                      placeholder="2024-03"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="crewSize" className="mb-1.5">
+                      Crew size
+                    </Label>
+                    <Input
+                      id="crewSize"
+                      name="crewSize"
+                      inputMode="numeric"
+                      className="min-h-11 sm:min-h-9"
+                      placeholder="4"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="homesCleaned" className="mb-1.5">
+                      Homes cleaned here
+                    </Label>
+                    <Input
+                      id="homesCleaned"
+                      name="homesCleaned"
+                      inputMode="numeric"
+                      className="min-h-11 sm:min-h-9"
+                      placeholder="340"
+                    />
+                    <p className="mt-1 text-[0.75rem] text-muted-foreground">
+                      Printed on the page exactly as typed, so round down rather than up.
+                    </p>
+                  </div>
+
                 </div>
-
-                <div>
-                  <Label htmlFor="crewLead" className="mb-1.5">
-                    Crew lead
-                  </Label>
-                  <Input
-                    id="crewLead"
-                    name="crewLead"
-                    className="min-h-11 sm:min-h-9"
-                    placeholder="First name only — Maria"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="servingSince" className="mb-1.5">
-                    Serving since
-                  </Label>
-                  <Input
-                    id="servingSince"
-                    name="servingSince"
-                    className="min-h-11 sm:min-h-9"
-                    placeholder="2024-03"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="crewSize" className="mb-1.5">
-                    Crew size
-                  </Label>
-                  <Input
-                    id="crewSize"
-                    name="crewSize"
-                    inputMode="numeric"
-                    className="min-h-11 sm:min-h-9"
-                    placeholder="4"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="homesCleaned" className="mb-1.5">
-                    Homes cleaned here
-                  </Label>
-                  <Input
-                    id="homesCleaned"
-                    name="homesCleaned"
-                    inputMode="numeric"
-                    className="min-h-11 sm:min-h-9"
-                    placeholder="340"
-                  />
-                  <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                    Printed on the page exactly as typed, so round down rather than up.
-                  </p>
-                </div>
-
-              </div>
-            </details>
+              </details>
+            )}
 
             {/* say what the button does: a several-minute pipeline */}
             <div className="rounded-md bg-muted/50 px-4 py-3 text-[0.8rem] text-muted-foreground">

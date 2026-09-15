@@ -13,6 +13,9 @@ import { requireAdmin } from '@/lib/auth-server'
 export const dynamic = 'force-dynamic'
 
 // Next 16: both params and searchParams are Promises and must be awaited.
+
+const SHOW_MARKET_FACTS = false
+
 export default async function SiteSettingsPage({
   params,
   searchParams,
@@ -76,45 +79,38 @@ export default async function SiteSettingsPage({
               One address per line. Every lead from this city is emailed to all of them.
             </Label>
             <SettingsForm cityKey={key} defaultValue={(settings?.notifyEmails ?? []).join('\n')} />
-            <p className="mt-3 text-[0.8rem] text-muted-foreground">
-              With no address here, leads are still saved but nobody is notified.
-            </p>
           </>
         )}
       </Panel>
 
-      <Panel title="What we know about this market">
-        {ops.ok ? (
-          <>
-            <p className="mb-4 text-[0.8rem] text-muted-foreground">
-              All optional. A competitor can describe the town; only you can say who cleans there,
-              since when, and what a customer actually said &mdash; and a page that is given one of
-              these facts is required to use it.
-            </p>
-            <OpsForm cityKey={key} fields={ops.fields} />
-            <p className="mt-3 text-[0.8rem] text-muted-foreground">
-              Saving changes what the NEXT generation is given. Pages already written still say what
-              they said &mdash; regenerate the city to put a new fact into its copy.
-            </p>
-          </>
-        ) : (
-          <Alert variant="destructive">
-            <TriangleAlert className="size-4" aria-hidden="true" />
-            <AlertTitle>This city has no draft or published document.</AlertTitle>
-            <AlertDescription>
-              There is nowhere to store market facts for &ldquo;{key}&rdquo; yet, so the form is
-              hidden rather than shown ready to fail on save. Generate the city first.
-            </AlertDescription>
-          </Alert>
-        )}
-      </Panel>
-
-      <Link
-        href={ADMIN_SITES}
-        className="inline-flex min-h-11 cursor-pointer items-center rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-0"
-      >
-        Back to sites
-      </Link>
+      {/* Market facts (ZIPs, crew, reviews) are hidden for now; the save action still works. Flip the flag to show them. */}
+      {SHOW_MARKET_FACTS && (
+        <Panel title="What we know about this market">
+          {ops.ok ? (
+            <>
+              <p className="mb-4 text-[0.8rem] text-muted-foreground">
+                All optional. A competitor can describe the town; only you can say who cleans there,
+                since when, and what a customer actually said &mdash; and a page that is given one of
+                these facts is required to use it.
+              </p>
+              <OpsForm cityKey={key} fields={ops.fields} />
+              <p className="mt-3 text-[0.8rem] text-muted-foreground">
+                Saving changes what the NEXT generation is given. Pages already written still say what
+                they said &mdash; regenerate the city to put a new fact into its copy.
+              </p>
+            </>
+          ) : (
+            <Alert variant="destructive">
+              <TriangleAlert className="size-4" aria-hidden="true" />
+              <AlertTitle>This city has no draft or published document.</AlertTitle>
+              <AlertDescription>
+                There is nowhere to store market facts for &ldquo;{key}&rdquo; yet, so the form is
+                hidden rather than shown ready to fail on save. Generate the city first.
+              </AlertDescription>
+            </Alert>
+          )}
+        </Panel>
+      )}
     </>
   )
 }

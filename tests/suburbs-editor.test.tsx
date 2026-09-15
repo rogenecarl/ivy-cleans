@@ -25,6 +25,7 @@ function render(meta: Record<string, SuburbMeta>) {
         { name: 'Hand-Added Hollow', slug: 'hand-added-hollow' },
       ]}
       meta={meta}
+      showResearch
     />,
   )
 }

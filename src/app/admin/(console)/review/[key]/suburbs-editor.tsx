@@ -48,14 +48,17 @@ function VerdictChip({ meta }: { meta: SuburbMeta | undefined }) {
   )
 }
 
+// the research verdict column is hidden on the review page for now; pass showResearch to bring it back
 export default function SuburbsEditor({
   cityKey,
   initial,
   meta,
+  showResearch = false,
 }: {
   cityKey: string
   initial: Row[]
   meta: Record<string, SuburbMeta>
+  showResearch?: boolean
 }) {
   const [rows, setRows] = useState<Row[]>(initial.length > 0 ? initial : [{ name: '', slug: '' }])
   const [saving, setSaving] = useState(false)
@@ -82,7 +85,7 @@ export default function SuburbsEditor({
       <div className="hidden gap-3 px-1 text-[0.72rem] font-semibold tracking-wide text-muted-foreground uppercase sm:flex">
         <span className="flex-1">Area name</span>
         <span className="flex-1">URL slug</span>
-        <span className="w-28 shrink-0">Research</span>
+        {showResearch && <span className="w-28 shrink-0">Research</span>}
         <span className="w-11 shrink-0" />
       </div>
 
@@ -100,9 +103,11 @@ export default function SuburbsEditor({
               <span className="text-[0.75rem] text-muted-foreground sm:hidden">URL slug</span>
               <p className="truncate font-mono text-[0.8rem] text-muted-foreground">{row.slug}</p>
             </div>
-            <div className="flex items-center sm:w-28 sm:shrink-0">
-              <VerdictChip meta={meta[row.slug]} />
-            </div>
+            {showResearch && (
+              <div className="flex items-center sm:w-28 sm:shrink-0">
+                <VerdictChip meta={meta[row.slug]} />
+              </div>
+            )}
             <Button
               type="button"
               variant="outline"

@@ -58,6 +58,7 @@ export default async function GeneratePage({ params }: { params: Promise<{ key: 
 
       <StageRunner
         cityKey={key}
+        cityName={draft.facts.city}
         stages={STAGES.map((stage) => ({ id: stage.id, label: stage.label }))}
         initialDone={draft.done}
       />
