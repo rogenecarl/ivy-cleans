@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getCity } from '../src/content/store'
-import { cleanArticleHtml, excerptOf, plainText } from '../src/blog/html'
+import { cleanArticleHtml, excerptOf, plainText, wrapTables } from '../src/blog/html'
 
 const minneapolis = await getCity('minneapolis')
 
@@ -55,9 +55,26 @@ describe('cleanArticleHtml', () => {
     expect(html).toContain('rel="noopener nofollow"')
   })
 
+  it('keeps task-list checkboxes inert and drops every other input', () => {
+    const html = cleanArticleHtml(
+      '<ul><li><input type="checkbox" checked onclick="x()"> Oven</li><li><input type="checkbox"> Coils</li></ul><input type="text" name="q">',
+      't',
+      minneapolis,
+    )
+    expect(html).toBe('<ul><li><input type="checkbox" disabled checked /> Oven</li><li><input type="checkbox" disabled /> Coils</li></ul>')
+  })
+
   it('lazy-loads images', () => {
     const html = cleanArticleHtml('<img src="https://x.test/a.png" alt="a">', 't', minneapolis)
     expect(html).toBe('<img src="https://x.test/a.png" alt="a" loading="lazy" />')
+  })
+})
+
+describe('wrapTables', () => {
+  it('puts each table in a scroll box', () => {
+    expect(wrapTables('<p>a</p><table><tr><td>1</td></tr></table><table></table>')).toBe(
+      '<p>a</p><div class="table-wrap"><table><tr><td>1</td></tr></table></div><div class="table-wrap"><table></table></div>',
+    )
   })
 })
 

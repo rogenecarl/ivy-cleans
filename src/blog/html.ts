@@ -7,14 +7,17 @@ const OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'a', 'strong', 'b', 'em', 'i', 'u', 's', 'code', 'pre',
     'blockquote', 'ul', 'ol', 'li', 'img', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
-    'span', 'div', 'sup', 'sub',
+    'span', 'div', 'sup', 'sub', 'input',
   ],
   allowedAttributes: {
     a: ['href', 'title', 'rel', 'target'],
     img: ['src', 'alt', 'width', 'height', 'loading'],
     td: ['colspan', 'rowspan'],
     th: ['colspan', 'rowspan'],
+    input: ['type', 'checked', 'disabled'],
   },
+  // only the inert checkbox of a task list survives; any other input goes
+  exclusiveFilter: (frame) => frame.tag === 'input' && frame.attribs.type !== 'checkbox',
   allowedSchemes: ['http', 'https', 'mailto', 'tel'],
   allowedSchemesAppliedToAttributes: ['href', 'src'],
 }
@@ -39,6 +42,10 @@ export function cleanArticleHtml(html: string, title: string, c: CityContent, ow
         return { tagName, attribs: out }
       },
       img: (tagName, attribs) => ({ tagName, attribs: { ...attribs, loading: 'lazy' } }),
+      input: (tagName, attribs): sanitizeHtml.Tag =>
+        attribs.type === 'checkbox'
+          ? { tagName, attribs: { type: 'checkbox', disabled: '', ...('checked' in attribs ? { checked: '' } : {}) } }
+          : { tagName, attribs: { type: 'text' } },
     },
   })
   return stripTitleHeading(cleaned, title).trim()
@@ -71,6 +78,11 @@ function stripTitleHeading(html: string, title: string): string {
   if (!match) return html
   if (normalizeWords(plainText(match[1])) !== normalizeWords(title)) return html
   return html.slice(match[0].length)
+}
+
+/** Each table in its own horizontal scroll box, so a wide table never widens the page on a phone. */
+export function wrapTables(html: string): string {
+  return html.replace(/<table\b/g, '<div class="table-wrap"><table').replace(/<\/table>/g, '</table></div>')
 }
 
 const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'" }

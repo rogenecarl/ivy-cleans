@@ -42,7 +42,7 @@ export function PostShell({
   return (
     <section className="mt-[50px] mb-0 bg-white">
       <div className="mx-auto max-w-[119rem]">
-        <article className="p-0 md:p-[60px] md:pb-0">
+        <article className="px-[2rem] md:p-[60px] md:pb-0">
           {/* 30px widget margin + 2rem widget spacing as one value so they don't collapse */}
           <h1 className="mb-[calc(30px+2rem)] text-[33px] leading-[1.2em] font-semibold text-black md:text-[60px]">
             {h1}
