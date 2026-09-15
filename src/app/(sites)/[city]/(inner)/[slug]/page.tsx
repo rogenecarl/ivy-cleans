@@ -8,8 +8,7 @@ import type { CityContent } from "@/content/types";
 import { getCity } from "@/content/store";
 import { suburbData, type SuburbRef } from "@/data/suburb";
 import { siteData } from "@/data/site";
-import { posts, postSlugs, type PostArticleData } from "@/data/posts";
-import { postForCity } from "@/data/posts/tenant";
+import { isLegacyPostSlug } from "@/data/legacy-posts";
 import SuburbHero from "@/components/suburb/SuburbHero";
 import HouseCleaning from "@/components/suburb/HouseCleaning";
 import SuburbBenefits from "@/components/suburb/Benefits";
@@ -17,12 +16,10 @@ import OtherServices from "@/components/suburb/OtherServices";
 import NearbyAreas from "@/components/suburb/NearbyAreas";
 import WorkInAction from "@/components/suburb/WorkInAction";
 import SuburbClosing from "@/components/suburb/Closing";
-import PostArticle from "@/components/blog/PostArticle";
-import CommentFormDisplay from "@/components/blog/CommentFormDisplay";
 
-// Root-level slugs: stored suburb slugs and blog post slugs render here; /deep-cleaning-<city> and
-// /<city>-move-out-cleaning-services 308 to /services/... (indexed URLs). Anything else 404s.
-// Static sibling routes win because Next matches them first. Posts live at the root on live, hence this segment.
+// Root-level slugs: stored suburb slugs render here; /deep-cleaning-<city> and /<city>-move-out-cleaning-services
+// 308 to /services/..., and the WordPress-era post slugs 308 to /blog (all indexed URLs). Anything else 404s.
+// Static sibling routes win because Next matches them first.
 type SlugParams = Promise<{ city: string; slug: string }>;
 
 function redirectSlugs(c: CityContent) {
@@ -33,9 +30,7 @@ function redirectSlugs(c: CityContent) {
   };
 }
 
-type Resolved =
-  | { kind: "suburb"; c: CityContent; suburb: SuburbRef }
-  | { kind: "post"; c: CityContent; post: PostArticleData };
+type Resolved = { c: CityContent; suburb: SuburbRef };
 
 // which slug this request addresses, or notFound(); page and generateMetadata both dispatch through here
 async function resolveSlug(params: SlugParams): Promise<Resolved> {
@@ -48,14 +43,13 @@ async function resolveSlug(params: SlugParams): Promise<Resolved> {
   if (slug === redirects.move) {
     permanentRedirect(cityHref(c, "/services/move-in-move-out-cleaning"));
   }
+  if (isLegacyPostSlug(slug)) permanentRedirect(cityHref(c, "/blog"));
   const suburb = c.research.suburbs.find((s) => s.slug === slug);
-  if (suburb !== undefined) return { kind: "suburb", c, suburb };
-  const post = posts[slug];
-  if (post !== undefined) return { kind: "post", c, post };
+  if (suburb !== undefined) return { c, suburb };
   notFound();
 }
 
-// runs once per city from the parent segment's params. Suburb slugs only when hasSuburbPages; post slugs always.
+// runs once per city from the parent segment's params. Suburb slugs only when hasSuburbPages.
 export async function generateStaticParams({ params }: { params: { city: string } }) {
   const c = await getCity(params.city);
   const { deep, move } = redirectSlugs(c);
@@ -63,7 +57,6 @@ export async function generateStaticParams({ params }: { params: { city: string 
   if (c.hasSuburbPages) {
     for (const suburb of c.research.suburbs) slugs.push({ slug: suburb.slug });
   }
-  for (const slug of postSlugs) slugs.push({ slug });
   return slugs;
 }
 
@@ -73,32 +66,13 @@ export const dynamicParams = true;
 
 export async function generateMetadata({ params }: { params: SlugParams }): Promise<Metadata> {
   const resolved = await resolveSlug(params);
-  if (resolved.kind === "post") {
-    return { title: resolved.post.meta.title, description: resolved.post.meta.description };
-  }
   const { suburbMeta } = suburbData(resolved.c, resolved.suburb);
   return { title: suburbMeta.title, description: suburbMeta.description };
 }
 
 export default async function InnerSlugPage({ params }: { params: SlugParams }) {
   const resolved = await resolveSlug(params);
-  if (resolved.kind === "post") return <PostPage c={resolved.c} post={resolved.post} />;
   return <SuburbPage c={resolved.c} suburb={resolved.suburb} />;
-}
-
-/* The live blog-post template: article, then the comment widget, both inside
-   the same Elementor column (see PostArticle / CommentFormDisplay). */
-function PostPage({ c, post: raw }: { c: CityContent; post: PostArticleData }) {
-  const post = postForCity(raw, c);
-  return (
-    <>
-      <Breadcrumbs
-        trail={breadcrumbs(c, { kind: "post", title: post.h1, slug: post.slug })}
-      />
-      <PostArticle post={post} />
-      <CommentFormDisplay responses={post.responses} />
-    </>
-  );
 }
 
 /* New for Plan 5, Task 2 — one page per suburb.slug (c.research.suburbs). */

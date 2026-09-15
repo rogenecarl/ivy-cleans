@@ -69,7 +69,8 @@ export async function receiveDelivery(input: ReceiveInput, deps: ReceiveDeps): P
     return { status: 422, body: { error: `slug "${slug}" is already used by another post on this site` } }
   }
 
-  const html = cleanArticleHtml(article.content_html, article.title, city)
+  const ownHosts = [input.host, domainForCity(cityKey, deps.domains) ?? ''].flatMap((h) => (h ? [h, `www.${h}`] : []))
+  const html = cleanArticleHtml(article.content_html, article.title, city, ownHosts)
   const text = plainText(html)
   const duplicate = findDuplicate(article.title, text, await deps.candidatesOutside(cityKey))
   if (duplicate !== null) {
@@ -97,7 +98,7 @@ export async function receiveDelivery(input: ReceiveInput, deps: ReceiveDeps): P
     tags: article.tags ?? [],
     publishedAt: Number.isNaN(publishedAt.getTime()) ? new Date() : publishedAt,
   })
-  deps.revalidate([`/${cityKey}/blog`, `/${cityKey}/blog/${slug}`, '/sitemap.xml'])
+  deps.revalidate([`/${cityKey}`, `/${cityKey}/blog`, `/${cityKey}/blog/${slug}`, '/sitemap.xml'])
 
   const url = liveUrl(cityKey, city, `/blog/${slug}`, input.host, deps.domains)
   console.log(`blog webhook: stored ${cityKey}/${slug}`)

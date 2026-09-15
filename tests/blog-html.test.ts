@@ -37,6 +37,18 @@ describe('cleanArticleHtml', () => {
     expect(html).toContain('<span>gone</span>')
   })
 
+  it('turns links to the serving host into site links, and links tool posts under /blog', () => {
+    const html = cleanArticleHtml(
+      '<p><a href="https://ivycleans.vercel.app/services/deep-cleaning">deep</a> <a href="https://ivycleans.vercel.app/blog/other-post">other</a> <a href="https://ivycleans.vercel.app/cost">cost</a></p>',
+      't',
+      minneapolis,
+      ['ivycleans.vercel.app'],
+    )
+    expect(html).toContain('<a href="/services/deep-cleaning">deep</a>')
+    expect(html).toContain('<a href="/blog/other-post">other</a>')
+    expect(html).toContain('<span>cost</span>')
+  })
+
   it('keeps third-party links but marks them nofollow', () => {
     const html = cleanArticleHtml('<p><a href="https://www.epa.gov/mold">EPA</a></p>', 't', minneapolis)
     expect(html).toContain('href="https://www.epa.gov/mold"')

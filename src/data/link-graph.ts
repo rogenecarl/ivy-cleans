@@ -4,10 +4,6 @@ import { sitePaths } from './routes'
 import { siteData } from './site'
 import { areasData } from './areas'
 import { packagesData } from './packages'
-import { blogCardsFor } from './blog'
-import { recentPostsFor } from './recent-posts'
-import { posts, postSlugs, type Inline } from './posts'
-import { postForCity } from './posts/tenant'
 import { suburbData } from './suburb'
 import { breadcrumbs, type BreadcrumbTarget } from './breadcrumbs'
 import { SERVICE_SLUGS, serviceBySlug } from './services/registry'
@@ -74,7 +70,6 @@ export function linkGraph(c: CityContent): LinkGraph {
   // front page
   if (c.hasSuburbPages) for (const a of areasData(c).areas) link('/', a.href)
   for (const p of packagesData(c).packages) link('/', p.href)
-  for (const card of recentPostsFor(c)) link('/', card.href)
 
   // /home
   if (c.hasSuburbPages) for (const a of areasData(c).areas) link('/home', a.href)
@@ -92,33 +87,7 @@ export function linkGraph(c: CityContent): LinkGraph {
   ] as const) {
     crumb(page, { kind: 'page', label, path: page })
   }
-  for (const card of blogCardsFor(c)) link('/blog', card.href)
   link('/faq', `${prefix}/contact`)
-
-  // blog posts
-  const runs = (from: string, list: Inline[]) => {
-    for (const run of list) {
-      if (typeof run === 'string') continue
-      if ('b' in run) runs(from, run.b)
-      else if ('i' in run) runs(from, run.i)
-      else {
-        link(from, run.href)
-        runs(from, run.a)
-      }
-    }
-  }
-  for (const slug of postSlugs) {
-    const page = `/${slug}`
-    const post = postForCity(posts[slug], c)
-    crumb(page, { kind: 'post', title: post.h1, slug })
-    for (const block of post.blocks) {
-      if (block.type === 'img') continue
-      if ('items' in block) for (const item of block.items) runs(page, item)
-      else runs(page, block.text)
-    }
-    if (post.authorBox.href) link(page, post.authorBox.href)
-    for (const item of post.responses?.items ?? []) if (item.href) link(page, item.href)
-  }
 
   // service pages
   for (const slug of SERVICE_SLUGS) {

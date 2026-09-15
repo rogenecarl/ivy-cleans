@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
 import { cityFromParams } from "@/content/city-param";
-import { blogMeta, blogCardsFor } from "@/data/blog";
-import { cityKeyOf } from "@/content/interpolate";
+import { cityHref, cityKeyOf } from "@/content/interpolate";
+import { blogMeta } from "@/data/blog";
 import { listPosts } from "@/blog/store";
 import { postCards } from "@/blog/cards";
 import BlogCardGrid from "@/components/blog/BlogCardGrid";
@@ -14,14 +14,24 @@ export const metadata: Metadata = {
   ...(blogMeta.description ? { description: blogMeta.description } : {}),
 };
 
+const PAGE_SIZE = 9;
+
 // post-32.css: heading band ca03b5d (eyebrow 6a04ca1, h2 aa875ed), posts section aff2ced
-export default async function BlogPage({ params }: { params: Promise<{ city: string }> }) {
-  // The cards' hrefs have to be scoped to this tenant — the raw list is
-  // root-relative and 404s anywhere but the default host. See blogCardsFor.
+export default async function BlogPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ city: string }>;
+  searchParams: Promise<{ page?: string }>;
+}) {
   const c = await cityFromParams(params);
   // the store is optional here: a database outage must not take the blog page down
-  const toolPosts = await listPosts(cityKeyOf(c)).catch(() => []);
-  const blogCards = [...postCards(toolPosts, c), ...blogCardsFor(c)];
+  const posts = await listPosts(cityKeyOf(c)).catch(() => []);
+  const pages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+  const requested = Number((await searchParams).page ?? "1");
+  const page = Number.isInteger(requested) ? Math.min(Math.max(requested, 1), pages) : 1;
+  const cards = postCards(posts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), c);
+  const base = cityHref(c, "/blog");
   return (
     <>
       <Breadcrumbs trail={breadcrumbs(c, { kind: "page", label: "Blog", path: "/blog" })} />
@@ -38,8 +48,12 @@ export default async function BlogPage({ params }: { params: Promise<{ city: str
       </section>
       <section className="mt-0 mb-0 bg-white pt-[1rem] pb-[1rem] md:mt-[95px] md:mb-[95px] md:pt-0 md:pb-[3rem] lg:pb-[8.6rem]">
         <div className="ec">
-          <BlogCardGrid cards={blogCards} />
-          <Pagination />
+          {cards.length > 0 ? (
+            <BlogCardGrid cards={cards} />
+          ) : (
+            <p className="text-center text-[1.8rem] leading-[1.5] text-[#777]">No posts yet. Check back soon.</p>
+          )}
+          <Pagination page={page} pages={pages} hrefFor={(n) => (n === 1 ? base : `${base}?page=${n}`)} />
         </div>
       </section>
     </>

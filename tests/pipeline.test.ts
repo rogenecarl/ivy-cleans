@@ -52,9 +52,7 @@ import {
   type StageId,
 } from '../src/pipeline/stages'
 import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '../src/pipeline/schemas'
-import { postSlugs } from '../src/data/posts'
-import { blogCards } from '../src/data/blog'
-import { posts as recentPosts } from '../src/data/recent-posts'
+import { LEGACY_POST_SLUGS } from '../src/data/legacy-posts'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -712,30 +710,16 @@ describe('pipeline stages', () => {
           'home',
           'privacy-policy',
           'services',
-          ...postSlugs,
-          ...blogCards.map((c) => c.href.slice(1)),
-          ...recentPosts.map((p) => p.href.slice(1)),
+          ...LEGACY_POST_SLUGS,
           'deep-cleaning-ztest-stubville',
           'ztest-stubville-move-out-cleaning-services',
         ]),
       )
     })
 
-    it('reserves post slugs that have no post module, so a suburb cannot claim a URL a blog card links to', () => {
+    it('reserves every WordPress-era post slug, so a suburb cannot claim a URL that still redirects', () => {
       const reserved = reservedSlugs('Ztest Stubville')
-      // Both are blogCards entries; live builds them as bespoke Elementor pages
-      // (elementor-page-2248 / -2262), not on the shared post template, so
-      // src/data/posts has no module for either.
-      expect(postSlugs).not.toContain('how-to-clean-smoke-detectors')
-      expect(postSlugs).not.toContain('what-to-do-in-st-louis-park-mn')
-      expect(reserved.has('how-to-clean-smoke-detectors')).toBe(true)
-      expect(reserved.has('what-to-do-in-st-louis-park-mn')).toBe(true)
-    })
-
-    it('reserves every slug the blog listing and the front-page recent posts link to', () => {
-      const reserved = reservedSlugs('Ztest Stubville')
-      for (const card of blogCards) expect(reserved.has(card.href.slice(1))).toBe(true)
-      for (const post of recentPosts) expect(reserved.has(post.href.slice(1))).toBe(true)
+      for (const slug of LEGACY_POST_SLUGS) expect(reserved.has(slug), slug).toBe(true)
     })
   })
 

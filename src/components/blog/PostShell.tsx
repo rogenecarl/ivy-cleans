@@ -1,111 +1,16 @@
 import Image from "next/image";
-import type { ArticleBlock, Inline, PostArticleData } from "@/data/posts/types";
 
 // post-952.css: section 4fed1c62, column 4f183490, h1 70712646, post-info 1329edf, content 32c6aca7.
 // Body sizes measured off the live posts at 1440/390.
+export type PostInfo = { author?: string; date?: string; time?: string; commentCount?: string };
+export type PostAuthor = { name: string; avatar: string; href: string };
+
 const SHARE_LINKS: { label: string; icon: string; bg: string }[] = [
   { label: "Facebook", icon: "/icons/facebook.svg", bg: "#3b5998" },
   { label: "Twitter", icon: "/icons/x.svg", bg: "#1da1f2" },
   { label: "LinkedIn", icon: "/icons/linkedin.svg", bg: "#0077b5" },
   { label: "Pinterest", icon: "/icons/pinterest.svg", bg: "#bd081c" },
 ];
-
-// floated figures cap at the column minus their 1rem gutter
-const ALIGN_CLASS: Record<"left" | "center" | "right" | "none", string> = {
-  left: "float-left mr-[1rem] mb-[18px] max-w-[calc(100%-1rem)]",
-  center: "mx-auto mb-[18px] block max-w-full",
-  right: "float-right ml-[1rem] mb-[18px] max-w-[calc(100%-1rem)]",
-  none: "mb-[18px] block max-w-full",
-};
-
-const HEADING_CLASS: Record<"h1" | "h2" | "h3", string> = {
-  h1: "mt-[0.5rem] mb-[1rem] text-[26px] leading-[1.2em] font-bold text-[#374151]",
-  h2: "mt-[0.5rem] mb-[1rem] text-[22px] leading-[1.2em] font-bold text-[#374151]",
-  h3: "mt-[0.5rem] mb-[1rem] text-[20px] leading-[1.2em] font-semibold text-[#374151]",
-};
-
-// `bolder`: 700 in a paragraph, 900 in a heading, like the live stylesheet
-function InlineRuns({ runs }: { runs: Inline[] }) {
-  return (
-    <>
-      {runs.map((run, i) => {
-        if (typeof run === "string") return <span key={i}>{run}</span>;
-        if ("b" in run) {
-          return (
-            <strong key={i} className="[font-weight:bolder]">
-              <InlineRuns runs={run.b} />
-            </strong>
-          );
-        }
-        if ("i" in run) {
-          return (
-            <em key={i}>
-              <InlineRuns runs={run.i} />
-            </em>
-          );
-        }
-        return (
-          <a key={i} href={run.href} className="text-[#cc3366] leading-[1.2em] no-underline">
-            <InlineRuns runs={run.a} />
-          </a>
-        );
-      })}
-    </>
-  );
-}
-
-function Block({ block }: { block: ArticleBlock }) {
-  // switch so the h1|h2|h3 discriminant narrows
-  switch (block.type) {
-    case "h1":
-    case "h2":
-    case "h3": {
-      const Tag = block.type;
-      return (
-        <Tag className={HEADING_CLASS[block.type]}>
-          <InlineRuns runs={block.text} />
-        </Tag>
-      );
-    }
-    case "ul":
-    case "ol": {
-      const Tag = block.type;
-      return (
-        <Tag
-          className={`m-0 list-outside pl-[40px] ${
-            block.type === "ul" ? "list-disc" : "list-decimal"
-          }`}
-        >
-          {block.items.map((item, i) => (
-            <li key={i}>
-              <InlineRuns runs={item} />
-            </li>
-          ))}
-        </Tag>
-      );
-    }
-    case "img":
-      // a pinned inline height stays fixed while max-width squeezes the width; everything else scales
-      return (
-        <Image
-          src={block.src}
-          alt={block.alt}
-          width={block.width}
-          height={block.height}
-          className={`${ALIGN_CLASS[block.align]} ${block.fixedHeight ? "" : "h-auto"}`}
-          style={
-            block.fixedHeight ? { width: block.width, height: block.height } : { width: block.width }
-          }
-        />
-      );
-    case "p":
-      return (
-        <p className="mb-[2rem] leading-[1.5]">
-          <InlineRuns runs={block.text} />
-        </p>
-      );
-  }
-}
 
 // live links the avatar and name to an author archive; a tenant has none, so href "" renders the same box unlinked
 function AuthorLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
@@ -129,8 +34,8 @@ export function PostShell({
 }: {
   h1: string;
   heroImage?: PostHero;
-  info: PostArticleData["info"];
-  authorBox: PostArticleData["authorBox"];
+  info: PostInfo;
+  authorBox: PostAuthor;
   children: React.ReactNode;
 }) {
   // 50px section margin is top-only here; CommentFormDisplay carries the bottom
@@ -240,17 +145,5 @@ export function PostShell({
         </article>
       </div>
     </section>
-  );
-}
-
-export default function PostArticle({ post }: { post: PostArticleData }) {
-  const { h1, heroImage, info, authorBox, blocks } = post;
-  return (
-    <PostShell h1={h1} heroImage={heroImage} info={info} authorBox={authorBox}>
-      {/* fixed content list; index is a stable key */}
-      {blocks.map((block, i) => (
-        <Block key={i} block={block} />
-      ))}
-    </PostShell>
   );
 }

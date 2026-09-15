@@ -1,11 +1,14 @@
 import Image from "next/image";
 import type { CityContent } from "@/content/types";
-import { recentPostsFor } from "@/data/recent-posts";
+import { cityHref } from "@/content/interpolate";
+import type { BlogPostRecord } from "@/blog/types";
 
-export default function BlogPreview({ c }: { c: CityContent }) {
-  // Scoped to this city: the raw `posts` hrefs are root-relative and 404 on
-  // any tenant but the default one. See recentPostsFor.
-  const posts = recentPostsFor(c);
+export const PREVIEW_COUNT = 3;
+
+// The front page's latest posts. Renders nothing while a city has no posts: an empty grid is worse than no section.
+export default function BlogPreview({ c, posts }: { c: CityContent; posts: BlogPostRecord[] }) {
+  const latest = posts.slice(0, PREVIEW_COUNT);
+  if (latest.length === 0) return null;
   return (
     <section className="bg-white py-[1rem] md:py-[2rem] lg:py-[5rem]">
       <div className="ec">
@@ -22,27 +25,39 @@ export default function BlogPreview({ c }: { c: CityContent }) {
             images 476.72 wide, two per row), 1 at <=767 */}
         <div className="grid gap-[3rem] md:grid-cols-2 lg:grid-cols-3 lg:gap-x-[6rem]">
           {/* live: .elementor-post{border-radius:5px;box-shadow:0 0 14px 0 rgba(0,0,0,.1)} */}
-          {posts.map((p) => (
-            <article
-              key={p.href}
-              className="overflow-hidden rounded-[5px] text-left shadow-[0_0_14px_0_rgba(0,0,0,0.1)]"
-            >
-              {/* 597443d: `.elementor-post__thumbnail{padding-bottom:calc(0.66*100%)}`,
-                  0.5 below 768px — a fixed-ratio box the image covers */}
-              <a href={p.href} className="relative block aspect-[100/50] md:aspect-[100/66]">
-                <Image src={p.image} alt={p.alt} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover" />
-              </a>
-              <div className="p-[2rem]">
-                {/* 597443d .elementor-post__title: 2.4rem, 2rem at <=1024, 1.8rem at <=767 */}
-                <h3 className="mb-[1.5rem] text-[1.8rem] leading-[1.2em] font-medium md:text-[2rem] lg:text-[2.4rem]">
-                  <a href={p.href}>{p.title}</a>
-                </h3>
-                <a href={p.href} className="text-link inline-block text-[1.6rem] leading-[1.2em] font-medium">
-                  Read More &raquo;
-                </a>
-              </div>
-            </article>
-          ))}
+          {latest.map((post) => {
+            const href = cityHref(c, `/blog/${post.slug}`);
+            return (
+              <article
+                key={post.slug}
+                className="overflow-hidden rounded-[5px] text-left shadow-[0_0_14px_0_rgba(0,0,0,0.1)]"
+              >
+                {/* 597443d: `.elementor-post__thumbnail{padding-bottom:calc(0.66*100%)}`,
+                    0.5 below 768px — a fixed-ratio box the image covers */}
+                {post.imageUrl && (
+                  <a href={href} className="relative block aspect-[100/50] md:aspect-[100/66]">
+                    <Image
+                      src={post.imageUrl}
+                      alt={post.imageAlt ?? post.title}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 767px) 100vw, 33vw"
+                      className="object-cover"
+                    />
+                  </a>
+                )}
+                <div className="p-[2rem]">
+                  {/* 597443d .elementor-post__title: 2.4rem, 2rem at <=1024, 1.8rem at <=767 */}
+                  <h3 className="mb-[1.5rem] text-[1.8rem] leading-[1.2em] font-medium md:text-[2rem] lg:text-[2.4rem]">
+                    <a href={href}>{post.title}</a>
+                  </h3>
+                  <a href={href} className="text-link inline-block text-[1.6rem] leading-[1.2em] font-medium">
+                    Read More &raquo;
+                  </a>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -29,9 +29,7 @@ import {
 } from '../content/slots'
 import { SERVICE_SLUGS, serviceBySlug } from '../data/services/registry'
 import { MAX_SERVICE_LINKS, MAX_SUBURB_LINKS, acceptLinks } from '../content/links'
-import { postSlugs } from '../data/posts'
-import { blogCards } from '../data/blog'
-import { posts as recentPosts } from '../data/recent-posts'
+import { LEGACY_POST_SLUGS } from '../data/legacy-posts'
 
 // STAGES/STAGE_IDS/stageSlots live in src/content/slots.ts (drafts.ts needs them; importing from here would cycle). Re-exported.
 // BANNED_PHRASES lives in src/content/quality.ts for the same cycle reason
@@ -459,20 +457,10 @@ export function reservedSlugs(cityName: string): Set<string> {
     'home',
     'privacy-policy',
     'services',
-    ...blogPostSlugs(),
+    ...LEGACY_POST_SLUGS,
     `deep-cleaning-${slug}`,
     `${slug}-move-out-cleaning-services`,
   ])
-}
-
-// every root-level post slug: posts, listing cards and recent-post cards
-function blogPostSlugs(): string[] {
-  const hrefSlug = (href: string) => href.replace(/^\//, '')
-  return [
-    ...postSlugs,
-    ...blogCards.map((c) => hrefSlug(c.href)),
-    ...recentPosts.map((p) => hrefSlug(p.href)),
-  ]
 }
 
 // normalise every slug; drop collisions (first wins), empties and reserved slugs

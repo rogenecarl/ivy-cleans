@@ -18,7 +18,7 @@ function article(overrides: Record<string, unknown> = {}) {
       slug: 'how-to-clean-a-screened-lanai',
       path: null,
       content_html:
-        '<h1>How to Clean a Screened Lanai</h1><p>A screened lanai collects pollen, lovebugs and irrigation spray through spring. Rinse the screens from the inside out before wiping the frame.</p><p>Second paragraph.</p>',
+        '<h1>How to Clean a Screened Lanai</h1><p>A screened lanai collects pollen, lovebugs and irrigation spray through spring. Rinse the screens from the inside out before wiping the frame.</p><p>Second paragraph. <a href="https://ivycleans.vercel.app/services/deep-cleaning">deep</a></p>',
       seo: { title: 'Lanai Cleaning Guide', meta_description: 'Keep the lanai clear.' },
       og_image_url: 'https://blogr.ai/storage/articles/lanai.png',
       og_image_alt: 'A clean lanai',
@@ -119,10 +119,11 @@ describe('receiveDelivery', () => {
     expect(post.cityKey).toBe('minneapolis')
     expect(post.externalId).toBe('812')
     expect(post.html.startsWith('<p>A screened lanai')).toBe(true)
+    expect(post.html).toContain('<a href="/services/deep-cleaning">deep</a>')
     expect(post.excerpt.startsWith('A screened lanai collects')).toBe(true)
     expect(post.metaTitle).toBe('Lanai Cleaning Guide')
     expect(post.publishedAt.toISOString()).toBe('2026-09-12T09:30:00.000Z')
-    expect(d.revalidated).toEqual(['/minneapolis/blog', '/minneapolis/blog/how-to-clean-a-screened-lanai', '/sitemap.xml'])
+    expect(d.revalidated).toEqual(['/minneapolis', '/minneapolis/blog', '/minneapolis/blog/how-to-clean-a-screened-lanai', '/sitemap.xml'])
   })
 
   it('uses the mapped domain for the URL when the city has one', async () => {

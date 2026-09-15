@@ -1,6 +1,7 @@
 import sanitizeHtml from 'sanitize-html'
 import type { CityContent } from '@/content/types'
 import { tenantHref } from '@/data/routes'
+import { cityHref } from '@/content/interpolate'
 
 const OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -18,13 +19,17 @@ const OPTIONS: sanitizeHtml.IOptions = {
   allowedSchemesAppliedToAttributes: ['href', 'src'],
 }
 
-/** The delivered body, sanitized, every link kept on the tenant, and the duplicated title heading removed. */
-export function cleanArticleHtml(html: string, title: string, c: CityContent): string {
+/**
+ * The delivered body, sanitized, every link kept on the tenant, and the duplicated title heading removed. `ownHosts`
+ * are the hosts this site is served on right now (the delivery host, the mapped domain): links to them become paths.
+ */
+export function cleanArticleHtml(html: string, title: string, c: CityContent, ownHosts: string[] = []): string {
+  const own = new Set(ownHosts.map((h) => h.toLowerCase().split(':')[0]).filter(Boolean))
   const cleaned = sanitizeHtml(html, {
     ...OPTIONS,
     transformTags: {
       a: (tagName, attribs): sanitizeHtml.Tag => {
-        const href = tenantHref(c, attribs.href ?? '')
+        const href = siteHref(c, localizeHref(attribs.href ?? '', own))
         if (href === null || href === '') return { tagName: 'span', attribs: {} }
         const out: sanitizeHtml.Attributes = { href }
         if (/^https?:\/\//i.test(href)) {
@@ -37,6 +42,27 @@ export function cleanArticleHtml(html: string, title: string, c: CityContent): s
     },
   })
   return stripTitleHeading(cleaned, title).trim()
+}
+
+// an absolute link to a host this site is served on becomes a bare path, so tenantHref can judge it
+function localizeHref(href: string, own: Set<string>): string {
+  if (!/^https?:\/\//i.test(href)) return href
+  try {
+    const url = new URL(href)
+    if (!own.has(url.hostname.toLowerCase())) return href
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch {
+    return href
+  }
+}
+
+const TOOL_POST = /^\/blog\/[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+// tenantHref knows the fixed pages; tool posts under /blog/<slug> are served too
+function siteHref(c: CityContent, href: string): string | null {
+  const path = href.split(/[?#]/)[0].replace(/\/+$/, '')
+  if (TOOL_POST.test(path)) return cityHref(c, path)
+  return tenantHref(c, href)
 }
 
 // the tool opens the body with the title as an <h1>; the template renders its own

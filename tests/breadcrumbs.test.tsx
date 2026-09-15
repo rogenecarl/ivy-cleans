@@ -46,6 +46,7 @@ describe('breadcrumbs()', () => {
     const trail = breadcrumbs(minneapolis, { kind: 'post', title: 'How to clean bathroom walls', slug: 'how-to-clean-bathroom-walls' })
     expect(trail.map((c) => c.label)).toEqual(['Home', 'Blog', 'How to clean bathroom walls'])
     expect(trail[1].href).toBe('/blog')
+    expect(trail[2].href).toBe('/blog/how-to-clean-bathroom-walls')
   })
 
   it('a draft city keeps every crumb inside its preview prefix', () => {

@@ -15,6 +15,8 @@ import { localBusinessJsonLd } from "@/data/structured-data";
 import { mapSrc } from "@/data/maps";
 import BlogPreview from "@/components/BlogPreview";
 import { cityBits } from "@/content/store";
+import { listPosts } from "@/blog/store";
+import { cityKeyOf } from "@/content/interpolate";
 import { cityFromParams, type CityParams } from "@/content/city-param";
 import { t } from "@/content/interpolate";
 import { siteData } from "@/data/site";
@@ -41,6 +43,8 @@ export async function generateMetadata({
 export default async function Home({ params }: { params: CityParams }) {
   const c = await cityFromParams(params);
   const bits = cityBits(c);
+  // the store is optional here: a database outage must not take the front page down
+  const posts = await listPosts(cityKeyOf(c)).catch(() => []);
   const { site } = siteData(c);
   const { heroParagraphs, serviceIntro, services } = servicesData(c);
   const { packagesIntro, packages } = packagesData(c);
@@ -67,7 +71,7 @@ export default async function Home({ params }: { params: CityParams }) {
       <Reviews reviews={c.ops?.reviews ?? []} />
       <Faq />
       <CtaBand site={site} bits={bits} />
-      <BlogPreview c={c} />
+      <BlogPreview c={c} posts={posts} />
       <JsonLd data={localBusinessJsonLd(c)} />
     </main>
   );

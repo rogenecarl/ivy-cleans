@@ -6,7 +6,7 @@ import { cityFromParams } from "@/content/city-param";
 import { cityKeyOf } from "@/content/interpolate";
 import { postBySlug } from "@/blog/store";
 import { postDate } from "@/blog/format";
-import { PostShell } from "@/components/blog/PostArticle";
+import { PostShell } from "@/components/blog/PostShell";
 import HtmlBody from "@/components/blog/HtmlBody";
 
 // Blog-tool posts live under /blog/<slug>; the file-based posts keep their root slugs. Rendered on demand: a post
@@ -35,7 +35,7 @@ export default async function ToolPostPage({ params }: { params: Params }) {
   const { c, post } = await resolvePost(params);
   return (
     <>
-      <Breadcrumbs trail={breadcrumbs(c, { kind: "post", title: post.title, slug: post.slug, path: `/blog/${post.slug}` })} />
+      <Breadcrumbs trail={breadcrumbs(c, { kind: "post", title: post.title, slug: post.slug })} />
       <PostShell
         h1={post.title}
         heroImage={
