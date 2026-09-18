@@ -98,10 +98,12 @@ export function PhotoDropzone(props: Props) {
 
   const add = useCallback(
     (files: FileList | File[]) => {
+      // copy now: the input's FileList is live and is emptied right after this call, before React runs the updater
+      const incoming = Array.from(files)
       const fresh: Picked[] = []
       setPicked((prev) => {
         const next = [...prev]
-        for (const file of Array.from(files)) {
+        for (const file of incoming) {
           const id = `${file.name}-${file.size}-${file.lastModified}`
           if (next.some((p) => p.id === id)) continue
           const overRoom = next.filter((p) => p.problem === null).length >= room
