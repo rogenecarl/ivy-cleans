@@ -1,6 +1,7 @@
 // src/data/site.ts
 import type { CityContent } from '../content/types'
 import { cityHref } from '../content/interpolate'
+import { aboutReady } from '../pipeline/about'
 import { allServices } from './services/registry'
 
 export type SiteData = {
@@ -38,6 +39,7 @@ export function siteData(c: CityContent): SiteData {
       nav: [
         { label: "Home", href: cityHref(c, "/home") },
         { label: "Cleaning Services", href: cityHref(c, "/cleaning-services") },
+        ...(aboutReady(c.ops) ? [{ label: "About Us", href: cityHref(c, "/about") }] : []),
         { label: "Blog", href: cityHref(c, "/blog") },
         { label: "Contact", href: cityHref(c, "/contact") },
         { label: "FAQ", href: cityHref(c, "/faq") },
@@ -76,6 +78,7 @@ export function siteData(c: CityContent): SiteData {
       ],
       footerLinks: [
         { label: "Home", href: cityHref(c, "/home") },
+        ...(aboutReady(c.ops) ? [{ label: "About Us", href: cityHref(c, "/about") }] : []),
         { label: "Blog", href: cityHref(c, "/blog") },
         { label: "Contact", href: cityHref(c, "/contact") },
         { label: "FAQ", href: cityHref(c, "/faq") },

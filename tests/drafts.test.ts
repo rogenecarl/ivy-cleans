@@ -706,11 +706,9 @@ describe('drafts store', () => {
       await expect(publishCity(KEY)).rejects.toThrow(/names 0 of 2 researched subdivisions/)
     })
 
-    it('refuses a city that was given a crew lead and never mentioned them', async () => {
-      // The rule that gives the ops block teeth: a page that received a real
-      // fact and ignored it is a failed page.
+    it('publishes a city that was given a crew lead the copy never mentions: the About page prints it', async () => {
       await goodDraft({ crewLead: 'Maria' })
-      await expect(publishCity(KEY)).rejects.toThrow(/crew lead "Maria"/)
+      await expect(publishCity(KEY)).resolves.toBeUndefined()
     })
 
     it('does NOT refuse a banned phrase — it is surfaced, not blocking', async () => {

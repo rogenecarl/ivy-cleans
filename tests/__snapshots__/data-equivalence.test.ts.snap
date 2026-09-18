@@ -634,6 +634,10 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
         "label": "Home",
       },
       {
+        "href": "/about",
+        "label": "About Us",
+      },
+      {
         "href": "/blog",
         "label": "Blog",
       },
@@ -675,6 +679,10 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
       {
         "href": "/cleaning-services",
         "label": "Cleaning Services",
+      },
+      {
+        "href": "/about",
+        "label": "About Us",
       },
       {
         "href": "/blog",

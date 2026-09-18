@@ -150,6 +150,12 @@
     "service.pre-listing-cleaning": {
       "local": "A pre-listing clean in Fixture City is aimed at the windows. Six months of test season leaves the original single-pane glass through North Stubville hazed enough to grey a listing photograph, and buyers here read that as neglect rather than weather. Crews do the glass first, inside and out, then the floors. The kitchens in this stock photograph well with very little work, so the time goes where the camera goes.",
       "links": []
+    },
+    "about": {
+      "paragraphs": [
+        "Ivy Cleans has cleaned homes in Ztest Aboutville since March 2024. Maria leads the crew here.",
+        "Every visit is done by our own crew, and the job is not finished until your home is clean."
+      ]
     }
   },
   "events": {

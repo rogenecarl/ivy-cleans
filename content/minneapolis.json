@@ -235,7 +235,11 @@
     "services.cards.bathroom": "Bathroom cleaning is a task that many homeowners find daunting, but it is crucial for maintaining a clean and healthy home. In Minneapolis, where the weather can be unpredictable, maintaining a clean and hygienic bathroom is particularly important. Our bathroom cleaning services ensure that your bathroom is free from germs and bacteria, providing a safe and healthy environment for you and your family.",
     "services.cards.window": "Window cleaning is another essential service that is particularly important in Minneapolis. With its cold and snowy winters, it can be challenging to keep windows clean and clear. Our professional window cleaning services ensure that your windows are free from dirt, grime, and streaks, providing a clearer view and a brighter, more inviting living space.",
     "services.cards.upholstery": "Upholstery cleaning is a service that is often overlooked but is crucial for maintaining a clean and healthy home. Minneapolis residents spend a lot of time indoors during the winter months, and this can lead to a buildup of dirt and allergens on upholstered furniture. Our upholstery cleaning services ensure that your furniture is free from dust, dirt, and allergens, providing a more comfortable and healthy living environment.",
-    "deep.whatIs": "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family."
+    "deep.whatIs": "Deep cleaning is a comprehensive cleaning service that goes beyond regular cleaning tasks. It involves a thorough cleaning of all surfaces, floors, carpets, and furniture in your home, with the goal of removing dirt, dust, and other allergens that may be lurking in your home. By doing so, deep cleaning helps to create a healthier and more comfortable living environment for you and your family.",
+    "about.story": [
+      "Ivy Cleans is a local house cleaning company in Minneapolis, Minnesota. We have cleaned homes here since 2023, and Bailey leads a crew of 4 who have cleaned 300 homes across the city between them.",
+      "We are a small crew, and we would rather be known for the homes we have cleaned than for what we say about ourselves. If you would like yours to be the next one, call us or book online."
+    ]
   },
   "ops": {
     "photos": [
@@ -259,6 +263,37 @@
         "path": "/images/Untitled-design-2.png",
         "alt": "Before and after a bedroom tidy: laundry piled across an unmade bed, then made up with pillows squared"
       }
-    ]
+    ],
+    "servingSince": "2023",
+    "reviews": [
+      {
+        "quote": "Bailey is amazing! Great job! Attention to detail and always on time! Definitely recommend Ivy Cleans and Bailey.",
+        "firstName": "John",
+        "area": "Minneapolis"
+      },
+      {
+        "quote": "The house is spotless and never looked better.",
+        "firstName": "Thomas",
+        "area": "Minneapolis"
+      },
+      {
+        "quote": "I scheduled cleaning with Ivy Cleans from Seattle for my sister in Minneapolis. That process alone was so friendly and efficient! My sister said the cleaning job by Ivy was one of her best birthday presents. Thanks for the great service!",
+        "firstName": "Gaye",
+        "area": "Minneapolis"
+      },
+      {
+        "quote": "Ivy Cleans did a great job! We needed furniture moved for a deep clean. I called 5 companies and this was the only one that could accommodate our needs and they were able to get a crew out here the next day! The cleaners did a great job and were friendly.",
+        "firstName": "Julianna",
+        "area": "Minneapolis"
+      },
+      {
+        "quote": "Keyshawn did an excellent very thorough job cleaning my house today. She covered all the bases & I am very much enjoying my clean house now. Well done, lady!",
+        "firstName": "Betsy",
+        "area": "Minneapolis"
+      }
+    ],
+    "crewLead": "Bailey",
+    "crewSize": 4,
+    "homesCleaned": 300
   }
 }

@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/auth-server'
 import {
+  addPhotoLogic,
   createDraftFromFields,
   finalizeLogic,
   getProgressLogic,
@@ -26,6 +27,7 @@ import {
   type SuburbRow,
 } from '@/pipeline/admin-logic'
 import { ADMIN_BASE } from '@/lib/admin-routes'
+import { checkPhotoUpload } from '@/pipeline/photos'
 
 /** FormData values are `string | File`; every field on these forms is a string. */
 function field(form: FormData, name: string): string {
@@ -36,6 +38,14 @@ function field(form: FormData, name: string): string {
 // errors redirect back to the form with ?error=; the redirects sit OUTSIDE createDraftFromFields' try/catch (redirect throws)
 export async function createDraftAction(formData: FormData): Promise<void> {
   await requireAdmin()
+
+  // photos are checked before the draft exists, so a bad file sends the form back instead of a half-made city
+  const crewPhotos = formData.getAll('crewPhoto').filter((f): f is File => f instanceof File && f.size > 0)
+  for (const [i, file] of crewPhotos.entries()) {
+    const problem = checkPhotoUpload({ type: file.type, size: file.size, count: i, alt: 'crew' })
+    if (problem) redirect(`${ADMIN_BASE}/new?error=${encodeURIComponent(`${file.name}: ${problem}`)}`)
+  }
+
   const result = await createDraftFromFields({
     city: field(formData, 'city'),
     state: field(formData, 'state'),
@@ -52,6 +62,21 @@ export async function createDraftAction(formData: FormData): Promise<void> {
 
   if (!result.ok) {
     redirect(`${ADMIN_BASE}/new?error=${encodeURIComponent(result.error)}`)
+  }
+
+  // the first photo is the crew photo; the rest go to the gallery
+  const city = field(formData, 'city').trim()
+  const caption = field(formData, 'crewPhotoAlt').trim() || `The ${city} crew`
+  for (const [i, file] of crewPhotos.entries()) {
+    const alt = i === 0 ? (/\bcrew\b/i.test(caption) ? caption : `${caption} (crew)`) : `${city} crew at work (${i + 1})`
+    const stored = await addPhotoLogic(result.key, {
+      bytes: new Uint8Array(await file.arrayBuffer()),
+      name: file.name,
+      type: file.type,
+      alt,
+    })
+    // the city exists either way; a storage failure is logged and the photo can be added in the site's Settings
+    if (!stored.ok) console.error(`createDraftAction: photo "${file.name}" for "${result.key}" was not stored: ${stored.error}`)
   }
   redirect(`${ADMIN_BASE}/generate/${result.key}`)
 }

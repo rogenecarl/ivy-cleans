@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Crew photo coming soon">
+  <rect width="800" height="600" fill="#EEF7F4"/>
+  <g fill="none" stroke="#86C6B0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="400" cy="230" r="58"/>
+    <path d="M300 430c0-60 45-105 100-105s100 45 100 105"/>
+    <circle cx="255" cy="270" r="44"/>
+    <path d="M175 430c0-48 36-84 80-84 22 0 42 9 56 24"/>
+    <circle cx="545" cy="270" r="44"/>
+    <path d="M625 430c0-48-36-84-80-84-22 0-42 9-56 24"/>
+  </g>
+  <text x="400" y="510" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="30" font-weight="600" fill="#37745f">Crew photo coming soon</text>
+</svg>

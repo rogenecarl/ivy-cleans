@@ -470,7 +470,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
         {allDone && finalizePhase === 'running' && (
           <p className="flex items-center gap-2 text-[0.85rem] text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            Assembling the site…
+            Assembling the site and writing the About story…
           </p>
         )}
 
@@ -502,6 +502,9 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
             <div className="mt-3 flex flex-wrap gap-2">
               <Button asChild size="lg" className="min-h-11 sm:min-h-9">
                 <Link href={reviewHref}>Draft ready →</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="min-h-11 sm:min-h-9">
+                <Link href={`${ADMIN_BASE}/sites/${cityKey}#about`}>Add About Us photos and reviews</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="min-h-11 sm:min-h-9">
                 <a href={`/${cityKey}`} target="_blank" rel="noreferrer">

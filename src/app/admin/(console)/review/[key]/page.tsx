@@ -3,6 +3,7 @@ import { ChevronLeft, ExternalLink } from 'lucide-react'
 import { loadDraft } from '@/content/drafts'
 import { getCity } from '@/content/store'
 import { errorMessage } from '@/pipeline/admin-logic'
+import { aboutMissing } from '@/pipeline/about'
 import { STAGES, scoreSuburbs } from '@/pipeline/stages'
 import { checkCity, findInvisibleChars } from '@/content/similarity'
 import { checkQuality } from '@/content/quality'
@@ -176,6 +177,19 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
           </ul>
         </Panel>
       )}
+
+      <Panel title="About page">
+        {aboutMissing(doc.ops).length === 0 ? (
+          <p className="text-[0.85rem] text-muted-foreground">On. It has serving-since and at least one photo.</p>
+        ) : (
+          <p className="text-[0.85rem] text-muted-foreground">
+            Off until it has {aboutMissing(doc.ops).join(' and ')}. The site publishes without it; add the facts when you have them.
+          </p>
+        )}
+        <Button asChild variant="outline" size="sm" className="mt-3 min-h-11 sm:min-h-8">
+          <Link href={`${ADMIN_BASE}/sites/${key}#about`}>Open in Settings</Link>
+        </Button>
+      </Panel>
 
       <Panel title="Service areas">
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />

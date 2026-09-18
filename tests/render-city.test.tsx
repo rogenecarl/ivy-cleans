@@ -244,9 +244,14 @@ describe('Reviews', () => {
     expect(html).toContain('last spring')
   })
 
-  it('a live city with no ops reviews has no reviews section', () => {
-    // Minneapolis's real Google reviews are not in its ops block — they were a
-    // widget snapshot, not operator-entered facts — so it has none to show.
-    expect(renderToStaticMarkup(<Reviews reviews={minneapolis.ops?.reviews ?? []} />)).toBe('')
+  it('a city with no ops reviews has no reviews section', () => {
+    expect(renderToStaticMarkup(<Reviews reviews={[]} />)).toBe('')
+  })
+
+  it('Minneapolis shows its own five Google reviews, entered as ops facts', () => {
+    const html = renderToStaticMarkup(<Reviews reviews={minneapolis.ops?.reviews ?? []} />)
+    expect(html).toContain('What Our Satisfied Clients Are Saying')
+    expect(html).toContain('The house is spotless and never looked better.')
+    expect(html).toContain('Thomas')
   })
 })

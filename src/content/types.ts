@@ -23,6 +23,9 @@ export type MarketPhoto = { path: string; alt: string }
 /** A prose link: `anchor` appears verbatim in its slot's text; `href` is a path on this site. */
 export type SlotLink = { anchor: string; href: string }
 
+// a public profile for THIS branch: Google Business Profile, Yelp, a Facebook page
+export type MarketProfile = { label: string; url: string }
+
 export type MarketOps = {
   zips?: string[]
   servingSince?: string
@@ -31,6 +34,9 @@ export type MarketOps = {
   homesCleaned?: number
   reviews?: MarketReview[]
   photos?: MarketPhoto[]
+  /** The owner's own line on insurance and bonding, rendered verbatim. */
+  insurance?: string
+  profiles?: MarketProfile[]
 }
 
 export type CityContent = {

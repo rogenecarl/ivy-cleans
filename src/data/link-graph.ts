@@ -2,6 +2,7 @@ import type { CityContent } from '../content/types'
 import { cityKeyOf } from '../content/interpolate'
 import { sitePaths } from './routes'
 import { siteData } from './site'
+import { aboutReady } from './about'
 import { areasData } from './areas'
 import { packagesData } from './packages'
 import { suburbData } from './suburb'
@@ -78,6 +79,7 @@ export function linkGraph(c: CityContent): LinkGraph {
 
   // static inner pages
   for (const [page, label] of [
+    ...(aboutReady(c.ops) ? ([['/about', 'About Us']] as const) : []),
     ['/blog', 'Blog'],
     ['/contact', 'Contact'],
     ['/faq', 'FAQ'],
@@ -88,6 +90,10 @@ export function linkGraph(c: CityContent): LinkGraph {
     crumb(page, { kind: 'page', label, path: page })
   }
   link('/faq', `${prefix}/contact`)
+  if (aboutReady(c.ops)) {
+    link('/about', `${prefix}/contact`)
+    link('/about', `${prefix}/book`)
+  }
 
   // service pages
   for (const slug of SERVICE_SLUGS) {

@@ -31,6 +31,7 @@ export function localBusinessJsonLd(c: CityContent): JsonLd | null {
     areaServed: c.research.suburbs.map((s) => ({ '@type': 'Place', name: s.name })),
   }
   if (c.ops?.servingSince) node.foundingDate = c.ops.servingSince
+  if (c.ops?.profiles?.length) node.sameAs = c.ops.profiles.map((p) => p.url)
   if (c.ops?.photos?.length) node.image = c.ops.photos.map((p) => p.path)
   if (c.ops?.reviews?.length) {
     node.review = c.ops.reviews.map((r) => ({

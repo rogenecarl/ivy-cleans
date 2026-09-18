@@ -1,20 +1,23 @@
 import Link from 'next/link'
 import { ChevronLeft, TriangleAlert } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { getSiteSettings } from '@/leads/store'
-import { readOpsLogic } from '@/pipeline/admin-logic'
+import { formatOpsFields, readMarketLogic } from '@/pipeline/admin-logic'
+import { aboutMissing } from '@/pipeline/about'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { ADMIN_SITES } from '@/lib/admin-routes'
+import { Button } from '@/components/ui/button'
 import { ErrorText, Panel } from '../../../ui'
-import { OpsForm } from './ops-form'
 import { SettingsForm } from './settings-form'
+import { FactsForm } from './facts-form'
+import { PhotosPanel } from './photos-panel'
+import { StoryPanel } from './story-panel'
 import { requireAdmin } from '@/lib/auth-server'
 
 export const dynamic = 'force-dynamic'
 
 // Next 16: both params and searchParams are Promises and must be awaited.
-
-const SHOW_MARKET_FACTS = false
 
 export default async function SiteSettingsPage({
   params,
@@ -28,6 +31,7 @@ export default async function SiteSettingsPage({
 
   const { key } = await params
   const { error } = await searchParams
+  const market = await readMarketLogic(key)
 
   // getSiteSettings THROWING (unknown) is not null (no row yet). On a throw the form is hidden entirely: a pre-filled
   // empty textarea would wipe the real inbox list on save.
@@ -43,9 +47,6 @@ export default async function SiteSettingsPage({
       err,
     )
   }
-
-  // a failed ops read does not hide the form: empty fields read the same either way. An unreachable city is the one case worth saying.
-  const ops = await readOpsLogic(key)
 
   return (
     <>
@@ -83,34 +84,60 @@ export default async function SiteSettingsPage({
         )}
       </Panel>
 
-      {/* Market facts (ZIPs, crew, reviews) are hidden for now; the save action still works. Flip the flag to show them. */}
-      {SHOW_MARKET_FACTS && (
-        <Panel title="What we know about this market">
-          {ops.ok ? (
-            <>
-              <p className="mb-4 text-[0.8rem] text-muted-foreground">
-                All optional. A competitor can describe the town; only you can say who cleans there,
-                since when, and what a customer actually said &mdash; and a page that is given one of
-                these facts is required to use it.
-              </p>
-              <OpsForm cityKey={key} fields={ops.fields} />
-              <p className="mt-3 text-[0.8rem] text-muted-foreground">
-                Saving changes what the NEXT generation is given. Pages already written still say what
-                they said &mdash; regenerate the city to put a new fact into its copy.
-              </p>
-            </>
-          ) : (
-            <Alert variant="destructive">
-              <TriangleAlert className="size-4" aria-hidden="true" />
-              <AlertTitle>This city has no draft or published document.</AlertTitle>
-              <AlertDescription>
-                There is nowhere to store market facts for &ldquo;{key}&rdquo; yet, so the form is
-                hidden rather than shown ready to fail on save. Generate the city first.
-              </AlertDescription>
-            </Alert>
-          )}
-        </Panel>
+      {/* About Us: every fact is typed by the operator; the page stays off the site until it has a year and a photo */}
+      <h2 id="about" className="mt-10 mb-1 scroll-mt-6 text-[1.15rem] font-semibold tracking-tight">About Us page</h2>
+      {market.ok ? (
+        <>
+          <AboutStatus missing={aboutMissing(market.ops)} cityKey={key} />
+
+          <Panel title="Facts">
+            <p className="mb-4 text-[0.8rem] text-muted-foreground">
+              All optional, all printed as typed. Only you can say who cleans here, since when, and what a customer
+              actually said. Nothing here is written by the model.
+            </p>
+            <FactsForm cityKey={key} fields={formatOpsFields(market.ops)} />
+          </Panel>
+
+          <Panel title="Photos">
+            <p className="mb-4 text-[0.8rem] text-muted-foreground">
+              Real photos of this branch. They appear on the About Us page and in the gallery on every area page.
+            </p>
+            <PhotosPanel cityKey={key} photos={market.ops?.photos ?? []} />
+          </Panel>
+
+          <Panel title="Story">
+            <StoryPanel cityKey={key} story={market.story} ready={aboutMissing(market.ops).length === 0} />
+          </Panel>
+        </>
+      ) : (
+        <Alert variant="destructive" className="mt-3">
+          <TriangleAlert className="size-4" aria-hidden="true" />
+          <AlertTitle>This city has no draft or published document.</AlertTitle>
+          <AlertDescription>Generate the city first; there is nowhere to keep its About Us facts yet.</AlertDescription>
+        </Alert>
       )}
     </>
+  )
+}
+
+function AboutStatus({ missing, cityKey }: { missing: string[]; cityKey: string }) {
+  if (missing.length === 0) {
+    return (
+      <div className="mb-4 flex flex-wrap items-center gap-3 text-[0.85rem]">
+        <span className="rounded-full border border-green-600/30 bg-green-50 px-2.5 py-0.5 text-green-700">On</span>
+        <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
+          <a href={`/${cityKey}/about`} target="_blank" rel="noreferrer">
+            Open the page
+            <ExternalLink className="size-3.5" aria-hidden="true" />
+          </a>
+        </Button>
+      </div>
+    )
+  }
+  return (
+    <p className="mb-4 text-[0.85rem] text-muted-foreground">
+      <span className="rounded-full border border-amber-600/30 bg-amber-50 px-2.5 py-0.5 text-amber-700">Off</span>
+      <span className="ml-2">It publishes once it has {missing.join(' and ')}. A crew lead, reviews and the rest make it better; they are not required.</span>
+    </p>
   )
 }

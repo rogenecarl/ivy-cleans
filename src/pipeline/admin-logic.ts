@@ -25,8 +25,13 @@ import { serviceBySlug } from '../data/services/registry'
 import { buildProvisioners, checkDomainLive } from './provision'
 import { deriveFacts } from './facts'
 import { makeClient } from './model'
+import { ABOUT_STORY_SLOT, ABOUT_SYSTEM, AboutStorySchema, aboutMissing, aboutReady, buildAboutStoryPrompt, validateAboutStory, type AboutFacts } from './about'
+import { MAX_CAPTION_LENGTH, checkPhotoUpload, isCityPhotoPath, photoFileName, photoPath } from './photos'
+import { deletePhoto, putPhoto } from './photo-store'
+import { optimizePhoto, sniffImageType } from './photo-process'
 import { readProgress, type ProgressEvent } from './progress'
 import type { MarketOps, Suburb } from './schemas'
+import type { MarketProfile } from '../content/types'
 import { STAGE_IDS, normalizeSlug, regenerateStage, reservedSlugs, runStage, type StageId } from './stages'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
@@ -79,7 +84,7 @@ export function isStageId(value: string): value is StageId {
 export type OpsFields = {
   /** Comma, space or newline separated. "77002, 77003" or one per line. */
   zips?: string
-  /** "2024-03". */
+  /** A year, "2024"; a month is accepted too, "2024-03". */
   servingSince?: string
   /** First name only. */
   crewLead?: string
@@ -87,6 +92,10 @@ export type OpsFields = {
   homesCleaned?: string
   /** One per line: `quote | first name | area | date?`. See parseReviews. */
   reviews?: string
+  /** The owner's own line on insurance and bonding. */
+  insurance?: string
+  /** One per line: `label | https://...`. See parseProfiles. */
+  profiles?: string
 }
 
 // /admin/new collects everything except reviews, which live on the settings screen
@@ -108,6 +117,30 @@ export function parseZips(raw: string | undefined): string[] {
 // bounds on the reviews field (untrusted RPC boundary)
 export const MAX_REVIEWS = 10
 export const MAX_REVIEWS_LENGTH = 8000
+export const MAX_PROFILES = 10
+
+export type ParseProfilesResult = { ok: true; profiles: MarketProfile[] } | { ok: false; error: string }
+
+// Profiles: `label | https://...`, one per line. A bad line rejects the submission with its line number.
+export function parseProfiles(raw: string | undefined): ParseProfilesResult {
+  if (!raw || raw.trim() === '') return { ok: true, profiles: [] }
+  const profiles: MarketProfile[] = []
+  const lines = raw.split(/\r?\n/)
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i].trim()
+    if (line === '') continue
+    const shape = `profiles line ${i + 1}: expected "label | https://..."`
+    const parts = line.split('|').map((part) => part.trim())
+    if (parts.length !== 2 || parts[0] === '' || !/^https?:\/\/\S+$/i.test(parts[1])) {
+      return { ok: false, error: shape }
+    }
+    profiles.push({ label: parts[0], url: parts[1] })
+    if (profiles.length > MAX_PROFILES) {
+      return { ok: false, error: `at most ${MAX_PROFILES} profiles can be saved` }
+    }
+  }
+  return { ok: true, profiles }
+}
 
 export type MarketReview = NonNullable<MarketOps['reviews']>[number]
 
@@ -187,10 +220,14 @@ export function buildOps(fields: OpsFields): BuildOpsResult {
   const crewSize = parseCount(fields.crewSize)
   const homesCleaned = parseCount(fields.homesCleaned)
 
-  // Reviews are the one ops field that can FAIL rather than come back empty,
-  // and the failure aborts the whole save — see parseReviews for why.
+  const insurance = fields.insurance?.trim()
+
+  // Reviews and profiles can FAIL rather than come back empty, and the failure aborts the whole save — see
+  // parseReviews for why.
   const parsed = parseReviews(fields.reviews)
   if (!parsed.ok) return { ok: false, error: parsed.error }
+  const profiles = parseProfiles(fields.profiles)
+  if (!profiles.ok) return { ok: false, error: profiles.error }
 
   const ops: MarketOps = {
     ...(zips.length ? { zips } : {}),
@@ -199,6 +236,8 @@ export function buildOps(fields: OpsFields): BuildOpsResult {
     ...(crewSize !== undefined ? { crewSize } : {}),
     ...(homesCleaned !== undefined ? { homesCleaned } : {}),
     ...(parsed.reviews.length ? { reviews: parsed.reviews } : {}),
+    ...(insurance ? { insurance } : {}),
+    ...(profiles.profiles.length ? { profiles: profiles.profiles } : {}),
   }
   return { ok: true, ops: Object.keys(ops).length ? ops : undefined }
 }
@@ -219,6 +258,8 @@ export function formatOpsFields(ops: MarketOps | undefined): OpsFields {
             .join('\n'),
         }
       : {}),
+    ...(ops.insurance ? { insurance: ops.insurance } : {}),
+    ...(ops.profiles?.length ? { profiles: ops.profiles.map((p) => `${p.label} | ${p.url}`).join('\n') } : {}),
   }
 }
 
@@ -323,7 +364,25 @@ export async function getProgressLogic(key: string): Promise<ProgressSnapshot> {
 
 /** Draft sidecar -> validated content/<key>.json + _cities.json registration. */
 export async function finalizeLogic(key: string): Promise<ActionResult> {
-  return attempt(() => finalizeDraft(key))
+  const result = await attempt(() => finalizeDraft(key))
+  if (result.ok) await writeAboutStoryIfReady(key)
+  return result
+}
+
+// Part of generating a city: once the site is assembled, a city that already has its About facts gets its story in
+// the same run. Never fails the run; a refused draft is retried once, then left for the button in Settings.
+async function writeAboutStoryIfReady(key: string): Promise<void> {
+  try {
+    const market = await readMarketLogic(key)
+    if (!market.ok || market.story || !aboutReady(market.ops)) return
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      const written = await writeAboutStoryLogic(key)
+      if (written.ok) return
+      console.error(`finalize: About story for "${key}" attempt ${attempt} was not saved: ${written.error}`)
+    }
+  } catch (err) {
+    console.error(`finalize: About story for "${key}" failed:`, err)
+  }
 }
 
 // flip to live, map or buy a host, retire the sidecar. `provision` spends money, so it is explicit.
@@ -592,4 +651,211 @@ export async function listCities(): Promise<CityRow[]> {
   }
 
   return [...rows.values()].sort((a, b) => a.city.localeCompare(b.city))
+}
+
+
+// ---- About page: market facts, photos and the story ------------------------------------------------------------
+
+export type MarketSnapshot =
+  | {
+      ok: true
+      city: string
+      state: string
+      stateName: string
+      status: 'draft' | 'live'
+      ops: MarketOps | undefined
+      story: string[] | undefined
+      areaNames: string[]
+    }
+  | { ok: false; error: string }
+
+/** Everything the Settings screen shows about one city's About Us page, from the draft when there is one, else the published document. */
+export async function readMarketLogic(key: string): Promise<MarketSnapshot> {
+  try {
+    let draft
+    try {
+      draft = await loadDraft(key)
+    } catch {
+      draft = null
+    }
+    if (draft) {
+      const story = draft.sections[ABOUT_STORY_SLOT]
+      return {
+        ok: true,
+        city: draft.facts.city,
+        state: draft.facts.state,
+        stateName: draft.facts.stateName,
+        status: 'draft',
+        ops: draft.facts.ops,
+        story: Array.isArray(story) ? story : undefined,
+        areaNames: draft.research?.suburbs.map((s) => s.name) ?? [],
+      }
+    }
+    const doc = await readCityDoc(key)
+    if (doc) {
+      const story = doc.sections[ABOUT_STORY_SLOT]
+      return {
+        ok: true,
+        city: doc.city,
+        state: doc.state,
+        stateName: doc.state,
+        status: 'live',
+        ops: doc.ops,
+        story: Array.isArray(story) ? story : undefined,
+        areaNames: doc.research.suburbs.map((s) => s.name),
+      }
+    }
+    return { ok: false, error: `no draft or published document found for "${key}"` }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+type CityEdit = { ops: MarketOps | undefined; sections: Record<string, string | string[]> }
+
+// one edit applied wherever the city lives (sidecar, document, or both); the writer decides, this only plumbs
+async function editCity(key: string, change: (current: CityEdit) => CityEdit | { error: string }): Promise<ActionResult> {
+  let draft
+  try {
+    draft = await loadDraft(key)
+  } catch {
+    draft = null
+  }
+  const doc = await readCityDoc(key)
+  if (!draft && !doc) return { ok: false, error: `no draft or published document found for "${key}"` }
+
+  if (draft) {
+    const next = change({ ops: draft.facts.ops, sections: draft.sections })
+    if ('error' in next) return { ok: false, error: next.error }
+    const facts = { ...draft.facts }
+    if (next.ops) facts.ops = next.ops
+    else delete facts.ops
+    draft.facts = facts
+    draft.sections = next.sections
+    await saveDraft(key, draft)
+  }
+  if (doc) {
+    const next = change({ ops: doc.ops, sections: doc.sections })
+    if ('error' in next) return { ok: false, error: next.error }
+    if (next.ops) doc.ops = next.ops
+    else delete doc.ops
+    doc.sections = next.sections
+    await writeFile(path.join(CONTENT_DIR, `${key}.json`), JSON.stringify(validateCityContent(doc), null, 2), 'utf-8')
+  }
+  revalidateCity(key)
+  return { ok: true }
+}
+
+export type PhotoUpload = { bytes: Uint8Array; name: string; type: string; alt: string }
+
+/** Stores the file (Backblaze, or public/photos/<key>/ when Backblaze is not configured) and records it on the ops block. */
+export async function addPhotoLogic(key: string, upload: PhotoUpload): Promise<ActionResult> {
+  try {
+    const snapshot = await readMarketLogic(key)
+    if (!snapshot.ok) return snapshot
+    const count = snapshot.ops?.photos?.length ?? 0
+    // the file's own header, not the browser's claim, says what it is
+    const realType = sniffImageType(upload.bytes)
+    const problem = checkPhotoUpload({ type: realType ?? upload.type, size: upload.bytes.byteLength, count, alt: upload.alt })
+    if (problem) return { ok: false, error: problem }
+    if (realType === null) return { ok: false, error: `"${upload.name}" is not a JPG, PNG or WebP image` }
+
+    const optimized = await optimizePhoto(upload.bytes)
+    const fileName = photoFileName(upload.name, optimized.type, Date.now())
+    const photo = { path: photoPath(key, fileName), alt: upload.alt.trim() }
+    await putPhoto(photo.path, optimized.bytes, optimized.type)
+
+    return editCity(key, ({ ops, sections }) => ({
+      ops: { ...(ops ?? {}), photos: [...(ops?.photos ?? []), photo] },
+      sections,
+    }))
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+/** Drops the photo from the ops block and deletes its file; only paths inside this city's folder are touched. */
+export async function removePhotoLogic(key: string, target: string): Promise<ActionResult> {
+  try {
+    if (!isCityPhotoPath(key, target)) return { ok: false, error: `"${target}" is not one of this city's photos` }
+    const result = await editCity(key, ({ ops, sections }) => {
+      const photos = (ops?.photos ?? []).filter((p) => p.path !== target)
+      const next: MarketOps = { ...(ops ?? {}) }
+      if (photos.length) next.photos = photos
+      else delete next.photos
+      return { ops: Object.keys(next).length ? next : undefined, sections }
+    })
+    if (!result.ok) return result
+    await deletePhoto(target)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+/** Captions keyed by photo path; a blank caption is refused because it is the alt text. */
+export async function savePhotoCaptionsLogic(key: string, captions: Record<string, string>): Promise<ActionResult> {
+  try {
+    for (const [target, alt] of Object.entries(captions)) {
+      if (alt.trim() === '') return { ok: false, error: `the caption for ${path.basename(target)} is empty` }
+      if (alt.length > MAX_CAPTION_LENGTH) return { ok: false, error: `a caption is over ${MAX_CAPTION_LENGTH} characters` }
+    }
+    return editCity(key, ({ ops, sections }) => ({
+      ops: ops?.photos?.length
+        ? { ...ops, photos: ops.photos.map((p) => (p.path in captions ? { ...p, alt: captions[p.path].trim() } : p)) }
+        : ops,
+      sections,
+    }))
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+function aboutFactsOf(snapshot: Extract<MarketSnapshot, { ok: true }>): AboutFacts | null {
+  if (!snapshot.ops) return null
+  return { city: snapshot.city, state: snapshot.state, stateName: snapshot.stateName, ops: snapshot.ops, areaNames: snapshot.areaNames }
+}
+
+/** One writing call for the About story, checked against the facts before it is saved. */
+export async function writeAboutStoryLogic(key: string): Promise<ActionResult> {
+  try {
+    const snapshot = await readMarketLogic(key)
+    if (!snapshot.ok) return snapshot
+    const missing = aboutMissing(snapshot.ops)
+    if (missing.length) return { ok: false, error: `the About page still needs: ${missing.join(', ')}` }
+    const facts = aboutFactsOf(snapshot)
+    if (!facts) return { ok: false, error: 'no market facts saved yet' }
+
+    const story = await makeClient().generate({
+      schema: AboutStorySchema,
+      key: 'about',
+      system: ABOUT_SYSTEM,
+      prompt: buildAboutStoryPrompt(facts),
+    })
+
+    let knownText = ''
+    const check = await editCity(key, ({ ops, sections }) => {
+      knownText = Object.values(sections)
+        .flatMap((v) => (Array.isArray(v) ? v : [v]))
+        .join(' ')
+      const verdict = validateAboutStory(story, facts, knownText)
+      if (!verdict.ok) return { error: `the story was refused: ${verdict.error}. Try again.` }
+      return { ops, sections: { ...sections, [ABOUT_STORY_SLOT]: story.paragraphs.map((p) => p.trim()).filter(Boolean) } }
+    })
+    return check
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+export async function removeAboutStoryLogic(key: string): Promise<ActionResult> {
+  try {
+    return await editCity(key, ({ ops, sections }) => {
+      const next = { ...sections }
+      delete next[ABOUT_STORY_SLOT]
+      return { ops, sections: next }
+    })
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
 }

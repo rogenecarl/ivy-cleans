@@ -11,9 +11,9 @@ import { saveOpsAction } from '../site-actions'
 
 type SaveState = { savedAt: number } | null
 
-// Market facts, editable after creation (they used to be lost at publish). Same wrapper shape as SettingsForm: a
-// rejected line redirects, so no false toast. Every input has defaultValue '' — parseOpsForm rejects an absent field.
-export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsFields }) {
+// The About page's facts, editable on a draft or a live city. Same wrapper shape as SettingsForm: a rejected line
+// redirects, so no false toast. Every input has defaultValue '' — parseOpsForm rejects an absent field.
+export function FactsForm({ cityKey, fields }: { cityKey: string; fields: OpsFields }) {
   const [state, formAction] = useActionState<SaveState, FormData>(async (_prev, formData) => {
     await saveOpsAction(cityKey, formData)
     return { savedAt: Date.now() }
@@ -23,7 +23,7 @@ export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsField
   useEffect(() => {
     if (state && state.savedAt !== savedAt.current) {
       savedAt.current = state.savedAt
-      toast.success('Market facts saved')
+      toast.success('Facts saved')
     }
   }, [state])
 
@@ -56,7 +56,7 @@ export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsField
             name="crewLead"
             className="min-h-11 sm:min-h-9"
             defaultValue={fields.crewLead ?? ''}
-            placeholder="First name only — Maria"
+            placeholder="Maria"
           />
         </div>
 
@@ -69,7 +69,7 @@ export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsField
             name="servingSince"
             className="min-h-11 sm:min-h-9"
             defaultValue={fields.servingSince ?? ''}
-            placeholder="2024-03"
+            placeholder="2024"
           />
         </div>
 
@@ -99,17 +99,8 @@ export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsField
             defaultValue={fields.homesCleaned ?? ''}
             placeholder="340"
           />
-          <p className="mt-1 text-[0.75rem] text-muted-foreground">
-            Printed on the page exactly as typed, so round down rather than up.
-          </p>
         </div>
       </div>
-
-      <p className="text-[0.75rem] text-muted-foreground">
-        A crew lead or a homes-cleaned figure entered here <strong>must</strong> appear in the
-        copy. If a page is given one and ignores it, publishing that city is refused &mdash; the
-        whole point of these facts is that they end up on the page.
-      </p>
 
       <div>
         <Label htmlFor="reviews" className="mb-1.5">
@@ -132,7 +123,7 @@ export function OpsForm({ cityKey, fields }: { cityKey: string; fields: OpsField
         </p>
       </div>
 
-      <SubmitButton pendingLabel="Saving">Save market facts</SubmitButton>
+      <SubmitButton pendingLabel="Saving">Save facts</SubmitButton>
     </form>
   )
 }

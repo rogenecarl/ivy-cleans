@@ -89,9 +89,39 @@ export function validateCityContent(raw: unknown): CityContent {
       if (o.zips !== undefined && !isStringArray(o.zips)) {
         errors.push('ops.zips must be an array of strings when present')
       }
-      for (const field of ['servingSince', 'crewLead'] as const) {
+      for (const field of ['servingSince', 'crewLead', 'insurance'] as const) {
         if (o[field] !== undefined && !isString(o[field])) {
           errors.push(`ops.${field} must be a string when present`)
+        }
+      }
+      if (o.photos !== undefined) {
+        if (!Array.isArray(o.photos)) {
+          errors.push('ops.photos must be an array when present')
+        } else {
+          o.photos.forEach((photo, i) => {
+            const ph = photo as Record<string, unknown>
+            if (photo === null || typeof photo !== 'object' || !isString(ph.path) || !isString(ph.alt)) {
+              errors.push(`ops.photos[${i}] must be { path: string, alt: string }`)
+            }
+          })
+        }
+      }
+      if (o.profiles !== undefined) {
+        if (!Array.isArray(o.profiles)) {
+          errors.push('ops.profiles must be an array when present')
+        } else {
+          o.profiles.forEach((profile, i) => {
+            const pr = profile as Record<string, unknown>
+            if (
+              profile === null ||
+              typeof profile !== 'object' ||
+              !isString(pr.label) ||
+              !isString(pr.url) ||
+              !/^https?:\/\//i.test(pr.url)
+            ) {
+              errors.push(`ops.profiles[${i}] must be { label: string, url: http(s) URL }`)
+            }
+          })
         }
       }
       for (const field of ['crewSize', 'homesCleaned'] as const) {

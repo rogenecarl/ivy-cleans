@@ -40,7 +40,7 @@ export function parseNotifyEmails(raw: unknown): ParseNotifyEmailsResult {
 // per-input cap so ten reviews aren't rejected because the ZIP box also had something
 export const MAX_OPS_FIELD_LENGTH = 8000
 
-/** The six raw strings the ops form submits. Mirrors OpsFields in admin-logic. */
+/** The raw strings the About facts form submits. Mirrors OpsFields in admin-logic. */
 export const OPS_FIELD_NAMES = [
   'zips',
   'servingSince',

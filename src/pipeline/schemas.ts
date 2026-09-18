@@ -35,6 +35,10 @@ export const MarketOpsSchema = z
     photos: z
       .array(z.object({ path: z.string(), alt: z.string() }).strict())
       .optional(),
+    /** The owner's own line on insurance and bonding, rendered verbatim on the About page. */
+    insurance: z.string().optional(),
+    /** Public profiles for THIS branch (Google Business Profile, Yelp, Facebook page). */
+    profiles: z.array(z.object({ label: z.string(), url: z.string() }).strict()).optional(),
   })
   .strict()
 export type MarketOps = z.infer<typeof MarketOpsSchema>

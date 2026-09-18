@@ -28,7 +28,7 @@ export const BANNED_PHRASES: readonly string[] = [
 // subdivisions a page must name: three, capped at what the area has
 export const SUBDIVISIONS_REQUIRED = 3
 
-export type QualityRule = 'entity-coverage' | 'ops-unused' | 'banned-phrase' | 'area-code'
+export type QualityRule = 'entity-coverage' | 'banned-phrase' | 'area-code'
 
 export interface QualityFinding {
   /** The slot, or the area prefix when the finding spans an area's three slots. */
@@ -41,11 +41,6 @@ export interface QualityFinding {
 }
 
 /** Every slot's text, flattened — array slots joined, so one pass reads all copy. */
-function allText(sections: CityContent['sections']): string {
-  return Object.values(sections)
-    .map((v) => (Array.isArray(v) ? v.join(' ') : v))
-    .join(' ')
-}
 
 /** The three slots one area page is assembled from, as a single lowercased string. */
 function areaText(sections: CityContent['sections'], slug: string): string {
@@ -79,36 +74,6 @@ function entityCoverage(suburbs: readonly Suburb[], sections: CityContent['secti
   return out
 }
 
-// only crewLead and homesCleaned are enforced — the others have honest variant spellings. Read across the whole document.
-function opsUsed(ops: MarketOps | undefined, sections: CityContent['sections']): QualityFinding[] {
-  if (!ops) return []
-  const text = allText(sections).toLowerCase()
-  const out: QualityFinding[] = []
-
-  if (ops.crewLead && !text.includes(ops.crewLead.toLowerCase())) {
-    out.push({
-      slot: 'sections',
-      rule: 'ops-unused',
-      detail: `crew lead "${ops.crewLead}" was supplied and never appears in the copy`,
-      blocking: true,
-    })
-  }
-
-  if (ops.homesCleaned !== undefined) {
-    // accept 1,200 or 1200
-    const forms = [String(ops.homesCleaned), ops.homesCleaned.toLocaleString('en-US')]
-    if (!forms.some((form) => text.includes(form.toLowerCase()))) {
-      out.push({
-        slot: 'sections',
-        rule: 'ops-unused',
-        detail: `homes cleaned (${ops.homesCleaned.toLocaleString('en-US')}) was supplied and never appears in the copy`,
-        blocking: true,
-      })
-    }
-  }
-
-  return out
-}
 
 // area codes by state, for the one check that matters: does the phone plausibly belong here?
 // Not exhaustive; an unlisted state produces no finding. Warns, never refuses.
@@ -177,7 +142,6 @@ function bannedPhrases(sections: CityContent['sections']): QualityFinding[] {
 export function checkQuality(doc: CityContent): QualityFinding[] {
   const findings = [
     ...entityCoverage(doc.research.suburbs, doc.sections),
-    ...opsUsed(doc.ops, doc.sections),
     ...bannedPhrases(doc.sections),
     ...areaCode(doc),
   ]

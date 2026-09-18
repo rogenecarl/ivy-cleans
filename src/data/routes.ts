@@ -1,6 +1,7 @@
 import type { CityContent } from '../content/types'
 import { cityHref, citySlug } from '../content/interpolate'
 import { SERVICE_SLUGS } from './services/registry'
+import { aboutReady } from '../pipeline/about'
 
 /** Every path a tenant serves, relative to the city root. */
 export function sitePaths(c: CityContent): string[] {
@@ -14,6 +15,7 @@ export function sitePaths(c: CityContent): string[] {
     '/book-now',
     '/blog',
     '/privacy-policy',
+    ...(aboutReady(c.ops) ? ['/about'] : []),
     ...SERVICE_SLUGS.map((slug) => `/services/${slug}`),
     // area pages only when hasSuburbPages: a URL that 404s is worse than none
     ...(c.hasSuburbPages ? c.research.suburbs.map((s) => `/${s.slug}`) : []),

@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { ErrorText } from '../../ui'
 import { SubmitButton } from '../../submit-button'
+import { PhotoDropzone } from '../../photo-dropzone'
 import { requireAdmin } from '@/lib/auth-server'
 
 // New-city form: a plain server-rendered <form action>. Errors come back as ?error=. searchParams is a Promise in Next 16.
 
-const SHOW_OPERATING_FACTS = false
+const SHOW_OPERATING_FACTS = true
 
 export const dynamic = 'force-dynamic'
 
@@ -105,38 +105,22 @@ export default async function NewCityPage({
               />
             </div>
 
-            {/* Operating facts, hidden for now: they are entered later on the site's settings screen. Flip the flag to
-              collect them here again; the action still accepts the fields. */}
+            {/* About Us facts that exist before generation. Photos and reviews need a draft to attach to, so they
+              live in the site's Settings, which the finished-generation page points at. */}
             {SHOW_OPERATING_FACTS && (
-              <details className="rounded-md border border-border/60 p-4">
+              <details open className="rounded-md border border-border/60 p-4">
                 <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
-                  This market is already operating
+                  About Us
                   <span className="ml-2 font-normal text-muted-foreground">optional</span>
                   <span className="mt-1 block text-[0.8rem] font-normal text-muted-foreground">
-                    Who cleans there, since when, and where. A competitor can describe the town; only
-                    you can say this. All of it can be added later on the site&rsquo;s settings screen
-                    &mdash; along with customer reviews, which is where those go &mdash; but anything
-                    entered now is used by the first generation.
+                    How long you have served this city, who leads the crew, how big it is, how many
+                    homes it has cleaned, and a photo of the crew. More photos and customer reviews
+                    come next, in the site&rsquo;s Settings, once the city exists. Everything here is printed
+                    as typed; nothing is written by the model.
                   </span>
                 </summary>
 
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="zips" className="mb-1.5">
-                      ZIP codes you serve
-                    </Label>
-                    <Textarea
-                      id="zips"
-                      name="zips"
-                      rows={2}
-                      placeholder="77002, 77003, 77004 — commas, spaces or one per line"
-                    />
-                    <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                      Printed as a list on the home page. Anything that isn&rsquo;t five digits is
-                      ignored rather than guessed at.
-                    </p>
-                  </div>
-
                   <div>
                     <Label htmlFor="crewLead" className="mb-1.5">
                       Crew lead
@@ -145,7 +129,7 @@ export default async function NewCityPage({
                       id="crewLead"
                       name="crewLead"
                       className="min-h-11 sm:min-h-9"
-                      placeholder="First name only — Maria"
+                      placeholder="Maria"
                     />
                   </div>
 
@@ -157,7 +141,7 @@ export default async function NewCityPage({
                       id="servingSince"
                       name="servingSince"
                       className="min-h-11 sm:min-h-9"
-                      placeholder="2024-03"
+                      placeholder="2024"
                     />
                   </div>
 
@@ -185,11 +169,19 @@ export default async function NewCityPage({
                       className="min-h-11 sm:min-h-9"
                       placeholder="340"
                     />
-                    <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                      Printed on the page exactly as typed, so round down rather than up.
-                    </p>
                   </div>
 
+                  <div className="sm:col-span-2">
+                    <PhotoDropzone
+                      mode="form"
+                      name="crewPhoto"
+                      captionName="crewPhotoAlt"
+                      label="Crew photos"
+                      hint="The first photo leads the About page; the rest fill its gallery. They are shrunk in your browser before they are sent, so a large phone photo is fine."
+                      captionLabel="Caption for the crew photo"
+                      captionPlaceholder="The Houston crew outside a Katy home"
+                    />
+                  </div>
                 </div>
               </details>
             )}
@@ -202,7 +194,10 @@ export default async function NewCityPage({
                 pages. About seven minutes. You can close the tab &mdash; reopening the page picks
                 up from the last finished stage, and nothing is charged twice.
               </p>
-              <p className="mt-1">Then you review it, and publish when it reads right.</p>
+              <p className="mt-1">
+                Then you review it, add the About Us photos and reviews, and publish when it reads
+                right.
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
