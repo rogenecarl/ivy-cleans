@@ -46,7 +46,7 @@ if (!DRY && !process.env.ANTHROPIC_API_KEY) {
 
 // Imported after the env load so makeClient() sees the key.
 const { createDraft, loadDraft, saveDraft, deleteDraft } = await import('../src/server/content/drafts.ts')
-const { runStage, STAGES } = await import('../src/server/pipeline/stages.ts')
+const { runStage, STAGES } = await import('../src/server/pipeline/stages/index.ts')
 const { makeClient } = await import('../src/server/pipeline/model.ts')
 const { checkQuality } = await import('../src/server/content/quality.ts')
 const { shingleSimilarity, longestSharedRun } = await import('../src/server/content/similarity.ts')
