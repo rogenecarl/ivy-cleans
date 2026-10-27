@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { cityFromParams } from "@/site/city-param";
 import { cityKeyOf } from "@/server/content/interpolate";
 import { postBySlug } from "@/server/blog/store";
 import { postDate } from "@/server/blog/format";
-import { PostShell } from "@/components/blog/PostShell";
-import HtmlBody from "@/components/blog/HtmlBody";
+import { PostShell } from "@/site/components/blog/PostShell";
+import HtmlBody from "@/site/components/blog/HtmlBody";
 
 // Blog-tool posts live under /blog/<slug>; the file-based posts keep their root slugs. Rendered on demand: a post
 // published after the last deploy must not 404 until the next one.

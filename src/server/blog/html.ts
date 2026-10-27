@@ -1,6 +1,6 @@
 import sanitizeHtml from 'sanitize-html'
 import type { CityContent } from '@/server/content/types'
-import { tenantHref } from '@/data/routes'
+import { tenantHref } from '@/site/data/routes'
 import { cityHref } from '@/server/content/interpolate'
 
 const OPTIONS: sanitizeHtml.IOptions = {

@@ -7,10 +7,10 @@
  */
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import Breadcrumbs from '@/components/inner/Breadcrumbs'
-import ServiceArea from '@/components/ServiceArea'
-import { AREAS_PATH, breadcrumbListJsonLd, breadcrumbs } from '@/data/breadcrumbs'
-import { areasData } from '@/data/areas'
+import Breadcrumbs from '@/site/components/inner/Breadcrumbs'
+import ServiceArea from '@/site/components/ServiceArea'
+import { AREAS_PATH, breadcrumbListJsonLd, breadcrumbs } from '@/site/data/breadcrumbs'
+import { areasData } from '@/site/data/areas'
 import { cityBits, getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 

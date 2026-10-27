@@ -2,8 +2,8 @@
 import { describe, expect, it } from 'vitest'
 import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS } from '@/server/leads/schema'
 import { getDefaultCity } from '@/server/content/store'
-import { bookData } from '@/data/book'
-import { contactData } from '@/data/contact'
+import { bookData } from '@/site/data/book'
+import { contactData } from '@/site/data/contact'
 
 function booking(over: Record<string, string> = {}): FormData {
   const f = new FormData()
@@ -87,7 +87,7 @@ describe('parseContactForm', () => {
   })
 
   it('accepts an empty name, because the contact form renders Name as optional', () => {
-    // src/data/contact.ts marks Name `required: false` (verbatim from the
+    // src/site/data/contact.ts marks Name `required: false` (verbatim from the
     // live markup) and Lead.name is nullable in Prisma. The server used to
     // reject this outright, so a customer who did exactly what the page
     // allowed was told to fix a field the page called optional.
@@ -106,7 +106,7 @@ describe('parseContactForm', () => {
 })
 
 /*
- * THE DRIFT GUARD. The rendered form (src/data/*.ts) and the server's idea of
+ * THE DRIFT GUARD. The rendered form (src/site/data/*.ts) and the server's idea of
  * that form (src/server/leads/schema.ts) are two hand-maintained lists that must
  * describe the same thing.
  *

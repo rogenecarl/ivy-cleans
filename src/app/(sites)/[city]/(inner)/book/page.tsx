@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { citySlug } from "@/server/content/interpolate";
-import { bookData } from "@/data/book";
-import BookSection from "@/components/book/BookSection";
+import { bookData } from "@/site/data/book";
+import BookSection from "@/site/components/book/BookSection";
 
 export async function generateMetadata({
   params,

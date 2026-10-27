@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import Linked from '@/components/Linked'
+import Linked from '@/site/components/Linked'
 import { MAX_SUBURB_LINKS, acceptLinks, linkify, slotLinks } from '@/server/content/links'
 import { validateCityContent } from '@/server/content/validate'
 import { suburbSlots } from '@/server/content/slots'
-import { suburbData } from '@/data/suburb'
+import { suburbData } from '@/site/data/suburb'
 import { getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 

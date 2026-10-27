@@ -11,10 +11,10 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
-import { suburbData } from '@/data/suburb'
+import { suburbData } from '@/site/data/suburb'
 import { suburbSlots } from '@/server/content/slots'
 import { BANNED_PHRASES } from '@/server/content/quality'
-import { pickOtherServices } from '@/data/other-services'
+import { pickOtherServices } from '@/site/data/other-services'
 
 const minneapolis = await getCity('minneapolis')
 const miami = await loadCityFixture('miami')

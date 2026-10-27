@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import JsonLd from '@/components/JsonLd'
-import { mapSrc } from '@/data/maps'
-import { BUSINESS_ID, localBusinessJsonLd, serviceJsonLd } from '@/data/structured-data'
-import { serviceBySlug } from '@/data/services/registry'
+import JsonLd from '@/site/components/JsonLd'
+import { mapSrc } from '@/site/data/maps'
+import { BUSINESS_ID, localBusinessJsonLd, serviceJsonLd } from '@/site/data/structured-data'
+import { serviceBySlug } from '@/site/data/services/registry'
 import { getCity } from '@/server/content/store'
 
 const minneapolis = await getCity('minneapolis')

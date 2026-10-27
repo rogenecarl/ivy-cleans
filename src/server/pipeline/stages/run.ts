@@ -19,7 +19,7 @@ import {
   suburbSlots,
   type StageId,
 } from '@/server/content/slots'
-import { serviceBySlug } from '@/data/services/registry'
+import { serviceBySlug } from '@/site/data/services/registry'
 import { MAX_SERVICE_LINKS, MAX_SUBURB_LINKS, acceptLinks } from '@/server/content/links'
 import {
   FRONT_SYSTEM,

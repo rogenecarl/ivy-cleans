@@ -14,7 +14,7 @@
  *   testville  a city with hasSuburbPages: false — ServiceArea must render
  *              every area name and link none of them.
  *   miami      researched areas with NO generated suburb copy, which is the
- *              only fixture exercising src/data/suburb.ts's template
+ *              only fixture exercising src/site/data/suburb.ts's template
  *              fallback. That fallback is what stops Minneapolis's live area
  *              pages throwing, so it has to stay covered.
  */

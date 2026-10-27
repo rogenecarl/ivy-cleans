@@ -1,6 +1,6 @@
 import { loadDraft } from '@/server/content/drafts'
 import { SERVICE_LOCAL_SLUGS, isWritableArea, isWrittenSlot, serviceSlots, suburbSlots } from '@/server/content/slots'
-import { serviceBySlug } from '@/data/services/registry'
+import { serviceBySlug } from '@/site/data/services/registry'
 import { makeClient } from '@/server/pipeline/model'
 import { readProgress, type ProgressEvent } from '@/server/pipeline/progress'
 import { regenerateStage, runStage, type StageId } from '@/server/pipeline/stages'

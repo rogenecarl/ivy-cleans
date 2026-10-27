@@ -1,9 +1,9 @@
-import TopBar from "@/components/TopBar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import TopBar from "@/site/components/TopBar";
+import Header from "@/site/components/Header";
+import Footer from "@/site/components/Footer";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
-import { siteData } from "@/data/site";
+import { siteData } from "@/site/data/site";
 
 export default async function FrontLayout({
   children,

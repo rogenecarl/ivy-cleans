@@ -75,7 +75,7 @@ describe('what the areas list lets an operator do', () => {
    * against what it can produce, and only one of them is purely subtractive:
    *
    *   Add     a hand-typed area has subdivisions: [], so isWritableArea is
-   *           false, the suburb stage skips it, and src/data/suburb.ts falls
+   *           false, the suburb stage skips it, and src/site/data/suburb.ts falls
    *           back through sOpt to the Savage template — the exact generic
    *           page that earned 23 clicks in 16 months. checkCity cannot see
    *           it either, because it reads `sections` and this area has none.

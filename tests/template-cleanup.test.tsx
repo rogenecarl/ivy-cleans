@@ -4,11 +4,11 @@
  */
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import CtaBand from '@/components/CtaBand'
-import Packages from '@/components/Packages'
-import { packagesData } from '@/data/packages'
-import { siteData } from '@/data/site'
-import { SERVICE_SLUGS, serviceBySlug, serviceTitle } from '@/data/services/registry'
+import CtaBand from '@/site/components/CtaBand'
+import Packages from '@/site/components/Packages'
+import { packagesData } from '@/site/data/packages'
+import { siteData } from '@/site/data/site'
+import { SERVICE_SLUGS, serviceBySlug, serviceTitle } from '@/site/data/services/registry'
 import { cityBits, getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 

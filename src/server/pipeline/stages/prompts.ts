@@ -5,7 +5,7 @@ import { type ResearchOutput, type Suburb } from '@/server/pipeline/schemas'
 import { SEARCH_BUDGET } from '@/server/pipeline/model'
 import { BANNED_PHRASES, SUBDIVISIONS_REQUIRED } from '@/server/content/quality'
 import { isWritableArea } from '@/server/content/slots'
-import { SERVICE_SLUGS, serviceBySlug } from '@/data/services/registry'
+import { SERVICE_SLUGS, serviceBySlug } from '@/site/data/services/registry'
 
 // ── Shape examples: real Minneapolis copy, used as structural models in the prompts ──
 

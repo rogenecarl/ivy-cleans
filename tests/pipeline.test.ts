@@ -52,7 +52,7 @@ import {
   type StageId,
 } from '@/server/pipeline/stages'
 import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '@/server/pipeline/schemas'
-import { LEGACY_POST_SLUGS } from '@/data/legacy-posts'
+import { LEGACY_POST_SLUGS } from '@/site/data/legacy-posts'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -283,7 +283,7 @@ describe('pipeline stages', () => {
        * move-in-move-out-cleaning is `bespoke`: its own five components, live
        * on Minneapolis today, and deliberately out of scope for this stage.
        */
-      const { allServices } = await import('@/data/services/registry')
+      const { allServices } = await import('@/site/data/services/registry')
       const template = allServices()
         .filter((e) => e.kind === 'template')
         .map((e) => e.slug)

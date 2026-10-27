@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cityFromParams } from "@/site/city-param";
 import { citySlug, cityHref } from "@/server/content/interpolate";
 import type { CityContent } from "@/server/content/types";
 import { getCity } from "@/server/content/store";
-import { suburbData, type SuburbRef } from "@/data/suburb";
-import { siteData } from "@/data/site";
-import { isLegacyPostSlug } from "@/data/legacy-posts";
-import SuburbHero from "@/components/suburb/SuburbHero";
-import HouseCleaning from "@/components/suburb/HouseCleaning";
-import SuburbBenefits from "@/components/suburb/Benefits";
-import OtherServices from "@/components/suburb/OtherServices";
-import NearbyAreas from "@/components/suburb/NearbyAreas";
-import WorkInAction from "@/components/suburb/WorkInAction";
-import SuburbClosing from "@/components/suburb/Closing";
+import { suburbData, type SuburbRef } from "@/site/data/suburb";
+import { siteData } from "@/site/data/site";
+import { isLegacyPostSlug } from "@/site/data/legacy-posts";
+import SuburbHero from "@/site/components/area/SuburbHero";
+import HouseCleaning from "@/site/components/area/HouseCleaning";
+import SuburbBenefits from "@/site/components/area/Benefits";
+import OtherServices from "@/site/components/area/OtherServices";
+import NearbyAreas from "@/site/components/area/NearbyAreas";
+import WorkInAction from "@/site/components/area/WorkInAction";
+import SuburbClosing from "@/site/components/area/Closing";
 
 // Root-level slugs: stored suburb slugs render here; /deep-cleaning-<city> and /<city>-move-out-cleaning-services
 // 308 to /services/..., and the WordPress-era post slugs 308 to /blog (all indexed URLs). Anything else 404s.

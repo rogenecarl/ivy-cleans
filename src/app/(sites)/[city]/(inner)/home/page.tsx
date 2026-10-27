@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import { cityBits } from "@/server/content/store";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
-import { homeData } from "@/data/home";
-import { servicesData } from "@/data/services";
-import { areasData } from "@/data/areas";
-import { siteData } from "@/data/site";
-import HomeHero from "@/components/home/HomeHero";
-import VideoEmbed from "@/components/home/VideoEmbed";
-import HomeServices from "@/components/home/HomeServices";
-import NearMe from "@/components/home/NearMe";
-import HouseCleaning from "@/components/home/HouseCleaning";
-import Principles from "@/components/home/Principles";
-import Locations from "@/components/home/Locations";
-import WorkCarousel from "@/components/home/WorkCarousel";
-import HomeFaqStatic from "@/components/home/HomeFaqStatic";
-import HomeCta from "@/components/home/HomeCta";
-import { mapSrc } from "@/data/maps";
+import { homeData } from "@/site/data/home";
+import { servicesData } from "@/site/data/services";
+import { areasData } from "@/site/data/areas";
+import { siteData } from "@/site/data/site";
+import HomeHero from "@/site/components/home/HomeHero";
+import VideoEmbed from "@/site/components/home/VideoEmbed";
+import HomeServices from "@/site/components/home/HomeServices";
+import NearMe from "@/site/components/home/NearMe";
+import HouseCleaning from "@/site/components/home/HouseCleaning";
+import Principles from "@/site/components/home/Principles";
+import Locations from "@/site/components/home/Locations";
+import WorkCarousel from "@/site/components/home/WorkCarousel";
+import HomeFaqStatic from "@/site/components/home/HomeFaqStatic";
+import HomeCta from "@/site/components/home/HomeCta";
+import { mapSrc } from "@/site/data/maps";
 
 export async function generateMetadata({
   params,

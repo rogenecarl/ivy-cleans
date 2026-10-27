@@ -8,7 +8,7 @@
  */
 import { describe, expect, test } from 'vitest'
 import { getDefaultCity } from '@/server/content/store'
-import { bookData } from '@/data/book'
+import { bookData } from '@/site/data/book'
 
 const c = await getDefaultCity()
 

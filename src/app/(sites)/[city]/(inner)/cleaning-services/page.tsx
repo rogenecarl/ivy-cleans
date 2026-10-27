@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
-import { csMeta, rooms } from "@/data/cleaning-services";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
+import { csMeta, rooms } from "@/site/data/cleaning-services";
 import { cityFromParams, type CityParams } from "@/site/city-param";
-import { siteData } from "@/data/site";
-import PlansHeader from "@/components/cleaning-services/PlansHeader";
-import PackagesBar from "@/components/cleaning-services/PackagesBar";
-import RoomChecklist from "@/components/cleaning-services/RoomChecklist";
+import { siteData } from "@/site/data/site";
+import PlansHeader from "@/site/components/cleaning-services/PlansHeader";
+import PackagesBar from "@/site/components/cleaning-services/PackagesBar";
+import RoomChecklist from "@/site/components/cleaning-services/RoomChecklist";
 
 export const metadata: Metadata = {
   title: csMeta.title,

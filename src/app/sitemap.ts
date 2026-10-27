@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { getCity } from '@/server/content/store'
 import { loadRouting } from '@/server/content/resolve-rewrite'
 import { cityHref } from '@/server/content/interpolate'
-import { sitePaths } from '@/data/routes'
+import { sitePaths } from '@/site/data/routes'
 import type { CityContent } from '@/server/content/types'
 import { listPosts } from '@/server/blog/store'
 

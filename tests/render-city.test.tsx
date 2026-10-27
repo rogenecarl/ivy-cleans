@@ -15,15 +15,15 @@
  * These are server components with no client-only hooks, so
  * renderToStaticMarkup in plain node is enough — no jsdom, no Next runtime.
  */
-import { SERVICE_SLUGS } from '@/data/services/registry'
+import { SERVICE_SLUGS } from '@/site/data/services/registry'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import ServiceArea from '@/components/ServiceArea'
-import Reviews, { MIN_REVIEWS, reviewDate } from '@/components/Reviews'
-import Locations from '@/components/home/Locations'
-import { areasData } from '@/data/areas'
-import { homeData } from '@/data/home'
-import { siteData } from '@/data/site'
+import ServiceArea from '@/site/components/ServiceArea'
+import Reviews, { MIN_REVIEWS, reviewDate } from '@/site/components/Reviews'
+import Locations from '@/site/components/home/Locations'
+import { areasData } from '@/site/data/areas'
+import { homeData } from '@/site/data/home'
+import { siteData } from '@/site/data/site'
 import { cityBits, getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 

@@ -1,6 +1,6 @@
 // tests/service-registry.test.ts
 import { describe, expect, it } from 'vitest'
-import { SERVICE_SLUGS, serviceBySlug } from '@/data/services/registry'
+import { SERVICE_SLUGS, serviceBySlug } from '@/site/data/services/registry'
 import { SERVICE_LOCAL_SLUGS } from '@/server/content/slots'
 import type { CityContent } from '@/server/content/types'
 

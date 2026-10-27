@@ -23,7 +23,7 @@ export type LeadFormField = {
   name: string
   /** Human label, for the payload / dashboard / email. */
   label: string
-  /** Marked required in the public markup (src/data/book.ts, src/data/contact.ts). */
+  /** Marked required in the public markup (src/site/data/book.ts, src/site/data/contact.ts). */
   required: boolean
 }
 

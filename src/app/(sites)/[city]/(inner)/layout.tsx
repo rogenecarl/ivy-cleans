@@ -1,8 +1,8 @@
-import InnerHeader from "@/components/inner/InnerHeader";
-import InnerFooter from "@/components/inner/InnerFooter";
+import InnerHeader from "@/site/components/inner/InnerHeader";
+import InnerFooter from "@/site/components/inner/InnerFooter";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
-import { siteData } from "@/data/site";
+import { siteData } from "@/site/data/site";
 
 export default async function InnerLayout({
   children,

@@ -8,7 +8,7 @@ const domains: DomainsIndex = { default: 'minneapolis', hosts: { 'miamicleans.co
 
 /*
  * CORRECTED 2026-08-21 after the Task 2 review. These are the field names the
- * booking form ACTUALLY submits, read from src/data/book.ts:128-262. Note that
+ * booking form ACTUALLY submits, read from src/site/data/book.ts:128-262. Note that
  * `form_fields[email]` is the SERVICE-TYPE DROPDOWN on this form, not an email
  * address -- Elementor reused the slot. The real email is
  * `form_fields[field_ca2243e]` and the real phone is

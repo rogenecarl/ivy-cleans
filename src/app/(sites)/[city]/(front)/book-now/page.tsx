@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { citySlug } from "@/server/content/interpolate";
-import { bookData } from "@/data/book";
-import BookNowSection from "@/components/book/BookNowSection";
+import { bookData } from "@/site/data/book";
+import BookNowSection from "@/site/components/book/BookNowSection";
 
 // live /book-now has no meta description; the city is resolved per request, never at module scope
 export async function generateMetadata({

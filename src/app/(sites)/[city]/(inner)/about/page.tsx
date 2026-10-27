@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import JsonLd from "@/components/JsonLd";
-import { reviewDate } from "@/components/Reviews";
-import { breadcrumbs } from "@/data/breadcrumbs";
-import { aboutData, aboutReady } from "@/data/about";
-import { localBusinessJsonLd } from "@/data/structured-data";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import JsonLd from "@/site/components/JsonLd";
+import { reviewDate } from "@/site/components/Reviews";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
+import { aboutData, aboutReady } from "@/site/data/about";
+import { localBusinessJsonLd } from "@/site/data/structured-data";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 
 // Who Ivy Cleans is in this city. Rendered from the operator's facts; 404 until the gate facts exist (see aboutReady).

@@ -403,7 +403,7 @@ describe('updateSuburbsLogic', () => {
 
     expect(await updateSuburbsLogic(KEY, EDITED)).toEqual({ ok: true })
 
-    // src/data/areas.ts maps research.suburbs off the city DOCUMENT, so this
+    // src/site/data/areas.ts maps research.suburbs off the city DOCUMENT, so this
     // is the copy the preview actually renders.
     const doc = await getCity(KEY)
     expect(doc.research.suburbs).toEqual([

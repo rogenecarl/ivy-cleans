@@ -13,14 +13,14 @@
  */
 import { describe, expect, test } from 'vitest'
 import { getDefaultCity } from '@/server/content/store'
-import { siteData } from '@/data/site'
-import { servicesData } from '@/data/services'
-import { homeData } from '@/data/home'
-import { packagesData } from '@/data/packages'
-import { areasData } from '@/data/areas'
-import { contactData } from '@/data/contact'
-import { deepCleaningData } from '@/data/deep-cleaning'
-import { moveOutData } from '@/data/move-out'
+import { siteData } from '@/site/data/site'
+import { servicesData } from '@/site/data/services'
+import { homeData } from '@/site/data/home'
+import { packagesData } from '@/site/data/packages'
+import { areasData } from '@/site/data/areas'
+import { contactData } from '@/site/data/contact'
+import { deepCleaningData } from '@/site/data/deep-cleaning'
+import { moveOutData } from '@/site/data/move-out'
 
 const c = await getDefaultCity()
 const modules = {

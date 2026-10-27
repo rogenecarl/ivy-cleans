@@ -1,6 +1,6 @@
 import type { CityContent } from '@/server/content/types'
 import { cityHref } from '@/server/content/interpolate'
-import type { BlogCard } from '@/data/blog'
+import type { BlogCard } from '@/site/data/blog'
 import { postDate } from './format'
 import type { BlogPostRecord } from './types'
 

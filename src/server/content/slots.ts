@@ -27,7 +27,7 @@ export function isWrittenSlot(value: string | string[] | undefined): boolean {
   return value !== undefined
 }
 
-// the three slot ids an area page owns; the pipeline writes them, src/data/suburb.ts reads them
+// the three slot ids an area page owns; the pipeline writes them, src/site/data/suburb.ts reads them
 export function suburbSlots(slug: string): readonly string[] {
   return [`suburb.${slug}.intro`, `suburb.${slug}.homes`, `suburb.${slug}.local`]
 }

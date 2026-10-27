@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { cityFromParams } from "@/site/city-param";
 import { cityHref, cityKeyOf } from "@/server/content/interpolate";
-import { blogMeta } from "@/data/blog";
+import { blogMeta } from "@/site/data/blog";
 import { listPosts } from "@/server/blog/store";
 import { postCards } from "@/server/blog/cards";
-import BlogCardGrid from "@/components/blog/BlogCardGrid";
-import Pagination from "@/components/blog/Pagination";
+import BlogCardGrid from "@/site/components/blog/BlogCardGrid";
+import Pagination from "@/site/components/blog/Pagination";
 
 export const metadata: Metadata = {
   title: blogMeta.title,

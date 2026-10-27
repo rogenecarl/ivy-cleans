@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { citySlug } from "@/server/content/interpolate";
-import { contactData } from "@/data/contact";
-import ContactHeader from "@/components/contact/ContactHeader";
-import ContactFormDisplay from "@/components/contact/ContactFormDisplay";
-import ContactMap from "@/components/contact/ContactMap";
-import ContactInfo from "@/components/contact/ContactInfo";
+import { contactData } from "@/site/data/contact";
+import ContactHeader from "@/site/components/contact/ContactHeader";
+import ContactFormDisplay from "@/site/components/contact/ContactFormDisplay";
+import ContactMap from "@/site/components/contact/ContactMap";
+import ContactInfo from "@/site/components/contact/ContactInfo";
 
 // the city is resolved per request, never at module scope
 export async function generateMetadata({

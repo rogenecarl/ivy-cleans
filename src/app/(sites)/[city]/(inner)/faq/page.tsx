@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { Source_Serif_4 } from "next/font/google";
-import { faqPageMeta, faqPageHeader } from "@/data/faq-page";
-import FaqAccordion from "@/components/faq-page/FaqAccordion";
+import { faqPageMeta, faqPageHeader } from "@/site/data/faq-page";
+import FaqAccordion from "@/site/components/faq-page/FaqAccordion";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
 

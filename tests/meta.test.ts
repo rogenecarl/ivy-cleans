@@ -2,8 +2,8 @@
  * Meta descriptions cut from generated copy — Abdi's Orlando review, item 9.
  */
 import { describe, expect, it } from 'vitest'
-import { META_DESCRIPTION_MAX, metaDescription } from '@/data/meta'
-import { homeData } from '@/data/home'
+import { META_DESCRIPTION_MAX, metaDescription } from '@/site/data/meta'
+import { homeData } from '@/site/data/home'
 import { getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 

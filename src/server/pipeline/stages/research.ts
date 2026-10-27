@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { type Condition, type ResearchOutput, type Suburb } from '@/server/pipeline/schemas'
 import { citySlug } from '@/server/content/interpolate'
 import { isWritableArea } from '@/server/content/slots'
-import { LEGACY_POST_SLUGS } from '@/data/legacy-posts'
+import { LEGACY_POST_SLUGS } from '@/site/data/legacy-posts'
 
 // new cities get a bare `<area>` slug; Minneapolis keeps its stored ones
 export const SLUG_PATTERN = '<area>' as const

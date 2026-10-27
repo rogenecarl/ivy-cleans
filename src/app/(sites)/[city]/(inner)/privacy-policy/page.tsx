@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
-import Breadcrumbs from "@/components/inner/Breadcrumbs";
-import { breadcrumbs } from "@/data/breadcrumbs";
-import { privacyPolicyMeta, privacyPolicyHeader, privacyPolicyParagraphs } from "@/data/privacy-policy";
+import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
+import { breadcrumbs } from "@/site/data/breadcrumbs";
+import { privacyPolicyMeta, privacyPolicyHeader, privacyPolicyParagraphs } from "@/site/data/privacy-policy";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 
 export const metadata: Metadata = {
