@@ -19,7 +19,7 @@ import {
   topCity,
   trendDirection,
   visibleAlarms,
-} from '@/app/admin/dashboard-logic'
+} from '@/app/admin/(console)/dashboard/logic'
 
 describe('describeAge', () => {
   const now = new Date('2026-08-22T12:00:00Z')

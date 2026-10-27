@@ -1,7 +1,7 @@
 // tests/sites-admin-ui.test.ts
 /*
  * Pure decisions behind the per-city settings screen, tested where they
- * live: src/app/admin/(console)/sites/logic.ts. site-actions.ts (a
+ * live: src/app/admin/(console)/sites/logic.ts. sites/actions.ts (a
  * 'use server' file) defers to this module for parsing and validation, the
  * same split tests/leads-admin-ui.test.ts exercises for the Leads screen.
  */

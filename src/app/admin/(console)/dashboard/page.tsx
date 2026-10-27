@@ -19,7 +19,7 @@ import { getSiteSettingsMany, leadDashboardStats, listLeads } from '@/server/lea
 import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
-import { EmptyState, LeadStatusChip, StatPill } from '@/app/admin/ui'
+import { EmptyState, LeadStatusChip, StatPill } from '@/app/admin/_components/ui'
 import { buildCityLookup, cityDisplayName, filterHref } from '@/app/admin/(console)/leads/logic'
 import {
   activeAlarms,
@@ -29,7 +29,7 @@ import {
   topCity,
   trendDirection,
   visibleAlarms,
-} from '@/app/admin/dashboard-logic'
+} from './logic'
 import { requireSession } from '@/server/auth/auth-server'
 
 // Two tiers: "Needs attention" (alarms, tinted only when non-zero) and "Performance" (the weekly read).
@@ -37,7 +37,7 @@ import { requireSession } from '@/server/auth/auth-server'
 export const dynamic = 'force-dynamic'
 
 /** Which icon each alarm gets. A lookup, not a branch in the JSX, so adding
- * an alarm in dashboard-logic.ts fails to compile until it has one. */
+ * an alarm in ./logic.ts fails to compile until it has one. */
 const ALARM_ICON = { waiting: Clock, email: MailWarning, inbox: MapPin } as const
 
 const RECENT_LIMIT = 6

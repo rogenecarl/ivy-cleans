@@ -1,4 +1,4 @@
-// src/app/admin/dashboard-logic.ts
+// src/app/admin/(console)/dashboard/logic.ts
 // The dashboard's presentation decisions as pure functions, testable without the framework.
 import type { Role } from '@/server/auth/access'
 import { ADMIN_BASE, ADMIN_LEADS } from '@/server/auth/admin-routes'

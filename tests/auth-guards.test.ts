@@ -162,22 +162,31 @@ beforeEach(() => {
 
 describe('admin-only pipeline actions', () => {
   /*
-   * Every export of (console)/actions.ts, listed literally rather than
+   * Every pipeline action (new/, generate/[key]/, review/[key]/ actions.ts, plus sites' listCitiesAction), listed literally rather than
    * discovered, so that ADDING an export without adding it here is a visible
    * omission in review rather than a silently uncovered endpoint.
    */
-  const cases: [string, (m: typeof import('@/app/admin/(console)/actions')) => Promise<unknown>][] = [
-    ['createDraftAction', (m) => m.createDraftAction(new FormData())],
-    ['runStageAction', (m) => m.runStageAction('miami', 'facts')],
-    ['regenerateAction', (m) => m.regenerateAction('miami', 'facts')],
-    ['finalizeAction', (m) => m.finalizeAction('miami')],
-    ['updateSuburbsAction', (m) => m.updateSuburbsAction('miami', [])],
-    ['pendingServicesAction', (m) => m.pendingServicesAction('miami')],
-    ['publishAction', (m) => m.publishAction('miami')],
-    ['checkProvisioningAction', (m) => m.checkProvisioningAction('miami')],
-    ['listCitiesAction', (m) => m.listCitiesAction()],
-    ['getProgressAction', (m) => m.getProgressAction('miami')],
+  const NEW = () => import('@/app/admin/(console)/new/actions')
+  const GENERATE = () => import('@/app/admin/(console)/generate/[key]/actions')
+  const REVIEW = () => import('@/app/admin/(console)/review/[key]/actions')
+  const SITES = () => import('@/app/admin/(console)/sites/actions')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cases: [string, () => Promise<any>, (m: any) => Promise<unknown>][] = [
+    ['createDraftAction', NEW, (m) => m.createDraftAction(new FormData())],
+    ['runStageAction', GENERATE, (m) => m.runStageAction('miami', 'facts')],
+    ['regenerateAction', REVIEW, (m) => m.regenerateAction('miami', 'facts')],
+    ['finalizeAction', GENERATE, (m) => m.finalizeAction('miami')],
+    ['updateSuburbsAction', REVIEW, (m) => m.updateSuburbsAction('miami', [])],
+    ['pendingServicesAction', GENERATE, (m) => m.pendingServicesAction('miami')],
+    ['publishAction', REVIEW, (m) => m.publishAction('miami')],
+    ['checkProvisioningAction', REVIEW, (m) => m.checkProvisioningAction('miami')],
+    ['listCitiesAction', SITES, (m) => m.listCitiesAction()],
+    ['getProgressAction', GENERATE, (m) => m.getProgressAction('miami')],
   ]
+
+  it('still covers the ten pipeline actions it covered before the split', () => {
+    expect(cases.length).toBe(10)
+  })
 
   /*
    * Asserted against every one of the eight, on every case -- not just the
@@ -200,10 +209,10 @@ describe('admin-only pipeline actions', () => {
     expect(getProgressLogic).not.toHaveBeenCalled()
   }
 
-  for (const [name, call] of cases) {
+  for (const [name, load, call] of cases) {
     it(`${name} refuses a manager and does no work`, async () => {
       asManager()
-      const mod = await import('@/app/admin/(console)/actions')
+      const mod = await load()
       await expect(call(mod)).rejects.toThrow(REDIRECTED)
       expect(requireAdmin).toHaveBeenCalled()
       expectNoAdminLogicCalls()
@@ -211,7 +220,7 @@ describe('admin-only pipeline actions', () => {
 
     it(`${name} refuses a signed-out caller and does no work`, async () => {
       signedOut()
-      const mod = await import('@/app/admin/(console)/actions')
+      const mod = await load()
       await expect(call(mod)).rejects.toThrow(REDIRECTED)
       expectNoAdminLogicCalls()
     })
@@ -221,7 +230,7 @@ describe('admin-only pipeline actions', () => {
 describe('saveNotifyEmailsAction', () => {
   it('refuses a manager and never writes settings', async () => {
     asManager()
-    const mod = await import('@/app/admin/(console)/sites/site-actions')
+    const mod = await import('@/app/admin/(console)/sites/actions')
     const form = new FormData()
     form.set('emails', 'x@y.com')
     await expect(mod.saveNotifyEmailsAction('miami', form)).rejects.toThrow(REDIRECTED)
@@ -238,7 +247,7 @@ describe('saveOpsAction', () => {
    */
   it('refuses a manager and never writes ops', async () => {
     asManager()
-    const mod = await import('@/app/admin/(console)/sites/site-actions')
+    const mod = await import('@/app/admin/(console)/sites/actions')
     const form = new FormData()
     form.set('crewLead', 'Maria')
     await expect(mod.saveOpsAction('miami', form)).rejects.toThrow(REDIRECTED)
@@ -247,7 +256,7 @@ describe('saveOpsAction', () => {
 
   it('refuses a signed-out caller and never writes ops', async () => {
     signedOut()
-    const mod = await import('@/app/admin/(console)/sites/site-actions')
+    const mod = await import('@/app/admin/(console)/sites/actions')
     const form = new FormData()
     form.set('crewLead', 'Maria')
     await expect(mod.saveOpsAction('miami', form)).rejects.toThrow(REDIRECTED)
@@ -258,14 +267,14 @@ describe('saveOpsAction', () => {
 describe('lead actions', () => {
   it('setStatusAction refuses a signed-out caller and never writes', async () => {
     signedOut()
-    const mod = await import('@/app/admin/(console)/leads/lead-actions')
+    const mod = await import('@/app/admin/(console)/leads/actions')
     await expect(mod.setStatusAction('lead-1', 'booked')).rejects.toThrow(REDIRECTED)
     expect(setLeadStatus).not.toHaveBeenCalled()
   })
 
   it('saveNotesAction refuses a signed-out caller and never writes', async () => {
     signedOut()
-    const mod = await import('@/app/admin/(console)/leads/lead-actions')
+    const mod = await import('@/app/admin/(console)/leads/actions')
     const form = new FormData()
     form.set('notes', 'hello')
     await expect(mod.saveNotesAction('lead-1', form)).rejects.toThrow(REDIRECTED)
@@ -274,7 +283,7 @@ describe('lead actions', () => {
 
   it('allows a manager through — leads are their job', async () => {
     asManager()
-    const mod = await import('@/app/admin/(console)/leads/lead-actions')
+    const mod = await import('@/app/admin/(console)/leads/actions')
     await mod.setStatusAction('lead-1', 'booked')
     expect(requireSession).toHaveBeenCalled()
     expect(setLeadStatus).toHaveBeenCalledWith('lead-1', 'booked')

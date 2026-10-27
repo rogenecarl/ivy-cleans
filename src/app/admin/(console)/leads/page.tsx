@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { buildCityLookup, cityDisplayName, filterHref } from './logic'
 import { LeadFilters } from './lead-filters'
 import { LeadsTable, type LeadRow } from './leads-table'
-import { StatusChips } from './status-chips'
+import { StatusChips } from './lead-status-chips'
 import { requireSession } from '@/server/auth/auth-server'
 
 // force-dynamic: the list changes with every submission

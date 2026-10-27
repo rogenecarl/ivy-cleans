@@ -16,7 +16,7 @@ export const IP_HASH_SALT = read('IP_HASH_SALT')
 /** Verified Resend sending address. `null` = not configured; the mailer then reports a legible failure instead of sending `from: ''`. */
 export const LEADS_FROM_EMAIL = read('LEADS_FROM_EMAIL')
 
-/** Canonical origin for the dashboard link in the notification email. `null` = not configured; the email omits the link rather than guess (see lead-actions.ts). */
+/** Canonical origin for the dashboard link in the notification email. `null` = not configured; the email omits the link rather than guess (see app/(sites)/[city]/actions.ts). */
 export const LEADS_DASHBOARD_ORIGIN = read('LEADS_DASHBOARD_ORIGIN')
 
 // '1' disables Node's Happy Eyeballs racing before db.ts opens its Pool. Off by default; only for environments with

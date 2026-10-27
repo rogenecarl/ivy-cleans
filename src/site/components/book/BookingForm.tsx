@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { BookData } from "@/site/data/book";
 import SubmitResultPanel from "./ComingSoonPanel";
-import { submitLeadAction } from "@/app/(sites)/[city]/lead-actions";
+import { submitLeadAction } from "@/app/(sites)/[city]/actions";
 
 // The 10-field form on /book-now (a295442, size md) and /book (3ef7408c, size sm).
 // No method/action: submit is intercepted client-side. Live is a 3-step wizard; this is flat.

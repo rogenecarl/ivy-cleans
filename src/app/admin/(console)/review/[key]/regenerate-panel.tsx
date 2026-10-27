@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { finalizeAction, regenerateAction } from '@/app/admin/(console)/actions'
+import { regenerateAction } from './actions'
+import { finalizeAction } from '@/app/admin/(console)/generate/[key]/actions'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
-import { ErrorText } from '@/app/admin/ui'
-import { stageName } from '@/app/admin/stage-names'
+import { ErrorText } from '@/app/admin/_components/ui'
+import { stageName } from '@/app/admin/_components/stage-names'
 
 // Per-stage regenerate. Regenerating research clears the dependent stages and sends the operator to the progress
 // screen. The other stages are followed by a finalize so the preview shows the new copy; finalizeDraft carries

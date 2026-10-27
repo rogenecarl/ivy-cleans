@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { OpsFields } from '@/server/pipeline/admin-logic'
-import { SubmitButton } from '@/app/admin/submit-button'
-import { saveOpsAction } from '@/app/admin/(console)/sites/site-actions'
+import { SubmitButton } from '@/app/admin/_components/submit-button'
+import { saveOpsAction } from '@/app/admin/(console)/sites/actions'
 
 type SaveState = { savedAt: number } | null
 

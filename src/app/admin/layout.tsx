@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Toaster } from '@/components/ui/sonner'
-import './admin.css'
+import './_components/admin.css'
 
 // Outer shell for everything under /admin, login included: the admin CSS root and metadata only. The session guard
 // lives in (console)/layout.tsx (here it would loop on /admin/login). No site components: this route must never

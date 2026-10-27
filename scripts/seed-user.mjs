@@ -194,7 +194,7 @@ async function main() {
      */
     console.log(`seed-user: ${userWasExisting ? 'updated existing' : 'created'} account (role=${role})`)
     console.log(`seed-user: password ${accountWasExisting ? 'updated' : 'set'}`)
-    // Never log the address itself — the same rule site-actions.ts follows.
+    // Never log the address itself — the same rule sites/actions.ts follows.
     console.log('seed-user: done. Sign in at /admin/login.')
   } finally {
     await client.end()

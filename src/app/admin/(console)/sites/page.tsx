@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE, ADMIN_SITES } from '@/server/auth/admin-routes'
-import { EmptyState, ReadinessMarker, StatusChip } from '@/app/admin/ui'
+import { EmptyState, ReadinessMarker, StatusChip } from '@/app/admin/_components/ui'
 import {
   filterSites,
   paginate,
@@ -32,7 +32,7 @@ import {
   siteStatusCounts,
   sortProblemsFirst,
 } from './list-logic'
-import { SiteStatusChips } from './status-chips'
+import { SiteStatusChips } from './site-status-chips'
 import { SiteSearch } from './site-search'
 import { requireAdmin } from '@/server/auth/auth-server'
 

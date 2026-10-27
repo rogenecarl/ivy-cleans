@@ -417,7 +417,7 @@ try {
   // Each <li> is one pipeline step: a status glyph (✓/⏳/✗/•) and the stage
   // name, both tagged with data-role so markup changes elsewhere in the row
   // (progress bar, activity lines, research chips) cannot shift which element
-  // these selectors land on. The names come from src/app/admin/stage-names.ts,
+  // these selectors land on. The names come from src/app/admin/_components/stage-names.ts,
   // which replaced the SKILL_META personas.
   const stageStates = () =>
     page.$$eval('ol li', (items) =>
@@ -451,7 +451,7 @@ try {
   /* 3a. Skill cards + activity feed (Task 4) ────────────────────────────── */
   const genScreenText = await text(page)
   check(
-    // src/app/admin/stage-names.ts. These replaced the SKILL_META personas
+    // src/app/admin/_components/stage-names.ts. These replaced the SKILL_META personas
     // ("Front-Page Copywriter" and friends) — the pipeline is five steps, not
     // a cast of characters, and a tagline explaining what "Research" does is
     // copy an operator reads once and scrolls past forever.

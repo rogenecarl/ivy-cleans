@@ -24,7 +24,7 @@ export type SubmitPorts = {
   }): Promise<SendResult>
   /** Display name for the city, for the subject line. */
   cityNameFor(cityKey: string): Promise<string>
-  /** null when the deployment has no configured canonical origin (see lead-actions.ts) -- the email omits the link rather than guess. */
+  /** null when the deployment has no configured canonical origin (see app/(sites)/[city]/actions.ts) -- the email omits the link rather than guess. */
   dashboardUrlFor(leadId: string): string | null
 }
 

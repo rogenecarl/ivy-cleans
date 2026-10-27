@@ -14,11 +14,11 @@ import {
   pendingServicesAction,
   pendingSuburbsAction,
   runStageAction,
-} from '@/app/admin/(console)/actions'
+} from './actions'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { SERVICE_LOCAL_SLUGS } from '@/server/content/slots'
-import { STAGE_EXPECTED, stageName } from '@/app/admin/stage-names'
-import { ErrorText, Pill } from '@/app/admin/ui'
+import { STAGE_EXPECTED, stageName } from '@/app/admin/_components/stage-names'
+import { ErrorText, Pill } from '@/app/admin/_components/ui'
 
 // One server-action call per stage, driven from the browser: one long request would hit the serverless cap and
 // leave no idea which stages landed. The sidecar records `done`, so a reload resumes. `cityKey`, not `key` (reserved

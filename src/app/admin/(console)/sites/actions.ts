@@ -12,6 +12,7 @@ import {
   updateOpsLogic,
   writeAboutStoryLogic,
   type ActionResult,
+  type CityRow,
 } from '@/server/pipeline/admin-logic'
 import { upsertSiteSettings } from '@/server/leads/store'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
@@ -170,4 +171,9 @@ export async function removeAboutStoryAction(cityKey: string): Promise<ActionRes
   const result = await removeAboutStoryLogic(cityKey)
   if (result.ok) revalidateAbout(cityKey)
   return result
+}
+
+export async function listCitiesAction(): Promise<CityRow[]> {
+  await requireAdmin()
+  return listCities()
 }

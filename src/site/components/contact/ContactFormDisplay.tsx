@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ContactData } from "@/site/data/contact";
-import { submitLeadAction } from "@/app/(sites)/[city]/lead-actions";
+import { submitLeadAction } from "@/app/(sites)/[city]/actions";
 
 // contact.html form 30bda89. No method/name; submit is intercepted client-side with a honeypot, like BookingForm.
 // Fields verbatim: Name + Email side by side, then Phone, project select, message. reCAPTCHA not reproduced.

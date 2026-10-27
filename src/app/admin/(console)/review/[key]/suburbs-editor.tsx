@@ -5,8 +5,8 @@ import { Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { SuburbVerdict } from '@/server/pipeline/stages'
 import { cn } from '@/lib/utils'
-import { updateSuburbsAction } from '@/app/admin/(console)/actions'
-import { ErrorText } from '@/app/admin/ui'
+import { updateSuburbsAction } from './actions'
+import { ErrorText } from '@/app/admin/_components/ui'
 
 // The suburb list becomes URLs and is the researched data most likely to need a human fix. Slugs are normalised
 // server-side. One set of rows (scripts/admin-e2e.mjs counts the inputs). Each row carries the uniqueness verdict,

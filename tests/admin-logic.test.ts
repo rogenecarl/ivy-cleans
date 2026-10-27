@@ -2,9 +2,9 @@
 /*
  * The admin's behaviour, tested where it actually lives.
  *
- * src/app/admin/(console)/actions.ts carries the 'use server'
- * directive, which makes it a set of Next RPC endpoints rather than an
- * importable module — vitest cannot call it without standing up the framework.
+ * the console's actions.ts files carry the 'use server'
+ * directive, which makes them Next RPC endpoints rather than
+ * importable modules — vitest cannot call them without standing up the framework.
  * So every decision the admin makes lives in src/server/pipeline/admin-logic.ts and
  * is exercised here directly; the actions file adds only redirect() and
  * revalidatePath() on top, and the first test below pins that separation by
