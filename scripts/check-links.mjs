@@ -6,7 +6,7 @@
 //   node scripts/check-links.mjs
 import { spawnSync } from 'node:child_process'
 
-const result = spawnSync('npx', ['vitest', 'run', 'tests/link-graph.test.ts', '--reporter=dot'], {
+const result = spawnSync('npx', ['vitest', 'run', 'tests/unit/site/link-graph.test.ts', '--reporter=dot'], {
   stdio: 'inherit',
   shell: process.platform === 'win32',
 })

@@ -154,6 +154,6 @@ pipeline forcing a rebuild** — city content is already Blob-backed.
 4. Run the recovery drill once, on that same domain
    (`docs/ivy-cleans-handsoff/domain-automation.md`).
 
-`tests/provision.test.ts` proves the order and the idempotency against fakes.
+`tests/unit/pipeline/provision.test.ts` proves the order and the idempotency against fakes.
 It cannot prove Porkbun and Vercel behave as their documentation says. Only
 step 2 does.

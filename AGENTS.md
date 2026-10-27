@@ -21,7 +21,7 @@ One Next.js app, two halves: the **public city sites** (a pixel-faithful clone o
 | Build + typecheck | `pnpm build` (`prisma generate && next build`) |
 | Lint | `pnpm lint` |
 | Tests | `pnpm test` (`vitest run`) |
-| One test file | `pnpm vitest run tests/access.test.ts` |
+| One test file | `pnpm vitest run tests/unit/auth/access.test.ts` |
 | Cross-city duplication | `pnpm check:duplication` (exits 1 on findings) |
 | Internal link graph | `pnpm check:links` (exits 1 on failure) |
 | Push schema to DB | `pnpm prisma db push` (no migrations dir — never has been) |
@@ -176,7 +176,7 @@ Env fallbacks: `??` fires only on undefined, and env templates ship blank lines 
 - Every console server action starts with `requireAdmin()` / `requireSession()`.
 - Keep `disableSignUp: true`. Never weaken `safeNext()`.
 - Leads hold customer PII. Never log lead contents; never send them anywhere but the operator email.
-- `pnpm test` runs `tests/leads-store.test.ts` against whatever `DATABASE_URL` points at — today the **production** Neon. Every write/delete there is scoped to `cityKey` starting with `ztest-`; keep that prefix on any new DB test.
+- `pnpm test` runs `tests/integration/leads-store.test.ts` against whatever `DATABASE_URL` points at — today the **production** Neon. Every write/delete there is scoped to `cityKey` starting with `ztest-`; keep that prefix on any new DB test.
 
 ### Critical (git)
 

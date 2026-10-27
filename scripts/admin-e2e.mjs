@@ -10,7 +10,7 @@
  *   The four admin screens work as a chain in a real browser: dashboard →
  *   new-city form → per-stage generation → review (suburb editor, preview) →
  *   publish → dashboard shows LIVE. The unit tests exercise the same logic
- *   (tests/admin-logic.test.ts) but call the functions directly; only this
+ *   (tests/unit/pipeline/admin-logic.test.ts) but call the functions directly; only this
  *   script proves the server actions, the client runner's effect, the confirm
  *   dialog and the rendered preview actually work end to end.
  *
@@ -27,8 +27,8 @@
  *   the row that came out of it, its status transition and its saved note.
  *   This is the ONLY place in the whole plan that exercises the submit ->
  *   store -> dashboard chain end to end; every other leads test either mocks
- *   the store (tests/leads-submit.test.ts) or is itself skipped without a
- *   database (tests/leads-store.test.ts). See that case below for exactly
+ *   the store (tests/unit/leads/leads-submit.test.ts) or is itself skipped without a
+ *   database (tests/integration/leads-store.test.ts). See that case below for exactly
  *   what it does and does not prove.
  *
  *   The admin/manager RBAC plan: this script now signs in before its first
@@ -39,7 +39,7 @@
  *       executed, because both tasks were barred from creating the seeded
  *       account it needs) — click Sign out, land on /admin/login, confirm
  *       /admin/dashboard no longer opens in that browser context;
- *     - the proxy adapter end to end (tests/middleware.test.ts covers
+ *     - the proxy adapter end to end (tests/unit/content/middleware.test.ts covers
  *       resolveAdminRedirect as a pure function; only a real browser holding
  *       a real cookie proves the redirect actually fires);
  *     - the RBAC split in a fresh context signed in as a manager: no Sites
@@ -48,11 +48,11 @@
  *       automatically the moment emailAndPassword is enabled, whether or not
  *       anything in the UI links to it — is actually refused against the
  *       real running server, and that a refused attempt creates no `user`
- *       row. tests/better-auth-api.test.ts asserts the `disableSignUp`
+ *       row. tests/unit/auth/better-auth-api.test.ts asserts the `disableSignUp`
  *       config is set; this is the only thing that proves the config does
  *       anything.
- *   tests/access.test.ts covers the role matrix exhaustively and
- *   tests/auth-guards.test.ts covers that every action calls a guard;
+ *   tests/unit/auth/access.test.ts covers the role matrix exhaustively and
+ *   tests/unit/auth/auth-guards.test.ts covers that every action calls a guard;
  *   neither one opens a browser.
  *
  * REQUIRED ENV: E2E_EMAIL / E2E_PASSWORD (an admin account) and
@@ -714,7 +714,7 @@ try {
    * and self-cleaning: it deletes the row(s) it creates in a finally block
    * so a repeat run — or a run that fails partway — never leaves a fixture
    * lead sitting in a real inbox operator's dashboard, mirroring
-   * tests/leads-store.test.ts's `ztest-` + unconditional-afterAll pattern.
+   * tests/integration/leads-store.test.ts's `ztest-` + unconditional-afterAll pattern.
    * The cityKey here is deliberately the real "minneapolis" (attribution
    * runs exactly as it would for a real customer), so the marker instead
    * lives in the email address.
@@ -729,7 +729,7 @@ try {
     skip(
       'leads capture end-to-end (submit → dashboard → status → notes)',
       'DATABASE_URL is not set (checked .env.local, .env, and the ambient environment). ' +
-        'tests/leads-store.test.ts is skipping for the same reason — the submit-to-dashboard ' +
+        'tests/integration/leads-store.test.ts is skipping for the same reason — the submit-to-dashboard ' +
         'chain has never been run against a real database. Set DATABASE_URL (and start the dev ' +
         'server with it set) to exercise this case.',
     )
@@ -888,7 +888,7 @@ try {
         err instanceof Error ? err.message : String(err),
       )
     } finally {
-      // Unconditional, like tests/leads-store.test.ts's afterAll: runs whether
+      // Unconditional, like tests/integration/leads-store.test.ts's afterAll: runs whether
       // the case above passed, failed a check, or threw. Deletes by the
       // unique fixture email rather than by id, since a throw before the
       // dashboard list step means this script never captured an id.
@@ -936,7 +936,7 @@ try {
    * better-auth mounts POST /api/auth/sign-up/email automatically whenever
    * emailAndPassword is enabled -- nothing in this app's UI has to link to
    * it for it to exist. `disableSignUp: true` in src/server/auth/auth.ts is the
-   * ONLY thing that refuses it (tests/better-auth-api.test.ts asserts the
+   * ONLY thing that refuses it (tests/unit/auth/better-auth-api.test.ts asserts the
    * config is set; this proves the config actually does something against
    * the real running server). Plain fetch(), not Playwright -- this is an
    * anonymous API call, no browser session involved. Uses its own throwaway
@@ -988,8 +988,8 @@ try {
 
   /* 11. Manager RBAC split ───────────────────────────────────────────────── */
   /*
-   * The unit tests cover the policy (tests/access.test.ts) and that each
-   * action calls a guard (tests/auth-guards.test.ts); only this proves a
+   * The unit tests cover the policy (tests/unit/auth/access.test.ts) and that each
+   * action calls a guard (tests/unit/auth/auth-guards.test.ts); only this proves a
    * real browser holding a real manager session cannot open Sites.
    */
   const managerCtx = await browser.newContext()

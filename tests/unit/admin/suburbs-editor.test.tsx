@@ -1,0 +1,111 @@
+// tests/unit/admin/suburbs-editor.test.tsx
+/*
+ * Task 13: the per-row verdict chip on the review screen's service-area
+ * editor. scoreSuburbs (Task 9/12) already runs in the research stage and
+ * drops the areas it scores 'skip' before this component ever sees them, so
+ * the only verdicts SuburbsEditor is ever handed are 'build' and 'review' —
+ * plus the absent case, when an operator adds a row by hand that scoreSuburbs
+ * never scored at all.
+ *
+ * renderToStaticMarkup in plain node is enough, the same as
+ * tests/unit/leads/lead-submission.test.tsx: this is a client component (useState), but
+ * nothing here exercises an event handler — only the markup its initial
+ * render produces.
+ */
+import { describe, expect, it } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
+import SuburbsEditor, { type SuburbMeta } from '@/app/admin/(console)/review/[key]/suburbs-editor'
+
+function render(meta: Record<string, SuburbMeta>) {
+  return renderToStaticMarkup(
+    <SuburbsEditor
+      cityKey="ztest-chipville"
+      initial={[
+        { name: 'Researched Heights', slug: 'researched-heights' },
+        { name: 'Hand-Added Hollow', slug: 'hand-added-hollow' },
+      ]}
+      meta={meta}
+      showResearch
+    />,
+  )
+}
+
+describe('SuburbsEditor verdict chips', () => {
+  it('renders a verdict chip per scored area and a not-researched chip for a hand-added row', () => {
+    const markup = render({
+      'researched-heights': {
+        score: 9,
+        verdict: 'build',
+        reason: '3 subdivisions, 2 local conditions',
+      },
+    })
+    expect(markup).toContain('Researched')
+    expect(markup).toMatch(/not researched/i)
+  })
+
+  it('renders the amber "thin" chip for a review verdict, carrying the reason', () => {
+    const markup = render({
+      'researched-heights': {
+        score: 5,
+        verdict: 'review',
+        reason: 'thin — enough for a page only if search demand justifies it',
+      },
+      'hand-added-hollow': {
+        score: 9,
+        verdict: 'build',
+        reason: '4 subdivisions, 1 local condition',
+      },
+    })
+    expect(markup).toContain('Thin')
+    expect(markup).toContain('thin — enough for a page only if search demand justifies it')
+    // Both rows are scored here, so the not-researched chip must not appear.
+    expect(markup).not.toMatch(/not researched/i)
+  })
+
+  it('renders every row unresearched when meta is empty (e.g. a draft with no research yet)', () => {
+    const markup = render({})
+    const matches = markup.match(/not researched/gi) ?? []
+    expect(matches).toHaveLength(2)
+  })
+})
+
+describe('what the areas list lets an operator do', () => {
+  /*
+   * Read-only, plus Remove. Each of the three possible edits was weighed
+   * against what it can produce, and only one of them is purely subtractive:
+   *
+   *   Add     a hand-typed area has subdivisions: [], so isWritableArea is
+   *           false, the suburb stage skips it, and src/site/data/suburb.ts falls
+   *           back through sOpt to the Savage template — the exact generic
+   *           page that earned 23 clicks in 16 months. checkCity cannot see
+   *           it either, because it reads `sections` and this area has none.
+   *   Rename  mergeSuburbRows matches on SLUG, so renaming an area keeps the
+   *           previous one's subdivisions. Real developments, attached to the
+   *           wrong town — worse than a generic page, because it is false.
+   *   Remove  cannot create a page. It only prevents one, and research
+   *           returns 8-12 areas it GUESSES you serve, so a wrong one has to
+   *           be removable or its page claims you clean somewhere you don't.
+   */
+  const markup = render({})
+
+  it('offers no way to add an area', () => {
+    expect(markup).not.toMatch(/add area/i)
+  })
+
+  it('shows the name and slug as text, not as editable fields', () => {
+    expect(markup).toContain('Researched Heights')
+    expect(markup).toContain('researched-heights')
+    expect(markup).not.toMatch(/<input/i)
+  })
+
+  it('still offers Remove on every row', () => {
+    expect(markup).toMatch(/Remove area 1/)
+    expect(markup).toMatch(/Remove area 2/)
+  })
+
+  it('says why adding and renaming are not offered', () => {
+    // An absent control with no explanation reads as an oversight, and the
+    // next person to look at this will add it back.
+    expect(markup).toMatch(/no research behind it/i)
+  })
+})

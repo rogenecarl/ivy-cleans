@@ -2,7 +2,7 @@ import path from 'node:path'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  // The component-render suite (tests/render-city.test.tsx) imports components
+  // The component-render suite (tests/unit/site/render-city.test.tsx) imports components
   // through the app's "@/..." alias, so vitest needs the same mapping
   // tsconfig.json's `paths` gives the Next build.
   resolve: {

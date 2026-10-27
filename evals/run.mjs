@@ -14,7 +14,7 @@
  *
  * WRITES INTO content/. Every fixture runs as a `zeval-<name>` draft and is
  * deleted afterwards, and content/_cities.json is restored byte-for-byte —
- * the same contract tests/admin-logic.test.ts holds itself to. A crash
+ * the same contract tests/unit/pipeline/admin-logic.test.ts holds itself to. A crash
  * mid-run leaves sidecars behind; they are all prefixed `zeval-`.
  */
 for (const f of ['.env.local', '.env']) {

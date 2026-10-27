@@ -3,7 +3,7 @@
  * Vitest does NOT load .env files the way `next dev`/`next build` do — only
  * Next's own tooling reads them automatically. Without this, DATABASE_URL
  * (and everything else in .env / .env.local) is simply absent under
- * `pnpm test`, which would make tests/leads-store.test.ts's
+ * `pnpm test`, which would make tests/integration/leads-store.test.ts's
  * `describe.skipIf(!process.env.DATABASE_URL)` skip silently on every
  * machine, including CI-shaped local runs, with no indication the suite
  * never actually ran.
