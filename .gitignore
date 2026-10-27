@@ -76,5 +76,4 @@ scripts/.snapshots/
 # disk, they just don't belong in the published repo. Ignoring the reference
 # dumps also keeps their raw `class` attributes out of Tailwind's content
 # scan, the same reason /fidelity-*/ is ignored above.
-/CLAUDE.md
 /docs/superpowers/
