@@ -4,10 +4,10 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { APIError } from 'better-auth/api'
-import { auth } from '@/lib/auth'
-import { isRole, safeNext } from '@/lib/access'
-import { checkRateLimit, RATE_LIMITS } from '@/lib/auth-rate-limit'
-import { clientIp } from '@/leads/client-ip'
+import { auth } from '@/server/auth/auth'
+import { isRole, safeNext } from '@/server/auth/access'
+import { checkRateLimit, RATE_LIMITS } from '@/server/auth/auth-rate-limit'
+import { clientIp } from '@/server/leads/client-ip'
 
 export type SignInState = { error: string } | null
 

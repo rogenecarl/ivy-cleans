@@ -23,10 +23,10 @@ import { toNextJsHandler } from 'better-auth/next-js'
 import { getSessionCookie, getCookieCache } from 'better-auth/cookies'
 import { hashPassword } from 'better-auth/crypto'
 import { APIError } from 'better-auth/api'
-import { auth } from '@/lib/auth'
+import { auth } from '@/server/auth/auth'
 
 describe('better-auth API surface', () => {
-  it('exports everything src/lib/auth*.ts and src/proxy.ts import', () => {
+  it('exports everything src/server/auth/auth*.ts and src/proxy.ts import', () => {
     expect(typeof betterAuth).toBe('function')
     expect(typeof prismaAdapter).toBe('function')
     expect(typeof nextCookies).toBe('function')
@@ -54,9 +54,9 @@ describe('email/password signup', () => {
      * moment emailAndPassword.enabled is true -- nothing in this app's UI
      * has to link to it. disableSignUp is the ONLY thing that refuses it
      * (sign-up.mjs's handler checks exactly this flag); `role.input: false`
-     * elsewhere in src/lib/auth.ts stops privilege escalation, not account
+     * elsewhere in src/server/auth/auth.ts stops privilege escalation, not account
      * creation, so it cannot substitute for this. Asserted on `auth.options`
-     * itself (the literal object src/lib/auth.ts passes to betterAuth(),
+     * itself (the literal object src/server/auth/auth.ts passes to betterAuth(),
      * exposed back on the returned instance) rather than by re-reading the
      * source file, so this fails the moment the config value actually
      * changes -- deleting the line, or someone "helpfully" flipping it back
@@ -68,7 +68,7 @@ describe('email/password signup', () => {
 
 describe('generated Prisma client', () => {
   it('exposes the two operator roles', async () => {
-    // Guards the schema against a rename: src/lib/access.ts hard-codes these
+    // Guards the schema against a rename: src/server/auth/access.ts hard-codes these
     // two strings, and a mismatch between the enum and the policy would show
     // up as every operator being denied everything.
     const { UserRole } = await import('@/generated/prisma/client')

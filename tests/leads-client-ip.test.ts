@@ -1,6 +1,6 @@
 // tests/leads-client-ip.test.ts
 import { describe, expect, it } from 'vitest'
-import { clientIp } from '@/leads/client-ip'
+import { clientIp } from '@/server/leads/client-ip'
 
 function headersOf(entries: Record<string, string>): Pick<Headers, 'get'> {
   return {

@@ -1,23 +1,23 @@
 'use server'
-// The only framework surface on the capture path; the logic is in src/leads/submit.ts. The city comes from the
+// The only framework surface on the capture path; the logic is in src/server/leads/submit.ts. The city comes from the
 // Host header here — `renderedCityKey` is untrusted and consulted only on an unmapped host. Draft vs live is
 // answered by the city document's status through the isDraftCity port, never by the request.
 import { headers } from 'next/headers'
 import domainsJson from '@content/_domains.json'
-import type { DomainsIndex } from '@/content/resolve-rewrite'
-import { getCity } from '@/content/store'
-import { clientIp } from '@/leads/client-ip'
-import { IP_HASH_SALT, LEADS_DASHBOARD_ORIGIN } from '@/leads/env'
-import { sendLeadEmail } from '@/leads/mailer'
+import type { DomainsIndex } from '@/server/content/resolve-rewrite'
+import { getCity } from '@/server/content/store'
+import { clientIp } from '@/server/leads/client-ip'
+import { IP_HASH_SALT, LEADS_DASHBOARD_ORIGIN } from '@/server/leads/env'
+import { sendLeadEmail } from '@/server/leads/mailer'
 import {
   countRecentByIpHash,
   createLead,
   getSiteSettings,
   markLeadEmail,
-} from '@/leads/store'
-import { submitLead, type SubmitPorts, type SubmitResult } from '@/leads/submit'
-import type { FormType } from '@/leads/types'
-import { ADMIN_BASE } from '@/lib/admin-routes'
+} from '@/server/leads/store'
+import { submitLead, type SubmitPorts, type SubmitResult } from '@/server/leads/submit'
+import type { FormType } from '@/server/leads/types'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
 
 export async function submitLeadAction(
   formType: FormType,

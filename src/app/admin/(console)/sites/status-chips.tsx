@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { CityStatus } from '@/pipeline/admin-logic'
+import type { CityStatus } from '@/server/pipeline/admin-logic'
 import { cn } from '@/lib/utils'
 import { siteFilterHref, visibleStatuses, type SiteQuery } from './list-logic'
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 
 // post-8.css 71b51dd4: uploads/2023/06/cleaning-bg2.jpg — not the 2023/11 file of the same name BeforeAfter uses.
 // Padding 6rem / 3rem 0 1rem / 2rem 0 0. Heading 2ddd8298 and body 11f8346 are white.

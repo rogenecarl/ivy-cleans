@@ -1,7 +1,7 @@
 // src/app/admin/dashboard-logic.ts
 // The dashboard's presentation decisions as pure functions, testable without the framework.
-import type { Role } from '@/lib/access'
-import { ADMIN_BASE, ADMIN_LEADS } from '@/lib/admin-routes'
+import type { Role } from '@/server/auth/access'
+import { ADMIN_BASE, ADMIN_LEADS } from '@/server/auth/admin-routes'
 
 // how long a lead has waited: "just now", "6 min", "4 hr", "3 d". Rounds DOWN — this figure must never overstate.
 export function describeAge(from: Date, now: Date): string {

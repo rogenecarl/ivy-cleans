@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
-import type { Role } from '@/lib/access'
+import type { Role } from '@/server/auth/access'
 
 // Sign-in success toast, raised at the DESTINATION: the login form is unmounting by then. Reads ?signedin=1 with
 // useSearchParams (layouts don't get searchParams) and strips it with history.replaceState so it can't loop.

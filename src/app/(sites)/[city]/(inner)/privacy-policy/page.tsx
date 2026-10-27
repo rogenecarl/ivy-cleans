@@ -3,7 +3,7 @@ import { Source_Serif_4 } from "next/font/google";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
 import { privacyPolicyMeta, privacyPolicyHeader, privacyPolicyParagraphs } from "@/data/privacy-policy";
-import { cityFromParams, type CityParams } from "@/content/city-param";
+import { cityFromParams, type CityParams } from "@/site/city-param";
 
 export const metadata: Metadata = {
   title: privacyPolicyMeta.title,

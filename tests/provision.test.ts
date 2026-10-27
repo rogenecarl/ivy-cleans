@@ -19,7 +19,7 @@ import {
   type Host,
   type Registrar,
   type Router,
-} from '@/pipeline/provision'
+} from '@/server/pipeline/provision'
 
 class FakeRegistrar implements Registrar {
   owned = new Set<string>()

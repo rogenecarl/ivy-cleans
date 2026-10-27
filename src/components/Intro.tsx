@@ -1,5 +1,5 @@
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 import IntroVideo from "./IntroVideo";
 
 export default function Intro({

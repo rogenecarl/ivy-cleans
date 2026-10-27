@@ -44,8 +44,8 @@ const leadStatusCounts = vi.fn()
 const getLead = vi.fn()
 const leadCountsByCity = vi.fn()
 const getSiteSettings = vi.fn()
-vi.mock('@/leads/store', async () => {
-  const actual = await vi.importActual<typeof import('@/leads/store')>('@/leads/store')
+vi.mock('@/server/leads/store', async () => {
+  const actual = await vi.importActual<typeof import('@/server/leads/store')>('@/server/leads/store')
   return {
     ...actual,
     setLeadStatus,
@@ -64,14 +64,14 @@ vi.mock('@/leads/store', async () => {
 
 // loadDraft/getCity back the generate and review screens -- both admin-only.
 const loadDraft = vi.fn()
-vi.mock('@/content/drafts', async () => {
-  const actual = await vi.importActual<typeof import('@/content/drafts')>('@/content/drafts')
+vi.mock('@/server/content/drafts', async () => {
+  const actual = await vi.importActual<typeof import('@/server/content/drafts')>('@/server/content/drafts')
   return { ...actual, loadDraft }
 })
 
 const getCity = vi.fn()
-vi.mock('@/content/store', async () => {
-  const actual = await vi.importActual<typeof import('@/content/store')>('@/content/store')
+vi.mock('@/server/content/store', async () => {
+  const actual = await vi.importActual<typeof import('@/server/content/store')>('@/server/content/store')
   return { ...actual, getCity }
 })
 
@@ -96,9 +96,9 @@ const checkProvisioningLogic = vi.fn()
 const publishLogic = vi.fn()
 const listCities = vi.fn(async () => [])
 const getProgressLogic = vi.fn()
-vi.mock('@/pipeline/admin-logic', async () => {
-  const actual = await vi.importActual<typeof import('@/pipeline/admin-logic')>(
-    '@/pipeline/admin-logic',
+vi.mock('@/server/pipeline/admin-logic', async () => {
+  const actual = await vi.importActual<typeof import('@/server/pipeline/admin-logic')>(
+    '@/server/pipeline/admin-logic',
   )
   return {
     ...actual,
@@ -118,10 +118,10 @@ vi.mock('@/pipeline/admin-logic', async () => {
 
 // The guard module itself is mocked: these tests are about whether each
 // action CALLS a guard, not about whether the guard works (that is
-// src/lib/auth-server.ts's own concern, exercised by hand in Task 9).
+// src/server/auth/auth-server.ts's own concern, exercised by hand in Task 9).
 const requireAdmin = vi.fn()
 const requireSession = vi.fn()
-vi.mock('@/lib/auth-server', () => ({
+vi.mock('@/server/auth/auth-server', () => ({
   requireAdmin: () => requireAdmin(),
   requireSession: () => requireSession(),
 }))

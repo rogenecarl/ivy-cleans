@@ -1,6 +1,6 @@
 // tests/pipeline.test.ts
 /*
- * Stub end-to-end for the three pipeline stages (src/pipeline/stages.ts): a
+ * Stub end-to-end for the three pipeline stages (src/server/pipeline/stages.ts): a
  * draft goes in, three StubModelClient-backed stages run, finalizeDraft turns
  * it into a real CityContent, and getCity serves it. Plus the two behaviours
  * that make the admin screen safe to reload — resume (a done stage never
@@ -15,13 +15,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { REQUIRED_SLOTS, createDraft, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '@/content/drafts'
-import { deriveFacts, type Facts } from '@/pipeline/facts'
-import { getCity, revalidateCity } from '@/content/store'
-import { validateCityContent } from '@/content/validate'
-import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '@/pipeline/model'
-import { clearProgress, readProgress } from '@/pipeline/progress'
-import * as stagesModule from '@/pipeline/stages'
+import { REQUIRED_SLOTS, createDraft, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '@/server/content/drafts'
+import { deriveFacts, type Facts } from '@/server/pipeline/facts'
+import { getCity, revalidateCity } from '@/server/content/store'
+import { validateCityContent } from '@/server/content/validate'
+import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
+import { clearProgress, readProgress } from '@/server/pipeline/progress'
+import * as stagesModule from '@/server/pipeline/stages'
 import {
   SLUG_PATTERN,
   STAGES,
@@ -50,8 +50,8 @@ import {
   scoreSuburbs,
   MODEL_KEYS,
   type StageId,
-} from '@/pipeline/stages'
-import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '@/pipeline/schemas'
+} from '@/server/pipeline/stages'
+import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '@/server/pipeline/schemas'
 import { LEGACY_POST_SLUGS } from '@/data/legacy-posts'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')

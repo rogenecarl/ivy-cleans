@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { SiteData } from "@/data/site";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 
 // post-8.css 219b11a0: cleaning-bg-desktop.jpg (-mbl below 768), padding 8rem 0 13rem / 3rem / 2rem 0 1rem.
 // Columns 55.098% / 44.86%; below 1025 the copy column is 65% and the art wraps. flex-col keeps widget margins from collapsing.

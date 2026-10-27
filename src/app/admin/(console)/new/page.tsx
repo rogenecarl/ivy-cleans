@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { createDraftAction } from '@/app/admin/(console)/actions'
-import { ADMIN_SITES } from '@/lib/admin-routes'
+import { ADMIN_SITES } from '@/server/auth/admin-routes'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { ErrorText } from '@/app/admin/ui'
 import { SubmitButton } from '@/app/admin/submit-button'
 import { PhotoDropzone } from '@/app/admin/photo-dropzone'
-import { requireAdmin } from '@/lib/auth-server'
+import { requireAdmin } from '@/server/auth/auth-server'
 
 // New-city form: a plain server-rendered <form action>. Errors come back as ?error=. searchParams is a Promise in Next 16.
 

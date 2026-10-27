@@ -4,8 +4,8 @@
 // Unknown payload keys render at the end under "Other".
 import type { ReactNode } from 'react'
 import { Mail, MapPin, Phone } from 'lucide-react'
-import { BOOKING_FIELDS, CONTACT_FIELDS, type LeadFormField } from '@/leads/schema'
-import type { LeadRecord } from '@/leads/types'
+import { BOOKING_FIELDS, CONTACT_FIELDS, type LeadFormField } from '@/server/leads/schema'
+import type { LeadRecord } from '@/server/leads/types'
 
 function fieldsFor(formType: LeadRecord['formType']): readonly LeadFormField[] {
   return formType === 'booking' ? BOOKING_FIELDS : CONTACT_FIELDS

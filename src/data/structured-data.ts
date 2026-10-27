@@ -1,5 +1,5 @@
-import type { CityContent } from '@/content/types'
-import { realAddress } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { realAddress } from '@/server/content/interpolate'
 import type { ServiceEntry } from './services/registry'
 
 export const BUSINESS_ID = '/#business'

@@ -1,5 +1,5 @@
-import type { CityContent } from '@/content/types'
-import { cityKeyOf } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { cityKeyOf } from '@/server/content/interpolate'
 import { sitePaths } from './routes'
 import { siteData } from './site'
 import { aboutReady } from './about'

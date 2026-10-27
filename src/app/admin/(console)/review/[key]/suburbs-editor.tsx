@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { SuburbVerdict } from '@/pipeline/stages'
+import type { SuburbVerdict } from '@/server/pipeline/stages'
 import { cn } from '@/lib/utils'
 import { updateSuburbsAction } from '@/app/admin/(console)/actions'
 import { ErrorText } from '@/app/admin/ui'

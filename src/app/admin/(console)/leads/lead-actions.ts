@@ -2,10 +2,10 @@
 // Mutations for the lead detail screen. Both revalidate the detail page and the list. Every input is validated and
 // every action starts with a guard — the layout guard does not run for an action POST.
 import { revalidatePath } from 'next/cache'
-import { LeadNotFoundError, setLeadNotes, setLeadStatus } from '@/leads/store'
-import { LEAD_STATUSES, type LeadStatus } from '@/leads/types'
-import { ADMIN_BASE } from '@/lib/admin-routes'
-import { requireSession } from '@/lib/auth-server'
+import { LeadNotFoundError, setLeadNotes, setLeadStatus } from '@/server/leads/store'
+import { LEAD_STATUSES, type LeadStatus } from '@/server/leads/types'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
+import { requireSession } from '@/server/auth/auth-server'
 
 /** Notes are operator free text, not a customer-controlled field, but they still arrive over a POST that any signed-in caller can hit directly -- an authenticated bound is not the same thing as a trusted body, so the length is still capped here to stop one malicious request from growing a row without limit. */
 const MAX_NOTES_LENGTH = 5000

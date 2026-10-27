@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { cityFromParams } from "@/content/city-param";
-import type { CityContent } from "@/content/types";
+import { cityFromParams } from "@/site/city-param";
+import type { CityContent } from "@/server/content/types";
 import { SERVICE_SLUGS, serviceBySlug, serviceTitle } from "@/data/services/registry";
 import type { ServiceContent } from "@/data/service-types";
 import { moveOutData } from "@/data/move-out";
@@ -23,7 +23,7 @@ import { areasData } from "@/data/areas";
 import { mapSrc } from "@/data/maps";
 import { serviceJsonLd } from "@/data/structured-data";
 import JsonLd from "@/components/JsonLd";
-import { cityBits } from "@/content/store";
+import { cityBits } from "@/server/content/store";
 import type { ServiceEntry } from "@/data/services/registry";
 
 // Shared home for all seven services; an unregistered slug 404s via resolveService(). The [slug] route still owns

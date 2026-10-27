@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { SlotLink } from "@/content/types";
-import { linkify } from "@/content/links";
+import type { SlotLink } from "@/server/content/types";
+import { linkify } from "@/server/content/links";
 
 // A generated paragraph with its accepted prose links rendered as anchors.
 export default function Linked({ text, links }: { text: string; links?: readonly SlotLink[] }) {

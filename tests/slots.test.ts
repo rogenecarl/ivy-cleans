@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeAll } from 'vitest'
-import { s, sl } from '@/content/slots'
-import { getDefaultCity, getCity, cityBits } from '@/content/store'
-import type { CityContent } from '@/content/types'
+import { s, sl } from '@/server/content/slots'
+import { getDefaultCity, getCity, cityBits } from '@/server/content/store'
+import type { CityContent } from '@/server/content/types'
 
 describe('slots + store', () => {
   let c: CityContent

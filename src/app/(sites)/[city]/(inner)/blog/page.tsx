@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
-import { cityFromParams } from "@/content/city-param";
-import { cityHref, cityKeyOf } from "@/content/interpolate";
+import { cityFromParams } from "@/site/city-param";
+import { cityHref, cityKeyOf } from "@/server/content/interpolate";
 import { blogMeta } from "@/data/blog";
-import { listPosts } from "@/blog/store";
-import { postCards } from "@/blog/cards";
+import { listPosts } from "@/server/blog/store";
+import { postCards } from "@/server/blog/cards";
 import BlogCardGrid from "@/components/blog/BlogCardGrid";
 import Pagination from "@/components/blog/Pagination";
 

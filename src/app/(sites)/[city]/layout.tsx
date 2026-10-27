@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { listLiveCityKeys } from "@/content/store";
+import { listLiveCityKeys } from "@/server/content/store";
 
 // The [city] segment owns the multi-tenant tree and is the only place that can enumerate cities for the build;
 // child segments inherit its params. Renders children untouched — it must not add a byte to any page.

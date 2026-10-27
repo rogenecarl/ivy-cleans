@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { META_DESCRIPTION_MAX, metaDescription } from '@/data/meta'
 import { homeData } from '@/data/home'
-import { getCity } from '@/content/store'
+import { getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')

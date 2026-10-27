@@ -1,6 +1,6 @@
 import type { Feature } from "@/data/home";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 import Features from "@/components/home/Features";
 
 // post-8.css 102673a0: move-out-bg.jpg, padding 8rem 0 10rem / 3rem 0 1rem / 2rem 0 0; wraps Features too.

@@ -3,7 +3,7 @@
  * scripts/check-duplication.mjs
  *
  * Runs the similarity checks over content/*.json and prints what collides.
- * Same logic as src/content/similarity.ts, standalone so it can be run today
+ * Same logic as src/server/content/similarity.ts, standalone so it can be run today
  * against what has already shipped:
  *
  *   node scripts/check-duplication.mjs

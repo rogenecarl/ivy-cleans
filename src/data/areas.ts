@@ -1,5 +1,5 @@
-import type { CityContent } from '@/content/types'
-import { cityHref } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { cityHref } from '@/server/content/interpolate'
 
 export type Area = { name: string; href: string };
 

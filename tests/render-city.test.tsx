@@ -4,7 +4,7 @@
  * (the draft fixture: 3 suburbs, no maps).
  *
  * Plan 5 Task 2 flipped Testville's own `hasSuburbPages` to true (every draft
- * city gets real suburb pages now — see finalizeDraft in src/content/drafts.ts),
+ * city gets real suburb pages now — see finalizeDraft in src/server/content/drafts.ts),
  * so the "no-suburb-pages, names render unlinked" scenario below passes
  * `hasSuburbPages={false}` as a literal rather than reading it off the
  * fixture — it tests the FALSE branch of ServiceArea/Locations using
@@ -24,7 +24,7 @@ import Locations from '@/components/home/Locations'
 import { areasData } from '@/data/areas'
 import { homeData } from '@/data/home'
 import { siteData } from '@/data/site'
-import { cityBits, getCity } from '@/content/store'
+import { cityBits, getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')

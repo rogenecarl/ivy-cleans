@@ -10,8 +10,8 @@
  * the three consumers only have to be checked for "does it call this".
  */
 import { describe, expect, it } from 'vitest'
-import { canAccess, isRole, navTabsFor, safeNext } from '@/lib/access'
-import { ADMIN_DASHBOARD, ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
+import { canAccess, isRole, navTabsFor, safeNext } from '@/server/auth/access'
+import { ADMIN_DASHBOARD, ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
 
 describe('canAccess', () => {
   it('lets an admin reach every console section', () => {

@@ -1,8 +1,8 @@
 // src/app/admin/(console)/leads/logic.ts
 // Pure decisions for the Leads screen, testable without the framework.
-import { leadQueryToSearch } from '@/leads/filters'
-import type { LeadQuery } from '@/leads/types'
-import { ADMIN_BASE } from '@/lib/admin-routes'
+import { leadQueryToSearch } from '@/server/leads/filters'
+import type { LeadQuery } from '@/server/leads/types'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
 
 // href keeping every current filter but the one being set; canonicalised through the validated query
 export function filterHref(query: LeadQuery, key: string, value: string | null): string {

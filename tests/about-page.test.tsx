@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { getCity } from '@/content/store'
-import type { CityContent, MarketOps } from '@/content/types'
+import { getCity } from '@/server/content/store'
+import type { CityContent, MarketOps } from '@/server/content/types'
 import { aboutData, aboutReady } from '@/data/about'
 import { siteData } from '@/data/site'
 import { sitePaths } from '@/data/routes'
 import { localBusinessJsonLd } from '@/data/structured-data'
 import { linkGraph } from '@/data/link-graph'
-import { ABOUT_STORY_SLOT } from '@/pipeline/about'
+import { ABOUT_STORY_SLOT } from '@/server/pipeline/about'
 
 const houston = await getCity('houston')
 

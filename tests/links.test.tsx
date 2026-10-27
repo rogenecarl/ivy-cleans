@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import Linked from '@/components/Linked'
-import { MAX_SUBURB_LINKS, acceptLinks, linkify, slotLinks } from '@/content/links'
-import { validateCityContent } from '@/content/validate'
-import { suburbSlots } from '@/content/slots'
+import { MAX_SUBURB_LINKS, acceptLinks, linkify, slotLinks } from '@/server/content/links'
+import { validateCityContent } from '@/server/content/validate'
+import { suburbSlots } from '@/server/content/slots'
 import { suburbData } from '@/data/suburb'
-import { getCity } from '@/content/store'
+import { getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')

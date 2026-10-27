@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { readPhoto } from '@/pipeline/photo-store'
+import { readPhoto } from '@/server/pipeline/photo-store'
 
 // Serves a city photo from Backblaze at the same /photos/<city>/<file> path a repo file would have. File names carry
 // a timestamp, so the response can be cached for good.

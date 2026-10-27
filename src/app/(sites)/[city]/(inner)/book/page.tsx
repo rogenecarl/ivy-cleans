@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
-import { cityFromParams, type CityParams } from "@/content/city-param";
-import { citySlug } from "@/content/interpolate";
+import { cityFromParams, type CityParams } from "@/site/city-param";
+import { citySlug } from "@/server/content/interpolate";
 import { bookData } from "@/data/book";
 import BookSection from "@/components/book/BookSection";
 

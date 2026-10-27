@@ -45,12 +45,12 @@ if (!DRY && !process.env.ANTHROPIC_API_KEY) {
 }
 
 // Imported after the env load so makeClient() sees the key.
-const { createDraft, loadDraft, saveDraft, deleteDraft } = await import('../src/content/drafts.ts')
-const { runStage, STAGES } = await import('../src/pipeline/stages.ts')
-const { makeClient } = await import('../src/pipeline/model.ts')
-const { checkQuality } = await import('../src/content/quality.ts')
-const { shingleSimilarity, longestSharedRun } = await import('../src/content/similarity.ts')
-const { isWritableArea, suburbSlots } = await import('../src/content/slots.ts')
+const { createDraft, loadDraft, saveDraft, deleteDraft } = await import('../src/server/content/drafts.ts')
+const { runStage, STAGES } = await import('../src/server/pipeline/stages.ts')
+const { makeClient } = await import('../src/server/pipeline/model.ts')
+const { checkQuality } = await import('../src/server/content/quality.ts')
+const { shingleSimilarity, longestSharedRun } = await import('../src/server/content/similarity.ts')
+const { isWritableArea, suburbSlots } = await import('../src/server/content/slots.ts')
 
 const IN_PER_MTOK = 5
 const OUT_PER_MTOK = 25

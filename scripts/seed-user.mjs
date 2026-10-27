@@ -84,7 +84,7 @@ if (!email || !email.includes('@')) fail('--email is required and must look like
 if (!name) fail('--name is required')
 if (!ROLES.includes(role)) fail(`--role must be one of: ${ROLES.join(', ')}`)
 if (password.length < MIN_PASSWORD_LENGTH) {
-  // Matches emailAndPassword.minPasswordLength in src/lib/auth.ts. A shorter
+  // Matches emailAndPassword.minPasswordLength in src/server/auth/auth.ts. A shorter
   // one would be accepted here and then rejected at sign-in, which is a
   // genuinely baffling failure to debug.
   fail(`--password must be at least ${MIN_PASSWORD_LENGTH} characters`)

@@ -2,8 +2,8 @@
 
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { auth } from '@/lib/auth'
-import { ADMIN_LOGIN } from '@/lib/admin-routes'
+import { auth } from '@/server/auth/auth'
+import { ADMIN_LOGIN } from '@/server/auth/admin-routes'
 
 // server action, not authClient.signOut(): the cookie is cleared on this response, no window with a live cookie
 export async function signOutAction(): Promise<void> {

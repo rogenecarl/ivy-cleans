@@ -1,6 +1,6 @@
 import Image from "next/image";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 
 export default function Values({ bits }: { bits: TokenSource }) {
   return (

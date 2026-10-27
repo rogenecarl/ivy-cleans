@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { isUnder, navTabsFor, type Role } from '@/lib/access'
+import { isUnder, navTabsFor, type Role } from '@/server/auth/access'
 
 // Header tabs. Client-only for usePathname; split out so the layout stays a server component with `metadata`.
 // Hiding a tab is not security — access.ts canAccess() is, enforced in auth-server.ts.

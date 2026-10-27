@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { cityBits } from "@/content/store";
-import { cityFromParams, type CityParams } from "@/content/city-param";
-import { cityHref } from "@/content/interpolate";
+import { cityBits } from "@/server/content/store";
+import { cityFromParams, type CityParams } from "@/site/city-param";
+import { cityHref } from "@/server/content/interpolate";
 import { homeData } from "@/data/home";
 import { servicesData } from "@/data/services";
 import { areasData } from "@/data/areas";

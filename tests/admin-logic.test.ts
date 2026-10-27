@@ -5,7 +5,7 @@
  * src/app/admin/(console)/actions.ts carries the 'use server'
  * directive, which makes it a set of Next RPC endpoints rather than an
  * importable module — vitest cannot call it without standing up the framework.
- * So every decision the admin makes lives in src/pipeline/admin-logic.ts and
+ * So every decision the admin makes lives in src/server/pipeline/admin-logic.ts and
  * is exercised here directly; the actions file adds only redirect() and
  * revalidatePath() on top, and the first test below pins that separation by
  * proving admin-logic imports nothing from next/.
@@ -39,11 +39,11 @@ import {
   readOpsLogic,
   updateOpsLogic,
   updateSuburbsLogic,
-} from '@/pipeline/admin-logic'
-import { loadDraft } from '@/content/drafts'
-import { getCity, revalidateCity } from '@/content/store'
-import { validateCityContent } from '@/content/validate'
-import { STAGE_IDS } from '@/pipeline/stages'
+} from '@/server/pipeline/admin-logic'
+import { loadDraft } from '@/server/content/drafts'
+import { getCity, revalidateCity } from '@/server/content/store'
+import { validateCityContent } from '@/server/content/validate'
+import { STAGE_IDS } from '@/server/pipeline/stages'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -134,7 +134,7 @@ afterAll(async () => {
 
 describe('framework independence', () => {
   it('admin-logic imports nothing from next/ — which is why this file can import it', async () => {
-    const source = await readFile(path.join(process.cwd(), 'src/pipeline/admin-logic.ts'), 'utf-8')
+    const source = await readFile(path.join(process.cwd(), 'src/server/pipeline/admin-logic.ts'), 'utf-8')
     // Anchored to a line-initial `import`, so the rule can be *described* in a
     // comment in that file without the description tripping this assertion.
     expect(source).not.toMatch(/^import[^\n]*['"]next(\/|['"])/m)
@@ -501,7 +501,7 @@ describe('updateSuburbsLogic — merge behaviour (feature 9 fix)', () => {
     await freshDraft(KEY)
     const draft = await loadDraft(KEY)
     draft.research = KATY_RESEARCH
-    const { saveDraft } = await import('@/content/drafts')
+    const { saveDraft } = await import('@/server/content/drafts')
     await saveDraft(KEY, draft)
   })
 
@@ -845,7 +845,7 @@ describe('regenerateLogic', () => {
 
     const draft = await loadDraft(KEY)
     draft.sections['service.deep-cleaning.local'] = 'STALE'
-    const { saveDraft } = await import('@/content/drafts')
+    const { saveDraft } = await import('@/server/content/drafts')
     await saveDraft(KEY, draft)
 
     expect(await regenerateLogic(KEY, 'service')).toEqual({ ok: true })
@@ -884,7 +884,7 @@ describe('regenerateLogic', () => {
 
     const sidecar = await loadDraft(KEY)
     expect(await publishLogic(KEY, 'ztest-partial.example')).toEqual({ ok: true })
-    const { saveDraft } = await import('@/content/drafts')
+    const { saveDraft } = await import('@/server/content/drafts')
     await saveDraft(KEY, sidecar) // the delete that never happened
     expect((await getCity(KEY)).status).toBe('live')
 
@@ -954,7 +954,7 @@ describe('listCities', () => {
     })
   })
 
-  // listCities' own logic (src/pipeline/admin-logic.ts) only flips to
+  // listCities' own logic (src/server/pipeline/admin-logic.ts) only flips to
   // 'draft-unfinalized' once ALL of STAGE_IDS are done. runAllStages here
   // deliberately tops out at RUNNABLE_STAGE_IDS (research/front/deep, not
   // suburb) so this test can exercise the genuinely-partial state: a draft
@@ -1190,7 +1190,7 @@ describe('editing the ops block after creation', () => {
     await draftOnly()
     const photos = [{ path: '/images/opsville-1.jpg', alt: 'Kitchen before and after' }]
 
-    const { saveDraft } = await import('@/content/drafts')
+    const { saveDraft } = await import('@/server/content/drafts')
     const draft = await loadDraft(KEY)
     draft.facts = { ...draft.facts, ops: { ...(draft.facts.ops ?? {}), photos } }
     await saveDraft(KEY, draft)

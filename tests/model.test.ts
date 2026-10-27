@@ -6,7 +6,7 @@ import {
   ServiceCopySchema,
   FrontSectionsSchema,
   ResearchSchema,
-} from '@/pipeline/schemas'
+} from '@/server/pipeline/schemas'
 import {
   AnthropicModelClient,
   StubModelClient,
@@ -15,7 +15,7 @@ import {
   makeClient,
   searchQuery,
   type ResearchEvent,
-} from '@/pipeline/model'
+} from '@/server/pipeline/model'
 
 // NOTE: this file must never instantiate a *working* AnthropicModelClient
 // (real apiKey + a call that would hit the network). Every AnthropicModelClient

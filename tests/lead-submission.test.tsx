@@ -16,8 +16,8 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LeadSubmission, leadHeadline } from '@/app/admin/(console)/leads/lead-submission'
-import { BOOKING_FIELDS, CONTACT_FIELDS } from '@/leads/schema'
-import type { LeadRecord } from '@/leads/types'
+import { BOOKING_FIELDS, CONTACT_FIELDS } from '@/server/leads/schema'
+import type { LeadRecord } from '@/server/leads/types'
 
 function lead(overrides: Partial<LeadRecord> = {}): LeadRecord {
   return {

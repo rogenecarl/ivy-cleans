@@ -1,7 +1,7 @@
 // Verbatim from contact.html and contact-content-dump.txt.
 
-import type { CityContent } from '@/content/types'
-import { realAddress } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { realAddress } from '@/server/content/interpolate'
 import { mapSrc } from "./maps";
 
 export type ContactField =

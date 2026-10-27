@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { ChevronRightIcon } from "@/components/Icons";
-import type { MarketPhoto } from "@/content/types";
+import type { MarketPhoto } from "@/server/content/types";
 
 // post-8.css: heading 5d80ea1, carousel 6153513 (max 1205px, min-height 395px).
 // swiper 741355c: 3-up from 1024, 2-up from 767, 1-up below; autoplay 5s, pauses on hover/interaction.

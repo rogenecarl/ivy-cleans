@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_NEIGHBORS, buildAreasResearchPrompt, buildResearchStructuringPrompt, linkNeighbors } from '@/pipeline/stages'
-import { deriveFacts } from '@/pipeline/facts'
+import { MAX_NEIGHBORS, buildAreasResearchPrompt, buildResearchStructuringPrompt, linkNeighbors } from '@/server/pipeline/stages'
+import { deriveFacts } from '@/server/pipeline/facts'
 import { suburbData } from '@/data/suburb'
 import { loadCityFixture } from './fixtures/cities/load'
 

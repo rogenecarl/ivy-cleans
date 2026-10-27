@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
-import { cityFromParams, type CityParams } from "@/content/city-param";
-import { citySlug } from "@/content/interpolate";
+import { cityFromParams, type CityParams } from "@/site/city-param";
+import { citySlug } from "@/server/content/interpolate";
 import { contactData } from "@/data/contact";
 import ContactHeader from "@/components/contact/ContactHeader";
 import ContactFormDisplay from "@/components/contact/ContactFormDisplay";

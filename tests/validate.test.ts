@@ -1,5 +1,5 @@
 import { describe, expect, test, it } from 'vitest'
-import { validateCityContent } from '@/content/validate'
+import { validateCityContent } from '@/server/content/validate'
 
 function omit<T extends object, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
   const copy = { ...obj }

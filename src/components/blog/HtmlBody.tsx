@@ -1,4 +1,4 @@
-import { wrapTables } from "@/blog/html";
+import { wrapTables } from "@/server/blog/html";
 
 // Sanitized blog-tool HTML in the post body's type sizes; the file-based posts used the same values.
 const BODY_CLASS = [

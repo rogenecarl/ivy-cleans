@@ -1,6 +1,6 @@
 // src/data/services/registry.ts
 // The seven services. Slugs are the client's, stored not derived. Six render through the shared template; move-out is bespoke.
-import type { CityContent } from '@/content/types'
+import type { CityContent } from '@/server/content/types'
 import type { ServiceContent } from '@/data/service-types'
 import { deepCleaningData } from '@/data/deep-cleaning'
 import { standardCleaningData } from './standard'

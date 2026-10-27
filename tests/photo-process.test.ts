@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import sharp from 'sharp'
-import { MAX_PHOTO_EDGE, optimizePhoto, sniffImageType } from '@/pipeline/photo-process'
+import { MAX_PHOTO_EDGE, optimizePhoto, sniffImageType } from '@/server/pipeline/photo-process'
 
 describe('sniffImageType', () => {
   it('reads the header, not the name', async () => {

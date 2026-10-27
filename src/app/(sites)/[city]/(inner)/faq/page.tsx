@@ -5,8 +5,8 @@ import { breadcrumbs } from "@/data/breadcrumbs";
 import { Source_Serif_4 } from "next/font/google";
 import { faqPageMeta, faqPageHeader } from "@/data/faq-page";
 import FaqAccordion from "@/components/faq-page/FaqAccordion";
-import { cityFromParams, type CityParams } from "@/content/city-param";
-import { cityHref } from "@/content/interpolate";
+import { cityFromParams, type CityParams } from "@/site/city-param";
+import { cityHref } from "@/server/content/interpolate";
 
 export const metadata: Metadata = {
   title: faqPageMeta.title,

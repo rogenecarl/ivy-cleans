@@ -9,7 +9,7 @@ import Packages from '@/components/Packages'
 import { packagesData } from '@/data/packages'
 import { siteData } from '@/data/site'
 import { SERVICE_SLUGS, serviceBySlug, serviceTitle } from '@/data/services/registry'
-import { cityBits, getCity } from '@/content/store'
+import { cityBits, getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')

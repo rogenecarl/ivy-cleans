@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Loader2, RotateCw } from 'lucide-react'
-import type { ProgressSnapshot } from '@/pipeline/admin-logic'
-import type { ProgressEvent } from '@/pipeline/progress'
+import type { ProgressSnapshot } from '@/server/pipeline/admin-logic'
+import type { ProgressEvent } from '@/server/pipeline/progress'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
@@ -15,8 +15,8 @@ import {
   pendingSuburbsAction,
   runStageAction,
 } from '@/app/admin/(console)/actions'
-import { ADMIN_BASE } from '@/lib/admin-routes'
-import { SERVICE_LOCAL_SLUGS } from '@/content/slots'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
+import { SERVICE_LOCAL_SLUGS } from '@/server/content/slots'
 import { STAGE_EXPECTED, stageName } from '@/app/admin/stage-names'
 import { ErrorText, Pill } from '@/app/admin/ui'
 

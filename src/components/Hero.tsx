@@ -1,6 +1,6 @@
 import type { SiteData } from "@/data/site";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 import CtaButton from "./CtaButton";
 import { PhoneIcon } from "./Icons";
 

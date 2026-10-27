@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { finalizeAction, regenerateAction } from '@/app/admin/(console)/actions'
-import { ADMIN_BASE } from '@/lib/admin-routes'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { ErrorText } from '@/app/admin/ui'
 import { stageName } from '@/app/admin/stage-names'
 

@@ -1,4 +1,4 @@
-import type { MarketReview } from "@/content/types";
+import type { MarketReview } from "@/server/content/types";
 
 // The market's own reviews from the ops block. No stars, avatars or Google wordmark: an ops review has no rating,
 // so drawing one would invent it. Nothing renders below three.

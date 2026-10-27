@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { isMappedHost, resolveRewrite, type DomainsIndex } from '@/content/resolve-rewrite'
-import { resolveAdminRedirect } from '@/content/resolve-admin'
+import { isMappedHost, resolveRewrite, type DomainsIndex } from '@/server/content/resolve-rewrite'
+import { resolveAdminRedirect } from '@/server/content/resolve-admin'
 
 /*
  * Pure tests over the proxy's rewrite decision (src/proxy.ts is a thin

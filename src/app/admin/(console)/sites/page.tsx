@@ -8,11 +8,11 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 import domainsJson from '@content/_domains.json'
-import { listCities, type CityRow } from '@/pipeline/admin-logic'
-import { STAGE_IDS } from '@/pipeline/stages'
-import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
-import { getSiteSettingsMany, leadCountsByCity } from '@/leads/store'
-import type { LeadCounts, SiteSettingsRecord } from '@/leads/types'
+import { listCities, type CityRow } from '@/server/pipeline/admin-logic'
+import { STAGE_IDS } from '@/server/pipeline/stages'
+import { domainFor, siteReadiness, type DomainsIndex } from '@/server/leads/readiness'
+import { getSiteSettingsMany, leadCountsByCity } from '@/server/leads/store'
+import type { LeadCounts, SiteSettingsRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
+import { ADMIN_BASE, ADMIN_SITES } from '@/server/auth/admin-routes'
 import { EmptyState, ReadinessMarker, StatusChip } from '@/app/admin/ui'
 import {
   filterSites,
@@ -34,7 +34,7 @@ import {
 } from './list-logic'
 import { SiteStatusChips } from './status-chips'
 import { SiteSearch } from './site-search'
-import { requireAdmin } from '@/lib/auth-server'
+import { requireAdmin } from '@/server/auth/auth-server'
 
 // Sites list. Reads the store directly (server component). force-dynamic: the list changes with every operator action.
 export const dynamic = 'force-dynamic'

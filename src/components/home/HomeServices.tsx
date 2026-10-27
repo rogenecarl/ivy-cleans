@@ -1,8 +1,8 @@
 import Image from "next/image";
 import type { Service } from "@/data/services";
 import type { SiteData } from "@/data/site";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 
 // post-8.css 6cbc7976: padding 6/3/2rem. h2 176e9adf; intro 70c713c2 max 112rem, 3rem to the cards from 1280.
 // Cards 33.33% from 768; the 4th/5th (7b8a2c27/5f81c296) get 6/3/1rem top padding. Button aeb05a4 1.9rem, 17px/30px.

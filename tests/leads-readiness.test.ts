@@ -1,6 +1,6 @@
 // tests/leads-readiness.test.ts
 import { describe, expect, it } from 'vitest'
-import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
+import { domainFor, siteReadiness, type DomainsIndex } from '@/server/leads/readiness'
 
 const counts = { total: 0, unworked: 0, emailFailed: 0 }
 

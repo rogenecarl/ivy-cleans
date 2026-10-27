@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { AdminUser } from '@/lib/auth-server'
+import type { AdminUser } from '@/server/auth/auth-server'
 import { signOutAction } from './sign-out-action'
 
 // the signed-in operator; replaces the hardcoded chip from before authentication

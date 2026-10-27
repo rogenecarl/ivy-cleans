@@ -76,7 +76,7 @@
  *   the env var (STUB_MODEL does reach server actions under `next start` —
  *   it is read at call time by makeClient()):
  *
- *   1. src/content/resolve-rewrite.ts STATICALLY IMPORTS content/_cities.json,
+ *   1. src/server/content/resolve-rewrite.ts STATICALLY IMPORTS content/_cities.json,
  *      so the proxy's city list is INLINED AT BUILD TIME. A city created after
  *      the build is not in it, so on the default host /stubville is not
  *      recognised as a preview path and gets rewritten to
@@ -148,7 +148,7 @@ try {
 }
 
 /*
- * Same DB_DISABLE_HAPPY_EYEBALLS flag as src/leads/env.ts (see there for the
+ * Same DB_DISABLE_HAPPY_EYEBALLS flag as src/server/leads/env.ts (see there for the
  * full explanation), applied here because this script's own process opens a
  * raw `pg` connection below (the Task 13 leads-capture cleanup) and is
  * therefore subject to the same Node Happy Eyeballs behaviour independently
@@ -220,7 +220,7 @@ const PHONE_DISPLAY = '(555) 555-0123'
 const NOTES = 'Fixture city. Housing stock is mock bungalows and stub-frame duplexes.'
 const SUBURBS = ['North Stubville', 'Mock Hollow', 'Fixture Heights']
 // Fixture Heights carries zero subdivisions in the fixture (see
-// tests/fixtures/stub-pipeline.json) — scoreSuburbs (src/pipeline/stages.ts)
+// tests/fixtures/stub-pipeline.json) — scoreSuburbs (src/server/pipeline/stages.ts)
 // treats zero subdivisions as a structural disqualifier regardless of the
 // rest of its score, so applyUniquenessGate drops it during the research
 // stage, before front/deep/suburb ever see it. Everywhere this script checks
@@ -382,7 +382,7 @@ try {
   const errText = await text(page)
   check(
     `invalid state "${BAD_STATE}" is rejected with the reason on screen`,
-    // Matches src/pipeline/facts.ts's actual wording ("unrecognised state"),
+    // Matches src/server/pipeline/facts.ts's actual wording ("unrecognised state"),
     // not the "unknown state code" this used to check for. That string went
     // stale when the State field's error message was reworded to accept
     // "FL" or "Florida" ("the State field takes FL or Florida"); the
@@ -583,7 +583,7 @@ try {
   )
 
   // Plan 5: finalizeDraft now stamps hasSuburbPages:true on every new draft
-  // (src/content/drafts.ts), so the KEPT fixture suburbs must render as REAL
+  // (src/server/content/drafts.ts), so the KEPT fixture suburbs must render as REAL
   // links, not plain text — the inverse of the pre-Plan-5 assertion here.
   // Fixture Heights is not among them: it never survives the uniqueness gate
   // in the research stage, so finalizeDraft never sees it either.
@@ -705,7 +705,7 @@ try {
    * Everything above this point is the Stubville pipeline and never touches
    * the database. This case is the only place in the whole leads-and-CRM
    * plan that runs the real chain: a real /minneapolis/contact submission,
-   * through the real server action and src/leads/submit.ts, into a real
+   * through the real server action and src/server/leads/submit.ts, into a real
    * Postgres row, read back by the real admin dashboard, mutated by the
    * real status/notes server actions. Everything else (tests/leads-*.test.ts)
    * either mocks the store or is itself skipped without a database.
@@ -738,7 +738,7 @@ try {
      * Raw `pg`, not the generated Prisma client: Prisma 7's `prisma-client`
      * generator emits real TypeScript source (src/generated/prisma/) meant
      * to be picked up by a bundler (Next's, in the app itself -- see
-     * src/leads/store.ts). This script runs as plain `node scripts/*.mjs`
+     * src/server/leads/store.ts). This script runs as plain `node scripts/*.mjs`
      * with no bundler in front of it, and that generated source uses
      * extensionless relative imports (`./enums`) that Node's own type
      * stripping does not resolve. The cleanup below only ever needed a
@@ -935,7 +935,7 @@ try {
   /*
    * better-auth mounts POST /api/auth/sign-up/email automatically whenever
    * emailAndPassword is enabled -- nothing in this app's UI has to link to
-   * it for it to exist. `disableSignUp: true` in src/lib/auth.ts is the
+   * it for it to exist. `disableSignUp: true` in src/server/auth/auth.ts is the
    * ONLY thing that refuses it (tests/better-auth-api.test.ts asserts the
    * config is set; this proves the config actually does something against
    * the real running server). Plain fetch(), not Playwright -- this is an

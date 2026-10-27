@@ -1,5 +1,5 @@
-import type { CityContent } from '@/content/types'
-import { cityHref, t } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { cityHref, t } from '@/server/content/interpolate'
 import { serviceBySlug, type ServiceSlug } from './services/registry'
 
 export type Pkg = { title: string; text: string; icon: string; href: string };

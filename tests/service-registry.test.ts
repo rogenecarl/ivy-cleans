@@ -1,8 +1,8 @@
 // tests/service-registry.test.ts
 import { describe, expect, it } from 'vitest'
 import { SERVICE_SLUGS, serviceBySlug } from '@/data/services/registry'
-import { SERVICE_LOCAL_SLUGS } from '@/content/slots'
-import type { CityContent } from '@/content/types'
+import { SERVICE_LOCAL_SLUGS } from '@/server/content/slots'
+import type { CityContent } from '@/server/content/types'
 
 describe('service registry', () => {
   it('holds exactly the seven client-specified slugs', () => {

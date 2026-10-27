@@ -1,10 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { loadRouting } from '@/content/resolve-rewrite'
-import { getCity } from '@/content/store'
-import { BLOGR_WEBHOOK_TOKEN } from '@/blog/env'
-import { receiveDelivery } from '@/blog/receive'
-import { candidatesOutside, postBySlug, upsertPost } from '@/blog/store'
+import { loadRouting } from '@/server/content/resolve-rewrite'
+import { getCity } from '@/server/content/store'
+import { BLOGR_WEBHOOK_TOKEN } from '@/server/blog/env'
+import { receiveDelivery } from '@/server/blog/receive'
+import { candidatesOutside, postBySlug, upsertPost } from '@/server/blog/store'
 
 // Blog-tool deliveries for every city land here; the payload's website.domain picks the city.
 export async function POST(request: NextRequest) {

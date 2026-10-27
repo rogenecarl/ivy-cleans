@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { FormType, LeadQuery } from '@/leads/types'
+import type { FormType, LeadQuery } from '@/server/leads/types'
 import { filterHref } from './logic'
 
 // Client component for the Selects; the filters still live in the URL through filterHref. Status moved to the chips

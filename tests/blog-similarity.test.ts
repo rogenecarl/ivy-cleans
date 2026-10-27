@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { findDuplicate, similarity } from '@/blog/similarity'
+import { findDuplicate, similarity } from '@/server/blog/duplicate-check'
 
 const grout = 'Grout lines collect soap film and mildew in a humid bathroom. Scrub them with an oxygen bleach paste and a stiff brush, then rinse. Seal the grout once it is fully dry so the next clean is easier.'
 const lanai = 'A screened lanai in Orlando collects pollen, lovebugs and irrigation spray. Rinse the screens from the inside out, then wipe the frame with a mild detergent. Do it monthly through spring.'

@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
-import { cityFromParams } from "@/content/city-param";
-import { cityKeyOf } from "@/content/interpolate";
-import { postBySlug } from "@/blog/store";
-import { postDate } from "@/blog/format";
+import { cityFromParams } from "@/site/city-param";
+import { cityKeyOf } from "@/server/content/interpolate";
+import { postBySlug } from "@/server/blog/store";
+import { postDate } from "@/server/blog/format";
 import { PostShell } from "@/components/blog/PostShell";
 import HtmlBody from "@/components/blog/HtmlBody";
 

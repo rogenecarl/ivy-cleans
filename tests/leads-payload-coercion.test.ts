@@ -1,6 +1,6 @@
 // tests/leads-payload-coercion.test.ts
 /*
- * coercePayload (src/leads/store.ts) is the seam that guarantees
+ * coercePayload (src/server/leads/store.ts) is the seam that guarantees
  * LeadRecord.payload is really Record<string, string>, no matter what a
  * Prisma `Json` column's parsed value turns out to be. It is a pure
  * function with no database dependency, so it lives in its own file rather
@@ -8,7 +8,7 @@
  * this environment (no DATABASE_URL) -- this file must run regardless.
  */
 import { describe, expect, it } from 'vitest'
-import { coercePayload } from '@/leads/store'
+import { coercePayload } from '@/server/leads/store'
 
 describe('coercePayload', () => {
   it('passes flat strings through unchanged', () => {

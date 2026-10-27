@@ -8,7 +8,7 @@
  * broken, and all of it would be quoted back as fact.
  */
 import { describe, expect, it } from 'vitest'
-import { canAccess } from '@/lib/access'
+import { canAccess } from '@/server/auth/access'
 import {
   activeAlarms,
   type Alarm,

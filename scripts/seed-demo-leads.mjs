@@ -12,7 +12,7 @@
  * on it), so this needs no toolchain and no build.
  *
  * WHY THE ANSWER KEYS ARE FULL QUESTIONS. The payload column is keyed by the
- * human label, not the Elementor field id -- see src/leads/schema.ts, where
+ * human label, not the Elementor field id -- see src/server/leads/schema.ts, where
  * `payload[field.label] = ...`. These strings must therefore match
  * BOOKING_FIELDS/CONTACT_FIELDS EXACTLY, typos included ("Are Your Looking",
  * "How Would Your Describe"), or the dashboard renders the question as
@@ -81,10 +81,10 @@ const CONTACT = {
  * quietly reads "Not answered" in front of the client.
  */
 function verifyLabels() {
-  const src = readFileSync(new URL('../src/leads/schema.ts', import.meta.url), 'utf8')
+  const src = readFileSync(new URL('../src/server/leads/schema.ts', import.meta.url), 'utf8')
   const section = (name) => {
     const start = src.indexOf(`export const ${name}`)
-    if (start === -1) throw new Error(`${name} not found in src/leads/schema.ts`)
+    if (start === -1) throw new Error(`${name} not found in src/server/leads/schema.ts`)
     /* The array's closing bracket is a `]` at the START of a line. Searching
      * for a bare ']' finds the one inside "form_fields[email]" instead and
      * truncates the section to nothing -- which is exactly the false alarm
@@ -108,7 +108,7 @@ function verifyLabels() {
     }
   }
   if (problems.length > 0) {
-    console.error('Seed data no longer matches src/leads/schema.ts:')
+    console.error('Seed data no longer matches src/server/leads/schema.ts:')
     for (const p of problems) console.error('  -', p)
     console.error('\nFix the payload keys above, then re-run. Nothing was written.')
     process.exit(1)
@@ -128,7 +128,7 @@ function verifyLabels() {
  *
  * Applied on the RETRY rather than up front so a correctly dual-stacked
  * machine keeps the address race, which is the better behaviour there and the
- * whole point of RFC 8305. src/leads/env.ts has the app-side equivalent,
+ * whole point of RFC 8305. src/server/leads/env.ts has the app-side equivalent,
  * behind DB_DISABLE_HAPPY_EYEBALLS.
  */
 async function connect() {

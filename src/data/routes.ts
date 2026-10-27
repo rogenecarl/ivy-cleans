@@ -1,7 +1,7 @@
-import type { CityContent } from '@/content/types'
-import { cityHref, citySlug } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { cityHref, citySlug } from '@/server/content/interpolate'
 import { SERVICE_SLUGS } from './services/registry'
-import { aboutReady } from '@/pipeline/about'
+import { aboutReady } from '@/server/pipeline/about'
 
 /** Every path a tenant serves, relative to the city root. */
 export function sitePaths(c: CityContent): string[] {

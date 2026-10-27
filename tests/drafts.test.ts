@@ -1,6 +1,6 @@
 // tests/drafts.test.ts
 /*
- * TDD for the admin pipeline's draft sidecar store (src/content/drafts.ts):
+ * TDD for the admin pipeline's draft sidecar store (src/server/content/drafts.ts):
  * CRUD on content/_drafts/<key>.json, finalizeDraft (assemble + validate +
  * publish to content/<key>.json + append _cities.json), and publishCity
  * (flip status live, wire a domain host, drop the sidecar).
@@ -23,12 +23,12 @@ import {
   REQUIRED_SLOTS,
   saveDraft,
   type DraftDoc,
-} from '@/content/drafts'
-import { deriveFacts } from '@/pipeline/facts'
-import { getCity, listLiveCityKeys, revalidateCity } from '@/content/store'
-import { validateCityContent } from '@/content/validate'
-import type { ResearchOutput } from '@/pipeline/schemas'
-import { STAGE_IDS } from '@/content/slots'
+} from '@/server/content/drafts'
+import { deriveFacts } from '@/server/pipeline/facts'
+import { getCity, listLiveCityKeys, revalidateCity } from '@/server/content/store'
+import { validateCityContent } from '@/server/content/validate'
+import type { ResearchOutput } from '@/server/pipeline/schemas'
+import { STAGE_IDS } from '@/server/content/slots'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')

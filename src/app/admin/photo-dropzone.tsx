@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { MAX_PHOTO_BYTES, MAX_PHOTOS, PHOTO_TYPES } from '@/pipeline/photos'
+import { MAX_PHOTO_BYTES, MAX_PHOTOS, PHOTO_TYPES } from '@/server/pipeline/photos'
 
 /** What a camera file may be before shrinking; the server's MAX_PHOTO_BYTES applies to what is sent. */
 const MAX_RAW_BYTES = 25 * 1024 * 1024

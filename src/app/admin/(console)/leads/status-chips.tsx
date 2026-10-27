@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LEAD_STATUSES, type LeadQuery, type LeadStatusCounts } from '@/leads/types'
+import { LEAD_STATUSES, type LeadQuery, type LeadStatusCounts } from '@/server/leads/types'
 import { cn } from '@/lib/utils'
 import { filterHref } from './logic'
 

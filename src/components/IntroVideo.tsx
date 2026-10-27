@@ -1,6 +1,6 @@
 // sec03 widget 70502ce: same YouTube id as /home's VideoEmbed, 16:9
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 
 export default function IntroVideo({ bits }: { bits: TokenSource }) {
   return (

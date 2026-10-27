@@ -13,8 +13,8 @@
  * function no longer classifies at all.
  */
 import { describe, expect, it } from 'vitest'
-import { attributeCity } from '@/leads/attribution'
-import type { DomainsIndex } from '@/content/resolve-rewrite'
+import { attributeCity } from '@/server/leads/attribution'
+import type { DomainsIndex } from '@/server/content/resolve-rewrite'
 
 const domains: DomainsIndex = {
   default: 'minneapolis',

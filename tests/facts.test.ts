@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { deriveFacts, resolveStateCode } from '@/pipeline/facts'
+import { deriveFacts, resolveStateCode } from '@/server/pipeline/facts'
 
 describe('deriveFacts', () => {
   test('derives phone formats and stateName from digits + state code', () => {

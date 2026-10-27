@@ -1,6 +1,6 @@
 // tests/auth-rate-limit.test.ts
 /*
- * src/lib/auth-rate-limit.ts shipped in Task 6 with no test at all, and its
+ * src/server/auth/auth-rate-limit.ts shipped in Task 6 with no test at all, and its
  * MAX_TRACKED eviction was rewritten during that task's fix round on
  * reasoning alone. Task 9 is the first thing that actually calls
  * checkRateLimit (the sign-in server action), so the test lands here.
@@ -16,7 +16,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 async function freshRateLimit() {
   vi.resetModules()
-  return import('@/lib/auth-rate-limit')
+  return import('@/server/auth/auth-rate-limit')
 }
 
 beforeEach(() => {

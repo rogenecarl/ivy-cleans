@@ -10,7 +10,7 @@
  *   LEADS_FROM_EMAIL blank -> `from: ''` -> every notification failed.
  *   LEADS_DASHBOARD_ORIGIN  correct by accident (truthiness).
  *
- * src/leads/env.ts resolves all three in one place with one rule. These tests
+ * src/server/leads/env.ts resolves all three in one place with one rule. These tests
  * pin that rule, because the whole failure mode was that nobody could tell
  * the three apart by reading the call sites.
  *
@@ -35,7 +35,7 @@ async function loadEnv(values: Record<string, string>) {
   for (const key of KEYS) delete process.env[key]
   Object.assign(process.env, values)
   vi.resetModules()
-  return import('@/leads/env')
+  return import('@/server/leads/env')
 }
 
 describe('leads environment resolution', () => {
@@ -78,8 +78,8 @@ describe('sendLeadEmail with a missing LEADS_FROM_EMAIL', () => {
     // provider: this returns before either the stub sink or the Resend import.
     for (const key of KEYS) delete process.env[key]
     vi.resetModules()
-    const { buildLeadEmail } = await import('@/leads/email')
-    const { sendLeadEmail } = await import('@/leads/mailer')
+    const { buildLeadEmail } = await import('@/server/leads/email')
+    const { sendLeadEmail } = await import('@/server/leads/mailer')
     const email = buildLeadEmail({
       cityName: 'Miami',
       lead: {

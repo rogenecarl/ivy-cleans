@@ -20,8 +20,8 @@
  */
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { validateCityContent } from '@/content/validate'
-import type { CityContent } from '@/content/types'
+import { validateCityContent } from '@/server/content/validate'
+import type { CityContent } from '@/server/content/types'
 
 export async function loadCityFixture(name: string): Promise<CityContent> {
   const file = path.join(process.cwd(), 'tests/fixtures/cities', `${name}.json`)

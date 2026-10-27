@@ -31,8 +31,8 @@ vi.mock('better-auth/cookies', () => ({
 }))
 
 const isMappedHost = vi.fn()
-vi.mock('@/content/resolve-rewrite', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/content/resolve-rewrite')>()
+vi.mock('@/server/content/resolve-rewrite', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/server/content/resolve-rewrite')>()
   return { ...actual, isMappedHost: (...args: unknown[]) => isMappedHost(...args) }
 })
 
@@ -178,7 +178,7 @@ describe('loadRouting', () => {
   it('returns the build-time JSON when Global Config is not configured at all', async () => {
     // The state every deployment is in today, and the one this must not break.
     delete process.env.EDGE_CONFIG
-    const { loadRouting } = await import('@/content/resolve-rewrite')
+    const { loadRouting } = await import('@/server/content/resolve-rewrite')
     const routing = await loadRouting()
 
     expect(routing.domains.default).toBe('minneapolis')
@@ -189,13 +189,13 @@ describe('loadRouting', () => {
     // A routing read that throws is every page on every domain, so this is
     // the one behaviour worth pinning above all others.
     process.env.EDGE_CONFIG = 'https://edge-config.vercel.com/nonexistent?token=nope'
-    const { loadRouting } = await import('@/content/resolve-rewrite')
+    const { loadRouting } = await import('@/server/content/resolve-rewrite')
     await expect(loadRouting()).resolves.toBeDefined()
   })
 
   it('degrades to the deployed map, not to nothing, when the store is unreachable', async () => {
     process.env.EDGE_CONFIG = 'https://edge-config.vercel.com/nonexistent?token=nope'
-    const { loadRouting } = await import('@/content/resolve-rewrite')
+    const { loadRouting } = await import('@/server/content/resolve-rewrite')
     const routing = await loadRouting()
 
     expect(routing.domains.default).toBe('minneapolis')
@@ -204,7 +204,7 @@ describe('loadRouting', () => {
 
   it('feeds resolveRewrite unchanged — the pure functions keep their contract', async () => {
     delete process.env.EDGE_CONFIG
-    const { loadRouting, resolveRewrite } = await import('@/content/resolve-rewrite')
+    const { loadRouting, resolveRewrite } = await import('@/server/content/resolve-rewrite')
     const { domains, cityKeys } = await loadRouting()
 
     // Same answers the default-argument form gives, which is what makes the

@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { privacyPolicyHeader, privacyPolicyMeta, privacyPolicyParagraphs } from '@/data/privacy-policy'
-import { reservedSlugs } from '@/pipeline/stages'
+import { reservedSlugs } from '@/server/pipeline/stages'
 import { sitemapPaths } from '@/app/sitemap'
 import { siteData } from '@/data/site'
-import { getCity } from '@/content/store'
+import { getCity } from '@/server/content/store'
 
 const REF = 'docs/superpowers/reference/ivycleans-live/privacy-policy.html'
 const html = readFileSync(REF, 'utf-8')

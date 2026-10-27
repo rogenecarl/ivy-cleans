@@ -1,8 +1,8 @@
 // Verbatim from move-out-content-dump.txt (lines 32-93) and move-out.html; casing and curly apostrophes kept.
 // {city}/{state} tokens where Minneapolis/MN appeared; no generated slots on this page.
 
-import type { CityContent } from '@/content/types'
-import { t } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { t } from '@/server/content/interpolate'
 
 export type MoveOutQuality = {
   title: string;

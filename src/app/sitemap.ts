@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next'
 import { headers } from 'next/headers'
-import { getCity } from '@/content/store'
-import { loadRouting } from '@/content/resolve-rewrite'
-import { cityHref } from '@/content/interpolate'
+import { getCity } from '@/server/content/store'
+import { loadRouting } from '@/server/content/resolve-rewrite'
+import { cityHref } from '@/server/content/interpolate'
 import { sitePaths } from '@/data/routes'
-import type { CityContent } from '@/content/types'
-import { listPosts } from '@/blog/store'
+import type { CityContent } from '@/server/content/types'
+import { listPosts } from '@/server/blog/store'
 
 // One sitemap per tenant, resolved from the Host header: one deployment serves every city, so there's no build-time
 // answer. headers() opts the route out of caching. Hosts come from loadRouting(), the same tables the proxy uses.

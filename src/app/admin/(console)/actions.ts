@@ -1,12 +1,12 @@
 'use server'
 
-// Thin server-action wrappers; the substance is in src/pipeline/admin-logic.ts (testable without Next).
+// Thin server-action wrappers; the substance is in src/server/pipeline/admin-logic.ts (testable without Next).
 // revalidatePath('/', 'layout') on purpose: a city is reachable at public paths and the /<key> preview.
 // Every action starts with a guard — the layout guard does not run for an action POST — and every export is admin-only.
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { requireAdmin } from '@/lib/auth-server'
+import { requireAdmin } from '@/server/auth/auth-server'
 import {
   addPhotoLogic,
   createDraftFromFields,
@@ -25,9 +25,9 @@ import {
   type CityRow,
   type ProgressSnapshot,
   type SuburbRow,
-} from '@/pipeline/admin-logic'
-import { ADMIN_BASE } from '@/lib/admin-routes'
-import { checkPhotoUpload } from '@/pipeline/photos'
+} from '@/server/pipeline/admin-logic'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
+import { checkPhotoUpload } from '@/server/pipeline/photos'
 
 /** FormData values are `string | File`; every field on these forms is a string. */
 function field(form: FormData, name: string): string {

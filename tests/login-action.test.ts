@@ -19,7 +19,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { APIError } from 'better-auth/api'
-import type { RateLimitResult } from '@/lib/auth-rate-limit'
+import type { RateLimitResult } from '@/server/auth/auth-rate-limit'
 
 const REDIRECTED = 'NEXT_REDIRECT'
 vi.mock('next/navigation', () => ({
@@ -34,7 +34,7 @@ vi.mock('next/headers', () => ({
 
 const signInEmail = vi.fn()
 const signOut = vi.fn()
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/server/auth/auth', () => ({
   auth: {
     api: {
       signInEmail: (...args: unknown[]) => signInEmail(...args),
@@ -48,12 +48,12 @@ vi.mock('@/lib/auth', () => ({
 const checkRateLimit = vi.fn<(config: unknown) => RateLimitResult>(
   () => ({ success: true, remaining: 4, resetAt: Date.now() + 1000 }),
 )
-vi.mock('@/lib/auth-rate-limit', () => ({
+vi.mock('@/server/auth/auth-rate-limit', () => ({
   checkRateLimit: (config: unknown) => checkRateLimit(config),
   RATE_LIMITS: { signIn: { windowSeconds: 300, maxRequests: 5 } },
 }))
 
-vi.mock('@/leads/client-ip', () => ({ clientIp: () => '203.0.113.1' }))
+vi.mock('@/server/leads/client-ip', () => ({ clientIp: () => '203.0.113.1' }))
 
 function formData(fields: Record<string, string>): FormData {
   const fd = new FormData()

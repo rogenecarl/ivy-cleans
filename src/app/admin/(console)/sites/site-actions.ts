@@ -12,10 +12,10 @@ import {
   updateOpsLogic,
   writeAboutStoryLogic,
   type ActionResult,
-} from '@/pipeline/admin-logic'
-import { upsertSiteSettings } from '@/leads/store'
-import { ADMIN_BASE } from '@/lib/admin-routes'
-import { requireAdmin } from '@/lib/auth-server'
+} from '@/server/pipeline/admin-logic'
+import { upsertSiteSettings } from '@/server/leads/store'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
+import { requireAdmin } from '@/server/auth/auth-server'
 import { parseNotifyEmails, parseOpsForm } from './logic'
 
 export async function saveNotifyEmailsAction(cityKey: string, formData: FormData): Promise<void> {

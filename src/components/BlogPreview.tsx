@@ -1,7 +1,7 @@
 import Image from "next/image";
-import type { CityContent } from "@/content/types";
-import { cityHref } from "@/content/interpolate";
-import type { BlogPostRecord } from "@/blog/types";
+import type { CityContent } from "@/server/content/types";
+import { cityHref } from "@/server/content/interpolate";
+import type { BlogPostRecord } from "@/server/blog/types";
 
 export const PREVIEW_COUNT = 3;
 

@@ -12,7 +12,7 @@ import {
   resolveCityKey,
   revalidateCity,
   type DomainsIndex,
-} from "@/content/store";
+} from "@/server/content/store";
 
 describe("getCity", () => {
   it("resolves to a validated CityContent doc for a known key", async () => {

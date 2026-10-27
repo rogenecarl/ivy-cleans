@@ -1,8 +1,8 @@
 // tests/leads-submit.test.ts
 import { describe, expect, it } from 'vitest'
-import { submitLead, type SubmitPorts } from '@/leads/submit'
-import type { DomainsIndex } from '@/content/resolve-rewrite'
-import type { LeadInput, LeadRecord } from '@/leads/types'
+import { submitLead, type SubmitPorts } from '@/server/leads/submit'
+import type { DomainsIndex } from '@/server/content/resolve-rewrite'
+import type { LeadInput, LeadRecord } from '@/server/leads/types'
 
 const domains: DomainsIndex = { default: 'minneapolis', hosts: { 'miamicleans.com': 'miami' } }
 
@@ -275,7 +275,7 @@ describe('submitLead', () => {
   })
 
   /*
-   * THE C2 REGRESSION SET. `ipSalt: null` is what src/leads/env.ts produces
+   * THE C2 REGRESSION SET. `ipSalt: null` is what src/server/leads/env.ts produces
    * for an IP_HASH_SALT that is absent OR blank -- and `IP_HASH_SALT=` in a
    * half-filled .env is the common case. That used to throw out of hashIp and
    * turn EVERY submission into a storage error, which was invisible locally

@@ -1,7 +1,7 @@
 // src/app/admin/(console)/sites/list-logic.ts
 // The Sites list's filtering, counting and ordering as pure functions. Filters live in the URL, like the Leads screen.
-import type { CityStatus } from '@/pipeline/admin-logic'
-import { ADMIN_SITES } from '@/lib/admin-routes'
+import type { CityStatus } from '@/server/pipeline/admin-logic'
+import { ADMIN_SITES } from '@/server/auth/admin-routes'
 
 export const SITE_STATUSES: readonly CityStatus[] = [
   'live',

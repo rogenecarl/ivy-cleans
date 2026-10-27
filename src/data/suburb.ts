@@ -2,10 +2,10 @@
 // hero/houseCleaning/benefits read the generated suburb.<slug>.intro/.homes/.local slots and fall back to
 // the template when absent (Minneapolis has no generated area copy). Takes the suburb ref: it repeats per area.
 
-import type { CityContent, MarketPhoto, SlotLink, Suburb } from '@/content/types'
-import { slotLinks } from '@/content/links'
-import { cityHref, t } from '@/content/interpolate'
-import { sOpt, suburbSlots } from '@/content/slots'
+import type { CityContent, MarketPhoto, SlotLink, Suburb } from '@/server/content/types'
+import { slotLinks } from '@/server/content/links'
+import { cityHref, t } from '@/server/content/interpolate'
+import { sOpt, suburbSlots } from '@/server/content/slots'
 import { metaDescription } from './meta'
 import { pickOtherServices } from './other-services'
 import { serviceBySlug } from './services/registry'

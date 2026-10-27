@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Area } from "@/data/areas";
-import type { TokenSource } from "@/content/interpolate";
-import { t } from "@/content/interpolate";
+import type { TokenSource } from "@/server/content/interpolate";
+import { t } from "@/server/content/interpolate";
 import { MapMarkerIcon } from "./Icons";
 
 export default function ServiceArea({

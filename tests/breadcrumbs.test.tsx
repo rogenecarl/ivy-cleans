@@ -11,7 +11,7 @@ import Breadcrumbs from '@/components/inner/Breadcrumbs'
 import ServiceArea from '@/components/ServiceArea'
 import { AREAS_PATH, breadcrumbListJsonLd, breadcrumbs } from '@/data/breadcrumbs'
 import { areasData } from '@/data/areas'
-import { cityBits, getCity } from '@/content/store'
+import { cityBits, getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')

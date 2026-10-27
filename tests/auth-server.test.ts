@@ -1,6 +1,6 @@
 // tests/auth-server.test.ts
 /*
- * src/lib/auth-server.ts calls itself "THE ENFORCEMENT POINT" -- every other
+ * src/server/auth/auth-server.ts calls itself "THE ENFORCEMENT POINT" -- every other
  * suite that touches it (tests/auth-guards.test.ts, the page-guard tests)
  * mocks the whole module away, on purpose: those suites are about whether a
  * caller invokes a guard, not whether the guard itself is correct. That left
@@ -29,7 +29,7 @@ vi.mock('next/headers', () => ({
 }))
 
 const getSession = vi.fn()
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/server/auth/auth', () => ({
   auth: { api: { getSession: (...args: unknown[]) => getSession(...args) } },
 }))
 
@@ -46,24 +46,24 @@ beforeEach(() => {
 describe('getServerUser', () => {
   it('returns null when there is no session', async () => {
     getSession.mockResolvedValue(null)
-    const { getServerUser } = await import('@/lib/auth-server')
+    const { getServerUser } = await import('@/server/auth/auth-server')
     await expect(getServerUser()).resolves.toBeNull()
   })
 
   it('returns null and logs when the session user has an unrecognised role', async () => {
     // The fail-closed property: a role the database has that
-    // src/lib/access.ts does not know about must be treated as signed out,
+    // src/server/auth/access.ts does not know about must be treated as signed out,
     // not defaulted to either real role.
     getSession.mockResolvedValue(sessionWithRole('superadmin'))
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const { getServerUser } = await import('@/lib/auth-server')
+    const { getServerUser } = await import('@/server/auth/auth-server')
     await expect(getServerUser()).resolves.toBeNull()
     expect(errorSpy).toHaveBeenCalled()
     errorSpy.mockRestore()
   })
 
   it('returns the user for each known role', async () => {
-    const { getServerUser } = await import('@/lib/auth-server')
+    const { getServerUser } = await import('@/server/auth/auth-server')
     for (const role of ['admin', 'manager'] as const) {
       getSession.mockResolvedValue(sessionWithRole(role))
       await expect(getServerUser()).resolves.toEqual({
@@ -79,20 +79,20 @@ describe('getServerUser', () => {
 describe('requireSession', () => {
   it('redirects to /admin/login when signed out', async () => {
     getSession.mockResolvedValue(null)
-    const { requireSession } = await import('@/lib/auth-server')
+    const { requireSession } = await import('@/server/auth/auth-server')
     await expect(requireSession()).rejects.toThrow(`${REDIRECTED}:/admin/login`)
   })
 
   it('encodes a given `next` into the login redirect', async () => {
     getSession.mockResolvedValue(null)
-    const { requireSession } = await import('@/lib/auth-server')
+    const { requireSession } = await import('@/server/auth/auth-server')
     await expect(requireSession('/admin/sites/miami')).rejects.toThrow(
       `${REDIRECTED}:/admin/login?next=${encodeURIComponent('/admin/sites/miami')}`,
     )
   })
 
   it('returns the user when signed in, for either role', async () => {
-    const { requireSession } = await import('@/lib/auth-server')
+    const { requireSession } = await import('@/server/auth/auth-server')
     getSession.mockResolvedValue(sessionWithRole('manager'))
     await expect(requireSession()).resolves.toMatchObject({ role: 'manager' })
     getSession.mockResolvedValue(sessionWithRole('admin'))
@@ -103,7 +103,7 @@ describe('requireSession', () => {
 describe('requireAdmin', () => {
   it('redirects a signed-out caller to /admin/login, not the dashboard', async () => {
     getSession.mockResolvedValue(null)
-    const { requireAdmin } = await import('@/lib/auth-server')
+    const { requireAdmin } = await import('@/server/auth/auth-server')
     await expect(requireAdmin()).rejects.toThrow(`${REDIRECTED}:/admin/login`)
   })
 
@@ -112,13 +112,13 @@ describe('requireAdmin', () => {
     // manager is AUTHENTICATED, just not AUTHORIZED, so the redirect target
     // must differ from the signed-out case above.
     getSession.mockResolvedValue(sessionWithRole('manager'))
-    const { requireAdmin } = await import('@/lib/auth-server')
+    const { requireAdmin } = await import('@/server/auth/auth-server')
     await expect(requireAdmin()).rejects.toThrow(`${REDIRECTED}:/admin/dashboard`)
   })
 
   it('returns the user for an admin', async () => {
     getSession.mockResolvedValue(sessionWithRole('admin'))
-    const { requireAdmin } = await import('@/lib/auth-server')
+    const { requireAdmin } = await import('@/server/auth/auth-server')
     await expect(requireAdmin()).resolves.toMatchObject({ role: 'admin' })
   })
 })

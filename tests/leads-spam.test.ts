@@ -1,6 +1,6 @@
 // tests/leads-spam.test.ts
 import { describe, expect, it } from 'vitest'
-import { RATE_LIMIT, hashIp, honeypotFilled, overRateLimit } from '@/leads/spam'
+import { RATE_LIMIT, hashIp, honeypotFilled, overRateLimit } from '@/server/leads/spam'
 
 describe('hashIp', () => {
   it('is stable for the same ip and salt', () => {
@@ -20,7 +20,7 @@ describe('hashIp', () => {
   })
 
   it('returns null when no salt is configured, rather than throwing', () => {
-    // `null` is what src/leads/env.ts produces for an IP_HASH_SALT that is
+    // `null` is what src/server/leads/env.ts produces for an IP_HASH_SALT that is
     // absent OR blank -- the two used to mean different things, and the blank
     // case refused every submission in production. The lead is now captured
     // with no ipHash instead; only the per-IP rate limit is lost.

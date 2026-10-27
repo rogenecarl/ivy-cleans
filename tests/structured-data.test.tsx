@@ -4,7 +4,7 @@ import JsonLd from '@/components/JsonLd'
 import { mapSrc } from '@/data/maps'
 import { BUSINESS_ID, localBusinessJsonLd, serviceJsonLd } from '@/data/structured-data'
 import { serviceBySlug } from '@/data/services/registry'
-import { getCity } from '@/content/store'
+import { getCity } from '@/server/content/store'
 
 const minneapolis = await getCity('minneapolis')
 const orlando = await getCity('orlando')

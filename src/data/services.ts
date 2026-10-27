@@ -1,7 +1,7 @@
 // src/data/services.ts
-import type { CityContent } from '@/content/types'
-import { s, sl } from '@/content/slots'
-import { t } from '@/content/interpolate'
+import type { CityContent } from '@/server/content/types'
+import { s, sl } from '@/server/content/slots'
+import { t } from '@/server/content/interpolate'
 
 export type Service = { title: string; text: string; image: string; alt: string; width: number; height: number };
 

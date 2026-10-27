@@ -8,7 +8,7 @@ import { reviewDate } from "@/components/Reviews";
 import { breadcrumbs } from "@/data/breadcrumbs";
 import { aboutData, aboutReady } from "@/data/about";
 import { localBusinessJsonLd } from "@/data/structured-data";
-import { cityFromParams, type CityParams } from "@/content/city-param";
+import { cityFromParams, type CityParams } from "@/site/city-param";
 
 // Who Ivy Cleans is in this city. Rendered from the operator's facts; 404 until the gate facts exist (see aboutReady).
 export const dynamicParams = true;

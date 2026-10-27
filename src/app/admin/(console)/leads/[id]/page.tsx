@@ -1,15 +1,15 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronLeft, TriangleAlert } from 'lucide-react'
-import { getLead } from '@/leads/store'
-import type { LeadRecord } from '@/leads/types'
+import { getLead } from '@/server/leads/store'
+import type { LeadRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ADMIN_BASE } from '@/lib/admin-routes'
+import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { LeadStatusChip, Panel, Pill } from '@/app/admin/ui'
 import { LeadSubmission } from '@/app/admin/(console)/leads/lead-submission'
 import { NotesForm } from './notes-form'
 import { StatusSelect } from './status-select'
-import { requireSession } from '@/lib/auth-server'
+import { requireSession } from '@/server/auth/auth-server'
 
 // force-dynamic: a status change must show immediately. No generateMetadata: a lead's name is PII and must not
 // end up in a title, URL or log.

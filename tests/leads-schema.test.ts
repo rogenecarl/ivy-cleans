@@ -1,7 +1,7 @@
 // tests/leads-schema.test.ts
 import { describe, expect, it } from 'vitest'
-import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS } from '@/leads/schema'
-import { getDefaultCity } from '@/content/store'
+import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS } from '@/server/leads/schema'
+import { getDefaultCity } from '@/server/content/store'
 import { bookData } from '@/data/book'
 import { contactData } from '@/data/contact'
 
@@ -107,7 +107,7 @@ describe('parseContactForm', () => {
 
 /*
  * THE DRIFT GUARD. The rendered form (src/data/*.ts) and the server's idea of
- * that form (src/leads/schema.ts) are two hand-maintained lists that must
+ * that form (src/server/leads/schema.ts) are two hand-maintained lists that must
  * describe the same thing.
  *
  * It used to compare names and labels only, and was therefore structurally

@@ -14,11 +14,11 @@ import {
   TrendingUp,
   TriangleAlert,
 } from 'lucide-react'
-import { listCities } from '@/pipeline/admin-logic'
-import { getSiteSettingsMany, leadDashboardStats, listLeads } from '@/leads/store'
-import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/leads/types'
+import { listCities } from '@/server/pipeline/admin-logic'
+import { getSiteSettingsMany, leadDashboardStats, listLeads } from '@/server/leads/store'
+import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
+import { ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
 import { EmptyState, LeadStatusChip, StatPill } from '@/app/admin/ui'
 import { buildCityLookup, cityDisplayName, filterHref } from '@/app/admin/(console)/leads/logic'
 import {
@@ -30,7 +30,7 @@ import {
   trendDirection,
   visibleAlarms,
 } from '@/app/admin/dashboard-logic'
-import { requireSession } from '@/lib/auth-server'
+import { requireSession } from '@/server/auth/auth-server'
 
 // Two tiers: "Needs attention" (alarms, tinted only when non-zero) and "Performance" (the weekly read).
 // Nothing is edited here. force-dynamic: every figure changes with each submission.

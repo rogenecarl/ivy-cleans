@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie, getCookieCache } from "better-auth/cookies";
-import { isMappedHost, loadRouting, resolveRewrite } from "@/content/resolve-rewrite";
-import { resolveAdminRedirect } from "@/content/resolve-admin";
-import { isUnder } from "@/lib/access";
-import { ADMIN_BASE } from "@/lib/admin-routes";
+import { isMappedHost, loadRouting, resolveRewrite } from "./server/content/resolve-rewrite";
+import { resolveAdminRedirect } from "./server/content/resolve-admin";
+import { isUnder } from "./server/auth/access";
+import { ADMIN_BASE } from "./server/auth/admin-routes";
 
 // Host -> city rewrite: public URLs stay bare, the app tree lives under /[city]. Internal /<cityKey>/... paths are
 // the draft preview and are left alone. Next 16 calls this file `proxy`, not `middleware`. Logic is in resolveRewrite().

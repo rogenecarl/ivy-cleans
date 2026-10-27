@@ -22,13 +22,13 @@ import {
   setLeadStatus,
   getSiteSettings,
   upsertSiteSettings,
-} from '@/leads/store'
-import type { LeadInput } from '@/leads/types'
+} from '@/server/leads/store'
+import type { LeadInput } from '@/server/leads/types'
 
 const CITY = 'ztest-miami'
 const OTHER = 'ztest-houston'
 // Prisma 7's driver-adapter client needs an explicit adapter -- see
-// src/leads/store.ts for the same construction against the real app.
+// src/server/leads/store.ts for the same construction against the real app.
 const prisma = new PrismaClient({
   adapter: new PrismaPg(new Pool({ connectionString: process.env.DATABASE_URL })),
 })

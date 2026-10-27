@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Breadcrumbs from "@/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/data/breadcrumbs";
 import { csMeta, rooms } from "@/data/cleaning-services";
-import { cityFromParams, type CityParams } from "@/content/city-param";
+import { cityFromParams, type CityParams } from "@/site/city-param";
 import { siteData } from "@/data/site";
 import PlansHeader from "@/components/cleaning-services/PlansHeader";
 import PackagesBar from "@/components/cleaning-services/PackagesBar";

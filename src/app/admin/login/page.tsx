@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { getServerUser } from '@/lib/auth-server'
-import { safeNext } from '@/lib/access'
+import { getServerUser } from '@/server/auth/auth-server'
+import { safeNext } from '@/server/auth/access'
 import { LoginForm } from './login-form'
 
 // The one path under /admin that isn't session-gated, hence outside (console). force-dynamic: it reads the session

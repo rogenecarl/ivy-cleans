@@ -9,11 +9,11 @@
 import { describe, expect, test } from 'vitest'
 import { readFile } from 'fs/promises'
 import path from 'path'
-import { getCity } from '@/content/store'
+import { getCity } from '@/server/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 import { suburbData } from '@/data/suburb'
-import { suburbSlots } from '@/content/slots'
-import { BANNED_PHRASES } from '@/content/quality'
+import { suburbSlots } from '@/server/content/slots'
+import { BANNED_PHRASES } from '@/server/content/quality'
 import { pickOtherServices } from '@/data/other-services'
 
 const minneapolis = await getCity('minneapolis')

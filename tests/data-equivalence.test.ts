@@ -12,7 +12,7 @@
  * that still needs justifying before it is accepted.
  */
 import { describe, expect, test } from 'vitest'
-import { getDefaultCity } from '@/content/store'
+import { getDefaultCity } from '@/server/content/store'
 import { siteData } from '@/data/site'
 import { servicesData } from '@/data/services'
 import { homeData } from '@/data/home'

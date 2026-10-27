@@ -1,4 +1,4 @@
-import type { Suburb } from '@/content/types'
+import type { Suburb } from '@/server/content/types'
 import type { ServiceSlug } from './services/registry'
 
 // Three services per area, chosen from its research so sibling area pages don't all link the same two.
