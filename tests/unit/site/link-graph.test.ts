@@ -1,5 +1,5 @@
 /*
- * The internal link graph, asserted per city — scripts/check-links.mjs runs this file. Every content/*.json city
+ * The internal link graph, asserted per city — scripts/checks/check-links.mjs runs this file. Every content/*.json city
  * is checked, drafts included: a draft renders at its preview and must hold the same shape.
  */
 import { readdir } from 'node:fs/promises'

@@ -28,10 +28,10 @@ Ivy Cleans turns one proven cleaning-company website into a network of city site
 
 | Part | Technology | Location |
 |---|---|---|
-| City sites (public) | Next.js 16 App Router, React 19, Tailwind CSS v4 | `src/app/(sites)/[city]`, `src/components`, `src/data` |
+| City sites (public) | Next.js 16 App Router, React 19, Tailwind CSS v4 | `src/app/(sites)/[city]`, `src/site/components`, `src/site/data` |
 | Operator console | Next.js server actions, shadcn/ui, better-auth | `src/app/admin` |
-| Generation pipeline | Anthropic SDK (Sonnet research, Opus writing), Zod structured output | `src/pipeline`, `src/content` |
-| Leads & blog | Prisma 7 + `@prisma/adapter-pg`, Resend | `src/leads`, `src/blog` |
+| Generation pipeline | Anthropic SDK (Sonnet research, Opus writing), Zod structured output | `src/server/pipeline`, `src/server/content` |
+| Leads & blog | Prisma 7 + `@prisma/adapter-pg`, Resend | `src/server/leads`, `src/server/blog` |
 | Database | Neon Postgres | `prisma/schema.prisma` |
 
 **Infrastructure:** Vercel (hosting), Vercel Global Config (host → city map), Neon (Postgres), Backblaze B2 (city photos), Resend (lead email), Porkbun (domains + DNS), blogr.ai (blog posts).
@@ -60,7 +60,7 @@ pnpm install                         # also runs prisma generate
 pnpm prisma db push
 
 # 3. Create an operator account
-SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs \
+SEED_PASSWORD=... node --env-file=.env scripts/ops/seed-user.mjs \
   --email you@example.com --name 'Your Name' --role admin
 
 # 4. Run
@@ -77,24 +77,24 @@ pnpm dev
 | Dev server | `pnpm dev` |
 | Build + typecheck | `pnpm build` |
 | Lint | `pnpm lint` |
-| Run tests | `pnpm test` |
+| Run tests | `pnpm test` (all) · `pnpm test:unit` · `pnpm test:integration` |
 | Cross-city duplication check | `pnpm check:duplication` |
 | Internal link check | `pnpm check:links` |
-| Generate a city with the real model | `node scripts/generate-city.mjs` |
+| Generate a city with the real model | `node scripts/ops/generate-city.mjs` |
 | Prompt evals | `npx tsx evals/run.mjs --dry-run` |
 | Admin end-to-end run | `node scripts/admin-e2e.mjs` |
-| Check provisioning credentials | `node scripts/provision-probe.mjs` |
+| Check provisioning credentials | `node scripts/ops/provision-probe.mjs` |
 
 ### Console Access
 
-The console at `/admin` sits behind a session. There is no signup page, and better-auth's `/api/auth/sign-up/email` is disabled (`disableSignUp: true` in `src/lib/auth.ts`). Accounts come from `scripts/seed-user.mjs` only.
+The console at `/admin` sits behind a session. There is no signup page, and better-auth's `/api/auth/sign-up/email` is disabled (`disableSignUp: true` in `src/server/auth/auth.ts`). Accounts come from `scripts/ops/seed-user.mjs` only.
 
 | Role | Access |
 |---|---|
 | `admin` | Dashboard, Leads, Sites, and the generation pipeline (new / generate / review) |
 | `manager` | Dashboard and Leads only; everything else is refused server-side |
 
-`src/lib/access.ts` is the single place the role matrix lives. `BETTER_AUTH_SECRET` signs session cookies — keep it stable, changing it signs every operator out. `BETTER_AUTH_URL` is the console's own origin.
+`src/server/auth/access.ts` is the single place the role matrix lives. `BETTER_AUTH_SECRET` signs session cookies — keep it stable, changing it signs every operator out. `BETTER_AUTH_URL` is the console's own origin.
 
 ### Known Limits
 
@@ -104,8 +104,8 @@ The console at `/admin` sits behind a session. There is no signup page, and bett
 ## Code Style
 
 - **TypeScript:** strict mode, ESLint (`eslint-config-next`), Zod at every boundary — forms, webhooks, model output
-- **Copy:** user-visible text lives in `src/data/*.ts`, verbatim from the live site; never paraphrased
+- **Copy:** user-visible text lives in `src/site/data/*.ts`, verbatim from the live site; never paraphrased
 - **Styling:** Tailwind arbitrary values traced to the reference CSS, not default utilities
 - **Git:** commit messages `area: description` (`feat`, `fix`, `content`, `admin`, `blog`)
 
-For coding conventions, architecture and agent rules, see [AGENTS.md](AGENTS.md) (also [CLAUDE.md](CLAUDE.md)). Every prompt the generator sends is written out in plain language in [docs/ai-prompts.md](docs/ai-prompts.md).
+For the folder layout and where new code goes, see [docs/architecture.md](docs/architecture.md). For coding conventions and agent rules, see [AGENTS.md](AGENTS.md) (also [CLAUDE.md](CLAUDE.md)). Every prompt the generator sends is written out in plain language in [docs/ai-prompts.md](docs/ai-prompts.md).

@@ -158,7 +158,7 @@ The brief it receives:
 >
 >    [THE REAL MINNEAPOLIS HERO PARAGRAPHS 1-2 ONLY ARE SHOWN HERE AS A STRUCTURAL EXAMPLE, WITH THE INSTRUCTION:] Match its SHAPE, its paragraph lengths and its rhythm; never copy its sentences, and never carry over a Minneapolis detail. Paragraph 3 is deliberately NOT shown: every city that saw the Minneapolis questions wrote the same three.
 >
->    Paragraphs 4 and 5 are one sentence each, so there is no shape left to imitate once you match it — write them to the spec in steps 4 and 5 above: a direct call to action, then a request for a quote or estimate close in spirit to it but not a repeat of its wording. Do not imitate a sample sentence for either. (Minneapolis's own paragraphs 4 and 5 are deliberately withheld as examples here — see src/content/similarity.ts for why.)
+>    Paragraphs 4 and 5 are one sentence each, so there is no shape left to imitate once you match it — write them to the spec in steps 4 and 5 above: a direct call to action, then a request for a quote or estimate close in spirit to it but not a repeat of its wording. Do not imitate a sample sentence for either. (Minneapolis's own paragraphs 4 and 5 are deliberately withheld as examples here — see src/server/content/similarity.ts for why.)
 >
 > 2. serviceIntro — exactly 5 paragraphs:
 >    1) An overview: the range of professional cleaning services we provide in [CITY] and nearby areas — residential, commercial, office upkeep, maid service — our experienced house cleaners, quality products and equipment, and flexible scheduling for busy people. Roughly 80 to 100 words.

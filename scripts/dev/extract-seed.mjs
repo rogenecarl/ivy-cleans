@@ -1,14 +1,14 @@
-// scripts/extract-seed.mjs
+// scripts/dev/extract-seed.mjs
 // One-shot: builds content/minneapolis.json from the CURRENT hardcoded data.
 // Run BEFORE the data files are refactored (they must still hold literals).
 import fs from 'node:fs'
 
-const services = await import('../src/site/data/services.ts')
-const home = await import('../src/site/data/home.ts')
-const deep = await import('../src/site/data/deep-cleaning.ts')
-const areas = await import('../src/site/data/areas.ts')
-const contact = await import('../src/site/data/contact.ts')
-const site = await import('../src/site/data/site.ts')
+const services = await import('../../src/site/data/services.ts')
+const home = await import('../../src/site/data/home.ts')
+const deep = await import('../../src/site/data/deep-cleaning.ts')
+const areas = await import('../../src/site/data/areas.ts')
+const contact = await import('../../src/site/data/contact.ts')
+const site = await import('../../src/site/data/site.ts')
 
 const cardKeys = ['dusting', 'vacuuming', 'bathroom', 'window', 'upholstery']
 

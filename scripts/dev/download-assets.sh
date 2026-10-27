@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/download-assets.sh — pull real assets from the live site
+# scripts/dev/download-assets.sh — pull real assets from the live site
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p public/images public/icons

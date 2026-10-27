@@ -35,7 +35,7 @@ any of this exists. Everything below assumes you have done that.
 **Then check all of it without spending anything:**
 
 ```bash
-node scripts/provision-probe.mjs
+node scripts/ops/provision-probe.mjs
 ```
 
 It verifies both sets of credentials, confirms the plan is Pro, and confirms
@@ -127,7 +127,7 @@ cost of one.**
 
 ## The rebuild problem this solves
 
-`src/content/resolve-rewrite.ts` imports `_domains.json` and `_cities.json`
+`src/server/content/resolve-rewrite.ts` imports `_domains.json` and `_cities.json`
 statically, because the proxy runs before any route renders and must be
 deployable to a CDN edge. That single import was **the only thing in the whole
 pipeline forcing a rebuild** — city content is already Blob-backed.

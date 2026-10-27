@@ -11,8 +11,8 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
-    "check:duplication": "node scripts/check-duplication.mjs",
-    "check:links": "node scripts/check-links.mjs"
+    "check:duplication": "node scripts/checks/check-duplication.mjs",
+    "check:links": "node scripts/checks/check-links.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

@@ -39,7 +39,7 @@ describe('better-auth API surface', () => {
     expect(typeof APIError).toBe('function')
   })
 
-  it('exports the password hasher scripts/seed-user.mjs depends on', () => {
+  it('exports the password hasher scripts/ops/seed-user.mjs depends on', () => {
     // The seed script writes an account row that signInEmail must later be
     // able to verify. Hand-rolling the hash is the most likely way to produce
     // an account that exists but cannot sign in, so it uses better-auth's own.

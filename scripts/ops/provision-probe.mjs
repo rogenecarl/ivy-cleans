@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /*
- * scripts/provision-probe.mjs
+ * scripts/ops/provision-probe.mjs
  *
  * Verifies all three provisioning credentials without buying anything.
  *
  *   PORKBUN_API_KEY=... PORKBUN_SECRET_KEY=... \
  *   VERCEL_TOKEN=... VERCEL_PROJECT_ID=... VERCEL_TEAM_ID=... GLOBAL_CONFIG_ID=... \
- *   node scripts/provision-probe.mjs [domain-to-price-check]
+ *   node scripts/ops/provision-probe.mjs [domain-to-price-check]
  *
  * Checks credentials, confirms the Vercel plan is Pro (Hobby caps at 50
  * domains per project) and confirms Porkbun's API registration is unlocked —

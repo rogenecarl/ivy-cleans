@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /*
- * scripts/check-duplication.mjs
+ * scripts/checks/check-duplication.mjs
  *
  * Runs the similarity checks over content/*.json and prints what collides.
  * Same logic as src/server/content/similarity.ts, standalone so it can be run today
  * against what has already shipped:
  *
- *   node scripts/check-duplication.mjs
- *   node scripts/check-duplication.mjs --run 40      # stricter verbatim floor
- *   node scripts/check-duplication.mjs --drafts      # also check draft cities
+ *   node scripts/checks/check-duplication.mjs
+ *   node scripts/checks/check-duplication.mjs --run 40      # stricter verbatim floor
+ *   node scripts/checks/check-duplication.mjs --drafts      # also check draft cities
  *
  * DEFAULT SCOPE IS LIVE CITIES ONLY (doc.status === 'live'). Drafts are not
  * pages Google can see, so duplication between them is not the thing this

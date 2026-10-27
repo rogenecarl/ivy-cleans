@@ -57,7 +57,7 @@
  *
  * REQUIRED ENV: E2E_EMAIL / E2E_PASSWORD (an admin account) and
  * E2E_MANAGER_EMAIL / E2E_MANAGER_PASSWORD (a manager account), both seeded
- * with scripts/seed-user.mjs. The script fails fast with a clear message if
+ * with scripts/ops/seed-user.mjs. The script fails fast with a clear message if
  * any of the four is unset, rather than surfacing as an opaque Playwright
  * fill() error partway through the run.
  *
@@ -174,7 +174,7 @@ const OUT = arg('--out', path.join(os.tmpdir(), 'ivy-admin-e2e'))
  * before anything is launched, so a missing var fails fast with a clear
  * message instead of surfacing as an opaque Playwright fill(undefined)
  * error deep into the run. Never hardcoded -- create the accounts with
- * scripts/seed-user.mjs.
+ * scripts/ops/seed-user.mjs.
  */
 const E2E_EMAIL = process.env.E2E_EMAIL
 const E2E_PASSWORD = process.env.E2E_PASSWORD
@@ -192,10 +192,10 @@ if (missingEnv.length > 0) {
   console.error(`admin-e2e: missing required env var(s): ${missingEnv.join(', ')}.`)
   console.error('Seed both operator accounts first, e.g.:')
   console.error(
-    "  SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs --email e2e-admin@example.invalid --name 'E2E Admin' --role admin",
+    "  SEED_PASSWORD=... node --env-file=.env scripts/ops/seed-user.mjs --email e2e-admin@example.invalid --name 'E2E Admin' --role admin",
   )
   console.error(
-    "  SEED_PASSWORD=... node --env-file=.env scripts/seed-user.mjs --email e2e-manager@example.invalid --name 'E2E Manager' --role manager",
+    "  SEED_PASSWORD=... node --env-file=.env scripts/ops/seed-user.mjs --email e2e-manager@example.invalid --name 'E2E Manager' --role manager",
   )
   console.error(
     'then re-run with E2E_EMAIL/E2E_PASSWORD/E2E_MANAGER_EMAIL/E2E_MANAGER_PASSWORD set.',
@@ -293,7 +293,7 @@ async function clickText(page, selector, label) {
  * script went straight to /admin/sites.
  *
  * Needs an operator account to exist. Create one with:
- *   node --env-file=.env scripts/seed-user.mjs \
+ *   node --env-file=.env scripts/ops/seed-user.mjs \
  *     --email e2e-admin@example.invalid --name 'E2E Admin' --role admin --password "$E2E_PASSWORD"
  */
 async function signIn(page, email, password) {

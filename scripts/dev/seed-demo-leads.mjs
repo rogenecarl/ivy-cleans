@@ -1,10 +1,10 @@
-// scripts/seed-demo-leads.mjs
+// scripts/dev/seed-demo-leads.mjs
 /*
  * Inserts two sample leads -- one from the booking form, one from the contact
  * form -- so the Leads screen has something to show in a demo.
  *
- *   node --env-file=.env scripts/seed-demo-leads.mjs          # insert
- *   node --env-file=.env scripts/seed-demo-leads.mjs --clean  # remove them
+ *   node --env-file=.env scripts/dev/seed-demo-leads.mjs          # insert
+ *   node --env-file=.env scripts/dev/seed-demo-leads.mjs --clean  # remove them
  *
  * WHY RAW `pg` AND NOT PRISMA. This is a standalone script, and the Prisma
  * client here is generated TypeScript that a bare `node` cannot import
@@ -81,7 +81,7 @@ const CONTACT = {
  * quietly reads "Not answered" in front of the client.
  */
 function verifyLabels() {
-  const src = readFileSync(new URL('../src/server/leads/schema.ts', import.meta.url), 'utf8')
+  const src = readFileSync(new URL('../../src/server/leads/schema.ts', import.meta.url), 'utf8')
   const section = (name) => {
     const start = src.indexOf(`export const ${name}`)
     if (start === -1) throw new Error(`${name} not found in src/server/leads/schema.ts`)
@@ -156,7 +156,7 @@ async function main() {
   if (!clean) verifyLabels()
 
   if (!process.env.DATABASE_URL) {
-    console.error('DATABASE_URL is not set. Run with: node --env-file=.env scripts/seed-demo-leads.mjs')
+    console.error('DATABASE_URL is not set. Run with: node --env-file=.env scripts/dev/seed-demo-leads.mjs')
     process.exit(1)
   }
 

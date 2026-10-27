@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /*
- * scripts/seed-user.mjs — create or update a console operator account.
+ * scripts/ops/seed-user.mjs — create or update a console operator account.
  *
  * This is the ONLY way an account comes into existence. There is no signup
  * route, by decision (see docs/superpowers/specs/2026-08-28-admin-auth-rbac-design.md):
  * the population is two people and a signup endpoint on a production console
  * is a liability that buys nothing.
  *
- *   SEED_PASSWORD='...' node --env-file=.env scripts/seed-user.mjs \
+ *   SEED_PASSWORD='...' node --env-file=.env scripts/ops/seed-user.mjs \
  *     --email you@example.com --name 'Your Name' --role admin
  *
  * SEED_PASSWORD is the preferred way to pass the password: a `--password`
@@ -34,7 +34,7 @@
  * way to end up with an account that exists, looks right in the database,
  * and cannot sign in.
  *
- * WHY PLAIN pg AND NOT PRISMA: matches scripts/seed-demo-leads.mjs, and keeps
+ * WHY PLAIN pg AND NOT PRISMA: matches scripts/dev/seed-demo-leads.mjs, and keeps
  * the script runnable without a `prisma generate` having happened first.
  *
  * WHY THE TWO WRITES ARE WRAPPED IN A TRANSACTION: `user` and `account` are
@@ -78,7 +78,7 @@ const role = (arg('--role') ?? '').trim()
 const password = process.env.SEED_PASSWORD ?? arg('--password') ?? ''
 
 if (!process.env.DATABASE_URL) {
-  fail('DATABASE_URL is not set. Run with: node --env-file=.env scripts/seed-user.mjs ...')
+  fail('DATABASE_URL is not set. Run with: node --env-file=.env scripts/ops/seed-user.mjs ...')
 }
 if (!email || !email.includes('@')) fail('--email is required and must look like an address')
 if (!name) fail('--name is required')
@@ -97,7 +97,7 @@ if (password.length < MIN_PASSWORD_LENGTH) {
  * WHY THE RETRY EXISTS. On a machine with no IPv6 route, `pg` connecting to a
  * dual-stack host by NAME fails with ETIMEDOUT even though the host is
  * perfectly reachable -- Node races the AAAA address and stalls on it. See
- * scripts/seed-demo-leads.mjs, where this same retry is measured against
+ * scripts/dev/seed-demo-leads.mjs, where this same retry is measured against
  * this project's own Neon pooler.
  *
  * Applied on the RETRY rather than up front so a correctly dual-stacked

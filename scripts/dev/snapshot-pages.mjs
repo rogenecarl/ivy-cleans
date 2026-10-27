@@ -1,5 +1,5 @@
-// scripts/snapshot-pages.mjs
-// Usage: node scripts/snapshot-pages.mjs baseline|compare
+// scripts/dev/snapshot-pages.mjs
+// Usage: node scripts/dev/snapshot-pages.mjs baseline|compare
 // Builds nothing itself — expects the prod server already running on PORT.
 // Crawls same-origin links from "/", saves normalized HTML per route,
 // and in compare mode diffs against the baseline dir.
@@ -8,7 +8,7 @@ import path from 'node:path'
 
 const MODE = process.argv[2]
 if (!['baseline', 'compare'].includes(MODE)) {
-  console.error('usage: node scripts/snapshot-pages.mjs baseline|compare')
+  console.error('usage: node scripts/dev/snapshot-pages.mjs baseline|compare')
   process.exit(2)
 }
 const BASE = process.env.SNAPSHOT_ORIGIN ?? 'http://localhost:3100'

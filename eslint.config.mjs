@@ -5,6 +5,29 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Import boundaries: backend code stays framework-free, public-site code never reaches the database.
+  {
+    files: ["src/server/**/*.{ts,tsx}"],
+    ignores: ["src/server/auth/**"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [
+          { group: ["react", "react-dom", "next", "next/*"], message: "src/server is framework-free; only src/server/auth may use next/* and react." },
+          { group: ["@/app/*", "@/site/components/*", "@/components/*"], message: "src/server must not import UI or routes (src/site/data is plain data and is allowed)." },
+        ],
+      }],
+    },
+  },
+  {
+    files: ["src/site/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [
+          { group: ["@/server/infra/*", "@/generated/*", "@prisma/*"], message: "src/site must not reach the database; read through a src/server module." },
+        ],
+      }],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -12,7 +12,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
-    // THE DOOR: without this an anonymous POST to /sign-up/email creates a manager account. Accounts come from scripts/seed-user.mjs only.
+    // THE DOOR: without this an anonymous POST to /sign-up/email creates a manager account. Accounts come from scripts/ops/seed-user.mjs only.
     disableSignUp: true,
   },
 

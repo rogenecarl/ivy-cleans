@@ -70,7 +70,7 @@ model User {
   name          String
   email         String    @unique
   /// Defaults to the RESTRICTED role on purpose. Accounts are meant to come
-  /// from scripts/seed-user.mjs, which sets the role explicitly; anything
+  /// from scripts/ops/seed-user.mjs, which sets the role explicitly; anything
   /// that creates a row by another route gets the least privilege rather
   /// than the most.
   role          UserRole  @default(manager)

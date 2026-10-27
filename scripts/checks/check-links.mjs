@@ -3,7 +3,7 @@
 // every inner page has a breadcrumb, no page is orphaned, every area page is linked from a service page.
 // Exits 1 on failure so it sits next to check-duplication.mjs in CI.
 //
-//   node scripts/check-links.mjs
+//   node scripts/checks/check-links.mjs
 import { spawnSync } from 'node:child_process'
 
 const result = spawnSync('npx', ['vitest', 'run', 'tests/unit/site/link-graph.test.ts', '--reporter=dot'], {

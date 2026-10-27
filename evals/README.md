@@ -49,7 +49,7 @@ Three reasons:
    have every run silently measure something new.
 
 **Re-freezing after a research change:** regenerate a city for real
-(`npx tsx scripts/generate-city.mjs houston --stage research --regenerate`),
+(`npx tsx scripts/ops/generate-city.mjs houston --stage research --regenerate`),
 then copy its draft's `research` into the fixture.
 
 ---

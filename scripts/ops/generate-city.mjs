@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /*
- * scripts/generate-city.mjs
+ * scripts/ops/generate-city.mjs
  *
  * Drive one city through the full pipeline against the REAL model, printing
  * per-stage progress and the token/cost tally as it goes.
  *
- *   npx tsx scripts/generate-city.mjs houston
- *   npx tsx scripts/generate-city.mjs houston --stage service   # just one stage
- *   npx tsx scripts/generate-city.mjs houston --stage service --regenerate
- *   npx tsx scripts/generate-city.mjs houston --dry-run         # plan only, no spend
+ *   npx tsx scripts/ops/generate-city.mjs houston
+ *   npx tsx scripts/ops/generate-city.mjs houston --stage service   # just one stage
+ *   npx tsx scripts/ops/generate-city.mjs houston --stage service --regenerate
+ *   npx tsx scripts/ops/generate-city.mjs houston --dry-run         # plan only, no spend
  *
  * This exists because the admin UI drives generation from a browser, and the
  * decisive test for this whole project -- generate a city, then read two of
@@ -59,7 +59,7 @@ const ONLY_STAGE = stageFlag === -1 ? null : process.argv[stageFlag + 1]
 const REGENERATE = process.argv.includes('--regenerate')
 
 if (!KEY) {
-  console.error('usage: node scripts/generate-city.mjs <city-key> [--stage <id>] [--dry-run]')
+  console.error('usage: node scripts/ops/generate-city.mjs <city-key> [--stage <id>] [--dry-run]')
   process.exit(1)
 }
 if (stageFlag !== -1 && !ONLY_STAGE) {
@@ -79,9 +79,9 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 // Run this file with tsx (see the usage line above) so the .ts imports below
 // resolve. Imported dynamically, after the env load, so makeClient() sees the key.
-const { loadDraft } = await import('../src/server/content/drafts.ts')
-const { runStage, regenerateStage, STAGES } = await import('../src/server/pipeline/stages/index.ts')
-const { makeClient } = await import('../src/server/pipeline/model.ts')
+const { loadDraft } = await import('../../src/server/content/drafts.ts')
+const { runStage, regenerateStage, STAGES } = await import('../../src/server/pipeline/stages/index.ts')
+const { makeClient } = await import('../../src/server/pipeline/model.ts')
 
 const IN_PER_MTOK = 5
 const OUT_PER_MTOK = 25
