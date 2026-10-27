@@ -22,8 +22,8 @@ import {
   setLeadStatus,
   getSiteSettings,
   upsertSiteSettings,
-} from '../src/leads/store'
-import type { LeadInput } from '../src/leads/types'
+} from '@/leads/store'
+import type { LeadInput } from '@/leads/types'
 
 const CITY = 'ztest-miami'
 const OTHER = 'ztest-houston'

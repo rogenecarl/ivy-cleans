@@ -2,9 +2,9 @@ import { Suspense, type ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ADMIN_DASHBOARD } from '@/lib/admin-routes'
-import { AdminNav } from '../nav'
-import { IdentityChip } from '../identity-chip'
-import { SignedInToast } from '../signed-in-toast'
+import { AdminNav } from '@/app/admin/nav'
+import { IdentityChip } from '@/app/admin/identity-chip'
+import { SignedInToast } from '@/app/admin/signed-in-toast'
 import { requireSession } from '@/lib/auth-server'
 
 // The signed-in console's shell; /admin/login sits outside it. AdminNav is the one client piece.

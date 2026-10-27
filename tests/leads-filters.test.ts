@@ -1,6 +1,6 @@
 // tests/leads-filters.test.ts
 import { describe, expect, it } from 'vitest'
-import { leadQueryToSearch, parseLeadQuery } from '../src/leads/filters'
+import { leadQueryToSearch, parseLeadQuery } from '@/leads/filters'
 
 describe('parseLeadQuery', () => {
   it('defaults to everything except test rows', () => {

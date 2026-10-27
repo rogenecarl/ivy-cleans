@@ -3,7 +3,7 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
-import { B2_BUCKET, b2Client, b2Configured } from '../lib/b2'
+import { B2_BUCKET, b2Client, b2Configured } from '@/lib/b2'
 
 const PUBLIC_DIR = path.join(process.cwd(), 'public')
 

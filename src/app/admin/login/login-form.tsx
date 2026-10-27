@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { SubmitButton } from '../submit-button'
+import { SubmitButton } from '@/app/admin/submit-button'
 import { signInAction, type SignInState } from './actions'
 
 // No form library for two fields. Success is the redirect itself (a toast would never paint); what's worth toasting

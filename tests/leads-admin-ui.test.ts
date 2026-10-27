@@ -7,9 +7,9 @@
  * standing up Next.
  */
 import { describe, expect, it } from 'vitest'
-import { parseLeadQuery } from '../src/leads/filters'
-import { buildCityLookup, cityDisplayName, filterHref } from '../src/app/admin/(console)/leads/logic'
-import { ADMIN_BASE } from '../src/lib/admin-routes'
+import { parseLeadQuery } from '@/leads/filters'
+import { buildCityLookup, cityDisplayName, filterHref } from '@/app/admin/(console)/leads/logic'
+import { ADMIN_BASE } from '@/lib/admin-routes'
 
 describe('filterHref', () => {
   it('changing one filter preserves the others', () => {

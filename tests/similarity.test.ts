@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { longestSharedRun, normalize, shingleSimilarity } from '../src/content/similarity'
-import { checkCity, findInvisibleChars, flattenSections, type SectionMap } from '../src/content/similarity'
+import { longestSharedRun, normalize, shingleSimilarity } from '@/content/similarity'
+import { checkCity, findInvisibleChars, flattenSections, type SectionMap } from '@/content/similarity'
 
 describe('normalize', () => {
   it('folds case, curly quotes and runs of whitespace', () => {

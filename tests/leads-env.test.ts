@@ -35,7 +35,7 @@ async function loadEnv(values: Record<string, string>) {
   for (const key of KEYS) delete process.env[key]
   Object.assign(process.env, values)
   vi.resetModules()
-  return import('../src/leads/env')
+  return import('@/leads/env')
 }
 
 describe('leads environment resolution', () => {
@@ -78,8 +78,8 @@ describe('sendLeadEmail with a missing LEADS_FROM_EMAIL', () => {
     // provider: this returns before either the stub sink or the Resend import.
     for (const key of KEYS) delete process.env[key]
     vi.resetModules()
-    const { buildLeadEmail } = await import('../src/leads/email')
-    const { sendLeadEmail } = await import('../src/leads/mailer')
+    const { buildLeadEmail } = await import('@/leads/email')
+    const { sendLeadEmail } = await import('@/leads/mailer')
     const email = buildLeadEmail({
       cityName: 'Miami',
       lead: {

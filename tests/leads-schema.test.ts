@@ -1,9 +1,9 @@
 // tests/leads-schema.test.ts
 import { describe, expect, it } from 'vitest'
-import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS } from '../src/leads/schema'
-import { getDefaultCity } from '../src/content/store'
-import { bookData } from '../src/data/book'
-import { contactData } from '../src/data/contact'
+import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS } from '@/leads/schema'
+import { getDefaultCity } from '@/content/store'
+import { bookData } from '@/data/book'
+import { contactData } from '@/data/contact'
 
 function booking(over: Record<string, string> = {}): FormData {
   const f = new FormData()

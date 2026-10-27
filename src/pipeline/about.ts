@@ -1,6 +1,6 @@
 // The About page's gate, story prompt and story validator. Pure: the console action and the tests share it.
 import { z } from 'zod'
-import type { MarketOps } from '../content/types'
+import type { MarketOps } from '@/content/types'
 
 export const ABOUT_STORY_SLOT = 'about.story'
 

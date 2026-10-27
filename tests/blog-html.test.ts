@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { getCity } from '../src/content/store'
-import { cleanArticleHtml, excerptOf, plainText, wrapTables } from '../src/blog/html'
+import { getCity } from '@/content/store'
+import { cleanArticleHtml, excerptOf, plainText, wrapTables } from '@/blog/html'
 
 const minneapolis = await getCity('minneapolis')
 

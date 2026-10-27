@@ -12,10 +12,10 @@
  * exist, and which are conditional.
  */
 import { describe, expect, it } from 'vitest'
-import { sitemapPaths } from '../src/app/sitemap'
-import { SERVICE_SLUGS } from '../src/data/services/registry'
+import { sitemapPaths } from '@/app/sitemap'
+import { SERVICE_SLUGS } from '@/data/services/registry'
 import { loadCityFixture } from './fixtures/cities/load'
-import { getCity } from '../src/content/store'
+import { getCity } from '@/content/store'
 
 const withAreas = await getCity('houston')
 const noAreas = await loadCityFixture('testville')

@@ -8,7 +8,7 @@
  * this environment (no DATABASE_URL) -- this file must run regardless.
  */
 import { describe, expect, it } from 'vitest'
-import { coercePayload } from '../src/leads/store'
+import { coercePayload } from '@/leads/store'
 
 describe('coercePayload', () => {
   it('passes flat strings through unchanged', () => {

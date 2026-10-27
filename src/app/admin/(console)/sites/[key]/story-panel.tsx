@@ -4,7 +4,7 @@ import { useTransition } from 'react'
 import { Loader2, RotateCw, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { removeAboutStoryAction, writeAboutStoryAction } from '../site-actions'
+import { removeAboutStoryAction, writeAboutStoryAction } from '@/app/admin/(console)/sites/site-actions'
 
 // The one model-written passage on the About page, written on demand from the saved facts and checked against them.
 export function StoryPanel({ cityKey, story, ready }: { cityKey: string; story: readonly string[] | undefined; ready: boolean }) {

@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LEAD_STATUSES, type LeadStatus } from '@/leads/types'
-import { setStatusAction } from '../lead-actions'
+import { setStatusAction } from '@/app/admin/(console)/leads/lead-actions'
 
 // one Select instead of five forms; still calls setStatusAction(id, status). No <form>, so the action runs inside
 // useTransition for `isPending` (the sanctioned non-form pattern per the Next server-actions guide).

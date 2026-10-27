@@ -39,11 +39,11 @@ import {
   readOpsLogic,
   updateOpsLogic,
   updateSuburbsLogic,
-} from '../src/pipeline/admin-logic'
-import { loadDraft } from '../src/content/drafts'
-import { getCity, revalidateCity } from '../src/content/store'
-import { validateCityContent } from '../src/content/validate'
-import { STAGE_IDS } from '../src/pipeline/stages'
+} from '@/pipeline/admin-logic'
+import { loadDraft } from '@/content/drafts'
+import { getCity, revalidateCity } from '@/content/store'
+import { validateCityContent } from '@/content/validate'
+import { STAGE_IDS } from '@/pipeline/stages'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -501,7 +501,7 @@ describe('updateSuburbsLogic — merge behaviour (feature 9 fix)', () => {
     await freshDraft(KEY)
     const draft = await loadDraft(KEY)
     draft.research = KATY_RESEARCH
-    const { saveDraft } = await import('../src/content/drafts')
+    const { saveDraft } = await import('@/content/drafts')
     await saveDraft(KEY, draft)
   })
 
@@ -845,7 +845,7 @@ describe('regenerateLogic', () => {
 
     const draft = await loadDraft(KEY)
     draft.sections['service.deep-cleaning.local'] = 'STALE'
-    const { saveDraft } = await import('../src/content/drafts')
+    const { saveDraft } = await import('@/content/drafts')
     await saveDraft(KEY, draft)
 
     expect(await regenerateLogic(KEY, 'service')).toEqual({ ok: true })
@@ -884,7 +884,7 @@ describe('regenerateLogic', () => {
 
     const sidecar = await loadDraft(KEY)
     expect(await publishLogic(KEY, 'ztest-partial.example')).toEqual({ ok: true })
-    const { saveDraft } = await import('../src/content/drafts')
+    const { saveDraft } = await import('@/content/drafts')
     await saveDraft(KEY, sidecar) // the delete that never happened
     expect((await getCity(KEY)).status).toBe('live')
 
@@ -1190,7 +1190,7 @@ describe('editing the ops block after creation', () => {
     await draftOnly()
     const photos = [{ path: '/images/opsville-1.jpg', alt: 'Kitchen before and after' }]
 
-    const { saveDraft } = await import('../src/content/drafts')
+    const { saveDraft } = await import('@/content/drafts')
     const draft = await loadDraft(KEY)
     draft.facts = { ...draft.facts, ops: { ...(draft.facts.ops ?? {}), photos } }
     await saveDraft(KEY, draft)

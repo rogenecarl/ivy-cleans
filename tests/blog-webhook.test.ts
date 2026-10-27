@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { getCity } from '../src/content/store'
-import { receiveDelivery, type ReceiveDeps } from '../src/blog/receive'
-import { cityKeyForDomain } from '../src/blog/resolve-city'
-import type { BlogPostInput, BlogPostRecord } from '../src/blog/types'
+import { getCity } from '@/content/store'
+import { receiveDelivery, type ReceiveDeps } from '@/blog/receive'
+import { cityKeyForDomain } from '@/blog/resolve-city'
+import type { BlogPostInput, BlogPostRecord } from '@/blog/types'
 
 const TOKEN = 'secret-token'
 const domains = { default: 'minneapolis', hosts: { 'ivycleansorlando.com': 'orlando' } }

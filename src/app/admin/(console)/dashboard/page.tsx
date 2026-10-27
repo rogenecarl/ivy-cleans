@@ -19,8 +19,8 @@ import { getSiteSettingsMany, leadDashboardStats, listLeads } from '@/leads/stor
 import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ADMIN_LEADS, ADMIN_SITES } from '@/lib/admin-routes'
-import { EmptyState, LeadStatusChip, StatPill } from '../../ui'
-import { buildCityLookup, cityDisplayName, filterHref } from '../leads/logic'
+import { EmptyState, LeadStatusChip, StatPill } from '@/app/admin/ui'
+import { buildCityLookup, cityDisplayName, filterHref } from '@/app/admin/(console)/leads/logic'
 import {
   activeAlarms,
   describeTrend,
@@ -29,7 +29,7 @@ import {
   topCity,
   trendDirection,
   visibleAlarms,
-} from '../../dashboard-logic'
+} from '@/app/admin/dashboard-logic'
 import { requireSession } from '@/lib/auth-server'
 
 // Two tiers: "Needs attention" (alarms, tinted only when non-zero) and "Performance" (the weekly read).

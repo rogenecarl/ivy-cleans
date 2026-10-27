@@ -9,12 +9,12 @@
 import { describe, expect, test } from 'vitest'
 import { readFile } from 'fs/promises'
 import path from 'path'
-import { getCity } from '../src/content/store'
+import { getCity } from '@/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
-import { suburbData } from '../src/data/suburb'
-import { suburbSlots } from '../src/content/slots'
-import { BANNED_PHRASES } from '../src/content/quality'
-import { pickOtherServices } from '../src/data/other-services'
+import { suburbData } from '@/data/suburb'
+import { suburbSlots } from '@/content/slots'
+import { BANNED_PHRASES } from '@/content/quality'
+import { pickOtherServices } from '@/data/other-services'
 
 const minneapolis = await getCity('minneapolis')
 const miami = await loadCityFixture('miami')

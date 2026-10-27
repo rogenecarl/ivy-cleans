@@ -8,8 +8,8 @@
  * at publish, where the draft sidecar is already gone.
  */
 import { describe, expect, it } from 'vitest'
-import { BANNED_PHRASES, checkQuality } from '../src/content/quality'
-import type { CityContent, MarketOps, Suburb } from '../src/content/types'
+import { BANNED_PHRASES, checkQuality } from '@/content/quality'
+import type { CityContent, MarketOps, Suburb } from '@/content/types'
 
 function suburb(over: Partial<Suburb> = {}): Suburb {
   return {

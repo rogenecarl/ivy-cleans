@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Loader2, RotateCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { checkProvisioningAction } from '../../actions'
+import { checkProvisioningAction } from '@/app/admin/(console)/actions'
 
 // "Is the domain answering yet?", polled from the browser every 20s: publishCity returns without waiting for DNS/TLS
 // (serverless timeout). checkProvisioningLogic clears doc.provisioning when live, and this stops.

@@ -1,4 +1,4 @@
-import type { SlotLink } from '../content/types'
+import type { SlotLink } from '@/content/types'
 // src/data/service-types.ts
 // Shape every service page's content builder returns (DeepCleaningData, renamed).
 export type ServiceQuality = {

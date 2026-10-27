@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { access, rm } from 'node:fs/promises'
 import path from 'node:path'
-import { revalidateCity } from '../src/content/store'
+import { revalidateCity } from '@/content/store'
 import {
   addPhotoLogic,
   createDraftFromFields,
@@ -10,8 +10,8 @@ import {
   removePhotoLogic,
   savePhotoCaptionsLogic,
   writeAboutStoryLogic,
-} from '../src/pipeline/admin-logic'
-import { readPhoto } from '../src/pipeline/photo-store'
+} from '@/pipeline/admin-logic'
+import { readPhoto } from '@/pipeline/photo-store'
 
 const KEY = 'ztest-aboutville'
 const CONTENT_DIR = path.join(process.cwd(), 'content')

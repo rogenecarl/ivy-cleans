@@ -7,8 +7,8 @@
  * snapshot; subsequent runs must stay stable.
  */
 import { describe, expect, test } from 'vitest'
-import { getDefaultCity } from '../src/content/store'
-import { bookData } from '../src/data/book'
+import { getDefaultCity } from '@/content/store'
+import { bookData } from '@/data/book'
 
 const c = await getDefaultCity()
 

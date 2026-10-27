@@ -6,7 +6,7 @@ export default defineConfig({
   // through the app's "@/..." alias, so vitest needs the same mapping
   // tsconfig.json's `paths` gives the Next build.
   resolve: {
-    alias: { '@': path.resolve(__dirname, 'src') },
+    alias: { '@': path.resolve(__dirname, 'src'), '@content': path.resolve(__dirname, 'content') },
   },
   test: {
     environment: 'node',

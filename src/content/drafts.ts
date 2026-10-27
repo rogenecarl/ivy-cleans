@@ -3,8 +3,8 @@
 // publishCity() flips it live and retires the sidecar. Framework-free: the server action calls revalidatePath itself.
 import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
 import path from 'path'
-import type { Facts } from '../pipeline/facts'
-import type { ResearchOutput } from '../pipeline/schemas'
+import type { Facts } from '@/pipeline/facts'
+import type { ResearchOutput } from '@/pipeline/schemas'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -17,7 +17,7 @@ import type { CityContent, SlotLink } from './types'
 import { citySlug } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
 import { checkQuality } from './quality'
-import { buildProvisioners, buildRouter, provisionDomain } from '../pipeline/provision'
+import { buildProvisioners, buildRouter, provisionDomain } from '@/pipeline/provision'
 import { validateCityContent } from './validate'
 import { getCity, listLiveCityKeys, revalidateCity } from './store'
 

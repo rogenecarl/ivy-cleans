@@ -1,8 +1,8 @@
 // tests/leads-submit.test.ts
 import { describe, expect, it } from 'vitest'
-import { submitLead, type SubmitPorts } from '../src/leads/submit'
-import type { DomainsIndex } from '../src/content/resolve-rewrite'
-import type { LeadInput, LeadRecord } from '../src/leads/types'
+import { submitLead, type SubmitPorts } from '@/leads/submit'
+import type { DomainsIndex } from '@/content/resolve-rewrite'
+import type { LeadInput, LeadRecord } from '@/leads/types'
 
 const domains: DomainsIndex = { default: 'minneapolis', hosts: { 'miamicleans.com': 'miami' } }
 

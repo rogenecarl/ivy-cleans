@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { t, citySlug } from '../src/content/interpolate'
+import { t, citySlug } from '@/content/interpolate'
 
 const c = {
   city: 'Minneapolis',

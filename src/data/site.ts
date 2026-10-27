@@ -1,7 +1,7 @@
 // src/data/site.ts
-import type { CityContent } from '../content/types'
-import { cityHref } from '../content/interpolate'
-import { aboutReady } from '../pipeline/about'
+import type { CityContent } from '@/content/types'
+import { cityHref } from '@/content/interpolate'
+import { aboutReady } from '@/pipeline/about'
 import { allServices } from './services/registry'
 
 export type SiteData = {

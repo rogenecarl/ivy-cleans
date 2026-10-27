@@ -1,6 +1,6 @@
 // tests/leads-spam.test.ts
 import { describe, expect, it } from 'vitest'
-import { RATE_LIMIT, hashIp, honeypotFilled, overRateLimit } from '../src/leads/spam'
+import { RATE_LIMIT, hashIp, honeypotFilled, overRateLimit } from '@/leads/spam'
 
 describe('hashIp', () => {
   it('is stable for the same ip and salt', () => {

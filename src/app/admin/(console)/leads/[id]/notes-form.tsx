@@ -3,8 +3,8 @@
 import { useActionState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { Textarea } from '@/components/ui/textarea'
-import { SubmitButton } from '../../../submit-button'
-import { saveNotesAction } from '../lead-actions'
+import { SubmitButton } from '@/app/admin/submit-button'
+import { saveNotesAction } from '@/app/admin/(console)/leads/lead-actions'
 
 type SaveState = { savedAt: number } | null
 

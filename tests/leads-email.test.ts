@@ -1,8 +1,8 @@
 // tests/leads-email.test.ts
 import { beforeEach, describe, expect, it } from 'vitest'
-import { buildLeadEmail } from '../src/leads/email'
-import { sendLeadEmail, stubbedEmails } from '../src/leads/mailer'
-import type { LeadInput } from '../src/leads/types'
+import { buildLeadEmail } from '@/leads/email'
+import { sendLeadEmail, stubbedEmails } from '@/leads/mailer'
+import type { LeadInput } from '@/leads/types'
 
 const lead: LeadInput = {
   cityKey: 'miami',

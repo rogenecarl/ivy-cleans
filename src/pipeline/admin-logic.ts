@@ -10,18 +10,18 @@ import {
   loadDraft,
   publishCity,
   saveDraft,
-} from '../content/drafts'
+} from '@/content/drafts'
 import {
   SERVICE_LOCAL_SLUGS,
   isWritableArea,
   isWrittenSlot,
   serviceSlots,
   suburbSlots,
-} from '../content/slots'
-import { getCity, revalidateCity } from '../content/store'
-import { validateCityContent } from '../content/validate'
-import type { CityContent, Suburb as StoredSuburb } from '../content/types'
-import { serviceBySlug } from '../data/services/registry'
+} from '@/content/slots'
+import { getCity, revalidateCity } from '@/content/store'
+import { validateCityContent } from '@/content/validate'
+import type { CityContent, Suburb as StoredSuburb } from '@/content/types'
+import { serviceBySlug } from '@/data/services/registry'
 import { buildProvisioners, checkDomainLive } from './provision'
 import { deriveFacts } from './facts'
 import { makeClient } from './model'
@@ -31,7 +31,7 @@ import { deletePhoto, putPhoto } from './photo-store'
 import { optimizePhoto, sniffImageType } from './photo-process'
 import { readProgress, type ProgressEvent } from './progress'
 import type { MarketOps, Suburb } from './schemas'
-import type { MarketProfile } from '../content/types'
+import type { MarketProfile } from '@/content/types'
 import { STAGE_IDS, normalizeSlug, regenerateStage, reservedSlugs, runStage, type StageId } from './stages'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')

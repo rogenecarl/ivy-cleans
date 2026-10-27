@@ -4,10 +4,10 @@
  */
 import { readdir } from 'node:fs/promises'
 import { describe, expect, it } from 'vitest'
-import { inbound, linkGraph } from '../src/data/link-graph'
-import { getCity } from '../src/content/store'
+import { inbound, linkGraph } from '@/data/link-graph'
+import { getCity } from '@/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
-import type { CityContent } from '../src/content/types'
+import type { CityContent } from '@/content/types'
 
 const keys = (await readdir('content', { withFileTypes: true }))
   .filter((e) => e.isFile() && e.name.endsWith('.json') && !e.name.startsWith('_'))

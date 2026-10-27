@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MAX_PHOTOS } from '@/pipeline/photos'
-import { SubmitButton } from '../../../submit-button'
-import { removePhotoAction, savePhotoCaptionsAction, uploadOnePhotoAction } from '../site-actions'
-import { PhotoDropzone } from '../../../photo-dropzone'
+import { SubmitButton } from '@/app/admin/submit-button'
+import { removePhotoAction, savePhotoCaptionsAction, uploadOnePhotoAction } from '@/app/admin/(console)/sites/site-actions'
+import { PhotoDropzone } from '@/app/admin/photo-dropzone'
 
 // Photos of this crew and its work. One upload per submit; captions are the alt text and save as a set.
 export function PhotosPanel({ cityKey, photos }: { cityKey: string; photos: readonly MarketPhoto[] }) {

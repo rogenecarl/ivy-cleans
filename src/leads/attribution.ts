@@ -1,7 +1,7 @@
 // Which city a submission came from. Mirrors resolveRewrite()'s host normalisation. `renderedCityKey` is untrusted
 // and read only when the host is not a tenant domain. Whether it is a test row is a separate question (submit.ts):
 // only a DRAFT city's leads are tests — a live city's are real however the request arrived.
-import type { DomainsIndex } from '../content/resolve-rewrite'
+import type { DomainsIndex } from '@/content/resolve-rewrite'
 
 export type Attribution = {
   cityKey: string

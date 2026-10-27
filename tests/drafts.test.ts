@@ -23,12 +23,12 @@ import {
   REQUIRED_SLOTS,
   saveDraft,
   type DraftDoc,
-} from '../src/content/drafts'
-import { deriveFacts } from '../src/pipeline/facts'
-import { getCity, listLiveCityKeys, revalidateCity } from '../src/content/store'
-import { validateCityContent } from '../src/content/validate'
-import type { ResearchOutput } from '../src/pipeline/schemas'
-import { STAGE_IDS } from '../src/content/slots'
+} from '@/content/drafts'
+import { deriveFacts } from '@/pipeline/facts'
+import { getCity, listLiveCityKeys, revalidateCity } from '@/content/store'
+import { validateCityContent } from '@/content/validate'
+import type { ResearchOutput } from '@/pipeline/schemas'
+import { STAGE_IDS } from '@/content/slots'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')

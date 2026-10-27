@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/sheet'
 import type { LeadRecord } from '@/leads/types'
 import { ADMIN_BASE } from '@/lib/admin-routes'
-import { EmptyState, LeadStatusChip, Pill } from '../../ui'
+import { EmptyState, LeadStatusChip, Pill } from '@/app/admin/ui'
 import { LeadSubmission, leadHeadline } from './lead-submission'
 import { NotesForm } from './[id]/notes-form'
 import { StatusSelect } from './[id]/status-select'

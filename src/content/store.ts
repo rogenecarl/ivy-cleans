@@ -6,7 +6,7 @@ import type { CityContent } from './types'
 import type { TokenSource } from './interpolate'
 import { citySlug } from './interpolate'
 import { validateCityContent } from './validate'
-import domainsJson from '../../content/_domains.json'
+import domainsJson from '@content/_domains.json'
 
 export type DomainsIndex = {
   default: string

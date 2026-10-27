@@ -1,7 +1,7 @@
 // src/data/home.ts
-import type { CityContent, MarketPhoto } from '../content/types'
-import { t } from '../content/interpolate'
-import { sl } from '../content/slots'
+import type { CityContent, MarketPhoto } from '@/content/types'
+import { t } from '@/content/interpolate'
+import { sl } from '@/content/slots'
 import { metaDescription } from './meta'
 
 export type Feature = { title: string; text: string; icon: string; width: number; height: number };

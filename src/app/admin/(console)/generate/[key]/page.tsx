@@ -5,7 +5,7 @@ import { errorMessage } from '@/pipeline/admin-logic'
 import { STAGES } from '@/pipeline/stages'
 import { Button } from '@/components/ui/button'
 import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
-import { ErrorText } from '../../../ui'
+import { ErrorText } from '@/app/admin/ui'
 import StageRunner from './stage-runner'
 import { requireAdmin } from '@/lib/auth-server'
 

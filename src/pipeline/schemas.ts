@@ -1,7 +1,7 @@
 // zod v4 structured-output schemas, .strict() everywhere. NO min/max/length: the API rejects them; put counts in the prompt.
 
 import { z } from 'zod'
-import { SERVICE_SLUGS } from '../data/services/registry'
+import { SERVICE_SLUGS } from '@/data/services/registry'
 
 // A local fact and what it means for cleaning. copySafe false = operator judgement only, never printed.
 // Per-market operations facts, entered by a human. Optional means 'may be absent', never 'may be ignored'.

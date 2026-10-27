@@ -12,15 +12,15 @@
  * that still needs justifying before it is accepted.
  */
 import { describe, expect, test } from 'vitest'
-import { getDefaultCity } from '../src/content/store'
-import { siteData } from '../src/data/site'
-import { servicesData } from '../src/data/services'
-import { homeData } from '../src/data/home'
-import { packagesData } from '../src/data/packages'
-import { areasData } from '../src/data/areas'
-import { contactData } from '../src/data/contact'
-import { deepCleaningData } from '../src/data/deep-cleaning'
-import { moveOutData } from '../src/data/move-out'
+import { getDefaultCity } from '@/content/store'
+import { siteData } from '@/data/site'
+import { servicesData } from '@/data/services'
+import { homeData } from '@/data/home'
+import { packagesData } from '@/data/packages'
+import { areasData } from '@/data/areas'
+import { contactData } from '@/data/contact'
+import { deepCleaningData } from '@/data/deep-cleaning'
+import { moveOutData } from '@/data/move-out'
 
 const c = await getDefaultCity()
 const modules = {

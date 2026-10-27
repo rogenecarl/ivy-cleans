@@ -1,6 +1,6 @@
-import type { CityContent, MarketPhoto, MarketReview } from '../content/types'
-import { cityHref, realAddress } from '../content/interpolate'
-import { ABOUT_STORY_SLOT, aboutReady, sinceLabel } from '../pipeline/about'
+import type { CityContent, MarketPhoto, MarketReview } from '@/content/types'
+import { cityHref, realAddress } from '@/content/interpolate'
+import { ABOUT_STORY_SLOT, aboutReady, sinceLabel } from '@/pipeline/about'
 
 export { aboutReady }
 

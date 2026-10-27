@@ -1,7 +1,7 @@
 // src/leads/submit.ts
 // A public form submission, every side effect behind an injected port. The lead is created BEFORE the email is
 // attempted; a failed notification never loses a customer.
-import type { DomainsIndex } from '../content/resolve-rewrite'
+import type { DomainsIndex } from '@/content/resolve-rewrite'
 import { attributeCity } from './attribution'
 import { buildLeadEmail, type LeadEmail } from './email'
 import type { SendResult } from './mailer'

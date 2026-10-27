@@ -2,9 +2,9 @@
  * Meta descriptions cut from generated copy — Abdi's Orlando review, item 9.
  */
 import { describe, expect, it } from 'vitest'
-import { META_DESCRIPTION_MAX, metaDescription } from '../src/data/meta'
-import { homeData } from '../src/data/home'
-import { getCity } from '../src/content/store'
+import { META_DESCRIPTION_MAX, metaDescription } from '@/data/meta'
+import { homeData } from '@/data/home'
+import { getCity } from '@/content/store'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const minneapolis = await getCity('minneapolis')

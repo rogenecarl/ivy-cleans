@@ -12,7 +12,7 @@ import {
   MAX_RAW_LENGTH,
   parseNotifyEmails,
   parseOpsForm,
-} from '../src/app/admin/(console)/sites/logic'
+} from '@/app/admin/(console)/sites/logic'
 
 describe('parseNotifyEmails', () => {
   it('accepts a list of valid addresses', () => {

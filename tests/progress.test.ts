@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { rm, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
-import { appendProgress, readProgress, clearProgress, PROGRESS_CAP } from '../src/pipeline/progress'
+import { appendProgress, readProgress, clearProgress, PROGRESS_CAP } from '@/pipeline/progress'
 
 const FILE = path.join(process.cwd(), 'content/_drafts/progress-spec.progress.json')
 

@@ -3,7 +3,7 @@
 // Host header here — `renderedCityKey` is untrusted and consulted only on an unmapped host. Draft vs live is
 // answered by the city document's status through the isDraftCity port, never by the request.
 import { headers } from 'next/headers'
-import domainsJson from '../../../../content/_domains.json'
+import domainsJson from '@content/_domains.json'
 import type { DomainsIndex } from '@/content/resolve-rewrite'
 import { getCity } from '@/content/store'
 import { clientIp } from '@/leads/client-ip'

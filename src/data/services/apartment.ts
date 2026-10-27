@@ -1,10 +1,10 @@
 // Placeholder-grade copy, same structure as deep-cleaning.ts. whatIs.local is the one generated field, read with sOpt.
 
-import type { CityContent } from '../../content/types'
-import { sOpt, serviceSlots } from '../../content/slots'
-import { slotLinks } from '../../content/links'
-import { t } from '../../content/interpolate'
-import type { ServiceContent } from '../service-types'
+import type { CityContent } from '@/content/types'
+import { sOpt, serviceSlots } from '@/content/slots'
+import { slotLinks } from '@/content/links'
+import { t } from '@/content/interpolate'
+import type { ServiceContent } from '@/data/service-types'
 
 export function apartmentCleaningData(c: CityContent): ServiceContent {
   return {

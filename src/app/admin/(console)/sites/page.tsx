@@ -7,7 +7,7 @@ import {
   MoreHorizontal,
   TriangleAlert,
 } from 'lucide-react'
-import domainsJson from '../../../../../content/_domains.json'
+import domainsJson from '@content/_domains.json'
 import { listCities, type CityRow } from '@/pipeline/admin-logic'
 import { STAGE_IDS } from '@/pipeline/stages'
 import { domainFor, siteReadiness, type DomainsIndex } from '@/leads/readiness'
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE, ADMIN_SITES } from '@/lib/admin-routes'
-import { EmptyState, ReadinessMarker, StatusChip } from '../../ui'
+import { EmptyState, ReadinessMarker, StatusChip } from '@/app/admin/ui'
 import {
   filterSites,
   paginate,

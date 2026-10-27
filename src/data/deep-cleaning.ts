@@ -1,10 +1,10 @@
 // Verbatim from deep-cleaning-content-dump.txt (lines 32-95) and deep-cleaning.html. Dump lines 42-43 are injected spam — never reproduce.
 // {city}/{state} tokens where Minneapolis/MN appeared; whatIs.local is the one generated slot.
 
-import type { CityContent } from '../content/types'
-import { sOpt, serviceSlots } from '../content/slots'
-import { slotLinks } from '../content/links'
-import { t } from '../content/interpolate'
+import type { CityContent } from '@/content/types'
+import { sOpt, serviceSlots } from '@/content/slots'
+import { slotLinks } from '@/content/links'
+import { t } from '@/content/interpolate'
 import type { ServiceContent } from './service-types'
 
 export function deepCleaningData(c: CityContent): ServiceContent {

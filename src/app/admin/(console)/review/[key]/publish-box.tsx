@@ -17,8 +17,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { publishAction } from '../../actions'
-import { ErrorText } from '../../../ui'
+import { publishAction } from '@/app/admin/(console)/actions'
+import { ErrorText } from '@/app/admin/ui'
 
 // Publish, confirmed in an AlertDialog that says whether a domain will be attached. Mapping a host in _domains.json
 // is not the same as attaching it to the Vercel project; the success panel says so.

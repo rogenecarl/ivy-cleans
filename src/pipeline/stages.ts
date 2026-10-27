@@ -13,9 +13,9 @@ import {
 } from './schemas'
 import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from './model'
 import { appendProgress, clearProgress } from './progress'
-import { loadDraft, saveDraft, type DraftDoc } from '../content/drafts'
-import { citySlug } from '../content/interpolate'
-import { BANNED_PHRASES, SUBDIVISIONS_REQUIRED } from '../content/quality'
+import { loadDraft, saveDraft, type DraftDoc } from '@/content/drafts'
+import { citySlug } from '@/content/interpolate'
+import { BANNED_PHRASES, SUBDIVISIONS_REQUIRED } from '@/content/quality'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -26,10 +26,10 @@ import {
   stageSlots,
   suburbSlots,
   type StageId,
-} from '../content/slots'
-import { SERVICE_SLUGS, serviceBySlug } from '../data/services/registry'
-import { MAX_SERVICE_LINKS, MAX_SUBURB_LINKS, acceptLinks } from '../content/links'
-import { LEGACY_POST_SLUGS } from '../data/legacy-posts'
+} from '@/content/slots'
+import { SERVICE_SLUGS, serviceBySlug } from '@/data/services/registry'
+import { MAX_SERVICE_LINKS, MAX_SUBURB_LINKS, acceptLinks } from '@/content/links'
+import { LEGACY_POST_SLUGS } from '@/data/legacy-posts'
 
 // STAGES/STAGE_IDS/stageSlots live in src/content/slots.ts (drafts.ts needs them; importing from here would cycle). Re-exported.
 // BANNED_PHRASES lives in src/content/quality.ts for the same cycle reason

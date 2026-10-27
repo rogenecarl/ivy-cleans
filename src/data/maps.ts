@@ -1,5 +1,5 @@
-import type { CityContent } from '../content/types'
-import { realAddress } from '../content/interpolate'
+import type { CityContent } from '@/content/types'
+import { realAddress } from '@/content/interpolate'
 
 // A city's stored embed when it has one (Minneapolis), else a Google embed of its street address, else none.
 export function mapSrc(c: CityContent, which: 'front' | 'home' | 'contact'): string | null {

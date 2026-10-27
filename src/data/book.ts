@@ -1,8 +1,8 @@
 // Verbatim from book-now.html / book.html. Same 10-field form on both; only the size class differs (BookingForm).
 // Live quirks kept: the address field's placeholder is "Message", and field 5 opens on a blank option.
 
-import type { CityContent } from "../content/types";
-import { t } from "../content/interpolate";
+import type { CityContent } from "@/content/types";
+import { t } from "@/content/interpolate";
 
 export type BookField =
   | {

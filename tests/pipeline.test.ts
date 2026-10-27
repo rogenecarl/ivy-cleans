@@ -15,13 +15,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { REQUIRED_SLOTS, createDraft, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '../src/content/drafts'
-import { deriveFacts, type Facts } from '../src/pipeline/facts'
-import { getCity, revalidateCity } from '../src/content/store'
-import { validateCityContent } from '../src/content/validate'
-import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '../src/pipeline/model'
-import { clearProgress, readProgress } from '../src/pipeline/progress'
-import * as stagesModule from '../src/pipeline/stages'
+import { REQUIRED_SLOTS, createDraft, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '@/content/drafts'
+import { deriveFacts, type Facts } from '@/pipeline/facts'
+import { getCity, revalidateCity } from '@/content/store'
+import { validateCityContent } from '@/content/validate'
+import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '@/pipeline/model'
+import { clearProgress, readProgress } from '@/pipeline/progress'
+import * as stagesModule from '@/pipeline/stages'
 import {
   SLUG_PATTERN,
   STAGES,
@@ -50,9 +50,9 @@ import {
   scoreSuburbs,
   MODEL_KEYS,
   type StageId,
-} from '../src/pipeline/stages'
-import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '../src/pipeline/schemas'
-import { LEGACY_POST_SLUGS } from '../src/data/legacy-posts'
+} from '@/pipeline/stages'
+import { ConditionSchema, ResearchSchema, type ResearchOutput, type Suburb } from '@/pipeline/schemas'
+import { LEGACY_POST_SLUGS } from '@/data/legacy-posts'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
@@ -283,7 +283,7 @@ describe('pipeline stages', () => {
        * move-in-move-out-cleaning is `bespoke`: its own five components, live
        * on Minneapolis today, and deliberately out of scope for this stage.
        */
-      const { allServices } = await import('../src/data/services/registry')
+      const { allServices } = await import('@/data/services/registry')
       const template = allServices()
         .filter((e) => e.kind === 'template')
         .map((e) => e.slug)

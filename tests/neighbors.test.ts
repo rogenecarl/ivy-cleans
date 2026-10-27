@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_NEIGHBORS, buildAreasResearchPrompt, buildResearchStructuringPrompt, linkNeighbors } from '../src/pipeline/stages'
-import { deriveFacts } from '../src/pipeline/facts'
-import { suburbData } from '../src/data/suburb'
+import { MAX_NEIGHBORS, buildAreasResearchPrompt, buildResearchStructuringPrompt, linkNeighbors } from '@/pipeline/stages'
+import { deriveFacts } from '@/pipeline/facts'
+import { suburbData } from '@/data/suburb'
 import { loadCityFixture } from './fixtures/cities/load'
 
 const miami = await loadCityFixture('miami')

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { aboutMissing, aboutReady, buildAboutStoryPrompt, sinceLabel, validateAboutStory, type AboutFacts } from '../src/pipeline/about'
-import { parseProfiles } from '../src/pipeline/admin-logic'
-import { checkPhotoUpload, isCityPhotoPath, photoFileName } from '../src/pipeline/photos'
+import { aboutMissing, aboutReady, buildAboutStoryPrompt, sinceLabel, validateAboutStory, type AboutFacts } from '@/pipeline/about'
+import { parseProfiles } from '@/pipeline/admin-logic'
+import { checkPhotoUpload, isCityPhotoPath, photoFileName } from '@/pipeline/photos'
 
 const facts: AboutFacts = {
   city: 'Houston',
@@ -125,7 +125,7 @@ describe('photo rules', () => {
 
 describe('photo store keys', () => {
   it('maps the served path to the bucket key', async () => {
-    const { photoObjectKey } = await import('../src/pipeline/photo-store')
+    const { photoObjectKey } = await import('@/pipeline/photo-store')
     expect(photoObjectKey('/photos/houston/1-crew.jpg')).toBe('photos/houston/1-crew.jpg')
   })
 })
