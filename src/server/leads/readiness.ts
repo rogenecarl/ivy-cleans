@@ -1,5 +1,6 @@
 // src/server/leads/readiness.ts
 // "Can this site deliver a lead to a human?" Derived, never stored. Drafts are exempt from the domain/inbox checks.
+import type { DomainsIndex } from '@/server/content/resolve-rewrite'
 import type { LeadCounts } from './types'
 
 export type ReadinessProblem = 'no-domain' | 'no-inbox' | 'email-failures'
@@ -23,11 +24,7 @@ export function siteReadiness(args: {
   return { ready: problems.length === 0, problems, domain: args.domain }
 }
 
-/** content/_domains.json shape, redefined so this module stays a leaf. */
-export type DomainsIndex = {
-  default: string
-  hosts: Record<string, string>
-}
+export type { DomainsIndex }
 
 // the domain a city answers on. The `default` city answers on the deploy's base domain without a hosts entry,
 // so it gets a placeholder rather than a NO DOMAIN chip on the only working site.

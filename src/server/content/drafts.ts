@@ -1,7 +1,7 @@
 // src/server/content/drafts.ts
 // Draft sidecars at content/_drafts/<key>.json while stages run. finalizeDraft() assembles and validates a CityContent;
 // publishCity() flips it live and retires the sidecar. Framework-free: the server action calls revalidatePath itself.
-import { mkdir, readdir, readFile, rm, writeFile } from 'fs/promises'
+import { mkdir, readdir, readFile, rm, stat, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '@/server/pipeline/facts'
 import type { ResearchOutput } from '@/server/pipeline/schemas'
@@ -19,7 +19,8 @@ import { checkCity, findInvisibleChars } from './similarity'
 import { checkQuality } from './quality'
 import { buildProvisioners, buildRouter, provisionDomain } from '@/server/pipeline/provision'
 import { validateCityContent } from './validate'
-import { getCity, listLiveCityKeys, revalidateCity } from './store'
+import { CONTENT_DIR, KEY_PATTERN, getCity, listLiveCityKeys, revalidateCity, writeCityDoc } from './store'
+import { loadRouting, parseDomainInput, type DomainsIndex } from './resolve-rewrite'
 
 export type DraftDoc = {
   facts: Facts
@@ -35,13 +36,9 @@ export type DraftDoc = {
   createdAt: string
 }
 
-const CONTENT_DIR = path.join(process.cwd(), 'content')
-const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
-const CITIES_JSON = path.join(CONTENT_DIR, '_cities.json')
+export const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
+export const CITIES_JSON = path.join(CONTENT_DIR, '_cities.json')
 const DOMAINS_JSON = path.join(CONTENT_DIR, '_domains.json')
-const KEY_PATTERN = /^[a-z0-9-]+$/
-
-type DomainsIndex = { default: string; hosts: Record<string, string> }
 
 function draftPath(key: string): string {
   return path.join(DRAFTS_DIR, `${key}.json`)
@@ -93,8 +90,7 @@ export async function createDraft(facts: Facts): Promise<string> {
     done: [],
     createdAt: new Date().toISOString(),
   }
-  await mkdir(DRAFTS_DIR, { recursive: true })
-  await writeFile(draftPath(key), JSON.stringify(doc, null, 2), 'utf-8')
+  await saveDraft(key, doc)
   return key
 }
 
@@ -111,6 +107,18 @@ export async function loadDraft(key: string): Promise<DraftDoc> {
   // drop `done` entries for stages that no longer exist (removing `deep` left drafts reading '5 of 4')
   doc.done = doc.done.filter((id) => (STAGE_IDS as readonly string[]).includes(id))
   return doc
+}
+
+/** The sidecar, or null when there is none. A sidecar that exists but won't load throws: it is not "no draft". */
+export async function findDraft(key: string): Promise<DraftDoc | null> {
+  if (!KEY_PATTERN.test(key)) return null
+  try {
+    await stat(draftPath(key))
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw err
+  }
+  return loadDraft(key)
 }
 
 export async function saveDraft(key: string, doc: DraftDoc): Promise<void> {
@@ -278,6 +286,19 @@ export async function publishCity(
   const raw = await readFile(cityPath(key), 'utf-8')
   const doc = validateCityContent(JSON.parse(raw))
 
+  let manualHost: string | undefined
+  if (!opts.provisionDomain && opts.domain !== undefined) {
+    const parsed = parseDomainInput(opts.domain)
+    if (parsed === null) throw new Error(`cannot publish "${key}": "${opts.domain}" is not a domain`)
+    // a host already routed elsewhere would silently take that city's traffic and leads
+    const fileHosts = (JSON.parse(await readFile(DOMAINS_JSON, 'utf-8')) as DomainsIndex).hosts
+    const owner = fileHosts[parsed] ?? (await loadRouting()).domains.hosts[parsed]
+    if (owner !== undefined && owner !== key) {
+      throw new Error(`cannot publish "${key}": ${parsed} already routes to "${owner}"`)
+    }
+    manualHost = parsed
+  }
+
   // duplication is refused at publish, not finalize, and only against live cities
   // invisible characters first: a zero-width space defeats the duplication check
   const invisible = findInvisibleChars(doc.sections)
@@ -313,6 +334,12 @@ export async function publishCity(
   }
 
   doc.status = 'live'
+  // what every read of a live city will demand (a real address), checked before a domain is bought or mapped
+  try {
+    validateCityContent(doc)
+  } catch (err) {
+    throw new Error(`cannot publish "${key}": ${err instanceof Error ? err.message : String(err)}`)
+  }
 
   let host: string | undefined
   if (opts.provisionDomain) {
@@ -329,12 +356,12 @@ export async function publishCity(
     doc.domain = host
     if (result.live) delete doc.provisioning
     else doc.provisioning = { since: new Date().toISOString(), domain: result.domain }
-  } else if (opts.domain !== undefined) {
-    host = opts.domain.toLowerCase().split(':')[0]
+  } else if (manualHost !== undefined) {
+    host = manualHost
     doc.domain = host
   }
 
-  await writeFile(cityPath(key), JSON.stringify(doc, null, 2), 'utf-8')
+  await writeCityDoc(key, doc)
 
   if (host !== undefined) {
     const domains = JSON.parse(await readFile(DOMAINS_JSON, 'utf-8')) as DomainsIndex
@@ -354,6 +381,5 @@ export async function publishCity(
   }
 
   revalidateCity(key)
-  await rm(draftPath(key), { force: true })
-  await rm(progressPath(key), { force: true })
+  await deleteDraft(key)
 }

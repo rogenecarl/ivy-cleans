@@ -96,16 +96,21 @@ export async function markLeadEmail(
   })
 }
 
-export async function listLeads(query: LeadQuery): Promise<LeadRecord[]> {
+// the filters the leads screens share; `status: false` drops the status filter (the chips set it)
+function leadWhere(query: LeadQuery, opts: { status?: boolean } = {}): Prisma.LeadWhereInput {
+  return {
+    ...(query.city ? { cityKey: query.city } : {}),
+    ...(query.status && opts.status !== false ? { status: query.status } : {}),
+    ...(query.formType ? { formType: query.formType } : {}),
+    ...(query.includeTest ? {} : { isTest: false }),
+  }
+}
+
+export async function listLeads(query: LeadQuery, take = 200): Promise<LeadRecord[]> {
   const rows = await prisma.lead.findMany({
-    where: {
-      ...(query.city ? { cityKey: query.city } : {}),
-      ...(query.status ? { status: query.status } : {}),
-      ...(query.formType ? { formType: query.formType } : {}),
-      ...(query.includeTest ? {} : { isTest: false }),
-    },
+    where: leadWhere(query),
     orderBy: { submittedAt: 'desc' },
-    take: 200,
+    take,
   })
   return rows.map(toRecord)
 }
@@ -114,11 +119,7 @@ export async function listLeads(query: LeadQuery): Promise<LeadRecord[]> {
 export async function leadStatusCounts(query: LeadQuery): Promise<LeadStatusCounts> {
   const rows = await prisma.lead.groupBy({
     by: ['status'],
-    where: {
-      ...(query.city ? { cityKey: query.city } : {}),
-      ...(query.formType ? { formType: query.formType } : {}),
-      ...(query.includeTest ? {} : { isTest: false }),
-    },
+    where: leadWhere(query, { status: false }),
     _count: { _all: true },
   })
   const counts: LeadStatusCounts = { new: 0, contacted: 0, quoted: 0, booked: 0, lost: 0 }
@@ -128,14 +129,7 @@ export async function leadStatusCounts(query: LeadQuery): Promise<LeadStatusCoun
 
 // how many rows the current filters would show if test rows were included — so hidden leads are never silent
 export async function countTestLeads(query: LeadQuery): Promise<number> {
-  return prisma.lead.count({
-    where: {
-      ...(query.city ? { cityKey: query.city } : {}),
-      ...(query.status ? { status: query.status } : {}),
-      ...(query.formType ? { formType: query.formType } : {}),
-      isTest: true,
-    },
-  })
+  return prisma.lead.count({ where: { ...leadWhere(query), isTest: true } })
 }
 
 export async function getLead(id: string): Promise<LeadRecord | null> {
@@ -143,22 +137,21 @@ export async function getLead(id: string): Promise<LeadRecord | null> {
   return row ? toRecord(row) : null
 }
 
-export async function setLeadStatus(id: string, status: LeadStatus): Promise<void> {
+async function updateLead(id: string, data: Prisma.LeadUpdateInput): Promise<void> {
   try {
-    await prisma.lead.update({ where: { id }, data: { status } })
+    await prisma.lead.update({ where: { id }, data })
   } catch (err) {
     if (isMissingRowError(err)) throw new LeadNotFoundError(id)
     throw err
   }
 }
 
+export async function setLeadStatus(id: string, status: LeadStatus): Promise<void> {
+  await updateLead(id, { status })
+}
+
 export async function setLeadNotes(id: string, notes: string): Promise<void> {
-  try {
-    await prisma.lead.update({ where: { id }, data: { notes } })
-  } catch (err) {
-    if (isMissingRowError(err)) throw new LeadNotFoundError(id)
-    throw err
-  }
+  await updateLead(id, { notes })
 }
 
 export async function countRecentByIpHash(ipHash: string, windowMs: number): Promise<number> {
@@ -172,16 +165,18 @@ export async function countRecentByIpHash(ipHash: string, windowMs: number): Pro
 }
 
 export async function leadCountsByCity(): Promise<Record<string, LeadCounts>> {
-  const rows = await prisma.lead.findMany({
+  const rows = await prisma.lead.groupBy({
+    by: ['cityKey', 'status', 'emailStatus'],
     where: { isTest: false },
-    select: { cityKey: true, status: true, emailStatus: true },
+    _count: { _all: true },
   })
   const out: Record<string, LeadCounts> = {}
   for (const row of rows) {
+    const n = row._count._all
     const bucket = (out[row.cityKey] ??= { total: 0, unworked: 0, emailFailed: 0 })
-    bucket.total += 1
-    if (row.status !== 'booked' && row.status !== 'lost') bucket.unworked += 1
-    if (row.emailStatus === 'failed') bucket.emailFailed += 1
+    bucket.total += n
+    if (row.status !== 'booked' && row.status !== 'lost') bucket.unworked += n
+    if (row.emailStatus === 'failed') bucket.emailFailed += n
   }
   return out
 }

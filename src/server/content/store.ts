@@ -1,22 +1,20 @@
 // src/server/content/store.ts
 // The city registry: async, per-process cached, Blob-or-file-backed, with a host -> key index
-import { readFile, readdir } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import path from 'path'
 import type { CityContent } from './types'
 import type { TokenSource } from './interpolate'
 import { citySlug } from './interpolate'
 import { validateCityContent } from './validate'
 import domainsJson from '@content/_domains.json'
+import { normalizeHost, type DomainsIndex } from './resolve-rewrite'
 
-export type DomainsIndex = {
-  default: string
-  hosts: Record<string, string>
-}
+export type { DomainsIndex }
 
 const defaultDomains: DomainsIndex = domainsJson as DomainsIndex
 
-const CONTENT_DIR = path.join(process.cwd(), 'content')
-const KEY_PATTERN = /^[a-z0-9-]+$/
+export const CONTENT_DIR = path.join(process.cwd(), 'content')
+export const KEY_PATTERN = /^[a-z0-9-]+$/
 
 /** Per-process cache: city key -> validated doc. */
 const cache = new Map<string, CityContent>()
@@ -86,8 +84,7 @@ export async function getDefaultCity(): Promise<CityContent> {
 
 // host -> cityKey, no fs
 export function resolveCityKey(host: string, domains: DomainsIndex = defaultDomains): string {
-  const normalized = host.toLowerCase().split(':')[0]
-  return domains.hosts[normalized] ?? domains.default
+  return domains.hosts[normalizeHost(host)] ?? domains.default
 }
 
 /** Live city keys, for generateStaticParams. Local-file mode reads content/; Blob mode variant below. */
@@ -123,4 +120,19 @@ export function cityBits(c: CityContent): TokenSource {
     stateName: c.stateName,
     phoneDisplay: c.phoneDisplay,
   }
+}
+
+/** content/<key>.json straight from disk (no cache, no Blob), or null when absent or invalid. For writers that must read fresh. */
+export async function readCityDoc(key: string): Promise<CityContent | null> {
+  try {
+    const raw = await readFile(path.join(CONTENT_DIR, `${key}.json`), 'utf-8')
+    return validateCityContent(JSON.parse(raw))
+  } catch {
+    return null
+  }
+}
+
+// validated before it reaches disk; the caller revalidates
+export async function writeCityDoc(key: string, doc: CityContent): Promise<void> {
+  await writeFile(path.join(CONTENT_DIR, `${key}.json`), JSON.stringify(validateCityContent(doc), null, 2), 'utf-8')
 }

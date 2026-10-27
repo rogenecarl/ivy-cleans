@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronLeft, ExternalLink } from 'lucide-react'
-import { loadDraft } from '@/server/content/drafts'
+import { findDraft } from '@/server/content/drafts'
 import { getCity } from '@/server/content/store'
 import { errorMessage } from '@/server/pipeline/admin-logic'
 import { aboutMissing } from '@/server/pipeline/about'
@@ -8,7 +8,6 @@ import { STAGES, scoreSuburbs } from '@/server/pipeline/stages'
 import { checkCity, findInvisibleChars } from '@/server/content/similarity'
 import { checkQuality } from '@/server/content/quality'
 import { listLiveCityKeys } from '@/server/content/store'
-import type { ResearchOutput } from '@/server/pipeline/schemas'
 import { Button } from '@/components/ui/button'
 import { ADMIN_BASE, ADMIN_SITES } from '@/server/auth/admin-routes'
 import { ErrorText, Panel, StatusChip } from '@/app/admin/_components/ui'
@@ -59,13 +58,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
   }
 
   // the sidecar's presence is exactly "this city can still be regenerated"; loaded once
-  let hasDraft = true
-  let draftResearch: ResearchOutput | undefined = undefined
-  try {
-    draftResearch = (await loadDraft(key)).research
-  } catch {
-    hasDraft = false
-  }
+  const draft = await findDraft(key)
+  const hasDraft = draft !== null
+  const draftResearch = draft?.research
 
   // recomputed from the draft's research every render, keyed by slug; a hand-added row has no entry ("not researched").
   // 'skip' never appears: the research stage already dropped those.

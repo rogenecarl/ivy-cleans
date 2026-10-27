@@ -11,15 +11,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { AdminUser } from '@/server/auth/auth-server'
 import { signOutAction } from './sign-out-action'
+import { initials } from './ui'
 
 // the signed-in operator; replaces the hardcoded chip from before authentication
-
-/** First letters of the first two words, for the avatar circle. */
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase()
-}
 
 export function IdentityChip({ user }: { user: AdminUser }) {
   return (
@@ -29,7 +23,7 @@ export function IdentityChip({ user }: { user: AdminUser }) {
           aria-hidden="true"
           className="flex size-8 items-center justify-center rounded-full bg-muted text-[0.7rem] font-semibold text-muted-foreground ring-2 ring-border"
         >
-          {initials(user.name)}
+          {initials(user.name, '?')}
         </span>
         <span className="hidden text-left sm:block">
           <span className="block text-[0.8rem] leading-tight font-medium">{user.name}</span>

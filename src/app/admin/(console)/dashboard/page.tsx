@@ -19,7 +19,7 @@ import { getSiteSettingsMany, leadDashboardStats, listLeads } from '@/server/lea
 import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
-import { EmptyState, LeadStatusChip, StatPill } from '@/app/admin/_components/ui'
+import { EmptyState, LeadStatusChip, StatPill, initials } from '@/app/admin/_components/ui'
 import { buildCityLookup, cityDisplayName, filterHref } from '@/app/admin/(console)/leads/logic'
 import {
   activeAlarms,
@@ -46,17 +46,6 @@ const RECENT_LIMIT = 6
  * screen -- the dashboard has no filters of its own to preserve. */
 const EMPTY_QUERY = { city: null, status: null, formType: null, includeTest: false } as const
 
-function initials(name: string | null): string {
-  if (!name) return '—'
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '—'
-  return parts
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase()
-}
-
 export default async function AdminDashboard() {
   // own guard: layouts don't re-render on soft navigation; React.cache makes it free
   const { role } = await requireSession()
@@ -77,7 +66,7 @@ export default async function AdminDashboard() {
   try {
     ;[stats, recent, settings] = await Promise.all([
       leadDashboardStats(now),
-      listLeads({ city: null, status: null, formType: null, includeTest: false }),
+      listLeads(EMPTY_QUERY, RECENT_LIMIT),
       isAdmin ? getSiteSettingsMany(cities.map((c) => c.key)) : Promise.resolve({}),
     ])
   } catch (err) {
@@ -253,7 +242,7 @@ export default async function AdminDashboard() {
               </div>
             ) : (
               <ul className="divide-y divide-border">
-                {recent.slice(0, RECENT_LIMIT).map((lead) => (
+                {recent.map((lead) => (
                   <li key={lead.id}>
                     <Link
                       href={`${ADMIN_LEADS}/${lead.id}`}

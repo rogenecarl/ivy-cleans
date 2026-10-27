@@ -10,10 +10,10 @@ import {
   finalizeLogic,
   getProgressLogic,
   isStageId,
-  pendingServicesLogic,
-  pendingSuburbsLogic,
+  pendingItemsLogic,
   runStageLogic,
   type ActionResult,
+  type PendingItems,
   type ProgressSnapshot,
 } from '@/server/pipeline/admin-logic'
 
@@ -27,16 +27,11 @@ export async function runStageAction(
   return runStageLogic(key, stage, only)
 }
 
-// areas the suburb stage still owes; the client drives the loop one request per area
-export async function pendingSuburbsAction(key: string) {
+// areas or service pages a per-item stage still owes; the client drives the loop one request per item
+export async function pendingItemsAction(key: string, stage: string): Promise<PendingItems> {
   await requireAdmin()
-  return pendingSuburbsLogic(key)
-}
-
-// service pages the service stage still owes; same one-per-request loop
-export async function pendingServicesAction(key: string) {
-  await requireAdmin()
-  return pendingServicesLogic(key)
+  if (stage !== 'suburb' && stage !== 'service') return { ok: false, error: `"${stage}" is not a per-item stage` }
+  return pendingItemsLogic(key, stage)
 }
 
 export async function finalizeAction(key: string): Promise<ActionResult> {

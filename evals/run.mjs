@@ -49,13 +49,14 @@ const { createDraft, loadDraft, saveDraft, deleteDraft } = await import('../src/
 const { runStage, STAGES } = await import('../src/server/pipeline/stages/index.ts')
 const { makeClient } = await import('../src/server/pipeline/model.ts')
 const { checkQuality } = await import('../src/server/content/quality.ts')
-const { shingleSimilarity, longestSharedRun } = await import('../src/server/content/similarity.ts')
+const { shingleSimilarity, longestSharedRun, DEFAULT_THRESHOLDS } = await import('../src/server/content/similarity.ts')
 const { isWritableArea, suburbSlots } = await import('../src/server/content/slots.ts')
 
 const IN_PER_MTOK = 5
 const OUT_PER_MTOK = 25
-const SIBLING_MAX = 0.75
-const VERBATIM_FLOOR = 60
+// the publish gate's own numbers, so a tuned threshold moves the evals with it
+const SIBLING_MAX = DEFAULT_THRESHOLDS.maxSibling
+const VERBATIM_FLOOR = DEFAULT_THRESHOLDS.maxRun
 const RUBRIC_MIN = 4
 
 /* ────────────────────────────────────────────────────────────────────────────

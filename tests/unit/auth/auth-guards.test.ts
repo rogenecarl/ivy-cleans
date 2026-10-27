@@ -91,12 +91,11 @@ const regenerateLogic = vi.fn()
 const finalizeLogic = vi.fn()
 const updateSuburbsLogic = vi.fn()
 const updateOpsLogic = vi.fn()
-const pendingServicesLogic = vi.fn()
+const pendingItemsLogic = vi.fn()
 const checkProvisioningLogic = vi.fn()
 const publishLogic = vi.fn()
 const listCities = vi.fn(async () => [])
 const getProgressLogic = vi.fn()
-const pendingSuburbsLogic = vi.fn()
 const addPhotoLogic = vi.fn()
 const removePhotoLogic = vi.fn()
 const savePhotoCaptionsLogic = vi.fn()
@@ -114,12 +113,11 @@ vi.mock('@/server/pipeline/admin-logic', async () => {
     finalizeLogic,
     updateSuburbsLogic,
     updateOpsLogic,
-    pendingServicesLogic,
+    pendingItemsLogic,
     checkProvisioningLogic,
     publishLogic,
     listCities,
     getProgressLogic,
-    pendingSuburbsLogic,
     addPhotoLogic,
     removePhotoLogic,
     savePhotoCaptionsLogic,
@@ -174,7 +172,7 @@ beforeEach(() => {
 
 describe('admin-only pipeline actions', () => {
   /*
-   * Every pipeline action (new/, generate/[key]/, review/[key]/ actions.ts, plus sites' listCitiesAction), listed literally rather than
+   * Every pipeline action (new/, generate/[key]/, review/[key]/ actions.ts), listed literally rather than
    * discovered, so that ADDING an export without adding it here is a visible
    * omission in review rather than a silently uncovered endpoint.
    */
@@ -189,13 +187,10 @@ describe('admin-only pipeline actions', () => {
     ['regenerateAction', REVIEW, (m) => m.regenerateAction('miami', 'facts')],
     ['finalizeAction', GENERATE, (m) => m.finalizeAction('miami')],
     ['updateSuburbsAction', REVIEW, (m) => m.updateSuburbsAction('miami', [])],
-    ['pendingServicesAction', GENERATE, (m) => m.pendingServicesAction('miami')],
+    ['pendingItemsAction', GENERATE, (m) => m.pendingItemsAction('miami', 'suburb')],
     ['publishAction', REVIEW, (m) => m.publishAction('miami')],
     ['checkProvisioningAction', REVIEW, (m) => m.checkProvisioningAction('miami')],
-    ['listCitiesAction', SITES, (m) => m.listCitiesAction()],
     ['getProgressAction', GENERATE, (m) => m.getProgressAction('miami')],
-    ['pendingSuburbsAction', GENERATE, (m) => m.pendingSuburbsAction('miami')],
-    ['uploadPhotoAction', SITES, (m) => m.uploadPhotoAction('miami', new FormData())],
     ['uploadOnePhotoAction', SITES, (m) => m.uploadOnePhotoAction('miami', new FormData())],
     ['removePhotoAction', SITES, (m) => m.removePhotoAction('miami', '/photos/miami/x.webp')],
     ['savePhotoCaptionsAction', SITES, (m) => m.savePhotoCaptionsAction('miami', new FormData())],
@@ -227,12 +222,11 @@ describe('admin-only pipeline actions', () => {
     expect(regenerateLogic).not.toHaveBeenCalled()
     expect(finalizeLogic).not.toHaveBeenCalled()
     expect(updateSuburbsLogic).not.toHaveBeenCalled()
-    expect(pendingServicesLogic).not.toHaveBeenCalled()
+    expect(pendingItemsLogic).not.toHaveBeenCalled()
     expect(checkProvisioningLogic).not.toHaveBeenCalled()
     expect(publishLogic).not.toHaveBeenCalled()
     expect(listCities).not.toHaveBeenCalled()
     expect(getProgressLogic).not.toHaveBeenCalled()
-    expect(pendingSuburbsLogic).not.toHaveBeenCalled()
     expect(addPhotoLogic).not.toHaveBeenCalled()
     expect(removePhotoLogic).not.toHaveBeenCalled()
     expect(savePhotoCaptionsLogic).not.toHaveBeenCalled()

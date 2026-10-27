@@ -11,8 +11,7 @@ import { cn } from '@/lib/utils'
 import {
   finalizeAction,
   getProgressAction,
-  pendingServicesAction,
-  pendingSuburbsAction,
+  pendingItemsAction,
   runStageAction,
 } from './actions'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
@@ -108,41 +107,26 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
     }
   }, [cityKey])
 
-  // walk the areas still owed, one request each; the list comes from the server since it depends on research
-  const runSuburbAreas = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
-    const pending = await pendingSuburbsAction(cityKey)
-    if (!pending.ok) return { ok: false, error: pending.error }
+  // walk the areas or service pages still owed, one request each; the list comes from the server
+  const runItems = useCallback(
+    async (stage: 'suburb' | 'service'): Promise<{ ok: true } | { ok: false; error: string }> => {
+      const pending = await pendingItemsAction(cityKey, stage)
+      if (!pending.ok) return { ok: false, error: pending.error }
 
-    const total = pending.areas.length
-    for (const [i, area] of pending.areas.entries()) {
-      setItemProgress({ done: i, total, name: area.name })
-      const r = await runStageAction(cityKey, 'suburb', area.slug)
-      if (!r.ok) return r
-    }
-    setItemProgress({ done: total, total, name: '' })
+      const total = pending.items.length
+      for (const [i, item] of pending.items.entries()) {
+        setItemProgress({ done: i, total, name: item.name })
+        const r = await runStageAction(cityKey, stage, item.slug)
+        if (!r.ok) return r
+      }
+      setItemProgress({ done: total, total, name: '' })
 
-    // No pending areas still has to reach the server: it is what marks the
-    // stage done when every area was already written on an earlier attempt.
-    return runStageAction(cityKey, 'suburb')
-  }, [cityKey])
-
-  // the same walk for the service pages
-  const runServicePages = useCallback(async (): Promise<{ ok: true } | { ok: false; error: string }> => {
-    const pending = await pendingServicesAction(cityKey)
-    if (!pending.ok) return { ok: false, error: pending.error }
-
-    const total = pending.services.length
-    for (const [i, service] of pending.services.entries()) {
-      setItemProgress({ done: i, total, name: service.name })
-      const r = await runStageAction(cityKey, 'service', service.slug)
-      if (!r.ok) return r
-    }
-    setItemProgress({ done: total, total, name: '' })
-
-    // As above: the no-pending call is what marks the stage done when every
-    // service was already written on an earlier attempt.
-    return runStageAction(cityKey, 'service')
-  }, [cityKey])
+      // No pending items still has to reach the server: it is what marks the
+      // stage done when every item was already written on an earlier attempt.
+      return runStageAction(cityKey, stage)
+    },
+    [cityKey],
+  )
 
   const run = useCallback(
     async (from: string[]) => {
@@ -163,11 +147,9 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
 
           // suburb and service run one item per request (~20s each); minutes in one request is killed
           const result =
-            stage.id === 'suburb'
-              ? await runSuburbAreas()
-              : stage.id === 'service'
-                ? await runServicePages()
-                : await runStageAction(cityKey, stage.id)
+            stage.id === 'suburb' || stage.id === 'service'
+              ? await runItems(stage.id)
+              : await runStageAction(cityKey, stage.id)
 
           if (!result.ok) {
             setCurrent(null)
@@ -187,7 +169,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
         busy.current = false
       }
     },
-    [cityKey, stages, finalize],
+    [cityKey, stages, finalize, runItems],
   )
 
   // Kick off on mount, and only on mount: the operator lands here straight

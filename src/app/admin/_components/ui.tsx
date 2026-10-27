@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { TriangleAlert, type LucideIcon } from 'lucide-react'
 import type { CityStatus } from '@/server/pipeline/admin-logic'
 import type { LeadStatus } from '@/server/leads/types'
@@ -7,8 +8,20 @@ import { Badge, type badgeVariants } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
 
 // Presentational scraps shared by the admin screens, on shadcn/ui. Server-safe. No class-string exports.
+
+/** First letters of the first two words, for an avatar circle; `fallback` when there is no name. */
+export function initials(name: string | null, fallback = '—'): string {
+  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return fallback
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant']
 
@@ -79,12 +92,6 @@ const PROBLEM_LABEL: Record<ReadinessProblem, string> = {
   'no-domain': 'NO DOMAIN',
   'no-inbox': 'NO INBOX',
   'email-failures': 'EMAIL FAILURES',
-}
-
-/** Human wording for a readiness problem, shared by the marker below and by
- * anything that needs to name one in prose. */
-export function readinessProblemLabel(problem: ReadinessProblem): string {
-  return PROBLEM_LABEL[problem]
 }
 
 // inline "something is wrong with this site" marker; renders nothing when nothing is wrong.
@@ -191,5 +198,41 @@ export function StatPill({
       </div>
       {hint && <p className="mt-1.5 truncate text-[0.75rem] text-muted-foreground">{hint}</p>}
     </div>
+  )
+}
+
+// one filter link with its count; the Leads and Sites status bars both use it
+export function FilterChip({
+  href,
+  label,
+  count,
+  active,
+}: {
+  href: string
+  label: string
+  count: number
+  active: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? 'true' : undefined}
+      className={cn(
+        'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-[0.85rem] font-medium outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9',
+        active
+          ? 'border-foreground/20 bg-foreground text-background'
+          : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
+      )}
+    >
+      {label}
+      <span
+        className={cn(
+          'rounded px-1.5 py-0.5 text-[0.75rem] tabular-nums',
+          active ? 'bg-background/20' : 'bg-muted text-foreground',
+        )}
+      >
+        {count}
+      </span>
+    </Link>
   )
 }

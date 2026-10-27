@@ -35,10 +35,11 @@ function sharesRunOfLength(a: string, b: string, len: number): boolean {
 
 // longest shared verbatim run, or ''; binary search on length, O((n+m) log n)
 export function longestSharedRun(rawA: string, rawB: string): string {
-  const a = normalize(rawA)
-  const b = normalize(rawB)
+  return longestRunFrom(normalize(rawA), normalize(rawB), 0)
+}
 
-  let lo = 0
+// the search on normalized text, given a length `lo` already known to be shared
+function longestRunFrom(a: string, b: string, lo: number): string {
   let hi = Math.min(a.length, b.length)
   while (lo < hi) {
     const mid = Math.floor((lo + hi + 1) / 2)
@@ -136,15 +137,19 @@ export function checkCity(
 ): SimilarityFinding[] {
   const findings: SimilarityFinding[] = []
   const mine = flattenSections(sections)
+  // normalized once per slot; most pairs share no long run, so test that before searching for the longest
+  const normalizedMine = mine.map(([, text]) => normalize(text))
 
   // 1 · against every other published city
   for (const other of published) {
     if (other.city === city) continue
     const theirs = flattenSections(other.sections)
-    for (const [slot, text] of mine) {
-      for (const [otherSlot, otherText] of theirs) {
-        const run = longestSharedRun(text, otherText)
-        if (run.length >= thresholds.maxRun) {
+    const normalizedTheirs = theirs.map(([, text]) => normalize(text))
+    for (const [i, [slot, text]] of mine.entries()) {
+      for (const [j, [otherSlot, otherText]] of theirs.entries()) {
+        const floor = Math.max(0, thresholds.maxRun)
+        if (floor === 0 || sharesRunOfLength(normalizedMine[i], normalizedTheirs[j], floor)) {
+          const run = longestRunFrom(normalizedMine[i], normalizedTheirs[j], floor)
           findings.push({
             kind: 'verbatim',
             slot,

@@ -1,21 +1,12 @@
 import type { MarketReview } from "@/server/content/types";
+import { monthYearLabel } from "@/server/content/month-label";
 
 // The market's own reviews from the ops block. No stars, avatars or Google wordmark: an ops review has no rating,
 // so drawing one would invent it. Nothing renders below three.
 export const MIN_REVIEWS = 3;
 
 /** "2025-06" -> "June 2025"; anything else is the operator's text, verbatim. */
-export function reviewDate(date: string): string {
-  const m = /^(\d{4})-(\d{2})$/.exec(date);
-  if (!m) return date;
-  const month = Number(m[2]);
-  if (month < 1 || month > 12) return date;
-  const name = new Date(Date.UTC(2000, month - 1, 1)).toLocaleString("en-US", {
-    month: "long",
-    timeZone: "UTC",
-  });
-  return `${name} ${m[1]}`;
-}
+export const reviewDate = monthYearLabel;
 
 export default function Reviews({ reviews }: { reviews: readonly MarketReview[] }) {
   if (reviews.length < MIN_REVIEWS) return null;

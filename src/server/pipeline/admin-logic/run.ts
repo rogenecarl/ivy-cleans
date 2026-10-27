@@ -17,34 +17,27 @@ export async function runStageLogic(
   return attempt(() => runStage(makeClient(), key, stage, only))
 }
 
-// areas the suburb stage still has to write; the client drives one per request
-export async function pendingSuburbsLogic(
-  key: string
-): Promise<{ ok: true; areas: { slug: string; name: string }[] } | { ok: false; error: string }> {
-  try {
-    const draft = await loadDraft(key)
-    const research = draft.research
-    if (!research) return { ok: true, areas: [] }
-    const areas = research.suburbs
-      .filter(isWritableArea)
-      .filter((s) => !suburbSlots(s.slug).every((slot) => isWrittenSlot(draft.sections[slot])))
-      .map((s) => ({ slug: s.slug, name: s.name }))
-    return { ok: true, areas }
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) }
-  }
-}
+export type ItemStage = 'suburb' | 'service'
+export type PendingItems = { ok: true; items: { slug: string; name: string }[] } | { ok: false; error: string }
 
-// service pages still to write; known from creation since the seven services are fixed
-export async function pendingServicesLogic(
-  key: string
-): Promise<{ ok: true; services: { slug: string; name: string }[] } | { ok: false; error: string }> {
+// areas or service pages a per-item stage still owes; the client drives one request each. Services are known from
+// creation (the seven are fixed); areas come from research, so there are none before it.
+export async function pendingItemsLogic(key: string, stage: ItemStage): Promise<PendingItems> {
   try {
     const draft = await loadDraft(key)
-    const services = SERVICE_LOCAL_SLUGS.filter(
-      (slug) => !serviceSlots(slug).every((slot) => isWrittenSlot(draft.sections[slot]))
-    ).map((slug) => ({ slug, name: serviceBySlug(slug)?.name ?? slug }))
-    return { ok: true, services }
+    const owed = (slots: readonly string[]) => !slots.every((slot) => isWrittenSlot(draft.sections[slot]))
+    if (stage === 'service') {
+      const items = SERVICE_LOCAL_SLUGS.filter((slug) => owed(serviceSlots(slug))).map((slug) => ({
+        slug,
+        name: serviceBySlug(slug)?.name ?? slug,
+      }))
+      return { ok: true, items }
+    }
+    const items = (draft.research?.suburbs ?? [])
+      .filter(isWritableArea)
+      .filter((s) => owed(suburbSlots(s.slug)))
+      .map((s) => ({ slug: s.slug, name: s.name }))
+    return { ok: true, items }
   } catch (err) {
     return { ok: false, error: errorMessage(err) }
   }
@@ -67,8 +60,7 @@ export type ProgressSnapshot =
 
 export async function getProgressLogic(key: string): Promise<ProgressSnapshot> {
   try {
-    const draft = await loadDraft(key)
-    const events = await readProgress(key)
+    const [draft, events] = await Promise.all([loadDraft(key), readProgress(key)])
     const research = draft.research
       ? {
           suburbs: draft.research.suburbs.map((s) => s.name),

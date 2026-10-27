@@ -3,8 +3,7 @@
 // Host header here — `renderedCityKey` is untrusted and consulted only on an unmapped host. Draft vs live is
 // answered by the city document's status through the isDraftCity port, never by the request.
 import { headers } from 'next/headers'
-import domainsJson from '@content/_domains.json'
-import type { DomainsIndex } from '@/server/content/resolve-rewrite'
+import { loadRouting } from '@/server/content/resolve-rewrite'
 import { getCity } from '@/server/content/store'
 import { clientIp } from '@/server/leads/client-ip'
 import { IP_HASH_SALT, LEADS_DASHBOARD_ORIGIN } from '@/server/leads/env'
@@ -26,6 +25,8 @@ export async function submitLeadAction(
 ): Promise<SubmitResult> {
   const list = await headers()
   const host = list.get('host') ?? ''
+  // the proxy's own tables (Global Config over _domains.json), so a domain added without a redeploy counts as mapped
+  const { domains } = await loadRouting()
 
   // LEADS_DASHBOARD_ORIGIN is the only source for the email's dashboard link; unset = no link, never a Host-derived one
   const dashboardOrigin = LEADS_DASHBOARD_ORIGIN
@@ -68,7 +69,7 @@ export async function submitLeadAction(
         clientIp: clientIp(list),
         // null = no salt configured: no ipHash, no rate limit, lead still captured. No fallback string on purpose.
         ipSalt: IP_HASH_SALT,
-        domains: domainsJson as DomainsIndex,
+        domains,
       },
       ports,
     )

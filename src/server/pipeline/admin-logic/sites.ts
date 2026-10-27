@@ -1,12 +1,10 @@
-import { readFile, writeFile } from 'node:fs/promises'
-import path from 'node:path'
-import { listDrafts, loadDraft, saveDraft } from '@/server/content/drafts'
-import { getCity, revalidateCity } from '@/server/content/store'
-import { validateCityContent } from '@/server/content/validate'
+import { readFile } from 'node:fs/promises'
+import { CITIES_JSON, findDraft, listDrafts } from '@/server/content/drafts'
+import { getCity, readCityDoc } from '@/server/content/store'
 import { ABOUT_STORY_SLOT } from '@/server/pipeline/about'
 import type { MarketOps } from '@/server/pipeline/schemas'
 import { STAGE_IDS } from '@/server/pipeline/stages'
-import { type ActionResult, CITIES_JSON, type CityRow, CONTENT_DIR, errorMessage, readCityDoc } from './shared'
+import { type ActionResult, type CityRow, editCity, errorMessage } from './shared'
 import { buildOps, formatOpsFields, type OpsFields } from './create'
 
 // ── Ops editing ──
@@ -16,12 +14,7 @@ export async function readOpsLogic(
   key: string,
 ): Promise<{ ok: true; fields: OpsFields } | { ok: false; error: string }> {
   try {
-    let draft
-    try {
-      draft = await loadDraft(key)
-    } catch {
-      draft = null
-    }
+    const draft = await findDraft(key)
     if (draft) return { ok: true, fields: formatOpsFields(draft.facts.ops) }
 
     const doc = await readCityDoc(key)
@@ -48,41 +41,7 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
       return { ...(built.ops ?? {}), photos }
     }
 
-    let draft
-    try {
-      draft = await loadDraft(key)
-    } catch {
-      draft = null
-    }
-    const doc = await readCityDoc(key)
-
-    if (!draft && !doc) {
-      return { ok: false, error: `no draft or published document found for "${key}"` }
-    }
-
-    if (draft) {
-      // delete, not undefined: the sidecar is JSON
-      const facts = { ...draft.facts }
-      const ops = keepPhotos(facts.ops)
-      if (ops) facts.ops = ops
-      else delete facts.ops
-      draft.facts = facts
-      await saveDraft(key, draft)
-    }
-
-    if (doc) {
-      const ops = keepPhotos(doc.ops)
-      if (ops) doc.ops = ops
-      else delete doc.ops
-      await writeFile(
-        path.join(CONTENT_DIR, `${key}.json`),
-        JSON.stringify(validateCityContent(doc), null, 2),
-        'utf-8',
-      )
-    }
-
-    revalidateCity(key)
-    return { ok: true }
+    return await editCity(key, (current) => ({ ops: keepPhotos(current.ops), sections: current.sections }))
   } catch (err) {
     return { ok: false, error: errorMessage(err) }
   }
@@ -113,10 +72,13 @@ export async function listCities(): Promise<CityRow[]> {
     })
   }
 
-  for (const key of await readCityKeys()) {
+  const keys = await readCityKeys()
+  const docs = await Promise.allSettled(keys.map((key) => getCity(key)))
+  keys.forEach((key, i) => {
     const draftRow = rows.get(key)
-    try {
-      const doc = await getCity(key)
+    const loaded = docs[i]
+    if (loaded.status === 'fulfilled') {
+      const doc = loaded.value
       rows.set(key, {
         key,
         city: doc.city,
@@ -124,11 +86,10 @@ export async function listCities(): Promise<CityRow[]> {
         hasDraft: draftRow !== undefined,
         ...(draftRow?.doneCount !== undefined ? { doneCount: draftRow.doneCount } : {}),
       })
-    } catch (err) {
-      if (draftRow) continue
-      rows.set(key, { key, city: key, status: 'error', hasDraft: false, error: errorMessage(err) })
+    } else if (!draftRow) {
+      rows.set(key, { key, city: key, status: 'error', hasDraft: false, error: errorMessage(loaded.reason) })
     }
-  }
+  })
 
   return [...rows.values()].sort((a, b) => a.city.localeCompare(b.city))
 }
@@ -152,12 +113,7 @@ export type MarketSnapshot =
 /** Everything the Settings screen shows about one city's About Us page, from the draft when there is one, else the published document. */
 export async function readMarketLogic(key: string): Promise<MarketSnapshot> {
   try {
-    let draft
-    try {
-      draft = await loadDraft(key)
-    } catch {
-      draft = null
-    }
+    const draft = await findDraft(key)
     if (draft) {
       const story = draft.sections[ABOUT_STORY_SLOT]
       return {

@@ -7,10 +7,10 @@ import {
   MoreHorizontal,
   TriangleAlert,
 } from 'lucide-react'
-import domainsJson from '@content/_domains.json'
+import { loadRouting } from '@/server/content/resolve-rewrite'
 import { listCities, type CityRow } from '@/server/pipeline/admin-logic'
 import { STAGE_IDS } from '@/server/pipeline/stages'
-import { domainFor, siteReadiness, type DomainsIndex } from '@/server/leads/readiness'
+import { domainFor, siteReadiness } from '@/server/leads/readiness'
 import { getSiteSettingsMany, leadCountsByCity } from '@/server/leads/store'
 import type { LeadCounts, SiteSettingsRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -78,7 +78,7 @@ export default async function SitesPage({
     console.error('AdminDashboard: lead data unavailable (leadCountsByCity/getSiteSettingsMany failed):', err)
   }
 
-  const domains = domainsJson as DomainsIndex
+  const { domains } = await loadRouting()
 
   // each row's derived facts, computed once for the table, the cards and the sort
   const viewRows = rows.map((row) => {

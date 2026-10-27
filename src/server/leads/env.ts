@@ -2,13 +2,7 @@
 // The one place the leads feature reads env. Absent and blank both mean "not configured" and resolve to null once,
 // at module load. (`??` on IP_HASH_SALT used to hash real IPs with a committed fallback string.)
 
-/** `undefined` and blank/whitespace-only both mean "not configured" -> null. */
-function read(name: string): string | null {
-  const raw = process.env[name]
-  if (raw === undefined) return null
-  const trimmed = raw.trim()
-  return trimmed === '' ? null : trimmed
-}
+import { readEnv as read } from '@/server/infra/env'
 
 // server-held salt for the stored IP hash. null = not configured: capture the lead, store no ipHash, skip the limit.
 export const IP_HASH_SALT = read('IP_HASH_SALT')

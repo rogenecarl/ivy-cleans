@@ -12,7 +12,6 @@ import {
   updateOpsLogic,
   writeAboutStoryLogic,
   type ActionResult,
-  type CityRow,
 } from '@/server/pipeline/admin-logic'
 import { upsertSiteSettings } from '@/server/leads/store'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
@@ -22,11 +21,8 @@ import { parseNotifyEmails, parseOpsForm } from './logic'
 export async function saveNotifyEmailsAction(cityKey: string, formData: FormData): Promise<void> {
   await requireAdmin()
 
-  // `cityKey` is a bound argument (untrusted); validated against listCities() so a typo can't create a settings row for nothing
-  const known = await listCities()
-  if (!known.some((city) => city.key === cityKey)) {
-    throw new Error(`unknown city "${cityKey}"`)
-  }
+  // `cityKey` is a bound argument (untrusted); checked so a typo can't create a settings row for nothing
+  await requireKnownCity(cityKey)
 
   const result = parseNotifyEmails(formData.get('emails'))
 
@@ -55,11 +51,7 @@ export async function saveNotifyEmailsAction(cityKey: string, formData: FormData
 // cityKey is checked against listCities() and parseOpsForm refuses an absent field. Reviews are never logged.
 export async function saveOpsAction(cityKey: string, formData: FormData): Promise<void> {
   await requireAdmin()
-
-  const known = await listCities()
-  if (!known.some((city) => city.key === cityKey)) {
-    throw new Error(`unknown city "${cityKey}"`)
-  }
+  await requireKnownCity(cityKey)
 
   const parsed = parseOpsForm(formData)
   if (!parsed.ok) {
@@ -89,35 +81,6 @@ function revalidateAbout(cityKey: string): void {
 async function requireKnownCity(cityKey: string): Promise<void> {
   const known = await listCities()
   if (!known.some((city) => city.key === cityKey)) throw new Error(`unknown city "${cityKey}"`)
-}
-
-/**
- * One or more photos per submit, one caption for the batch: the second photo onward gets " (2)", " (3)" so every alt
- * text stays distinct. A refused file stops the batch there; the ones before it are kept.
- */
-export async function uploadPhotoAction(cityKey: string, formData: FormData): Promise<void> {
-  await requireAdmin()
-  await requireKnownCity(cityKey)
-
-  const files = formData.getAll('photo').filter((f): f is File => f instanceof File && f.size > 0)
-  const alt = formData.get('alt')
-  if (files.length === 0 || typeof alt !== 'string' || alt.trim() === '') {
-    redirect(`${ADMIN_BASE}/sites/${cityKey}?error=${encodeURIComponent('choose at least one photo and write a caption')}`)
-  }
-  for (const [i, file] of files.entries()) {
-    const result = await addPhotoLogic(cityKey, {
-      bytes: new Uint8Array(await file.arrayBuffer()),
-      name: file.name,
-      type: file.type,
-      alt: i === 0 ? alt : `${alt.trim()} (${i + 1})`,
-    })
-    if (!result.ok) {
-      revalidateAbout(cityKey)
-      const kept = i > 0 ? ` ${i} of ${files.length} were saved.` : ''
-      redirect(`${ADMIN_BASE}/sites/${cityKey}?error=${encodeURIComponent(`${file.name}: ${result.error}.${kept}`)}`)
-    }
-  }
-  revalidateAbout(cityKey)
 }
 
 /** One file, one caption, a result the caller shows in place. The drop zone calls this once per file. */
@@ -171,9 +134,4 @@ export async function removeAboutStoryAction(cityKey: string): Promise<ActionRes
   const result = await removeAboutStoryLogic(cityKey)
   if (result.ok) revalidateAbout(cityKey)
   return result
-}
-
-export async function listCitiesAction(): Promise<CityRow[]> {
-  await requireAdmin()
-  return listCities()
 }

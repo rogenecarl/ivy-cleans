@@ -13,6 +13,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
+  findDraft,
   createDraft,
   deleteDraft,
   draftKeyFor,
@@ -540,6 +541,97 @@ describe('drafts store', () => {
     })
   })
 
+  describe('publishCity domain input', () => {
+    const key = 'ztest-domaincheck'
+
+    async function finalized(): Promise<void> {
+      await rm(draftPath(key), { force: true })
+      await rm(cityPath(key), { force: true })
+      revalidateCity(key)
+      const facts = deriveFacts({ city: 'Ztest Domaincheck', state: 'MN', phoneDigits: '6125550104', address: '1 Domain Way' })
+      await createDraft(facts)
+      const doc = await loadDraft(key)
+      doc.research = fullResearch()
+      doc.sections = fullSections()
+      doc.done = ['research', 'front', 'home']
+      await saveDraft(key, doc)
+      await finalizeDraft(key)
+    }
+
+    async function hosts(): Promise<Record<string, string>> {
+      return (JSON.parse(await readFile(DOMAINS_JSON, 'utf-8')) as { hosts: Record<string, string> }).hosts
+    }
+
+    afterEach(async () => {
+      await rm(draftPath(key), { force: true })
+      await rm(cityPath(key), { force: true })
+      revalidateCity(key)
+      await writeFile(DOMAINS_JSON, domainsSnapshot, 'utf-8')
+    })
+
+    it('reduces a pasted URL to its host', async () => {
+      await finalized()
+      await publishCity(key, { domain: 'https://Ztest-Url.example/contact' })
+      expect(validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8'))).domain).toBe('ztest-url.example')
+      expect((await hosts())['ztest-url.example']).toBe(key)
+      expect((await hosts())['https']).toBeUndefined()
+    })
+
+    it('refuses a city still on the placeholder address before anything is bought or mapped', async () => {
+      // published anyway, the live document fails validation on every read and the city cannot load
+      await rm(draftPath(key), { force: true })
+      await rm(cityPath(key), { force: true })
+      revalidateCity(key)
+      await createDraft(deriveFacts({ city: 'Ztest Domaincheck', state: 'MN', phoneDigits: '6125550104' }))
+      const doc = await loadDraft(key)
+      doc.research = fullResearch()
+      doc.sections = fullSections()
+      doc.done = ['research', 'front', 'home']
+      await saveDraft(key, doc)
+      await finalizeDraft(key)
+
+      await expect(publishCity(key, { domain: 'ztest-noaddr.example' })).rejects.toThrow(/cannot publish .*address/)
+      expect(validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8'))).status).toBe('draft')
+      expect((await hosts())['ztest-noaddr.example']).toBeUndefined()
+    })
+
+    it('refuses input that is not a host name, and leaves the city a draft', async () => {
+      await finalized()
+      await expect(publishCity(key, { domain: 'not a domain' })).rejects.toThrow(/not a domain/)
+      expect(validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8'))).status).toBe('draft')
+    })
+
+    it('refuses a domain that already routes to another city', async () => {
+      await finalized()
+      const domains = JSON.parse(await readFile(DOMAINS_JSON, 'utf-8')) as { hosts: Record<string, string> }
+      domains.hosts['ztest-taken.example'] = 'minneapolis'
+      await writeFile(DOMAINS_JSON, JSON.stringify(domains, null, 2), 'utf-8')
+
+      await expect(publishCity(key, { domain: 'ztest-taken.example' })).rejects.toThrow(/already routes to "minneapolis"/)
+      expect((await hosts())['ztest-taken.example']).toBe('minneapolis')
+      expect(validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8'))).status).toBe('draft')
+    })
+  })
+
+  describe('findDraft', () => {
+    const KEY = 'ztest-finddraft'
+
+    afterEach(async () => {
+      await rm(draftPath(KEY), { force: true })
+    })
+
+    it('returns null only when there is no sidecar', async () => {
+      await expect(findDraft(KEY)).resolves.toBeNull()
+      await expect(findDraft('Not A Key!')).resolves.toBeNull()
+    })
+
+    it('throws on a sidecar that exists but will not parse, rather than reading it as absent', async () => {
+      // a null here sends edits to the document alone, and the next finalize overwrites them from the stale sidecar
+      await writeFile(draftPath(KEY), '{ not json', 'utf-8')
+      await expect(findDraft(KEY)).rejects.toThrow()
+    })
+  })
+
   describe('loadDraft prunes stages that no longer exist', () => {
     const KEY = 'ztest-stale'
 
@@ -608,7 +700,7 @@ describe('drafts store', () => {
     })
 
     async function ready() {
-      const facts = deriveFacts({ city: 'Ztest Provision', state: 'MN', phoneDigits: '6125550199' })
+      const facts = deriveFacts({ city: 'Ztest Provision', state: 'MN', phoneDigits: '6125550199', address: '1 Provision Way' })
       await createDraft(facts)
       const draft = await loadDraft(KEY)
       draft.research = fullResearch()
@@ -682,6 +774,7 @@ describe('drafts store', () => {
         city: 'Ztest Quality',
         state: 'MN',
         phoneDigits: '6125550198',
+        address: '1 Quality Way',
         ...(ops ? { ops } : {}),
       })
       await createDraft(facts)

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { headers } from 'next/headers'
-import { getCity } from '@/server/content/store'
+import { getCity, resolveCityKey } from '@/server/content/store'
 import { loadRouting } from '@/server/content/resolve-rewrite'
 import { cityHref } from '@/server/content/interpolate'
 import { sitePaths } from '@/site/data/routes'
@@ -18,7 +18,7 @@ export const sitemapPaths = sitePaths
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const host = (await headers()).get('host') ?? ''
   const { domains } = await loadRouting()
-  const key = domains.hosts[host.toLowerCase().split(':')[0]] ?? domains.default
+  const key = resolveCityKey(host, domains)
 
   let city: CityContent
   try {

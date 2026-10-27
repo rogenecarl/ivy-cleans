@@ -10,8 +10,8 @@ import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { ErrorText } from '@/app/admin/_components/ui'
 import { stageName } from '@/app/admin/_components/stage-names'
 
-// Per-stage regenerate. Regenerating research clears the dependent stages and sends the operator to the progress
-// screen. The other stages are followed by a finalize so the preview shows the new copy; finalizeDraft carries
+// Per-stage regenerate. Research, area pages and service pages are cleared and the operator is sent to the progress
+// screen to re-run them. The other stages are followed by a finalize so the preview shows the new copy; finalizeDraft carries
 // status/domain forward, so that can't demote a live city.
 
 type StageMeta = { id: string; label: string }
@@ -44,7 +44,8 @@ export default function RegeneratePanel({
       setError(result.error)
       return
     }
-    if (stage === 'research') {
+    // research and the per-item stages are only cleared here; the generate screen re-runs them, one request each
+    if (stage === 'research' || stage === 'suburb' || stage === 'service') {
       router.push(`${ADMIN_BASE}/generate/${cityKey}`)
       return
     }

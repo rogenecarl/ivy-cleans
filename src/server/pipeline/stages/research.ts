@@ -30,11 +30,7 @@ export const MODEL_KEYS = {
 
 // slugs become URLs, so normalise in code: lowercase, non-alphanumerics to hyphens, trimmed
 export function normalizeSlug(raw: string): string {
-  return raw
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return citySlug(raw)
 }
 
 // Route segments that exist for every city; a suburb slug equal to one would be silently shadowed.

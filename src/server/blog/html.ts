@@ -2,6 +2,7 @@ import sanitizeHtml from 'sanitize-html'
 import type { CityContent } from '@/server/content/types'
 import { tenantHref } from '@/site/data/routes'
 import { cityHref } from '@/server/content/interpolate'
+import { normalizeHost } from '@/server/content/resolve-rewrite'
 
 const OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -27,7 +28,7 @@ const OPTIONS: sanitizeHtml.IOptions = {
  * are the hosts this site is served on right now (the delivery host, the mapped domain): links to them become paths.
  */
 export function cleanArticleHtml(html: string, title: string, c: CityContent, ownHosts: string[] = []): string {
-  const own = new Set(ownHosts.map((h) => h.toLowerCase().split(':')[0]).filter(Boolean))
+  const own = new Set(ownHosts.map(normalizeHost).filter(Boolean))
   const cleaned = sanitizeHtml(html, {
     ...OPTIONS,
     transformTags: {

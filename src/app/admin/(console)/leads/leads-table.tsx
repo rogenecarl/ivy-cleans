@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/sheet'
 import type { LeadRecord } from '@/server/leads/types'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
-import { EmptyState, LeadStatusChip, Pill } from '@/app/admin/_components/ui'
+import { EmptyState, LeadStatusChip, Pill, initials } from '@/app/admin/_components/ui'
 import { LeadSubmission, leadHeadline } from './lead-submission'
 import { NotesForm } from './[id]/notes-form'
 import { StatusSelect } from './[id]/status-select'
@@ -35,19 +35,6 @@ export type LeadRow = {
   submittedLabel: string
   /** Full timestamp, for the title attribute. Also server-computed. */
   submittedExact: string
-}
-
-/** Two-letter monogram for the row avatar. Falls back to a dash rather than
- * rendering an empty circle for a lead that arrived with no name. */
-function initials(name: string | null): string {
-  if (!name) return '—'
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '—'
-  return parts
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase()
 }
 
 export function LeadsTable({

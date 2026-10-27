@@ -31,8 +31,7 @@ import {
   normalizeSuburbs,
   parseReviews,
   parseZips,
-  pendingServicesLogic,
-  pendingSuburbsLogic,
+  pendingItemsLogic,
   publishLogic,
   regenerateLogic,
   runStageLogic,
@@ -738,59 +737,59 @@ describe('the ops block through the form', () => {
   })
 })
 
-describe('pendingSuburbsLogic', () => {
+describe('pendingItemsLogic: suburb', () => {
   const KEY = 'ztest-editville'
 
   it('lists the areas the suburb stage still owes, so the client can drive one request each', async () => {
     await freshDraft(KEY)
     await runStageLogic(KEY, 'research')
 
-    const before = await pendingSuburbsLogic(KEY)
+    const before = await pendingItemsLogic(KEY, 'suburb')
     expect(before.ok).toBe(true)
     if (!before.ok) return
-    expect(before.areas.length).toBeGreaterThan(0)
+    expect(before.items.length).toBeGreaterThan(0)
     // every entry carries what the progress display needs
-    for (const a of before.areas) {
+    for (const a of before.items) {
       expect(typeof a.slug).toBe('string')
       expect(typeof a.name).toBe('string')
     }
 
     // writing one area removes exactly that area from the list, so a resume
     // pays for only what is left
-    const first = before.areas[0]
+    const first = before.items[0]
     await runStageLogic(KEY, 'suburb', first.slug)
 
-    const after = await pendingSuburbsLogic(KEY)
+    const after = await pendingItemsLogic(KEY, 'suburb')
     expect(after.ok).toBe(true)
     if (!after.ok) return
-    expect(after.areas.map((a) => a.slug)).not.toContain(first.slug)
-    expect(after.areas).toHaveLength(before.areas.length - 1)
+    expect(after.items.map((a) => a.slug)).not.toContain(first.slug)
+    expect(after.items).toHaveLength(before.items.length - 1)
   })
 
   it('returns an empty list before research has run rather than failing', async () => {
     await freshDraft(KEY)
-    const r = await pendingSuburbsLogic(KEY)
-    expect(r).toEqual({ ok: true, areas: [] })
+    const r = await pendingItemsLogic(KEY, 'suburb')
+    expect(r).toEqual({ ok: true, items: [] })
   })
 })
 
-describe('pendingServicesLogic', () => {
+describe('pendingItemsLogic: service', () => {
   const KEY = 'ztest-editville'
 
   it('lists the service pages the stage still owes, so the client can drive one request each', async () => {
     /*
-     * Same reason as pendingSuburbsLogic: six model calls inside one server
+     * Same reason as the suburb list: six model calls inside one server
      * action is minutes, and a serverless function is killed long before
      * that. The client needs the list to drive the loop.
      */
     await freshDraft(KEY)
     await runStageLogic(KEY, 'research')
 
-    const before = await pendingServicesLogic(KEY)
+    const before = await pendingItemsLogic(KEY, 'service')
     expect(before.ok).toBe(true)
     if (!before.ok) return
-    expect(before.services).toHaveLength(6)
-    for (const svc of before.services) {
+    expect(before.items).toHaveLength(6)
+    for (const svc of before.items) {
       expect(typeof svc.slug).toBe('string')
       // the display name, so the progress line reads "Airbnb & Short-Term
       // Rental Cleaning" rather than a slug
@@ -800,22 +799,22 @@ describe('pendingServicesLogic', () => {
 
     // writing one removes exactly that one, so a resume pays only for what
     // is left
-    const first = before.services[0]
+    const first = before.items[0]
     await runStageLogic(KEY, 'service', first.slug)
 
-    const after = await pendingServicesLogic(KEY)
+    const after = await pendingItemsLogic(KEY, 'service')
     expect(after.ok).toBe(true)
     if (!after.ok) return
-    expect(after.services.map((x) => x.slug)).not.toContain(first.slug)
-    expect(after.services).toHaveLength(before.services.length - 1)
+    expect(after.items.map((x) => x.slug)).not.toContain(first.slug)
+    expect(after.items).toHaveLength(before.items.length - 1)
   })
 
   it('never offers the bespoke move-out page, which owns no slot', async () => {
     await freshDraft(KEY)
-    const r = await pendingServicesLogic(KEY)
+    const r = await pendingItemsLogic(KEY, 'service')
     expect(r.ok).toBe(true)
     if (!r.ok) return
-    expect(r.services.map((x) => x.slug)).not.toContain('move-in-move-out-cleaning')
+    expect(r.items.map((x) => x.slug)).not.toContain('move-in-move-out-cleaning')
   })
 
   it('lists every service before research has run, unlike the suburb loop', async () => {
@@ -823,12 +822,20 @@ describe('pendingServicesLogic', () => {
     // exist in every city -- so the list is known from creation. (The stage
     // itself still needs research for the conditions it writes from.)
     await freshDraft(KEY)
-    const r = await pendingServicesLogic(KEY)
+    const r = await pendingItemsLogic(KEY, 'service')
     expect(r.ok).toBe(true)
     if (!r.ok) return
-    expect(r.services).toHaveLength(6)
+    expect(r.items).toHaveLength(6)
   })
 })
+
+// the generate screen's loop: one request per owed item, then one to mark the stage done
+async function runItemsAsTheClientDoes(key: string, stage: 'suburb' | 'service'): Promise<void> {
+  const pending = await pendingItemsLogic(key, stage)
+  if (!pending.ok) throw new Error(pending.error)
+  for (const item of pending.items) expect(await runStageLogic(key, stage, item.slug)).toEqual({ ok: true })
+  expect(await runStageLogic(key, stage)).toEqual({ ok: true })
+}
 
 describe('regenerateLogic', () => {
   const KEY = 'ztest-editville'
@@ -853,7 +860,11 @@ describe('regenerateLogic', () => {
     await saveDraft(KEY, draft)
 
     expect(await regenerateLogic(KEY, 'service')).toEqual({ ok: true })
-    expect((await loadDraft(KEY)).sections['service.deep-cleaning.local']).not.toBe('STALE')
+    expect((await loadDraft(KEY)).sections['service.deep-cleaning.local']).toBeUndefined()
+    await runItemsAsTheClientDoes(KEY, 'service')
+    const rewritten = (await loadDraft(KEY)).sections['service.deep-cleaning.local']
+    expect(rewritten).toBeTruthy()
+    expect(rewritten).not.toBe('STALE')
   })
 
   it('clears downstream copy when research is regenerated', async () => {
@@ -893,6 +904,7 @@ describe('regenerateLogic', () => {
     expect((await getCity(KEY)).status).toBe('live')
 
     expect(await regenerateLogic(KEY, 'service')).toEqual({ ok: true })
+    await runItemsAsTheClientDoes(KEY, 'service')
     expect(await finalizeLogic(KEY)).toEqual({ ok: true })
 
     const doc = await getCity(KEY)

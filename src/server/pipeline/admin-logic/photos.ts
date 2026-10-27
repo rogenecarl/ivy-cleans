@@ -1,8 +1,4 @@
-import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { loadDraft, saveDraft } from '@/server/content/drafts'
-import { revalidateCity } from '@/server/content/store'
-import { validateCityContent } from '@/server/content/validate'
 import { makeClient } from '@/server/pipeline/model'
 import {
   ABOUT_STORY_SLOT,
@@ -23,43 +19,8 @@ import {
 import { deletePhoto, putPhoto } from '@/server/pipeline/photo-store'
 import { optimizePhoto, sniffImageType } from '@/server/pipeline/photo-process'
 import type { MarketOps } from '@/server/pipeline/schemas'
-import { type ActionResult, CONTENT_DIR, errorMessage, readCityDoc } from './shared'
+import { type ActionResult, editCity, errorMessage } from './shared'
 import { type MarketSnapshot, readMarketLogic } from './sites'
-
-type CityEdit = { ops: MarketOps | undefined; sections: Record<string, string | string[]> }
-
-// one edit applied wherever the city lives (sidecar, document, or both); the writer decides, this only plumbs
-async function editCity(key: string, change: (current: CityEdit) => CityEdit | { error: string }): Promise<ActionResult> {
-  let draft
-  try {
-    draft = await loadDraft(key)
-  } catch {
-    draft = null
-  }
-  const doc = await readCityDoc(key)
-  if (!draft && !doc) return { ok: false, error: `no draft or published document found for "${key}"` }
-
-  if (draft) {
-    const next = change({ ops: draft.facts.ops, sections: draft.sections })
-    if ('error' in next) return { ok: false, error: next.error }
-    const facts = { ...draft.facts }
-    if (next.ops) facts.ops = next.ops
-    else delete facts.ops
-    draft.facts = facts
-    draft.sections = next.sections
-    await saveDraft(key, draft)
-  }
-  if (doc) {
-    const next = change({ ops: doc.ops, sections: doc.sections })
-    if ('error' in next) return { ok: false, error: next.error }
-    if (next.ops) doc.ops = next.ops
-    else delete doc.ops
-    doc.sections = next.sections
-    await writeFile(path.join(CONTENT_DIR, `${key}.json`), JSON.stringify(validateCityContent(doc), null, 2), 'utf-8')
-  }
-  revalidateCity(key)
-  return { ok: true }
-}
 
 export type PhotoUpload = { bytes: Uint8Array; name: string; type: string; alt: string }
 

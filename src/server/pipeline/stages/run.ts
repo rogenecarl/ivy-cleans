@@ -55,10 +55,10 @@ function requireResearch(draft: DraftDoc, key: string, stage: StageId): Research
 async function executeStage(
   client: ModelClient,
   key: string,
+  draft: DraftDoc,
   stage: StageId,
   only?: string
 ): Promise<void> {
-  const draft = await loadDraft(key)
   const { facts } = draft
 
   switch (stage) {
@@ -353,7 +353,7 @@ export async function runStage(
   const draft = await loadDraft(key)
   if (draft.done.includes(stage)) return
   try {
-    await executeStage(client, key, stage, only)
+    await executeStage(client, key, draft, stage, only)
   } catch (err) {
     const label = err instanceof Error ? err.message : String(err)
     await appendProgress(key, { stage, kind: 'error', label }).catch(() => {})
@@ -375,7 +375,7 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
   }
 }
 
-// re-run a stage. Regenerating research also clears front and suburb: both consumed it.
+// re-run a stage (per-item stages are only cleared). Regenerating research also clears front and suburb: both consumed it.
 export async function regenerateStage(
   client: ModelClient,
   key: string,
@@ -383,20 +383,13 @@ export async function regenerateStage(
 ): Promise<void> {
   const draft = await loadDraft(key)
 
-  if (stage === 'research') {
-    for (const downstream of ['front', 'suburb', 'service'] as const) {
-      clearStageOutputs(draft, downstream)
-    }
-  }
-  clearStageOutputs(draft, stage)
-
-  if (stage === 'research') {
-    for (const downstream of ['front', 'suburb', 'service'] as const) {
-      await clearProgress(key, downstream)
-    }
-  }
-  await clearProgress(key, stage)
+  // downstream first, while draft.research still says which slots they own
+  const targets: StageId[] = stage === 'research' ? ['front', 'suburb', 'service', 'research'] : [stage]
+  for (const target of targets) clearStageOutputs(draft, target)
+  for (const target of targets) await clearProgress(key, target)
 
   await saveDraft(key, draft)
+  // suburb and service are one model call per item; the generate screen's loop rewrites them one request each
+  if (stage === 'suburb' || stage === 'service') return
   await runStage(client, key, stage)
 }

@@ -3,11 +3,12 @@
 import { Agent } from 'node:https'
 import { S3Client } from '@aws-sdk/client-s3'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
+import { readEnv } from './env'
 
-const endpoint = process.env.B2_ENDPOINT?.trim() || ''
-const accessKeyId = process.env.B2_ACCESS_KEY_ID?.trim() || ''
-const secretAccessKey = process.env.B2_SECRET_ACCESS_KEY?.trim() || ''
-export const B2_BUCKET = process.env.B2_BUCKET_NAME?.trim() || ''
+const endpoint = readEnv('B2_ENDPOINT') ?? ''
+const accessKeyId = readEnv('B2_ACCESS_KEY_ID') ?? ''
+const secretAccessKey = readEnv('B2_SECRET_ACCESS_KEY') ?? ''
+export const B2_BUCKET = readEnv('B2_BUCKET_NAME') ?? ''
 
 export function b2Configured(): boolean {
   return Boolean(endpoint && accessKeyId && secretAccessKey && B2_BUCKET)

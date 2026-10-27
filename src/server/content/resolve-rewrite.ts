@@ -18,11 +18,11 @@ export async function loadRouting(): Promise<{ domains: DomainsIndex; cityKeys: 
   try {
     // Imported lazily so a deployment without the store never loads the
     // client, and so a missing package degrades like any other failure.
-    const { get } = await import("@vercel/edge-config");
-    const [hosts, keys] = await Promise.all([
-      get<Record<string, string>>("hosts"),
-      get<string[]>("cityKeys"),
-    ]);
+    const { getAll } = await import("@vercel/edge-config");
+    const { hosts, cityKeys: keys } = await getAll<{
+      hosts?: Record<string, string>;
+      cityKeys?: string[];
+    }>(["hosts", "cityKeys"]);
     return {
       domains: {
         default: fallback.domains.default,
@@ -36,8 +36,16 @@ export async function loadRouting(): Promise<{ domains: DomainsIndex; cityKeys: 
 }
 
 // bare lowercase hostname, the key into _domains.hosts
-function normalizeHost(host: string): string {
+export function normalizeHost(host: string): string {
   return host.toLowerCase().split(":")[0];
+}
+
+const HOSTNAME = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+
+// what an operator typed or pasted ("https://Example.com/contact", "example.com:3000") -> bare host, or null
+export function parseDomainInput(raw: string): string | null {
+  const host = normalizeHost(raw.trim().replace(/^[a-z][a-z0-9+.-]*:\/\//i, "").split(/[/?#]/)[0]).replace(/\.$/, "");
+  return HOSTNAME.test(host) ? host : null;
 }
 
 // is this host a customer domain? proxy.ts uses it to keep the console off customer domains

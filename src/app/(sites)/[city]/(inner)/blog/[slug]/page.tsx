@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
@@ -15,10 +16,13 @@ export const dynamicParams = true;
 
 type Params = Promise<{ city: string; slug: string }>;
 
+// metadata and page both need the post: one query per render, not two
+const loadPost = cache((cityKey: string, slug: string) => postBySlug(cityKey, slug).catch(() => null));
+
 async function resolvePost(params: Params) {
   const c = await cityFromParams(params);
   const { slug } = await params;
-  const post = await postBySlug(cityKeyOf(c), slug).catch(() => null);
+  const post = await loadPost(cityKeyOf(c), slug);
   if (post === null) notFound();
   return { c, post };
 }

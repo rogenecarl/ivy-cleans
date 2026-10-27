@@ -1,14 +1,11 @@
-import { writeFile } from 'node:fs/promises'
-import path from 'node:path'
-import { deleteDraft, finalizeDraft, loadDraft, publishCity, saveDraft } from '@/server/content/drafts'
-import { revalidateCity } from '@/server/content/store'
-import { validateCityContent } from '@/server/content/validate'
+import { deleteDraft, finalizeDraft, findDraft, publishCity, saveDraft } from '@/server/content/drafts'
+import { readCityDoc, revalidateCity, writeCityDoc } from '@/server/content/store'
 import type { Suburb as StoredSuburb } from '@/server/content/types'
 import { buildProvisioners, checkDomainLive } from '@/server/pipeline/provision'
 import { aboutReady } from '@/server/pipeline/about'
 import type { Suburb } from '@/server/pipeline/schemas'
 import { normalizeSlug, reservedSlugs } from '@/server/pipeline/stages'
-import { type ActionResult, attempt, CONTENT_DIR, errorMessage, readCityDoc, type SuburbRow } from './shared'
+import { type ActionResult, attempt, errorMessage, type SuburbRow } from './shared'
 import { readMarketLogic } from './sites'
 import { writeAboutStoryLogic } from './photos'
 
@@ -62,11 +59,7 @@ export async function checkProvisioningLogic(
     const live = await checkDomainLive(host, doc.provisioning.domain)
     if (live) {
       delete doc.provisioning
-      await writeFile(
-        path.join(CONTENT_DIR, `${key}.json`),
-        JSON.stringify(validateCityContent(doc), null, 2),
-        'utf-8',
-      )
+      await writeCityDoc(key, doc)
       revalidateCity(key)
     }
     return { ok: true, live, domain: doc.provisioning?.domain ?? doc.domain ?? null }
@@ -121,12 +114,7 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
       return { ok: false, error: 'at least one suburb with a name is required' }
     }
 
-    let draft
-    try {
-      draft = await loadDraft(key)
-    } catch {
-      draft = null
-    }
+    const draft = await findDraft(key)
     const doc = await readCityDoc(key)
 
     // a colliding slug would shadow a page; tell the operator which
@@ -149,11 +137,7 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
 
     if (doc) {
       doc.research = { ...doc.research, suburbs: mergeSuburbRows(suburbs, doc.research.suburbs) }
-      await writeFile(
-        path.join(CONTENT_DIR, `${key}.json`),
-        JSON.stringify(validateCityContent(doc), null, 2),
-        'utf-8',
-      )
+      await writeCityDoc(key, doc)
       touched = true
     }
 

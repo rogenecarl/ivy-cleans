@@ -346,6 +346,19 @@ describe('pipeline stages', () => {
       expect(draft.sections['services.cards.dusting']).toMatch(/Stubville/)
     })
 
+    it('only clears a per-item stage, leaving the client loop to rewrite it one request per item', async () => {
+      // twelve areas in one server action is minutes; Vercel kills it partway with half the areas cleared
+      for (const stage of ['suburb', 'service'] as const) {
+        const client = newClient()
+        await regenerateStage(client, KEY, stage)
+
+        expect(client.calls).toEqual([])
+        const draft = await loadDraft(KEY)
+        expect(draft.done).not.toContain(stage)
+        for (const slot of stageSlots(draft.research)[stage]) expect(draft.sections[slot]).toBeUndefined()
+      }
+    })
+
     it('clears every downstream stage when research is regenerated', async () => {
       const client = newClient()
       await regenerateStage(client, KEY, 'research')
