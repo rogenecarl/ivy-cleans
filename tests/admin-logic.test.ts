@@ -18,7 +18,7 @@
  * bytes they had before the run.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { readFile, rm, writeFile } from 'node:fs/promises'
+import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
   createDraftFromFields,
@@ -118,7 +118,6 @@ afterAll(async () => {
   if (priorStubModel === undefined) delete process.env.STUB_MODEL
   else process.env.STUB_MODEL = priorStubModel
 
-  const { readdir } = await import('node:fs/promises')
   const content = await readdir(CONTENT_DIR)
   const drafts = await readdir(DRAFTS_DIR)
   for (const key of KEYS) {
@@ -134,11 +133,16 @@ afterAll(async () => {
 
 describe('framework independence', () => {
   it('admin-logic imports nothing from next/ — which is why this file can import it', async () => {
-    const source = await readFile(path.join(process.cwd(), 'src/server/pipeline/admin-logic.ts'), 'utf-8')
-    // Anchored to a line-initial `import`, so the rule can be *described* in a
-    // comment in that file without the description tripping this assertion.
-    expect(source).not.toMatch(/^import[^\n]*['"]next(\/|['"])/m)
-    expect(source).not.toMatch(/^[^\n]*require\(['"]next/m)
+    const dir = path.join(process.cwd(), 'src/server/pipeline/admin-logic')
+    const files = (await readdir(dir)).filter((f) => f.endsWith('.ts'))
+    expect(files.length).toBe(7)
+    for (const file of files) {
+      const source = await readFile(path.join(dir, file), 'utf-8')
+      // Anchored to a line-initial `import`, so the rule can be *described* in a
+      // comment in that file without the description tripping this assertion.
+      expect(source).not.toMatch(/^import[^\n]*['"]next(\/|['"])/m)
+      expect(source).not.toMatch(/^[^\n]*require\(['"]next/m)
+    }
     // And the module really did load in a bare node environment:
     expect(typeof listCities).toBe('function')
     expect(typeof runStageLogic).toBe('function')
