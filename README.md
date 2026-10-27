@@ -82,7 +82,7 @@ pnpm dev
 | Internal link check | `pnpm check:links` |
 | Generate a city with the real model | `node scripts/ops/generate-city.mjs` |
 | Prompt evals | `npx tsx evals/run.mjs --dry-run` |
-| Admin end-to-end run | `node scripts/admin-e2e.mjs` |
+| Admin end-to-end run | `node scripts/dev/admin-e2e.mjs` |
 | Check provisioning credentials | `node scripts/ops/provision-probe.mjs` |
 
 ### Console Access

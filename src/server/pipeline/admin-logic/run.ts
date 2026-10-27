@@ -50,7 +50,7 @@ export async function pendingServicesLogic(
   }
 }
 
-/** Force a stage to run again. Research also clears front/home/deep — see stages.ts. */
+/** Force a stage to run again. Research also clears front/home/deep — see stages/run.ts. */
 export async function regenerateLogic(key: string, stage: StageId): Promise<ActionResult> {
   return attempt(() => regenerateStage(makeClient(), key, stage))
 }

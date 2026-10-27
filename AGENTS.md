@@ -28,7 +28,7 @@ One Next.js app, two halves: the **public city sites** (a pixel-faithful clone o
 | Create an operator | `SEED_PASSWORD=... node --env-file=.env scripts/ops/seed-user.mjs --email x@y.com --name 'Name' --role admin` |
 | Generate a city, real model | `node scripts/ops/generate-city.mjs` (spends API money) |
 | Prompt evals | `npx tsx evals/run.mjs [fixture] [--dry-run] [--no-rubric]` — run before merging any prompt change |
-| Admin E2E (by hand) | `node scripts/admin-e2e.mjs` (Playwright, stubbed model) |
+| Admin E2E (by hand) | `node scripts/dev/admin-e2e.mjs` (Playwright, stubbed model) |
 | Provisioning creds check | `node scripts/ops/provision-probe.mjs` (buys nothing) |
 
 ## Project Structure

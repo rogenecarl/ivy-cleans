@@ -96,6 +96,12 @@ const checkProvisioningLogic = vi.fn()
 const publishLogic = vi.fn()
 const listCities = vi.fn(async () => [])
 const getProgressLogic = vi.fn()
+const pendingSuburbsLogic = vi.fn()
+const addPhotoLogic = vi.fn()
+const removePhotoLogic = vi.fn()
+const savePhotoCaptionsLogic = vi.fn()
+const writeAboutStoryLogic = vi.fn()
+const removeAboutStoryLogic = vi.fn()
 vi.mock('@/server/pipeline/admin-logic', async () => {
   const actual = await vi.importActual<typeof import('@/server/pipeline/admin-logic')>(
     '@/server/pipeline/admin-logic',
@@ -113,6 +119,12 @@ vi.mock('@/server/pipeline/admin-logic', async () => {
     publishLogic,
     listCities,
     getProgressLogic,
+    pendingSuburbsLogic,
+    addPhotoLogic,
+    removePhotoLogic,
+    savePhotoCaptionsLogic,
+    writeAboutStoryLogic,
+    removeAboutStoryLogic,
   }
 })
 
@@ -182,18 +194,31 @@ describe('admin-only pipeline actions', () => {
     ['checkProvisioningAction', REVIEW, (m) => m.checkProvisioningAction('miami')],
     ['listCitiesAction', SITES, (m) => m.listCitiesAction()],
     ['getProgressAction', GENERATE, (m) => m.getProgressAction('miami')],
+    ['pendingSuburbsAction', GENERATE, (m) => m.pendingSuburbsAction('miami')],
+    ['uploadPhotoAction', SITES, (m) => m.uploadPhotoAction('miami', new FormData())],
+    ['uploadOnePhotoAction', SITES, (m) => m.uploadOnePhotoAction('miami', new FormData())],
+    ['removePhotoAction', SITES, (m) => m.removePhotoAction('miami', '/photos/miami/x.webp')],
+    ['savePhotoCaptionsAction', SITES, (m) => m.savePhotoCaptionsAction('miami', new FormData())],
+    ['writeAboutStoryAction', SITES, (m) => m.writeAboutStoryAction('miami')],
+    ['removeAboutStoryAction', SITES, (m) => m.removeAboutStoryAction('miami')],
   ]
 
-  it('still covers the ten pipeline actions it covered before the split', () => {
-    expect(cases.length).toBe(10)
+  // actions covered by their own describes below, not by the admin-only loop
+  const COVERED_ELSEWHERE = ['saveNotifyEmailsAction', 'saveOpsAction', 'setStatusAction', 'saveNotesAction']
+
+  it('covers every action every console actions.ts exports', async () => {
+    const modules = [NEW, GENERATE, REVIEW, SITES, () => import('@/app/admin/(console)/leads/actions')]
+    const exported = (await Promise.all(modules.map((load) => load()))).flatMap((m) => Object.keys(m)).sort()
+    const covered = [...cases.map(([name]) => name), ...COVERED_ELSEWHERE].sort()
+    expect(covered).toEqual(exported)
   })
 
   /*
-   * Asserted against every one of the eight, on every case -- not just the
+   * Asserted against every logic mock, on every case -- not just the
    * function the case under test would have called. A guard removed from
    * ANY export must fail SOME case's "no work happened" assertion; asserting
    * only the matching mock would still catch a missing guard (the wrong
-   * mock gets called), but asserting all eight is what keeps this list
+   * mock gets called), but asserting all of them is what keeps this list
    * honest as a literal enumeration rather than an implicit one.
    */
   function expectNoAdminLogicCalls() {
@@ -207,6 +232,12 @@ describe('admin-only pipeline actions', () => {
     expect(publishLogic).not.toHaveBeenCalled()
     expect(listCities).not.toHaveBeenCalled()
     expect(getProgressLogic).not.toHaveBeenCalled()
+    expect(pendingSuburbsLogic).not.toHaveBeenCalled()
+    expect(addPhotoLogic).not.toHaveBeenCalled()
+    expect(removePhotoLogic).not.toHaveBeenCalled()
+    expect(savePhotoCaptionsLogic).not.toHaveBeenCalled()
+    expect(writeAboutStoryLogic).not.toHaveBeenCalled()
+    expect(removeAboutStoryLogic).not.toHaveBeenCalled()
   }
 
   for (const [name, load, call] of cases) {

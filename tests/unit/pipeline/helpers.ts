@@ -20,7 +20,7 @@ export const FIXTURE_PATH = path.join(process.cwd(), 'tests/fixtures/stub-pipeli
 
 export const KEY = 'ztest-stubville'
 
-// executeStage's 'suburb' case is Task 16's work (see stages.ts) — until it
+// executeStage's 'suburb' case is Task 16's work (see stages/run.ts) — until it
 // lands, "run every stage" in these fixtures means every stage that actually
 // generates something. STAGES itself still lists all four; this is only
 // about which ones the stub client can be asked to run end to end.

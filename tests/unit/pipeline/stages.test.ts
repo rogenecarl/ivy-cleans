@@ -679,7 +679,7 @@ describe('pipeline stages', () => {
 
 
   // Task 20: the four rotated slug shapes ('house-cleaning-<area>', etc.)
-  // were dead code — nothing in stages.ts ever read SLUG_PATTERNS to build a
+  // were dead code — nothing in the stages module ever read SLUG_PATTERNS to build a
   // slug, the model was only ever told about the rotation through the
   // structuring prompt (asserted above). Minneapolis's stored slugs already
   // exercise every one of the retired shapes below, so this only has to

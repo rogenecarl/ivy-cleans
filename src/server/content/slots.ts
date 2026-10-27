@@ -48,7 +48,7 @@ export function serviceSlots(slug: string): readonly string[] {
   return [`service.${slug}.local`]
 }
 
-// the four stages. Here rather than pipeline/stages.ts so drafts.ts can import without a cycle; stages.ts re-exports.
+// the four stages. Here rather than pipeline/stages/ so drafts.ts can import without a cycle; stages/index.ts re-exports.
 export const STAGES = [
   { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
   { id: 'front', label: 'Writing the front page — hero and services' },

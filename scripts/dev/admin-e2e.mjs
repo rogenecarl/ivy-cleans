@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * scripts/admin-e2e.mjs — stubbed browser end-to-end run of the admin pipeline.
+ * scripts/dev/admin-e2e.mjs — stubbed browser end-to-end run of the admin pipeline.
  *
  * VERIFICATION TOOLING, RUN BY HAND. Not wired into `pnpm test` and not in CI:
  * it needs a running server, a borrowed Playwright, and it writes into the real
@@ -101,7 +101,7 @@
  *   PW_PATH=/home/kyousuke/Bajig/Intern-Project/epathways/node_modules/playwright
  *
  * USAGE
- *   node scripts/admin-e2e.mjs [--out DIR] [--base URL] [--keep]
+ *   node scripts/dev/admin-e2e.mjs [--out DIR] [--base URL] [--keep]
  *     --out   screenshot directory (default: $TMPDIR/ivy-admin-e2e)
  *     --base  server origin (default: http://localhost:3100)
  *     --keep  skip cleanup, leaving the generated Stubville on disk
@@ -220,7 +220,7 @@ const PHONE_DISPLAY = '(555) 555-0123'
 const NOTES = 'Fixture city. Housing stock is mock bungalows and stub-frame duplexes.'
 const SUBURBS = ['North Stubville', 'Mock Hollow', 'Fixture Heights']
 // Fixture Heights carries zero subdivisions in the fixture (see
-// tests/fixtures/stub-pipeline.json) — scoreSuburbs (src/server/pipeline/stages.ts)
+// tests/fixtures/stub-pipeline.json) — scoreSuburbs (src/server/pipeline/stages/)
 // treats zero subdivisions as a structural disqualifier regardless of the
 // rest of its score, so applyUniquenessGate drops it during the research
 // stage, before front/deep/suburb ever see it. Everywhere this script checks
@@ -238,7 +238,7 @@ const SUBURBS_STRUCT = [
   { name: 'Fixture Heights', slug: 'fixture-heights-cleaning-services' },
 ]
 
-const ROOT = path.resolve(path.join(import.meta.dirname, '..'))
+const ROOT = path.resolve(path.join(import.meta.dirname, '..', '..'))
 const CONTENT = path.join(ROOT, 'content')
 const CITY_DOC = path.join(CONTENT, `${KEY}.json`)
 const SIDECAR = path.join(CONTENT, '_drafts', `${KEY}.json`)

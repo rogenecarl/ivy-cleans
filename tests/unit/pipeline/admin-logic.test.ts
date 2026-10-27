@@ -5,7 +5,7 @@
  * the console's actions.ts files carry the 'use server'
  * directive, which makes them Next RPC endpoints rather than
  * importable modules — vitest cannot call them without standing up the framework.
- * So every decision the admin makes lives in src/server/pipeline/admin-logic.ts and
+ * So every decision the admin makes lives in src/server/pipeline/admin-logic/ and
  * is exercised here directly; the actions file adds only redirect() and
  * revalidatePath() on top, and the first test below pins that separation by
  * proving admin-logic imports nothing from next/.
@@ -958,7 +958,7 @@ describe('listCities', () => {
     })
   })
 
-  // listCities' own logic (src/server/pipeline/admin-logic.ts) only flips to
+  // listCities' own logic (src/server/pipeline/admin-logic/) only flips to
   // 'draft-unfinalized' once ALL of STAGE_IDS are done. runAllStages here
   // deliberately tops out at RUNNABLE_STAGE_IDS (research/front/deep, not
   // suburb) so this test can exercise the genuinely-partial state: a draft

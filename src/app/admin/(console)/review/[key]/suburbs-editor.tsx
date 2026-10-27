@@ -9,7 +9,7 @@ import { updateSuburbsAction } from './actions'
 import { ErrorText } from '@/app/admin/_components/ui'
 
 // The suburb list becomes URLs and is the researched data most likely to need a human fix. Slugs are normalised
-// server-side. One set of rows (scripts/admin-e2e.mjs counts the inputs). Each row carries the uniqueness verdict,
+// server-side. One set of rows (scripts/dev/admin-e2e.mjs counts the inputs). Each row carries the uniqueness verdict,
 // recomputed by the caller every render; a hand-added row shows "Not researched".
 
 type Row = { name: string; slug: string }

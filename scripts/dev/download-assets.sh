@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/dev/download-assets.sh — pull real assets from the live site
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 mkdir -p public/images public/icons
 
 BASE="https://ivycleans.com/wp-content/uploads"

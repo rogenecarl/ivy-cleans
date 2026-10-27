@@ -44,7 +44,7 @@ export async function signInAction(_prev: SignInState, formData: FormData): Prom
 
   // validate the role from signInEmail's OWN response. getServerUser() reads headers() — the incoming request's
   // snapshot — which never reflects a cookie set in this same action, so it reported "wrong password" after a
-  // correct sign-in (found by scripts/admin-e2e.mjs). redirect() throws, so it sits outside the try.
+  // correct sign-in (found by scripts/dev/admin-e2e.mjs). redirect() throws, so it sits outside the try.
   const role = (result.user as { role?: unknown } | undefined)?.role
   if (!isRole(role)) {
     // an unknown role means the database and access.ts disagree: log it

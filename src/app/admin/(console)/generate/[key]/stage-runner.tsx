@@ -22,7 +22,7 @@ import { ErrorText, Pill } from '@/app/admin/_components/ui'
 
 // One server-action call per stage, driven from the browser: one long request would hit the serverless cap and
 // leave no idea which stages landed. The sidecar records `done`, so a reload resumes. `cityKey`, not `key` (reserved
-// by React). Stage list is a prop because stages.ts reaches the filesystem. Glyphs/data-role hooks are asserted by scripts/admin-e2e.mjs.
+// by React). Stage list is a prop because the stages module reaches the filesystem. Glyphs/data-role hooks are asserted by scripts/dev/admin-e2e.mjs.
 
 type StageMeta = { id: string; label: string }
 
@@ -306,9 +306,9 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
           const items =
             isRunning && (stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
           const isFailed = failed?.stage === stage.id
-          // The glyphs are load-bearing: scripts/admin-e2e.mjs polls
+          // The glyphs are load-bearing: scripts/dev/admin-e2e.mjs polls
           // [data-role="status-icon"] for '✓' to know the run finished.
-          // a real spinner for the running row; the other glyphs are polled by scripts/admin-e2e.mjs
+          // a real spinner for the running row; the other glyphs are polled by scripts/dev/admin-e2e.mjs
           const icon = isDone ? '✓' : isFailed ? '✗' : isRunning ? '' : '•'
           // colour only for running and failed: an all-green list says nothing
           const tone = isFailed

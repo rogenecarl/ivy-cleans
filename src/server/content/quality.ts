@@ -4,7 +4,7 @@
 // Not checked here: reading level, once-per-page phrases, cross-page convergence (needs a rubric call).
 import type { CityContent, MarketOps, Suburb } from './types'
 
-// Defined here, not in stages.ts, to avoid a content -> pipeline cycle; stages.ts imports it.
+// Defined here, not in pipeline/stages/, to avoid a content -> pipeline cycle; stages/prompts.ts imports it.
 // `peace of mind` / `exceptional` are allowed once per page, which this module can't express.
 export const BANNED_PHRASES: readonly string[] = [
   'nestled in the heart of',
