@@ -2,6 +2,7 @@
 // Did the copy do what the prompt asked? Entities named, operator facts used, banned phrases absent.
 // similarity.ts covers duplication. Takes only the document: it runs at publish, after the sidecar is gone.
 // Not checked here: reading level, once-per-page phrases, cross-page convergence (needs a rubric call).
+import { SERVICE_SLUGS, serviceBySlug } from '@/site/data/services/registry'
 import type { CityContent, MarketOps, Suburb } from './types'
 
 // Defined here, not in pipeline/stages/, to avoid a content -> pipeline cycle; stages/prompts.ts imports it.
@@ -28,7 +29,7 @@ export const BANNED_PHRASES: readonly string[] = [
 // subdivisions a page must name: three, capped at what the area has
 export const SUBDIVISIONS_REQUIRED = 3
 
-export type QualityRule = 'entity-coverage' | 'banned-phrase' | 'area-code'
+export type QualityRule = 'entity-coverage' | 'banned-phrase' | 'area-code' | 'unknown-place'
 
 export interface QualityFinding {
   /** The slot, or the area prefix when the finding spans an area's three slots. */
@@ -138,12 +139,47 @@ function bannedPhrases(sections: CityContent['sections']): QualityFinding[] {
   return out
 }
 
+/** Capitalised phrases the copy may use that are not research places. */
+export const PLACE_ALLOW: readonly string[] = ['Ivy Cleans']
+
+// capitalised multi-word phrases research never named — advisory: a likely invented place, or just a proper noun
+function unknownPlaces(doc: CityContent): QualityFinding[] {
+  const known = new Set(
+    [
+      doc.city,
+      doc.stateName,
+      ...PLACE_ALLOW,
+      ...doc.research.suburbs.flatMap((s) => [s.name, ...s.subdivisions]),
+    ].map((n) => n.toLowerCase()),
+  )
+  const services = SERVICE_SLUGS.map((slug) => serviceBySlug(slug)?.name.toLowerCase() ?? '')
+  const isKnown = (phrase: string) => {
+    const p = phrase.toLowerCase()
+    return known.has(p) || services.some((name) => name.includes(p))
+  }
+  const out: QualityFinding[] = []
+  for (const [slot, value] of Object.entries(doc.sections)) {
+    const text = Array.isArray(value) ? value.join(' ') : value
+    const seen = new Set<string>()
+    for (const match of text.matchAll(/[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+/g)) {
+      let phrase = match[0]
+      // a sentence's first word is capitalised anyway: judge what follows it
+      if (/(^|[.!?]\s*)$/.test(text.slice(0, match.index))) phrase = phrase.split(/\s+/).slice(1).join(' ')
+      if (!phrase.includes(' ') || isKnown(phrase) || seen.has(phrase)) continue
+      seen.add(phrase)
+      out.push({ slot, rule: 'unknown-place', detail: `names "${phrase}", which research never found`, blocking: false })
+    }
+  }
+  return out
+}
+
 // every finding, blocking first; [] when clean
 export function checkQuality(doc: CityContent): QualityFinding[] {
   const findings = [
     ...entityCoverage(doc.research.suburbs, doc.sections),
     ...bannedPhrases(doc.sections),
     ...areaCode(doc),
+    ...unknownPlaces(doc),
   ]
   return [...findings].sort((a, b) => Number(b.blocking) - Number(a.blocking))
 }

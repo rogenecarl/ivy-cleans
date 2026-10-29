@@ -54,6 +54,7 @@ ${BANNED_PHRASES.map((p) => `  "${p}"`).join('\n')}
   "peace of mind" and "exceptional" — at most once per page each.
 
 SUBSTANCE — this is what separates a page worth reading from filler
+- Name only places that appear in the data you are given: the city, its areas, and the neighborhoods listed for them. A place that is not in the data does not go on the page, however well you know it.
 - Ground the copy in the real city: its climate and seasons, its housing stock (historic bungalows, brick row houses, ranch homes, stucco, high-rise condos, beach rentals), and how people there actually live — long indoor winters, humid summers, pollen season, road salt, blown sand, desert dust, coastal salt air, wildfire smoke.
 - Two or three concrete details that are true of that city beat a page of generic praise. If a sentence would read exactly the same for any other city in the country, rewrite it until it could not.
 - Write about cleaning, always. The local detail is the reason a room gets dirty; the sentence still has to end up at what we do about it.

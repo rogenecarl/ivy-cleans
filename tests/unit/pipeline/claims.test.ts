@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { researchFromClaims, toResearchAndClaims, type ResearchClaim } from '@/server/pipeline/claims'
+import { blockedNames, researchFromClaims, toResearchAndClaims, type ResearchClaim } from '@/server/pipeline/claims'
 import type { ResearchStructured } from '@/server/pipeline/schemas'
 
 const S = new Set(['S1', 'S2'])
@@ -133,5 +133,22 @@ describe('researchFromClaims', () => {
   it('links neighbours by slug among the areas that remain', () => {
     const out = researchFromClaims(research, claims)
     expect(out.suburbs.find((s) => s.slug === 'edina')?.neighbors).toEqual(['hopkins'])
+  })
+})
+
+describe('blockedNames', () => {
+  const claims: ResearchClaim[] = [
+    { id: 'a:subdivision:heights-park-estates', area: 'a', kind: 'subdivision', text: 'Heights Park Estates', sources: ['S1'], status: 'dropped' },
+    { id: 'a:subdivision:norhill', area: 'a', kind: 'subdivision', text: 'Norhill', sources: ['S1'], status: 'confirmed' },
+    { id: 'a:subdivision:oak', area: 'a', kind: 'subdivision', text: 'Oak', sources: ['S1'], status: 'unconfirmed' },
+    { id: 'a:condition:x', area: 'a', kind: 'condition', text: 'Hard water', sources: ['S1'], status: 'wrong' },
+  ]
+
+  it('finds an unconfirmed, wrong or dropped place name in the copy', () => {
+    expect(blockedNames('Homes around heights park estates date to 1920.', claims)).toEqual(['Heights Park Estates'])
+  })
+
+  it('ignores a confirmed name, a word inside another word, and conditions', () => {
+    expect(blockedNames('Norhill bungalows near Oakwood face hard water.', claims)).toEqual([])
   })
 })

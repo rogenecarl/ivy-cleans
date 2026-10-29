@@ -109,3 +109,17 @@ export function acceptedResearch(full: ResearchOutput, claims: readonly Research
 export function researchFromClaims(full: ResearchOutput, claims: readonly ResearchClaim[]): ResearchOutput {
   return linkNeighbors(applyUniquenessGate(acceptedResearch(full, claims)).research)
 }
+
+const NOT_ACCEPTED: ReadonlySet<ClaimStatus> = new Set(['unconfirmed', 'wrong', 'dropped'])
+
+/** Place names (areas, subdivisions, ZIPs) the copy must not use: found case-insensitively, as whole words. */
+export function blockedNames(text: string, claims: readonly ResearchClaim[]): string[] {
+  const lower = text.toLowerCase()
+  const found: string[] = []
+  for (const c of claims) {
+    if (!NOT_ACCEPTED.has(c.status) || (c.kind !== 'area' && c.kind !== 'subdivision' && c.kind !== 'zip')) continue
+    const escaped = c.text.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    if (new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(lower) && !found.includes(c.text)) found.push(c.text)
+  }
+  return found
+}

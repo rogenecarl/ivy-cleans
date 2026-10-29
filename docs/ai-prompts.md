@@ -99,6 +99,8 @@ Before anything is written, every area, neighbourhood, housing description, prin
 
 "Supported" facts are used. "Contradicted" ones are dropped. "Unclear" ones — and places the map puts too far away — are left out of everything the writers see until the owner decides (keep or drop) on the generate screen. Conditions marked never-to-be-printed are not checked at all.
 
+After every page is written, code reads it back: if it names an area, neighbourhood or ZIP code that was dropped or never confirmed, the page is refused before it is saved and has to be written again. Any other capitalised place name the research never found is listed on the review page as worth a look (it doesn't block anything — it may just be a proper noun).
+
 ---
 
 ## The shared voice guide (all three writing skills)
@@ -137,6 +139,7 @@ Every writing skill starts from this same instruction block:
 >     "peace of mind" and "exceptional" — at most once per page each.
 >
 > SUBSTANCE — this is what separates a page worth reading from filler
+> - Name only places that appear in the data you are given: the city, its areas, and the neighborhoods listed for them. A place that is not in the data does not go on the page, however well you know it.
 > - Ground the copy in the real city: its climate and seasons, its housing stock (historic bungalows, brick row houses, ranch homes, stucco, high-rise condos, beach rentals), and how people there actually live — long indoor winters, humid summers, pollen season, road salt, blown sand, desert dust, coastal salt air, wildfire smoke.
 > - Two or three concrete details that are true of that city beat a page of generic praise. If a sentence would read exactly the same for any other city in the country, rewrite it until it could not.
 > - Write about cleaning, always. The local detail is the reason a room gets dirty; the sentence still has to end up at what we do about it.

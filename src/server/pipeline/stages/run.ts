@@ -10,7 +10,7 @@ import {
 import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
 import { appendProgress, clearProgress } from '@/server/pipeline/progress'
 import { asResearchResult, mergeSources, type ResearchResult } from '@/server/pipeline/sources'
-import { acceptedResearch, researchFromClaims, toResearchAndClaims } from '@/server/pipeline/claims'
+import { acceptedResearch, blockedNames, researchFromClaims, toResearchAndClaims } from '@/server/pipeline/claims'
 import { makeGeocoder, type Geocoder } from '@/server/pipeline/geo'
 import { pendingVerifyItems, verifyItem } from './verify'
 import { loadDraft, saveDraft, type DraftDoc } from '@/server/content/drafts'
@@ -47,6 +47,14 @@ import {
   normalizeResearchSlugs,
   normalizeSlug,
 } from './research'
+
+// written copy that names a place the check did not accept is refused before any of it is saved
+function refuseBlockedNames(draft: DraftDoc, item: string, texts: ReadonlyArray<string | readonly string[]>): void {
+  const names = blockedNames(texts.flat().join('\n'), draft.claims ?? [])
+  if (names.length > 0) {
+    throw new Error(`the copy for ${item} names "${names[0]}", which was not confirmed — regenerate it`)
+  }
+}
 
 function requireResearch(draft: DraftDoc, key: string, stage: StageId): ResearchOutput {
   const undecided = (draft.claims ?? []).filter((c) => c.status === 'unconfirmed').length
@@ -206,6 +214,7 @@ async function executeStage(
         system: FRONT_SYSTEM,
         prompt: buildFrontPrompt(facts, research),
       })
+      refuseBlockedNames(draft, 'the front page', [out.heroParagraphs, out.serviceIntro, ...Object.values(out.cards)])
       draft.sections['services.heroParagraphs'] = out.heroParagraphs
       draft.sections['services.serviceIntro'] = out.serviceIntro
       draft.sections['services.cards.dusting'] = out.cards.dusting
@@ -268,6 +277,7 @@ async function executeStage(
           prompt: buildSuburbPrompt(facts, research, suburb),
         })
 
+        refuseBlockedNames(draft, `the ${suburb.name} page`, [out.intro, out.homes, out.local])
         draft.sections[introSlot] = out.intro
         draft.sections[homesSlot] = out.homes
         draft.sections[localSlot] = out.local
@@ -338,6 +348,7 @@ async function executeStage(
           prompt: buildServiceLocalPrompt(facts, research, slug),
         })
 
+        refuseBlockedNames(draft, `the ${slug} page`, [out.local])
         draft.sections[localSlot] = out.local
 
         delete draft.links?.[localSlot]

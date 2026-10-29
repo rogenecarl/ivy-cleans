@@ -136,4 +136,19 @@ describe('the verify stage', () => {
     expect(stageSlots(research).verify).toEqual([])
     expect(Object.values(stageSlots(research)).flat().sort()).toEqual([...requiredSlotsFor(research)].sort())
   })
+
+  it('refuses copy that names a dropped place, and saves none of it', async () => {
+    const claims = await researched()
+    await runStage(clientFor(claims).client, KEY, 'verify', undefined, new StubGeocoder({}))
+    const { researchFromClaims } = await import('@/server/pipeline/claims')
+    const draft = await loadDraft(KEY)
+    draft.claims!.find((c) => c.text === 'Assertion Acres')!.status = 'dropped'
+    draft.research = researchFromClaims(draft.researchFull!, draft.claims!)
+    await saveDraft(KEY, draft)
+
+    await expect(runStage(newClient(), KEY, 'suburb', NORTH, new StubGeocoder({}))).rejects.toThrow(
+      /names "Assertion Acres", which was not confirmed/,
+    )
+    expect((await loadDraft(KEY)).sections[`suburb.${NORTH}.homes`]).toBeUndefined()
+  })
 })
