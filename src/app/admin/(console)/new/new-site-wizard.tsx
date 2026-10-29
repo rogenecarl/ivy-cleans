@@ -74,7 +74,7 @@ export function NewSiteWizard() {
     <div className="flex flex-wrap items-start gap-6">
       <form
         action={createDraftAction}
-        className="flex min-w-0 flex-[999_1_560px] flex-col gap-6 rounded-lg border border-border bg-card p-6"
+        className="flex min-w-0 flex-[999_1_480px] flex-col gap-6 rounded-lg border border-border bg-card p-6"
         data-role="new-site-form"
       >
         <ol aria-label="Steps" className="grid grid-cols-3 gap-3">

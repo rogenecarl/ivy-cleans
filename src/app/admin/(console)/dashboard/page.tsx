@@ -161,6 +161,9 @@ export default async function AdminDashboard() {
                 {stats.newThisWeek} this week · {describeTrend(stats.newThisWeek, stats.newLastWeek)}
               </span>
             </div>
+            {totalLeads === 0 && (
+              <p className="mt-3 text-[0.85rem] text-muted-foreground">No leads in the last {WEEKS} weeks.</p>
+            )}
             <div
               className="mt-4 flex h-28 items-end gap-2"
               role="img"

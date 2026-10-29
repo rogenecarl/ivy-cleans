@@ -501,7 +501,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
       </ol>
 
       {(areas.length > 0 || feed.length > 0) && !allDone && (
-        <div className="mt-4 flex flex-wrap gap-4">
+        <div className="mt-4 flex flex-wrap items-start gap-4">
           {areas.length > 0 && !done.includes('suburb') && (
             <section className="min-w-0 flex-[999_1_420px] rounded-lg border border-border bg-card p-4" aria-labelledby="areas-title" data-role="area-grid">
               <h2 id="areas-title" className="mb-3 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
@@ -538,8 +538,8 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
               </h2>
               <ul className="divide-y divide-border/60">
                 {feed.map((event, i) => (
-                  <li key={`${event.at}-${i}`} className="grid grid-cols-[3.25rem_1fr] gap-2 py-1.5 text-[0.8rem]">
-                    <span className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">{clock(event.at)}</span>
+                  <li key={`${event.at}-${i}`} className="grid grid-cols-[4.5rem_1fr] gap-2 py-1.5 text-[0.8rem]">
+                    <span className="whitespace-nowrap font-mono text-[0.75rem] text-muted-foreground tabular-nums">{clock(event.at)}</span>
                     <span className={cn(event.kind === 'error' && 'text-destructive')}>{event.label}</span>
                   </li>
                 ))}
