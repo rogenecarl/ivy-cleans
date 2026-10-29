@@ -20,6 +20,7 @@ import { deletePhoto, putPhoto } from '@/server/pipeline/photo-store'
 import { optimizePhoto, sniffImageType } from '@/server/pipeline/photo-process'
 import type { MarketOps } from '@/server/pipeline/schemas'
 import { type ActionResult, editCity, errorMessage } from './shared'
+import { recordUsage } from './run'
 import { type MarketSnapshot, readMarketLogic } from './sites'
 
 export type PhotoUpload = { bytes: Uint8Array; name: string; type: string; alt: string }
@@ -102,12 +103,14 @@ export async function writeAboutStoryLogic(key: string): Promise<ActionResult> {
     const facts = aboutFactsOf(snapshot)
     if (!facts) return { ok: false, error: 'no market facts saved yet' }
 
-    const story = await makeClient().generate({
+    const client = makeClient()
+    const story = await client.generate({
       schema: AboutStorySchema,
       key: 'about',
       system: ABOUT_SYSTEM,
       prompt: buildAboutStoryPrompt(facts),
     })
+    await recordUsage(key, client)
 
     let knownText = ''
     const check = await editCity(key, ({ ops, sections }) => {

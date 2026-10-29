@@ -1,6 +1,10 @@
 import { readFile } from 'node:fs/promises'
 import { CITIES_JSON, findDraft, listDrafts, saveDraft } from '@/server/content/drafts'
 import { getCity, readCityDoc, revalidateCity, writeCityDoc } from '@/server/content/store'
+import { checkQuality } from '@/server/content/quality'
+import { readProgress } from '@/server/pipeline/progress'
+import { costUsd } from '@/server/pipeline/pricing'
+import { siteStage, type StageView } from './stage'
 import { pendingAddress, realAddress } from '@/server/content/interpolate'
 import { phoneDigitsFrom, phoneFields } from '@/server/pipeline/facts'
 import { ABOUT_STORY_SLOT } from '@/server/pipeline/about'
@@ -203,4 +207,26 @@ export async function updateContactLogic(key: string, input: { phone: string; ad
   } catch (err) {
     return { ok: false, error: errorMessage(err) }
   }
+}
+
+// ---- Stage per city, for the Dashboard and Sites -----------------------------------------------------------------
+
+export type SiteSummary = CityRow &
+  StageView & { totalStages: number; costUsd: number | null; undecided: number; hasAddress: boolean }
+
+/** listCities, plus each city's stage, next step, cost so far and what it is waiting on. */
+export async function listSiteSummaries(): Promise<SiteSummary[]> {
+  const rows = await listCities()
+  return Promise.all(
+    rows.map(async (row) => {
+      const draft = row.hasDraft ? await findDraft(row.key).catch(() => null) : null
+      const doc = row.status === 'error' ? null : await readCityDoc(row.key)
+      const events = draft ? await readProgress(row.key) : []
+      const undecided = (draft?.claims ?? []).filter((c) => c.status === 'unconfirmed').length
+      const hasAddress = Boolean(draft ? draft.facts.address : realAddress(doc?.address))
+      const blockingQuality = doc ? checkQuality(doc).filter((f) => f.blocking).length : 0
+      const view = siteStage({ row, lastEventKind: events.at(-1)?.kind ?? null, hasAddress, undecided, blockingQuality })
+      return { ...row, ...view, totalStages: STAGE_IDS.length, costUsd: costUsd(draft?.usage), undecided, hasAddress }
+    }),
+  )
 }

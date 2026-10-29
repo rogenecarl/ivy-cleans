@@ -28,6 +28,7 @@ import {
   getProgressLogic,
   isStageId,
   listCities,
+  listSiteSummaries,
   MAX_REVIEWS,
   MAX_REVIEWS_LENGTH,
   normalizeSuburbs,
@@ -138,7 +139,7 @@ describe('framework independence', () => {
   it('admin-logic imports nothing from next/ — which is why this file can import it', async () => {
     const dir = path.join(process.cwd(), 'src/server/pipeline/admin-logic')
     const files = (await readdir(dir)).filter((f) => f.endsWith('.ts'))
-    expect(files.length).toBe(7)
+    expect(files.length).toBe(8)
     for (const file of files) {
       const source = await readFile(path.join(dir, file), 'utf-8')
       // Anchored to a line-initial `import`, so the rule can be *described* in a
@@ -1512,6 +1513,39 @@ describe('final review fixes', () => {
     expect((await freshDraft(KEY)).ok).toBe(true)
     const r = await regenerateLogic(KEY, 'verify')
     expect(r.ok).toBe(false)
+    await wipe(KEY)
+  })
+})
+
+describe('cost and area progress for the console', () => {
+  const KEY = 'ztest-editville'
+
+  it('records usage on the draft after each stage request, and reports it with the area states', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).usage).toBeDefined()
+    expect(await runStageLogic(KEY, 'verify')).toEqual({ ok: true })
+
+    const before = await getProgressLogic(KEY)
+    expect(before.ok).toBe(true)
+    if (!before.ok) return
+    expect(before.costUsd).toBe(0) // the stub spends nothing, but the draft has a record
+    expect(before.areas.map((a) => a.written)).toEqual([false, false])
+
+    const first = before.areas[0].slug
+    expect(await runStageLogic(KEY, 'suburb', first)).toEqual({ ok: true })
+    const after = await getProgressLogic(KEY)
+    expect(after.ok && after.areas.find((a) => a.slug === first)?.written).toBe(true)
+    await wipe(KEY)
+  })
+
+  it('lists every city with its stage and next step', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    const rows = await listSiteSummaries()
+    const mine = rows.find((r) => r.key === KEY)!
+    expect(mine).toMatchObject({ stage: 'generating', next: { label: 'Watch progress' }, costUsd: null })
+    const mpls = rows.find((r) => r.key === 'minneapolis')!
+    expect(mpls).toMatchObject({ stage: 'live', next: { label: 'Settings' } })
     await wipe(KEY)
   })
 })

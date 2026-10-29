@@ -1,13 +1,22 @@
-import { loadDraft, saveDraft } from '@/server/content/drafts'
+import { findDraft, loadDraft, saveDraft } from '@/server/content/drafts'
+import { addUsage, costUsd } from '@/server/pipeline/pricing'
 import { researchFromClaims, type ResearchClaim } from '@/server/pipeline/claims'
 import { SERVICE_LOCAL_SLUGS, isWritableArea, isWrittenSlot, serviceSlots, suburbSlots } from '@/server/content/slots'
 import { serviceBySlug } from '@/site/data/services/registry'
-import { makeClient } from '@/server/pipeline/model'
+import { makeClient, type ModelClient } from '@/server/pipeline/model'
 import { readProgress, type ProgressEvent } from '@/server/pipeline/progress'
 import { CITY_ITEM, pendingVerifyItems, regenerateStage, runStage, type StageId } from '@/server/pipeline/stages'
 import { type ActionResult, attempt, errorMessage } from './shared'
 
 // ── Stage execution ──
+
+// what a request spent goes on the draft whether it succeeded or not; a city with no draft (published) has nowhere to keep it
+export async function recordUsage(key: string, client: ModelClient): Promise<void> {
+  const draft = await findDraft(key).catch(() => null)
+  if (!draft) return
+  draft.usage = addUsage(draft.usage, client.usage.byModel)
+  await saveDraft(key, draft)
+}
 
 // one stage per request so a serverless cap, reload or retry is survivable
 export async function runStageLogic(
@@ -15,7 +24,10 @@ export async function runStageLogic(
   stage: StageId,
   only?: string
 ): Promise<ActionResult> {
-  return attempt(() => runStage(makeClient(), key, stage, only))
+  const client = makeClient()
+  const result = await attempt(() => runStage(client, key, stage, only))
+  await recordUsage(key, client)
+  return result
 }
 
 export type ItemStage = 'verify' | 'suburb' | 'service'
@@ -60,7 +72,10 @@ export async function pendingItemsLogic(key: string, stage: ItemStage): Promise<
 export async function regenerateLogic(key: string, stage: StageId): Promise<ActionResult> {
   // checking every area in one request breaks the one-call-per-request rule; regenerate research to check again
   if (stage === 'verify') return { ok: false, error: 'the fact check runs again when research is regenerated' }
-  return attempt(() => regenerateStage(makeClient(), key, stage))
+  const client = makeClient()
+  const result = await attempt(() => regenerateStage(client, key, stage))
+  await recordUsage(key, client)
+  return result
 }
 
 // snapshot for the activity feed: events, done stages, suburb names/zips, subdivision total
@@ -70,6 +85,10 @@ export type ProgressSnapshot =
       events: ProgressEvent[]
       done: string[]
       research: { suburbs: string[]; zips: string[]; subdivisions: number } | null
+      /** dollars this draft has spent so far; null for a draft made before costs were kept */
+      costUsd: number | null
+      /** the areas that get a page, and whether each is written yet */
+      areas: { slug: string; name: string; written: boolean }[]
     }
   | { ok: false; error: string }
 
@@ -83,7 +102,12 @@ export async function getProgressLogic(key: string): Promise<ProgressSnapshot> {
           subdivisions: draft.research.suburbs.reduce((n, s) => n + s.subdivisions.length, 0),
         }
       : null
-    return { ok: true, events, done: draft.done, research }
+    const areas = (draft.research?.suburbs ?? []).filter(isWritableArea).map((s) => ({
+      slug: s.slug,
+      name: s.name,
+      written: suburbSlots(s.slug).every((slot) => isWrittenSlot(draft.sections[slot])),
+    }))
+    return { ok: true, events, done: draft.done, research, costUsd: costUsd(draft.usage), areas }
   } catch (err) {
     return { ok: false, error: errorMessage(err) }
   }
