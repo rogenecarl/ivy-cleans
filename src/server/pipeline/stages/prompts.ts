@@ -99,6 +99,8 @@ You are a transcriber, not a researcher and not a writer. Every area name, subdi
 
 Drop anything the findings themselves flag as uncertain, disputed, or out of the service area, and drop any phone number, street address or business name that wandered into the findings — those fields do not exist in this output.
 
+Every item carries sources: the S-numbers from the SOURCES list at the end of the findings whose quoted lines state it. An item no source states is left out entirely; never attach a source that does not mention the item.
+
 Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.`
 
 // ── Prompt builders ──
@@ -212,11 +214,13 @@ export function buildResearchStructuringPrompt(
 
 EVERY ARRAY, ALL OF THEM. The findings are written in lettered parts and every part has somewhere to go: (a) and (b) become suburbs and their subdivisions, (c) becomes housingCharacter plus the two condition arrays. Work through the findings part by part and fill each array from its part. A field left empty because you stopped reading is the one failure this task can produce — you are transcribing, and everything present in the findings must come out the other side.
 
+Each area, subdivision, housing description, condition and ZIP code is an object with a sources array of S-numbers (e.g. ["S2", "S5"]). The findings mark cited statements with [S#].
+
 suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 they contain). A named subdivision inside an area is never its own entry; it goes in that area's subdivisions array. Each entry has:
   name: the place name exactly as the findings write it, e.g. "St. Louis Park", "Sugar Land".
   slug: that name lowercased, with spaces and punctuation replaced by single hyphens — "St. Louis Park" gives "st-louis-park". Nothing else: no prefix, no suffix. Unique, lowercase, a-z 0-9 and hyphens only.
-  subdivisions: the named developments and neighborhoods the findings place inside this area. Empty array if the findings name none — do not fill it from your own knowledge.
-  housingCharacter: one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
+  subdivisions: { name, sources } for each named development and neighborhood the findings place inside this area. Empty array if the findings name none — do not fill it from your own knowledge.
+  housing: { text, sources } — text is one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
   conditions: the local conditions the findings give for THIS area specifically, each with what it means for cleaning.
   neighbors: the two to four OTHER areas from this same suburbs list that the findings say border or sit next to this one, by their exact names. Only areas that are entries in this list; empty array if the findings give no sense of where it sits.
 

@@ -17,6 +17,7 @@ import { readFile, rm, writeFile } from 'node:fs/promises'
 import { REQUIRED_SLOTS, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '@/server/content/drafts'
 import { getCity, revalidateCity } from '@/server/content/store'
 import { validateCityContent } from '@/server/content/validate'
+import type { ResearchStructured } from '@/server/pipeline/schemas'
 import { StubModelClient, type ModelClient } from '@/server/pipeline/model'
 import { clearProgress, readProgress } from '@/server/pipeline/progress'
 import * as stagesModule from '@/server/pipeline/stages'
@@ -493,13 +494,14 @@ describe('pipeline stages', () => {
       // every entry carries just enough (4 subdivisions + housing character,
       // scoring 6 — 'review', not 'skip') to survive it untouched.
       const enoughToSurvive = {
-        subdivisions: ['A', 'B', 'C', 'D'],
-        housingCharacter: 'Present.',
+        sources: ['S1'],
+        subdivisions: ['A', 'B', 'C', 'D'].map((name) => ({ name, sources: ['S1'] })),
+        housing: { text: 'Present.', sources: ['S1'] },
         neighbors: [],
         conditions: [],
       }
       const structured = {
-        ...(fixtures.generated['research.structure'] as ResearchOutput),
+        ...(fixtures.generated['research.structure'] as ResearchStructured),
         suburbs: [
           { name: 'Weird Slug', slug: 'Weird Slug!', ...enoughToSurvive },
           { name: 'Weird Slug Again', slug: 'weird--slug', ...enoughToSurvive },
@@ -628,9 +630,15 @@ describe('pipeline stages', () => {
      * Proves the "dropped" text is conditional, not unconditionally appended.
      */
     function allGoodFixtures(): StubFixtures {
-      const researched = { subdivisions: ['A', 'B', 'C', 'D'], housingCharacter: 'Present.', neighbors: [], conditions: [] }
+      const researched = {
+        sources: ['S1'],
+        subdivisions: ['A', 'B', 'C', 'D'].map((name) => ({ name, sources: ['S1'] })),
+        housing: { text: 'Present.', sources: ['S1'] },
+        neighbors: [],
+        conditions: [],
+      }
       const structured = {
-        ...(fixtures.generated['research.structure'] as ResearchOutput),
+        ...(fixtures.generated['research.structure'] as ResearchStructured),
         suburbs: [
           { name: 'North Stubville', slug: 'house-cleaning-north-stubville', ...researched },
           { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow', ...researched },

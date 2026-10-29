@@ -56,7 +56,7 @@ A small structuring call then pulls the area names out of those findings, exactl
 >
 > The other areas this branch serves are [THE OTHER AREA NAMES]. If a page says which of these [AREA] borders, note it.
 
-The three sets of findings are then joined into one document, in the order the structuring pass expects (city-wide, areas, per area).
+The three sets of findings are then joined into one document, in the order the structuring pass expects (city-wide, areas, per area). Every web page a pass quoted is kept: each gets a number (S1, S2, …), the findings carry `[S3]`-style markers where a statement came from a page, and a SOURCES list at the end gives each page's title, address and the exact lines quoted from it.
 
 Landmarks are no longer requested. They fed one sentence that read identically on every city site, and named subdivisions do the same job of proving local knowledge far better. ZIP codes are not researched either — which ZIPs a branch serves is the owner's decision, entered in the admin. Keywords are not researched: they come from real search-volume data (DataForSEO) when that is connected, and until then the front page is written without them.
 
@@ -70,9 +70,13 @@ A second pass converts the findings text into the site's data (the areas list wi
 >
 > Drop anything the findings themselves flag as uncertain, disputed, or out of the service area, and drop any phone number, street address or business name that wandered into the findings — those fields do not exist in this output.
 >
+> Every item carries sources: the S-numbers from the SOURCES list at the end of the findings whose quoted lines state it. An item no source states is left out entirely; never attach a source that does not mention the item.
+>
 > Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.
 
 The brief this pass receives asks it to turn each area's findings into: a name and a URL slug (the name, lowercased and hyphenated), the subdivisions found inside it, a sentence or two on what the homes there are like, the local conditions specific to that area, and the two to four other areas from the same list that border it — plus the metro-wide conditions, the ZIP list, and the keywords. Code then turns the neighbour names into links both ways (if Lake Mary lists Sanford, Sanford lists Lake Mary), drops any name that is not an area on the list, and caps each area at four; the area page shows them as "Nearby areas we also serve".
+
+Every area, subdivision, housing description, condition and ZIP comes back with the S-numbers of the pages that state it. Code then throws away anything with no real source behind it — an area with no source loses its page and everything in it — and keeps the rest as a list of claims to be checked (see Step 1c), each remembering the pages it came from.
 
 On keywords specifically, this pass is told one of two things: with no real search-volume keywords supplied (today), return an empty list — never phrases guessed from the findings; once the keyword-research provider is wired in, it is handed an exact list and told to use it unchanged.
 

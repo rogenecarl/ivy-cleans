@@ -6,6 +6,7 @@ import path from 'path'
 import type { Facts } from '@/server/pipeline/facts'
 import type { ResearchOutput } from '@/server/pipeline/schemas'
 import type { ResearchResult, ResearchSource } from '@/server/pipeline/sources'
+import type { ResearchClaim } from '@/server/pipeline/claims'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -32,6 +33,9 @@ export type DraftDoc = {
   // every web source research cited, by id (S1…); facts point at these
   sources?: ResearchSource[]
   research?: ResearchOutput
+  // everything research found with a source, before checking; `research` is rebuilt from it and `claims`
+  researchFull?: ResearchOutput
+  claims?: ResearchClaim[]
   sections: Record<string, string | string[]>
   links?: Record<string, SlotLink[]>
   done: string[]

@@ -2,7 +2,7 @@
 
 import {
   FrontSectionsSchema,
-  ResearchSchema,
+  ResearchStructuredSchema,
   ServiceCopySchema,
   SuburbCopySchema,
   type ResearchOutput,
@@ -10,6 +10,7 @@ import {
 import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
 import { appendProgress, clearProgress } from '@/server/pipeline/progress'
 import { asResearchResult, mergeSources, type ResearchResult } from '@/server/pipeline/sources'
+import { acceptedResearch, researchFromClaims, toResearchAndClaims } from '@/server/pipeline/claims'
 import { loadDraft, saveDraft, type DraftDoc } from '@/server/content/drafts'
 import {
   SERVICE_LOCAL_SLUGS,
@@ -127,16 +128,21 @@ async function executeStage(
         label: `Collected ${findings.length.toLocaleString()} chars of findings — structuring`,
       })
       const structured = await client.generate({
-        schema: ResearchSchema,
+        schema: ResearchStructuredSchema,
         key: MODEL_KEYS.researchStructure,
         system: RESEARCH_STRUCTURE_SYSTEM,
         prompt: buildResearchStructuringPrompt(findings, facts, []),
         model: MODELS.research,
       })
-      const normalized = normalizeResearchSlugs(structured, facts.city)
+      for (const s of structured.suburbs) s.slug = normalizeSlug(s.slug)
+      const sourced = toResearchAndClaims(structured, new Set(merged.sources.map((s) => s.id)))
+      const normalized = normalizeResearchSlugs(sourced.research, facts.city)
+      const kept = new Set(normalized.suburbs.map((s) => s.slug))
+      draft.researchFull = normalized
+      draft.claims = sourced.claims.filter((c) => c.area === null || kept.has(c.area))
       // the gate runs here, before anything downstream can see a skipped area
-      const { research: gated, scored } = applyUniquenessGate(normalized)
-      const r = linkNeighbors(gated)
+      const { scored } = applyUniquenessGate(acceptedResearch(normalized, draft.claims))
+      const r = researchFromClaims(normalized, draft.claims)
       draft.research = r
       const skipped = scored.filter((s) => s.verdict === 'skip')
       // subdivisions, not landmarks, are the count that matters
@@ -388,6 +394,8 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
     delete draft.findings
     delete draft.researchParts
     delete draft.sources
+    delete draft.researchFull
+    delete draft.claims
   }
 }
 

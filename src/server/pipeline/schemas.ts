@@ -78,6 +78,33 @@ export const ResearchSchema = z
   .strict()
 export type ResearchOutput = z.infer<typeof ResearchSchema>
 
+// The structuring call's output: the research above, with every item tagged by the source ids (S1…) that state it.
+// Code turns it into ResearchOutput plus a claim list; an item no source states never gets that far.
+const Sourced = { sources: z.array(z.string()) }
+const SourcedConditionSchema = z.object({ ...ConditionSchema.shape, ...Sourced }).strict()
+
+export const ResearchStructuredSchema = z
+  .object({
+    suburbs: z.array(
+      z
+        .object({
+          name: z.string(),
+          slug: z.string(),
+          ...Sourced,
+          subdivisions: z.array(z.object({ name: z.string(), ...Sourced }).strict()),
+          housing: z.object({ text: z.string(), ...Sourced }).strict(),
+          neighbors: z.array(z.string()),
+          conditions: z.array(SourcedConditionSchema),
+        })
+        .strict(),
+    ),
+    conditions: z.array(SourcedConditionSchema),
+    zips: z.array(z.object({ zip: z.string(), ...Sourced }).strict()),
+    keywords: z.array(z.string()),
+  })
+  .strict()
+export type ResearchStructured = z.infer<typeof ResearchStructuredSchema>
+
 export const FrontSectionsSchema = z
   .object({
     heroParagraphs: z.array(z.string()),

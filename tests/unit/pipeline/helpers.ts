@@ -6,6 +6,8 @@ import { deriveFacts, type Facts } from '@/server/pipeline/facts'
 import { revalidateCity } from '@/server/content/store'
 import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
 import type { ResearchResult } from '@/server/pipeline/sources'
+import { toResearchAndClaims } from '@/server/pipeline/claims'
+import type { ResearchStructured } from '@/server/pipeline/schemas'
 import { STAGES } from '@/server/pipeline/stages'
 import { type ResearchOutput } from '@/server/pipeline/schemas'
 
@@ -84,7 +86,7 @@ export function stubFacts(): Facts {
 
 /** research.structure canned output, used by the prompt-builder unit tests. */
 export function fixtureResearch(): ResearchOutput {
-  return fixtures.generated['research.structure'] as ResearchOutput
+  return toResearchAndClaims(fixtures.generated['research.structure'] as ResearchStructured, new Set(['S1'])).research
 }
 
 export async function resetDraft(): Promise<void> {
