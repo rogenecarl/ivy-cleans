@@ -1,3 +1,4 @@
+import type { SiteSummary } from '@/server/pipeline/admin-logic'
 /*
  * The dashboard's numbers, as a test.
  *
@@ -19,6 +20,9 @@ import {
   topCity,
   trendDirection,
   visibleAlarms,
+  attentionItems,
+  bucketByWeek,
+  pipelineBuckets,
 } from '@/app/admin/(console)/dashboard/logic'
 
 describe('describeAge', () => {
@@ -216,5 +220,63 @@ describe('quickActionsFor', () => {
         expect(canAccess(role, action.href)).toBe(true)
       }
     }
+  })
+})
+
+describe('bucketByWeek', () => {
+  const now = new Date('2026-10-29T12:00:00Z')
+  const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000)
+
+  it('counts per week, oldest first, ignoring anything older than the window', () => {
+    expect(bucketByWeek([daysAgo(0), daysAgo(6.9), daysAgo(7), daysAgo(15), daysAgo(60)], now, 3)).toEqual([1, 1, 2])
+  })
+
+  it('returns zeros for an empty list', () => {
+    expect(bucketByWeek([], now, 8)).toEqual([0, 0, 0, 0, 0, 0, 0, 0])
+  })
+})
+
+describe('pipelineBuckets', () => {
+  const site = (key: string, stage: SiteSummary['stage']) => ({ key, stage }) as SiteSummary
+
+  it('puts stopped runs with generating ones, and each other stage in its own bucket', () => {
+    const b = pipelineBuckets([
+      site('a', 'generating'),
+      site('b', 'stopped'),
+      site('c', 'needs-review'),
+      site('d', 'ready'),
+      site('e', 'live'),
+    ])
+    expect(b.generating.map((s) => s.key)).toEqual(['a', 'b'])
+    expect(b.review.map((s) => s.key)).toEqual(['c'])
+    expect(b.ready.map((s) => s.key)).toEqual(['d'])
+    expect(b.live.map((s) => s.key)).toEqual(['e'])
+  })
+})
+
+describe('attentionItems', () => {
+  const site = (over: Partial<SiteSummary>) =>
+    ({ key: 'houston', city: 'Houston', stage: 'needs-review', undecided: 0, hasAddress: true, ...over }) as SiteSummary
+  const alarms = [
+    { key: 'waiting' as const, label: 'Lead waiting for a reply', value: 1, hint: 'oldest 3 d' },
+    { key: 'inbox' as const, label: 'Live sites with no inbox', value: 1, hint: 'Minneapolis' },
+  ]
+
+  it('gives every item one action, including drafts missing an address or waiting on facts', () => {
+    const items = attentionItems(alarms, [site({ hasAddress: false }), site({ key: 'orlando', city: 'Orlando', undecided: 2 })], 'admin')
+    expect(items.map((i) => i.id)).toEqual(['waiting', 'inbox', 'address:houston', 'facts:orlando'])
+    expect(items.every((i) => i.action.href.startsWith('/admin'))).toBe(true)
+    expect(items.find((i) => i.id === 'address:houston')?.action.href).toBe('/admin/sites/houston')
+    expect(items.find((i) => i.id === 'facts:orlando')?.action.href).toBe('/admin/generate/orlando')
+  })
+
+  it('shows a manager only what a manager can act on', () => {
+    const items = attentionItems(alarms, [site({ hasAddress: false })], 'manager')
+    expect(items.map((i) => i.id)).toEqual(['waiting'])
+  })
+
+  it('does not ask for an address on a live city or a run still generating', () => {
+    const items = attentionItems([], [site({ stage: 'live', hasAddress: false }), site({ key: 'x', stage: 'generating', hasAddress: false })], 'admin')
+    expect(items).toEqual([])
   })
 })

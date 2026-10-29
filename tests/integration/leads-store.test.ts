@@ -22,6 +22,7 @@ import {
   setLeadStatus,
   getSiteSettings,
   upsertSiteSettings,
+  leadsPerWeek,
 } from '@/server/leads/store'
 import type { LeadInput } from '@/server/leads/types'
 
@@ -126,6 +127,16 @@ describe.skipIf(!process.env.DATABASE_URL)('leads store', () => {
     const counts = await leadCountsByCity()
     expect(counts[CITY]).toEqual({ total: 1, unworked: 1, emailFailed: 1 })
     expect(counts[OTHER]).toEqual({ total: 1, unworked: 1, emailFailed: 0 })
+  })
+
+  it('counts leads per week for one city, test rows excluded', async () => {
+    await createLead(input())
+    await createLead(input())
+    await createLead(input({ isTest: true }))
+    const weeks = await leadsPerWeek(new Date(Date.now() + 60_000), 8, CITY)
+    expect(weeks).toHaveLength(8)
+    expect(weeks[7]).toBe(2)
+    expect(weeks.slice(0, 7).every((n) => n === 0)).toBe(true)
   })
 
   it('upserts site settings', async () => {

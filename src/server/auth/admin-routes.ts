@@ -11,6 +11,9 @@ export const ADMIN_LEADS = `${ADMIN_BASE}/leads`
 /** The Sites (cities) list. Every "back to cities" link points here. */
 export const ADMIN_SITES = `${ADMIN_BASE}/sites`
 
+/** The new-site form. */
+export const ADMIN_NEW = `${ADMIN_BASE}/new`
+
 /** The login screen. The one path under ADMIN_BASE that is NOT session-gated,
  * which is why it sits outside the (console) route group. */
 export const ADMIN_LOGIN = `${ADMIN_BASE}/login`
