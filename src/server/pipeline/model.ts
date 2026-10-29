@@ -62,12 +62,40 @@ export interface ModelClient {
   readonly usage: UsageTally
 }
 
+export type BilledUsage = {
+  inputTokens: number
+  outputTokens: number
+  cacheWriteTokens: number
+  cacheReadTokens: number
+  searches: number
+}
+
+type ApiUsage = {
+  input_tokens?: number | null
+  output_tokens?: number | null
+  cache_creation_input_tokens?: number | null
+  cache_read_input_tokens?: number | null
+  server_tool_use?: { web_search_requests?: number | null } | null
+}
+
+/** Every billed part of one response's usage. */
+export function usageFrom(message: { usage?: ApiUsage | null }): BilledUsage {
+  const u = message.usage ?? {}
+  return {
+    inputTokens: u.input_tokens ?? 0,
+    outputTokens: u.output_tokens ?? 0,
+    cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+    cacheReadTokens: u.cache_read_input_tokens ?? 0,
+    searches: u.server_tool_use?.web_search_requests ?? 0,
+  }
+}
+
 export interface UsageTally {
   calls: number
   inputTokens: number
   outputTokens: number
-  /** the same, per model — research and writing are priced differently */
-  byModel: Record<string, { calls: number; inputTokens: number; outputTokens: number }>
+  /** the same, per model — research and writing are priced differently; cache and search parts are billed apart */
+  byModel: Record<string, { calls: number } & BilledUsage>
 }
 
 const RESEARCH_SYSTEM =
@@ -127,16 +155,18 @@ export class AnthropicModelClient implements ModelClient {
   private readonly client: Anthropic
   readonly usage: UsageTally = { calls: 0, inputTokens: 0, outputTokens: 0, byModel: {} }
 
-  private count(model: string, message: { usage?: { input_tokens?: number; output_tokens?: number } }): void {
-    const input = message.usage?.input_tokens ?? 0
-    const output = message.usage?.output_tokens ?? 0
+  private count(model: string, message: { usage?: ApiUsage | null }): void {
+    const u = usageFrom(message)
     this.usage.calls += 1
-    this.usage.inputTokens += input
-    this.usage.outputTokens += output
-    const m = (this.usage.byModel[model] ??= { calls: 0, inputTokens: 0, outputTokens: 0 })
+    this.usage.inputTokens += u.inputTokens
+    this.usage.outputTokens += u.outputTokens
+    const m = (this.usage.byModel[model] ??= { calls: 0, inputTokens: 0, outputTokens: 0, cacheWriteTokens: 0, cacheReadTokens: 0, searches: 0 })
     m.calls += 1
-    m.inputTokens += input
-    m.outputTokens += output
+    m.inputTokens += u.inputTokens
+    m.outputTokens += u.outputTokens
+    m.cacheWriteTokens += u.cacheWriteTokens
+    m.cacheReadTokens += u.cacheReadTokens
+    m.searches += u.searches
   }
 
   constructor(apiKey: string | undefined = process.env.ANTHROPIC_API_KEY) {

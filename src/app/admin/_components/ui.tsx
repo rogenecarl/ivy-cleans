@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { TriangleAlert, type LucideIcon } from 'lucide-react'
-import type { CityStatus } from '@/server/pipeline/admin-logic'
+import type { CityStatus, SiteStage } from '@/server/pipeline/admin-logic'
 import type { LeadStatus } from '@/server/leads/types'
 import type { Readiness, ReadinessProblem } from '@/server/leads/readiness'
 import { Badge, type badgeVariants } from '@/components/ui/badge'
@@ -234,5 +234,25 @@ export function FilterChip({
         {count}
       </span>
     </Link>
+  )
+}
+
+const STAGE: Record<SiteStage, { label: string; className: string }> = {
+  generating: { label: 'GENERATING', className: 'bg-blue-50 text-blue-800 border-blue-600/30' },
+  stopped: { label: 'STOPPED', className: 'bg-red-50 text-red-800 border-red-600/30' },
+  'needs-review': { label: 'NEEDS REVIEW', className: 'bg-amber-50 text-amber-900 border-amber-600/30' },
+  ready: { label: 'READY', className: 'bg-emerald-50 text-emerald-800 border-emerald-600/30' },
+  live: { label: 'LIVE', className: 'bg-emerald-50 text-emerald-800 border-emerald-600/30' },
+}
+
+/** Where a city is in the process, as one pill (Dashboard and Sites). */
+export function StagePill({ stage }: { stage: SiteStage }) {
+  return (
+    <span
+      className={`inline-flex rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold tracking-wide ${STAGE[stage].className}`}
+      data-role="stage"
+    >
+      {STAGE[stage].label}
+    </span>
   )
 }

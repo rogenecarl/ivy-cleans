@@ -1,7 +1,8 @@
 // src/app/admin/(console)/dashboard/logic.ts
 // The dashboard's presentation decisions as pure functions, testable without the framework.
 import type { Role } from '@/server/auth/access'
-import { ADMIN_BASE, ADMIN_LEADS } from '@/server/auth/admin-routes'
+import { ADMIN_BASE, ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
+import type { SiteSummary } from '@/server/pipeline/admin-logic'
 
 // how long a lead has waited: "just now", "6 min", "4 hr", "3 d". Rounds DOWN — this figure must never overstate.
 export function describeAge(from: Date, now: Date): string {
@@ -128,4 +129,68 @@ export function quickActionsFor(role: Role): QuickAction[] {
     })
   }
   return actions
+}
+
+// ---- Redesigned dashboard --------------------------------------------------------------------------------------
+
+export { bucketByWeek } from '@/server/leads/weeks'
+
+/** The four "Sites in progress" cards; a stopped run is still in progress. */
+export function pipelineBuckets(sites: readonly SiteSummary[]) {
+  return {
+    generating: sites.filter((s) => s.stage === 'generating' || s.stage === 'stopped'),
+    review: sites.filter((s) => s.stage === 'needs-review'),
+    ready: sites.filter((s) => s.stage === 'ready'),
+    live: sites.filter((s) => s.stage === 'live'),
+  }
+}
+
+export type AttentionItem = {
+  id: string
+  tag: string
+  text: string
+  action: { label: string; href: string }
+}
+
+// one row per thing that needs a person, each with the one action that fixes it
+export function attentionItems(alarms: Alarm[], sites: readonly SiteSummary[], role: Role): AttentionItem[] {
+  const items: AttentionItem[] = visibleAlarms(alarms, role).map((alarm) => ({
+    id: alarm.key,
+    tag: alarm.key === 'inbox' ? 'Inbox' : 'Lead',
+    text: [alarm.label, alarm.hint].filter(Boolean).join(' · '),
+    action:
+      alarm.key === 'waiting'
+        ? { label: 'Open leads', href: `${ADMIN_LEADS}?status=new` }
+        : alarm.key === 'inbox'
+          ? { label: 'Add an inbox', href: ADMIN_SITES }
+          : { label: 'Open leads', href: ADMIN_LEADS },
+  }))
+  if (role !== 'admin') return items
+  for (const site of sites) {
+    if (site.stage !== 'needs-review' && site.stage !== 'ready') continue
+    if (site.undecided > 0) {
+      items.push({
+        id: `facts:${site.key}`,
+        tag: 'Site',
+        text: `${site.city}: ${site.undecided === 1 ? '1 fact needs' : `${site.undecided} facts need`} your decision before writing`,
+        action: { label: 'Decide', href: `${ADMIN_BASE}/generate/${site.key}` },
+      })
+    }
+    if (!site.hasAddress) {
+      items.push({
+        id: `address:${site.key}`,
+        tag: 'Site',
+        text: `${site.city} can’t go live yet: no street address`,
+        action: { label: 'Add address', href: `${ADMIN_BASE}/sites/${site.key}` },
+      })
+    }
+  }
+  return items.sort((a, b) => order(a.id) - order(b.id))
+}
+
+// alarms first, then addresses, then facts — the order the operator tends to fix them in
+function order(id: string): number {
+  if (id.startsWith('address:')) return 1
+  if (id.startsWith('facts:')) return 2
+  return 0
 }

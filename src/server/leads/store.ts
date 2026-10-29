@@ -2,6 +2,7 @@
 // The only module that speaks Prisma's query API; the client lives in src/server/infra/db.ts. Everything above speaks types.ts.
 import { Prisma, type Lead as PrismaLead } from '@/generated/prisma/client'
 import { prisma } from '@/server/infra/db'
+import { bucketByWeek } from './weeks'
 import type {
   EmailStatus,
   LeadStatusCounts,
@@ -179,6 +180,20 @@ export async function leadCountsByCity(): Promise<Record<string, LeadCounts>> {
     if (row.emailStatus === 'failed') bucket.emailFailed += n
   }
   return out
+}
+
+// leads per week, oldest first, for the dashboard chart; only the dates leave the database
+export async function leadsPerWeek(now: Date, weeks: number, cityKey?: string): Promise<number[]> {
+  const since = new Date(now.getTime() - weeks * 7 * 86_400_000)
+  const rows = await prisma.lead.findMany({
+    where: { isTest: false, submittedAt: { gte: since, lte: now }, ...(cityKey ? { cityKey } : {}) },
+    select: { submittedAt: true },
+  })
+  return bucketByWeek(
+    rows.map((r) => r.submittedAt),
+    now,
+    weeks,
+  )
 }
 
 export async function getSiteSettings(cityKey: string): Promise<SiteSettingsRecord | null> {

@@ -5,7 +5,7 @@ export { errorMessage, isStageId } from './shared'
 export type { ActionResult, CityRow, CityStatus, CreateResult, SuburbRow } from './shared'
 export {
   buildOps,
-  createDraftFromFields,
+  cityKeyStatusLogic, createDraftFromFields,
   formatOpsFields,
   MAX_PROFILES,
   MAX_REVIEWS,
@@ -22,7 +22,7 @@ export type {
   ParseProfilesResult,
   ParseReviewsResult,
 } from './create'
-export { listCities, readMarketLogic, readOpsLogic, updateContactLogic, updateOpsLogic } from './sites'
+export { listCities, listSiteSummaries, type SiteSummary, readMarketLogic, readOpsLogic, updateContactLogic, updateOpsLogic } from './sites'
 export type { MarketSnapshot } from './sites'
 export {
   addPhotoLogic,
@@ -40,5 +40,6 @@ export {
   publishLogic,
   updateSuburbsLogic,
 } from './review'
-export { decideClaimLogic, getProgressLogic, isItemStage, listDecisionsLogic, pendingItemsLogic, type UndecidedClaim, regenerateLogic, runStageLogic, type ItemStage, type PendingItems } from './run'
+export { decideClaimLogic, getProgressLogic, recordUsage, isItemStage, listDecisionsLogic, pendingItemsLogic, type UndecidedClaim, regenerateLogic, runStageLogic, type ItemStage, type PendingItems } from './run'
 export type { ProgressSnapshot } from './run'
+export { siteStage, type SiteStage, type StageView } from './stage'

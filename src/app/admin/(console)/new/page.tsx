@@ -1,19 +1,11 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { createDraftAction } from './actions'
 import { ADMIN_SITES } from '@/server/auth/admin-routes'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { ErrorText } from '@/app/admin/_components/ui'
-import { SubmitButton } from '@/app/admin/_components/submit-button'
-import { PhotoDropzone } from '@/app/admin/_components/photo-dropzone'
 import { requireAdmin } from '@/server/auth/auth-server'
+import { NewSiteWizard } from './new-site-wizard'
 
-// New-city form: a plain server-rendered <form action>. Errors come back as ?error=. searchParams is a Promise in Next 16.
-
-const SHOW_OPERATING_FACTS = true
+// New site: the three-step form (client) posting to createDraftAction. Errors come back as ?error=.
 
 export const dynamic = 'force-dynamic'
 
@@ -37,181 +29,14 @@ export default async function NewCityPage({
           <ChevronLeft className="size-4" aria-hidden="true" />
           Sites
         </Link>
-        <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">Create site</h1>
-        <p className="mt-1 text-[0.85rem] text-muted-foreground">
-          The phone number and state name are derived in code and never written by the AI.
-        </p>
+        <h1 className="mt-2 text-[1.4rem] font-semibold tracking-tight">New site</h1>
       </div>
 
       {error && <ErrorText>{error}</ErrorText>}
 
-      <Card className="mt-4">
-        <CardContent>
-          <form action={createDraftAction} className="space-y-4">
-            <div>
-              <Label htmlFor="city" className="mb-1.5">
-                City <span className="text-destructive">*</span>
-              </Label>
-              <Input id="city" name="city" required className="min-h-11 sm:min-h-9" placeholder="Miami" />
-              <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                Becomes the site’s city name and its URL key (Miami → /miami).
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="state" className="mb-1.5">
-                  State <span className="text-destructive">*</span>
-                </Label>
-                {/* no pattern: "FL" or "Florida", resolved by deriveFacts() */}
-                <Input
-                  id="state"
-                  name="state"
-                  required
-                  maxLength={40}
-                  className="min-h-11 sm:min-h-9"
-                  placeholder="FL"
-                />
-                <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                  Two-letter code or full name. FL or Florida.
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="phone" className="mb-1.5">
-                  Phone <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  required
-                  className="min-h-11 sm:min-h-9"
-                  placeholder="(305) 555-0142"
-                />
-                <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                  Any format works. Punctuation is stripped to ten digits.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="address" className="mb-1.5">
-                Address
-              </Label>
-              <Input
-                id="address"
-                name="address"
-                className="min-h-11 sm:min-h-9"
-                placeholder="Optional. Shown on the contact page"
-              />
-            </div>
-
-            {/* About Us facts that exist before generation. Photos and reviews need a draft to attach to, so they
-              live in the site's Settings, which the finished-generation page points at. */}
-            {SHOW_OPERATING_FACTS && (
-              <details open className="rounded-md border border-border/60 p-4">
-                <summary className="cursor-pointer list-none text-[0.95rem] font-semibold">
-                  About Us
-                  <span className="ml-2 font-normal text-muted-foreground">optional</span>
-                  <span className="mt-1 block text-[0.8rem] font-normal text-muted-foreground">
-                    How long you have served this city, who leads the crew, how big it is, how many
-                    homes it has cleaned, and a photo of the crew. More photos and customer reviews
-                    come next, in the site&rsquo;s Settings, once the city exists. Everything here is printed
-                    as typed; nothing is written by the model.
-                  </span>
-                </summary>
-
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="crewLead" className="mb-1.5">
-                      Crew lead
-                    </Label>
-                    <Input
-                      id="crewLead"
-                      name="crewLead"
-                      className="min-h-11 sm:min-h-9"
-                      placeholder="Maria"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="servingSince" className="mb-1.5">
-                      Serving since
-                    </Label>
-                    <Input
-                      id="servingSince"
-                      name="servingSince"
-                      className="min-h-11 sm:min-h-9"
-                      placeholder="2024"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="crewSize" className="mb-1.5">
-                      Crew size
-                    </Label>
-                    <Input
-                      id="crewSize"
-                      name="crewSize"
-                      inputMode="numeric"
-                      className="min-h-11 sm:min-h-9"
-                      placeholder="4"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="homesCleaned" className="mb-1.5">
-                      Homes cleaned here
-                    </Label>
-                    <Input
-                      id="homesCleaned"
-                      name="homesCleaned"
-                      inputMode="numeric"
-                      className="min-h-11 sm:min-h-9"
-                      placeholder="340"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <PhotoDropzone
-                      mode="form"
-                      name="crewPhoto"
-                      captionName="crewPhotoAlt"
-                      label="Crew photos"
-                      hint="The first photo leads the About page; the rest fill its gallery. They are shrunk in your browser before they are sent, so a large phone photo is fine."
-                      captionLabel="Caption for the crew photo"
-                      captionPlaceholder="The Houston crew outside a Katy home"
-                    />
-                  </div>
-                </div>
-              </details>
-            )}
-
-            {/* say what the button does: a several-minute pipeline */}
-            <div className="rounded-md bg-muted/50 px-4 py-3 text-[0.8rem] text-muted-foreground">
-              <p className="font-medium text-foreground">What happens next</p>
-              <p className="mt-1">
-                Research &rarr; front page &rarr; deep cleaning &rarr; area pages &rarr; service
-                pages. About seven minutes. You can close the tab &mdash; reopening the page picks
-                up from the last finished stage, and nothing is charged twice.
-              </p>
-              <p className="mt-1">
-                Then you review it, add the About Us photos and reviews, and publish when it reads
-                right.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              {/* SubmitButton for feedback on click, like every other form here */}
-              <SubmitButton pendingLabel="Creating…" className="sm:min-h-9">
-                Create &amp; generate
-              </SubmitButton>
-              <Button asChild variant="outline" size="lg" className="min-h-11 sm:min-h-9">
-                <Link href={ADMIN_SITES}>Cancel</Link>
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <div className="mt-4">
+        <NewSiteWizard />
+      </div>
     </>
   )
 }

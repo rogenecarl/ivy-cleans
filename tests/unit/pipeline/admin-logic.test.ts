@@ -21,6 +21,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
+  cityKeyStatusLogic,
   createDraftFromFields,
   decideClaimLogic,
   listDecisionsLogic,
@@ -28,6 +29,7 @@ import {
   getProgressLogic,
   isStageId,
   listCities,
+  listSiteSummaries,
   MAX_REVIEWS,
   MAX_REVIEWS_LENGTH,
   normalizeSuburbs,
@@ -38,6 +40,7 @@ import {
   regenerateLogic,
   runStageLogic,
   readMarketLogic,
+  recordUsage,
   readOpsLogic,
   updateContactLogic,
   updateOpsLogic,
@@ -138,7 +141,7 @@ describe('framework independence', () => {
   it('admin-logic imports nothing from next/ — which is why this file can import it', async () => {
     const dir = path.join(process.cwd(), 'src/server/pipeline/admin-logic')
     const files = (await readdir(dir)).filter((f) => f.endsWith('.ts'))
-    expect(files.length).toBe(7)
+    expect(files.length).toBe(9)
     for (const file of files) {
       const source = await readFile(path.join(dir, file), 'utf-8')
       // Anchored to a line-initial `import`, so the rule can be *described* in a
@@ -1513,5 +1516,67 @@ describe('final review fixes', () => {
     const r = await regenerateLogic(KEY, 'verify')
     expect(r.ok).toBe(false)
     await wipe(KEY)
+  })
+})
+
+describe('cost and area progress for the console', () => {
+  const KEY = 'ztest-editville'
+
+  it('records usage on the draft after each stage request, and reports it with the area states', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).usage).toBeDefined()
+    expect(await runStageLogic(KEY, 'verify')).toEqual({ ok: true })
+
+    const before = await getProgressLogic(KEY)
+    expect(before.ok).toBe(true)
+    if (!before.ok) return
+    expect(before.costUsd).toBe(0) // the stub spends nothing, but the draft has a record
+    expect(before.areas.map((a) => a.written)).toEqual([false, false])
+
+    const first = before.areas[0].slug
+    expect(await runStageLogic(KEY, 'suburb', first)).toEqual({ ok: true })
+    const after = await getProgressLogic(KEY)
+    expect(after.ok && after.areas.find((a) => a.slug === first)?.written).toBe(true)
+    await wipe(KEY)
+  })
+
+  it('lists every city with its stage and next step', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    const rows = await listSiteSummaries()
+    const mine = rows.find((r) => r.key === KEY)!
+    expect(mine).toMatchObject({ stage: 'generating', next: { label: 'Watch progress' }, costUsd: null })
+    const mpls = rows.find((r) => r.key === 'minneapolis')!
+    expect(mpls).toMatchObject({ stage: 'live', next: { label: 'Settings' } })
+    await wipe(KEY)
+  })
+})
+
+describe('cityKeyStatusLogic', () => {
+  const KEY = 'ztest-editville'
+
+  it('says a new city name is free and what its address will be', async () => {
+    await wipe(KEY)
+    expect(await cityKeyStatusLogic('Ztest Editville')).toEqual({ key: KEY, free: true })
+  })
+
+  it('says when a draft or a published city already uses the name', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await cityKeyStatusLogic('Ztest Editville')).toMatchObject({ free: false, reason: expect.stringMatching(/draft/) })
+    await wipe(KEY)
+    expect(await cityKeyStatusLogic('Minneapolis')).toMatchObject({ key: 'minneapolis', free: false, reason: expect.stringMatching(/published/) })
+  })
+
+  it('refuses a name with no letters or numbers', async () => {
+    expect(await cityKeyStatusLogic('!!!')).toMatchObject({ key: '', free: false })
+  })
+})
+
+describe('recordUsage', () => {
+  it('never turns a stage result into a thrown error, even when recording fails', async () => {
+    const broken = { get usage(): never { throw new Error('disk full') } } as unknown as Parameters<typeof recordUsage>[1]
+    expect((await freshDraft('ztest-editville')).ok).toBe(true)
+    await expect(recordUsage('ztest-editville', broken)).resolves.toBeUndefined()
+    await wipe('ztest-editville')
   })
 })

@@ -1,7 +1,9 @@
 import { Suspense, type ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ADMIN_DASHBOARD } from '@/server/auth/admin-routes'
+import { Plus } from 'lucide-react'
+import { ADMIN_DASHBOARD, ADMIN_NEW } from '@/server/auth/admin-routes'
+import { Button } from '@/components/ui/button'
 import { AdminNav } from '@/app/admin/_components/nav'
 import { IdentityChip } from '@/app/admin/_components/identity-chip'
 import { SignedInToast } from '@/app/admin/_components/signed-in-toast'
@@ -40,7 +42,17 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
 
             <AdminNav role={user.role} />
 
-            <IdentityChip user={user} />
+            <div className="ml-auto flex items-center gap-3">
+              {user.role === 'admin' && (
+                <Button asChild size="sm" className="hidden min-h-9 sm:inline-flex" data-role="new-site">
+                  <Link href={ADMIN_NEW}>
+                    <Plus className="size-4" aria-hidden="true" />
+                    New site
+                  </Link>
+                </Button>
+              )}
+              <IdentityChip user={user} />
+            </div>
           </div>
         </div>
       </header>

@@ -1,18 +1,13 @@
 // src/app/admin/(console)/sites/list-logic.ts
 // The Sites list's filtering, counting and ordering as pure functions. Filters live in the URL, like the Leads screen.
-import type { CityStatus } from '@/server/pipeline/admin-logic'
+import type { SiteStage } from '@/server/pipeline/admin-logic'
 import { ADMIN_SITES } from '@/server/auth/admin-routes'
 
-export const SITE_STATUSES: readonly CityStatus[] = [
-  'live',
-  'draft',
-  'draft-unfinalized',
-  'generating',
-  'error',
-]
+// pipeline order: the order a city moves through them
+export const SITE_STATUSES: readonly SiteStage[] = ['generating', 'stopped', 'needs-review', 'ready', 'live']
 
 export type SiteQuery = {
-  status: CityStatus | null
+  status: SiteStage | null
   /** Free-text match over city name, url key and domain. '' means no search. */
   q: string
   /** 1-based. Always at least 1; see parseSiteQuery. */
@@ -64,7 +59,7 @@ export function siteFilterHref(
     // changing a filter resets to page 1
     next.page = 1
     if (key === 'status') {
-      next.status = (SITE_STATUSES.find((s) => s === value) ?? null) as CityStatus | null
+      next.status = SITE_STATUSES.find((s) => s === value) ?? null
     } else {
       next.q = value ?? ''
     }
@@ -100,7 +95,7 @@ export function paginate<T>(
 export type FilterableSite = {
   key: string
   city: string
-  status: CityStatus
+  stage: SiteStage
   domain: string | null
 }
 
@@ -108,7 +103,7 @@ export type FilterableSite = {
 export function filterSites<T extends FilterableSite>(rows: T[], query: SiteQuery): T[] {
   const q = query.q.toLowerCase()
   return rows.filter((row) => {
-    if (query.status !== null && row.status !== query.status) return false
+    if (query.status !== null && row.stage !== query.status) return false
     if (q === '') return true
     return (
       row.city.toLowerCase().includes(q) ||
@@ -118,16 +113,10 @@ export function filterSites<T extends FilterableSite>(rows: T[], query: SiteQuer
   })
 }
 
-/** Counts per status over the UNFILTERED set, for the chips. */
-export function siteStatusCounts(rows: { status: CityStatus }[]): Record<CityStatus, number> {
-  const counts: Record<CityStatus, number> = {
-    live: 0,
-    draft: 0,
-    'draft-unfinalized': 0,
-    generating: 0,
-    error: 0,
-  }
-  for (const row of rows) counts[row.status] += 1
+/** Counts per stage over the UNFILTERED set, for the chips. */
+export function siteStatusCounts(rows: { stage: SiteStage }[]): Record<SiteStage, number> {
+  const counts: Record<SiteStage, number> = { generating: 0, stopped: 0, 'needs-review': 0, ready: 0, live: 0 }
+  for (const row of rows) counts[row.stage] += 1
   return counts
 }
 
@@ -140,13 +129,8 @@ export function sortProblemsFirst<T extends { city: string; problemCount: number
   )
 }
 
-// live and draft always show; generating / draft-unfinalized / error only when non-zero — except the selected one, which always shows
-export function visibleStatuses(
-  counts: Record<CityStatus, number>,
-  active: CityStatus | null,
-): CityStatus[] {
-  const alwaysShown: CityStatus[] = ['live', 'draft']
-  return SITE_STATUSES.filter(
-    (status) => alwaysShown.includes(status) || counts[status] > 0 || active === status,
-  )
+// Needs review and Live always show; the others only when non-zero — except the selected one, which always shows
+export function visibleStatuses(counts: Record<SiteStage, number>, active: SiteStage | null): SiteStage[] {
+  const alwaysShown: SiteStage[] = ['needs-review', 'live']
+  return SITE_STATUSES.filter((stage) => alwaysShown.includes(stage) || counts[stage] > 0 || active === stage)
 }

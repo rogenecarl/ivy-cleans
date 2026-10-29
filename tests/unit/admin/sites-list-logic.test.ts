@@ -19,9 +19,9 @@ import {
 } from '@/app/admin/(console)/sites/list-logic'
 
 const SITES = [
-  { key: 'minneapolis', city: 'Minneapolis', status: 'live' as const, domain: 'ivycleans.com' },
-  { key: 'miami', city: 'Miami', status: 'live' as const, domain: null },
-  { key: 'testville', city: 'Testville', status: 'draft' as const, domain: null },
+  { key: 'minneapolis', city: 'Minneapolis', stage: 'live' as const, domain: 'ivycleans.com' },
+  { key: 'miami', city: 'Miami', stage: 'live' as const, domain: null },
+  { key: 'testville', city: 'Testville', stage: 'needs-review' as const, domain: null },
 ]
 
 describe('parseSiteQuery', () => {
@@ -40,7 +40,7 @@ describe('parseSiteQuery', () => {
   })
 
   it('takes the first value when a parameter repeats', () => {
-    expect(parseSiteQuery({ status: ['draft', 'live'] }).status).toBe('draft')
+    expect(parseSiteQuery({ status: ['needs-review', 'live'] }).status).toBe('needs-review')
   })
 })
 
@@ -50,8 +50,8 @@ describe('siteQueryToSearch / siteFilterHref', () => {
   })
 
   it('keeps the other filter when changing one', () => {
-    const href = siteFilterHref({ status: 'live', q: 'mia', page: 1 }, 'status', 'draft')
-    expect(href).toContain('status=draft')
+    const href = siteFilterHref({ status: 'live', q: 'mia', page: 1 }, 'status', 'ready')
+    expect(href).toContain('status=ready')
     expect(href).toContain('q=mia')
   })
 
@@ -91,16 +91,8 @@ describe('filterSites', () => {
 })
 
 describe('siteStatusCounts', () => {
-  it('includes every status, zeros included', () => {
-    // A missing "error" key would render as a gap rather than a zero, reading
-    // as "errors are not a thing here".
-    expect(siteStatusCounts(SITES)).toEqual({
-      live: 2,
-      draft: 1,
-      'draft-unfinalized': 0,
-      generating: 0,
-      error: 0,
-    })
+  it('includes every stage, zeros included', () => {
+    expect(siteStatusCounts(SITES)).toEqual({ generating: 0, stopped: 0, 'needs-review': 1, ready: 0, live: 2 })
   })
 })
 
@@ -130,43 +122,19 @@ describe('sortProblemsFirst', () => {
 })
 
 describe('visibleStatuses', () => {
-  const healthy = { live: 3, draft: 1, 'draft-unfinalized': 0, generating: 0, error: 0 }
+  const healthy = { generating: 0, stopped: 0, 'needs-review': 1, ready: 0, live: 3 }
 
-  it('hides the three exception states when nothing is in them', () => {
-    // On a healthy system these sit at zero permanently; three chips that
-    // always read "0" are decoration.
-    expect(visibleStatuses(healthy, null)).toEqual(['live', 'draft'])
+  it('always shows Needs review and Live, and hides the rest at zero', () => {
+    expect(visibleStatuses(healthy, null)).toEqual(['needs-review', 'live'])
+    expect(visibleStatuses({ ...healthy, live: 0, 'needs-review': 0 }, null)).toEqual(['needs-review', 'live'])
   })
 
-  it('always shows Live and Draft, even at zero', () => {
-    // A zero here is real information: "nothing is published yet".
-    expect(visibleStatuses({ ...healthy, live: 0, draft: 0 }, null)).toEqual(['live', 'draft'])
+  it('surfaces a stage the moment it has something in it, in pipeline order', () => {
+    expect(visibleStatuses({ ...healthy, stopped: 1, ready: 2 }, null)).toEqual(['stopped', 'needs-review', 'ready', 'live'])
   })
 
-  it('surfaces an exception state the moment it has something in it', () => {
-    expect(visibleStatuses({ ...healthy, error: 1 }, null)).toEqual(['live', 'draft', 'error'])
-    expect(visibleStatuses({ ...healthy, generating: 2 }, null)).toEqual([
-      'live',
-      'draft',
-      'generating',
-    ])
-  })
-
-  it('keeps a SELECTED status visible at zero, so the filter can be undone', () => {
-    // Hiding it would strand the operator on a filtered view with no chip
-    // showing what the filter is or how to clear it.
-    expect(visibleStatuses(healthy, 'error')).toEqual(['live', 'draft', 'error'])
-  })
-
-  it('preserves pipeline order rather than the order things appeared', () => {
-    const all = { live: 1, draft: 1, 'draft-unfinalized': 1, generating: 1, error: 1 }
-    expect(visibleStatuses(all, null)).toEqual([
-      'live',
-      'draft',
-      'draft-unfinalized',
-      'generating',
-      'error',
-    ])
+  it('keeps a SELECTED stage visible at zero, so the filter can be undone', () => {
+    expect(visibleStatuses(healthy, 'generating')).toEqual(['generating', 'needs-review', 'live'])
   })
 })
 

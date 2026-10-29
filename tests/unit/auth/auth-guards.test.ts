@@ -86,6 +86,7 @@ vi.mock('@/server/content/store', async () => {
  * is ever removed.
  */
 const createDraftFromFields = vi.fn()
+const cityKeyStatusLogic = vi.fn()
 const runStageLogic = vi.fn()
 const regenerateLogic = vi.fn()
 const finalizeLogic = vi.fn()
@@ -111,6 +112,7 @@ vi.mock('@/server/pipeline/admin-logic', async () => {
   return {
     ...actual,
     createDraftFromFields,
+    cityKeyStatusLogic,
     runStageLogic,
     regenerateLogic,
     finalizeLogic,
@@ -189,6 +191,7 @@ describe('admin-only pipeline actions', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cases: [string, () => Promise<any>, (m: any) => Promise<unknown>][] = [
     ['createDraftAction', NEW, (m) => m.createDraftAction(new FormData())],
+    ['checkCityKeyAction', NEW, (m) => m.checkCityKeyAction('Miami')],
     ['runStageAction', GENERATE, (m) => m.runStageAction('miami', 'facts')],
     ['regenerateAction', REVIEW, (m) => m.regenerateAction('miami', 'facts')],
     ['finalizeAction', GENERATE, (m) => m.finalizeAction('miami')],
@@ -227,6 +230,7 @@ describe('admin-only pipeline actions', () => {
    */
   function expectNoAdminLogicCalls() {
     expect(createDraftFromFields).not.toHaveBeenCalled()
+    expect(cityKeyStatusLogic).not.toHaveBeenCalled()
     expect(runStageLogic).not.toHaveBeenCalled()
     expect(regenerateLogic).not.toHaveBeenCalled()
     expect(finalizeLogic).not.toHaveBeenCalled()
@@ -430,7 +434,7 @@ describe('console page guards', () => {
   it('review/[key]/page.tsx refuses a manager and never reads the city document', async () => {
     asManager()
     const mod = await import('@/app/admin/(console)/review/[key]/page')
-    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    await expect(mod.default({ params: poison('params'), searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
     expect(getCity).not.toHaveBeenCalled()
     expect(loadDraft).not.toHaveBeenCalled()
   })
@@ -438,7 +442,7 @@ describe('console page guards', () => {
   it('review/[key]/page.tsx refuses a signed-out caller', async () => {
     signedOut()
     const mod = await import('@/app/admin/(console)/review/[key]/page')
-    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    await expect(mod.default({ params: poison('params'), searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
     expect(getCity).not.toHaveBeenCalled()
     expect(loadDraft).not.toHaveBeenCalled()
   })
