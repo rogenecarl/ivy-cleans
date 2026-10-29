@@ -11,6 +11,8 @@ import {
   getProgressLogic,
   isItemStage,
   isStageId,
+  decideClaimLogic,
+  listDecisionsLogic,
   pendingItemsLogic,
   runStageLogic,
   type ActionResult,
@@ -48,4 +50,16 @@ export async function finalizeAction(key: string): Promise<ActionResult> {
 export async function getProgressAction(key: string): Promise<ProgressSnapshot> {
   await requireAdmin()
   return getProgressLogic(key)
+}
+
+/** The facts the fact check could not confirm; writing waits until each is kept or dropped. */
+export async function listDecisionsAction(key: string) {
+  await requireAdmin()
+  return listDecisionsLogic(key)
+}
+
+export async function decideClaimAction(key: string, claimId: string, decision: string): Promise<ActionResult> {
+  await requireAdmin()
+  if (decision !== 'keep' && decision !== 'drop') return { ok: false, error: `unknown decision "${decision}"` }
+  return decideClaimLogic(key, claimId, decision)
 }

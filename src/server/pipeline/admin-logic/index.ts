@@ -40,5 +40,5 @@ export {
   publishLogic,
   updateSuburbsLogic,
 } from './review'
-export { getProgressLogic, isItemStage, pendingItemsLogic, regenerateLogic, runStageLogic, type ItemStage, type PendingItems } from './run'
+export { decideClaimLogic, getProgressLogic, isItemStage, listDecisionsLogic, pendingItemsLogic, type UndecidedClaim, regenerateLogic, runStageLogic, type ItemStage, type PendingItems } from './run'
 export type { ProgressSnapshot } from './run'

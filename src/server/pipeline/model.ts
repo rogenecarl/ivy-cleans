@@ -269,9 +269,14 @@ type StubFixtures = {
   events?: Record<string, ResearchEvent[]>
 }
 
+/** STUB_FIXTURE (a path from the repo root) swaps in another fixture, e.g. one where a fact comes back unconfirmed. */
+export function stubFixturePath(): string {
+  return path.join(process.cwd(), process.env.STUB_FIXTURE?.trim() || 'tests/fixtures/stub-pipeline.json')
+}
+
 export function makeClient(): ModelClient {
   if (process.env.STUB_MODEL === '1') {
-    const fixturePath = path.join(process.cwd(), 'tests/fixtures/stub-pipeline.json')
+    const fixturePath = stubFixturePath()
     const raw = fs.readFileSync(fixturePath, 'utf-8')
     const fixtures = JSON.parse(raw) as StubFixtures
     return new StubModelClient(fixtures)

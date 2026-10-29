@@ -22,6 +22,8 @@ import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
   createDraftFromFields,
+  decideClaimLogic,
+  listDecisionsLogic,
   finalizeLogic,
   getProgressLogic,
   isStageId,
@@ -1369,6 +1371,86 @@ describe('updateContactLogic', () => {
     if (!read.ok) return
     expect(read.phone).toBe('(612) 555-0142')
     expect(read.address).toBe('')
+    await wipe(KEY)
+  })
+})
+
+describe('deciding on unconfirmed facts before writing', () => {
+  const KEY = 'ztest-editville'
+
+  // research + fact check on the stub (all confirmed), then one subdivision turned unconfirmed by hand
+  async function withOneUnconfirmed(text = 'Mock Hollow Terrace'): Promise<string> {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'verify')).toEqual({ ok: true })
+    const { saveDraft } = await import('@/server/content/drafts')
+    const { researchFromClaims } = await import('@/server/pipeline/claims')
+    const draft = await loadDraft(KEY)
+    const claim = draft.claims!.find((c) => c.text === text)!
+    claim.status = 'unconfirmed'
+    claim.reason = 'the source does not mention it'
+    draft.research = researchFromClaims(draft.researchFull!, draft.claims!)
+    await saveDraft(KEY, draft)
+    return claim.id
+  }
+
+  const subdivisionsOf = async (slug: string) =>
+    (await loadDraft(KEY)).research!.suburbs.find((s) => s.slug === slug)?.subdivisions ?? []
+
+  it('lists the undecided facts with their area and source links', async () => {
+    const id = await withOneUnconfirmed()
+    const r = await listDecisionsLogic(KEY)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.claims).toHaveLength(1)
+    expect(r.claims[0]).toMatchObject({ id, areaName: 'Mock Hollow', reason: 'the source does not mention it' })
+    expect(r.claims[0].sourceLinks[0].url).toBe('https://stubville.example/guide')
+    await wipe(KEY)
+  })
+
+  it('Keep puts the fact back into the research the writers see', async () => {
+    const id = await withOneUnconfirmed()
+    expect(await subdivisionsOf('cleaning-services-mock-hollow')).not.toContain('Mock Hollow Terrace')
+    expect(await decideClaimLogic(KEY, id, 'keep')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).claims!.find((c) => c.id === id)?.status).toBe('kept')
+    expect(await subdivisionsOf('cleaning-services-mock-hollow')).toContain('Mock Hollow Terrace')
+    await wipe(KEY)
+  })
+
+  it('Drop keeps it out for good', async () => {
+    const id = await withOneUnconfirmed()
+    expect(await decideClaimLogic(KEY, id, 'drop')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).claims!.find((c) => c.id === id)?.status).toBe('dropped')
+    expect(await subdivisionsOf('cleaning-services-mock-hollow')).not.toContain('Mock Hollow Terrace')
+    await wipe(KEY)
+  })
+
+  it('refuses a second decision on the same fact, and an unknown fact', async () => {
+    const id = await withOneUnconfirmed()
+    expect(await decideClaimLogic(KEY, id, 'drop')).toEqual({ ok: true })
+    expect((await decideClaimLogic(KEY, id, 'keep')).ok).toBe(false)
+    expect((await decideClaimLogic(KEY, 'no:such:claim', 'keep')).ok).toBe(false)
+    await wipe(KEY)
+  })
+
+  it('will not write a page while a fact is undecided', async () => {
+    await withOneUnconfirmed()
+    const r = await runStageLogic(KEY, 'front')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toMatch(/need a decision/)
+    await wipe(KEY)
+  })
+
+  it('after a reload, lists only the facts still undecided', async () => {
+    const first = await withOneUnconfirmed('Mock Hollow Terrace')
+    const { saveDraft } = await import('@/server/content/drafts')
+    const draft = await loadDraft(KEY)
+    draft.claims!.find((c) => c.text === 'Mock Hollow Commons')!.status = 'unconfirmed'
+    await saveDraft(KEY, draft)
+    expect(await decideClaimLogic(KEY, first, 'keep')).toEqual({ ok: true })
+    const r = await listDecisionsLogic(KEY)
+    expect(r.ok && r.claims.map((c) => c.text)).toEqual(['Mock Hollow Commons'])
     await wipe(KEY)
   })
 })

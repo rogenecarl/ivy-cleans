@@ -1,4 +1,5 @@
-import { loadDraft } from '@/server/content/drafts'
+import { loadDraft, saveDraft } from '@/server/content/drafts'
+import { researchFromClaims, type ResearchClaim } from '@/server/pipeline/claims'
 import { SERVICE_LOCAL_SLUGS, isWritableArea, isWrittenSlot, serviceSlots, suburbSlots } from '@/server/content/slots'
 import { serviceBySlug } from '@/site/data/services/registry'
 import { makeClient } from '@/server/pipeline/model'
@@ -87,3 +88,46 @@ export async function getProgressLogic(key: string): Promise<ProgressSnapshot> {
 }
 
 /** Draft sidecar -> validated content/<key>.json + _cities.json registration. */
+
+// ── Decisions on unconfirmed facts (before writing) ──
+
+export type UndecidedClaim = ResearchClaim & { areaName: string | null; sourceLinks: { title: string; url: string }[] }
+
+export async function listDecisionsLogic(
+  key: string,
+): Promise<{ ok: true; claims: UndecidedClaim[] } | { ok: false; error: string }> {
+  try {
+    const draft = await loadDraft(key)
+    const names = new Map((draft.researchFull?.suburbs ?? []).map((s) => [s.slug, s.name]))
+    const sources = new Map((draft.sources ?? []).map((s) => [s.id, s]))
+    const claims = (draft.claims ?? [])
+      .filter((c) => c.status === 'unconfirmed')
+      .map((c) => ({
+        ...c,
+        areaName: c.area === null ? null : (names.get(c.area) ?? c.area),
+        sourceLinks: c.sources.flatMap((id) => {
+          const s = sources.get(id)
+          return s ? [{ title: s.title, url: s.url }] : []
+        }),
+      }))
+    return { ok: true, claims }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}
+
+// keep → the fact goes back into what the writers see; drop → it stays out. Only an undecided fact can be decided.
+export async function decideClaimLogic(key: string, claimId: string, decision: 'keep' | 'drop'): Promise<ActionResult> {
+  try {
+    const draft = await loadDraft(key)
+    const claim = draft.claims?.find((c) => c.id === claimId)
+    if (!claim) return { ok: false, error: 'that fact is no longer in this draft — reload the page' }
+    if (claim.status !== 'unconfirmed') return { ok: false, error: 'that fact has already been decided' }
+    claim.status = decision === 'keep' ? 'kept' : 'dropped'
+    if (draft.researchFull) draft.research = researchFromClaims(draft.researchFull, draft.claims!)
+    await saveDraft(key, draft)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) }
+  }
+}

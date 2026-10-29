@@ -97,6 +97,8 @@ const checkProvisioningLogic = vi.fn()
 const publishLogic = vi.fn()
 const listCities = vi.fn(async () => [])
 const getProgressLogic = vi.fn()
+const listDecisionsLogic = vi.fn()
+const decideClaimLogic = vi.fn()
 const addPhotoLogic = vi.fn()
 const removePhotoLogic = vi.fn()
 const savePhotoCaptionsLogic = vi.fn()
@@ -120,6 +122,8 @@ vi.mock('@/server/pipeline/admin-logic', async () => {
     publishLogic,
     listCities,
     getProgressLogic,
+    listDecisionsLogic,
+    decideClaimLogic,
     addPhotoLogic,
     removePhotoLogic,
     savePhotoCaptionsLogic,
@@ -190,6 +194,8 @@ describe('admin-only pipeline actions', () => {
     ['finalizeAction', GENERATE, (m) => m.finalizeAction('miami')],
     ['updateSuburbsAction', REVIEW, (m) => m.updateSuburbsAction('miami', [])],
     ['pendingItemsAction', GENERATE, (m) => m.pendingItemsAction('miami', 'suburb')],
+    ['listDecisionsAction', GENERATE, (m) => m.listDecisionsAction('miami')],
+    ['decideClaimAction', GENERATE, (m) => m.decideClaimAction('miami', 'x', 'keep')],
     ['publishAction', REVIEW, (m) => m.publishAction('miami')],
     ['checkProvisioningAction', REVIEW, (m) => m.checkProvisioningAction('miami')],
     ['getProgressAction', GENERATE, (m) => m.getProgressAction('miami')],
@@ -230,6 +236,8 @@ describe('admin-only pipeline actions', () => {
     expect(publishLogic).not.toHaveBeenCalled()
     expect(listCities).not.toHaveBeenCalled()
     expect(getProgressLogic).not.toHaveBeenCalled()
+    expect(listDecisionsLogic).not.toHaveBeenCalled()
+    expect(decideClaimLogic).not.toHaveBeenCalled()
     expect(addPhotoLogic).not.toHaveBeenCalled()
     expect(removePhotoLogic).not.toHaveBeenCalled()
     expect(savePhotoCaptionsLogic).not.toHaveBeenCalled()

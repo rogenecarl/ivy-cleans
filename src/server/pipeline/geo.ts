@@ -1,8 +1,8 @@
 // Code checks for research claims: where a place is (OpenStreetMap Nominatim) and which ZIPs exist (Census table).
 // Absence of evidence is neutral; only a place found in the wrong state or too far away counts against a claim.
 import fs from 'node:fs'
-import path from 'node:path'
 import zips from './data/zips.json'
+import { stubFixturePath } from './model'
 
 export type GeoPoint = { lat: number; lon: number; state: string | null }
 
@@ -92,7 +92,7 @@ export class StubGeocoder implements Geocoder {
 /** The real geocoder, or with STUB_MODEL=1 the stub fixture's `geocode` map (no network in tests and E2E). */
 export function makeGeocoder(): Geocoder {
   if (process.env.STUB_MODEL === '1') {
-    const raw = fs.readFileSync(path.join(process.cwd(), 'tests/fixtures/stub-pipeline.json'), 'utf-8')
+    const raw = fs.readFileSync(stubFixturePath(), 'utf-8')
     return new StubGeocoder((JSON.parse(raw) as { geocode?: Record<string, GeoPoint | null> }).geocode ?? {})
   }
   return new NominatimGeocoder()

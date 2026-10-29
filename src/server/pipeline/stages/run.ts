@@ -44,12 +44,15 @@ import {
   MAX_AREAS,
   MODEL_KEYS,
   applyUniquenessGate,
-  linkNeighbors,
   normalizeResearchSlugs,
   normalizeSlug,
 } from './research'
 
 function requireResearch(draft: DraftDoc, key: string, stage: StageId): ResearchOutput {
+  const undecided = (draft.claims ?? []).filter((c) => c.status === 'unconfirmed').length
+  if (undecided > 0) {
+    throw new Error(`cannot run stage "${stage}" for "${key}": ${undecided} research facts still need a decision`)
+  }
   if (!draft.research) {
     throw new Error(`cannot run stage "${stage}" for "${key}": the research stage has not completed`)
   }
