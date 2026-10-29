@@ -103,6 +103,17 @@ Every item carries sources: the S-numbers from the SOURCES list at the end of th
 
 Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.`
 
+// fact check: one claim at a time against the lines quoted from its own sources. Not on SYSTEM_BASE: it writes no copy.
+export const FACT_CHECK_SYSTEM = `You check research claims about a city against the source text they came from.
+
+For each claim you get its id, what it says, and the exact lines quoted from the web pages it was taken from. Judge ONLY from those quoted lines — not from your own knowledge of the place, and not from what seems likely.
+
+- supported: the quoted lines state the claim (a named place appears as a place in that area or city; a description matches what the lines say).
+- unclear: the lines mention something related but do not actually state the claim, or the place they name could be somewhere else.
+- contradicted: the lines say something incompatible (the place is in another city or state, the description is the opposite).
+
+Give one verdict per claim id, with a reason of one short sentence a non-technical operator can read.`
+
 // ── Prompt builders ──
 
 
@@ -394,4 +405,24 @@ Working through every condition on the list is what makes six service pages read
 If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.
 
 links — up to two phrases you have already written above that name one of the areas listed, each with that area's name exactly as listed. The phrase must appear word for word in your paragraph and contain the area name. If none, return an empty list.`
+}
+
+/** One area's (or the city-wide) claims with the quoted lines of each claim's sources. */
+export function buildFactCheckPrompt(
+  facts: Facts,
+  claims: ReadonlyArray<{ id: string; kind: string; text: string; area: string | null; sources: readonly string[] }>,
+  sources: readonly ResearchSource[],
+  areaName: string | null,
+): string {
+  const byId = new Map(sources.map((s) => [s.id, s]))
+  const blocks = claims.map((c) => {
+    const quoted = c.sources
+      .map((id) => byId.get(id))
+      .filter((s): s is ResearchSource => s !== undefined)
+      .map((s) => `  From "${s.title}":\n${s.quotes.map((q) => `    "${q}"`).join('\n')}`)
+      .join('\n')
+    return `- id: ${c.id}\n  ${c.kind}: ${c.text}\n${quoted || '  (no quoted lines)'}`
+  })
+  const where = areaName ? `${areaName}, an area served from ${facts.city}, ${facts.stateName}` : `${facts.city}, ${facts.stateName} as a whole`
+  return `These claims are about ${where}. Check each one.\n\n${blocks.join('\n\n')}`
 }

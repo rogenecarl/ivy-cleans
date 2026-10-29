@@ -200,13 +200,13 @@
       ],
       "zips": [
         {
-          "zip": "00001",
+          "zip": "55401",
           "sources": [
             "S1"
           ]
         },
         {
-          "zip": "00002",
+          "zip": "55402",
           "sources": [
             "S1"
           ]
@@ -294,6 +294,92 @@
         "Ivy Cleans has cleaned homes in Ztest Aboutville since March 2024. Maria leads the crew here.",
         "Every visit is done by our own crew, and the job is not finished until your home is clean."
       ]
+    },
+    "verify.house-cleaning-north-stubville": {
+      "verdicts": [
+        {
+          "id": "house-cleaning-north-stubville:area:north-stubville",
+          "verdict": "supported",
+          "reason": "The source names North Stubville."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:assertion-acres",
+          "verdict": "supported",
+          "reason": "The source names Assertion Acres."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:mock-meadows",
+          "verdict": "supported",
+          "reason": "The source names Mock Meadows."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:fixture-court",
+          "verdict": "supported",
+          "reason": "The source names Fixture Court."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:stub-village-estates",
+          "verdict": "supported",
+          "reason": "The source names Stub Village Estates."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:placeholder-heights",
+          "verdict": "supported",
+          "reason": "The source names Placeholder Heights."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:canned-creek",
+          "verdict": "supported",
+          "reason": "The source names Canned Creek."
+        },
+        {
+          "id": "house-cleaning-north-stubville:housing:mock-bungalows-from-the-fixture-era-mostly-one-story-with-small-fenced-yards",
+          "verdict": "supported",
+          "reason": "The source names the housing."
+        }
+      ]
+    },
+    "verify.cleaning-services-mock-hollow": {
+      "verdicts": [
+        {
+          "id": "cleaning-services-mock-hollow:area:mock-hollow",
+          "verdict": "supported",
+          "reason": "The source names Mock Hollow."
+        },
+        {
+          "id": "cleaning-services-mock-hollow:subdivision:mock-hollow-commons",
+          "verdict": "supported",
+          "reason": "The source names Mock Hollow Commons."
+        },
+        {
+          "id": "cleaning-services-mock-hollow:subdivision:mock-hollow-terrace",
+          "verdict": "supported",
+          "reason": "The source names Mock Hollow Terrace."
+        },
+        {
+          "id": "cleaning-services-mock-hollow:housing:stub-frame-duplexes-built-close-together-along-the-fixture-line",
+          "verdict": "supported",
+          "reason": "The source names the housing."
+        }
+      ]
+    },
+    "verify.fixture-heights-cleaning-services": {
+      "verdicts": [
+        {
+          "id": "fixture-heights-cleaning-services:area:fixture-heights",
+          "verdict": "supported",
+          "reason": "The source names Fixture Heights."
+        }
+      ]
+    },
+    "verify._city": {
+      "verdicts": [
+        {
+          "id": "_city:condition:six-months-of-test-season-followed-by-six-months-of-assertions",
+          "verdict": "supported",
+          "reason": "The source names the condition."
+        }
+      ]
     }
   },
   "events": {
@@ -311,5 +397,6 @@
         "label": "Reading search results…"
       }
     ]
-  }
+  },
+  "geocode": {}
 }

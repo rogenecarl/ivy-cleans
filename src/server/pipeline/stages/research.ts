@@ -23,6 +23,7 @@ export const MODEL_KEYS = {
   researchAreaList: 'research.structure.areas',
   researchArea: (slug: string) => `research.area.${slug}`,
   researchStructure: 'research.structure',
+  verify: (item: string) => `verify.${item}`,
   front: 'front',
   suburb: (slug: string) => `suburb.${slug}`,
   service: (slug: string) => `service.${slug}`,

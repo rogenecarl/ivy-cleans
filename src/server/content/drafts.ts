@@ -7,6 +7,7 @@ import type { Facts } from '@/server/pipeline/facts'
 import type { ResearchOutput } from '@/server/pipeline/schemas'
 import type { ResearchResult, ResearchSource } from '@/server/pipeline/sources'
 import type { ResearchClaim } from '@/server/pipeline/claims'
+import type { GeoPoint } from '@/server/pipeline/geo'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -36,6 +37,8 @@ export type DraftDoc = {
   // everything research found with a source, before checking; `research` is rebuilt from it and `claims`
   researchFull?: ResearchOutput
   claims?: ResearchClaim[]
+  // geocoder answers by query, so a resumed fact check never asks twice
+  geocodes?: Record<string, GeoPoint | null>
   sections: Record<string, string | string[]>
   links?: Record<string, SlotLink[]>
   done: string[]

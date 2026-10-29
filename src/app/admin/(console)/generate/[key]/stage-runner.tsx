@@ -109,7 +109,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
 
   // walk the areas or service pages still owed, one request each; the list comes from the server
   const runItems = useCallback(
-    async (stage: 'suburb' | 'service'): Promise<{ ok: true } | { ok: false; error: string }> => {
+    async (stage: 'verify' | 'suburb' | 'service'): Promise<{ ok: true } | { ok: false; error: string }> => {
       const pending = await pendingItemsAction(cityKey, stage)
       if (!pending.ok) return { ok: false, error: pending.error }
 
@@ -147,7 +147,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
 
           // suburb and service run one item per request (~20s each); minutes in one request is killed
           const result =
-            stage.id === 'suburb' || stage.id === 'service'
+            stage.id === 'verify' || stage.id === 'suburb' || stage.id === 'service'
               ? await runItems(stage.id)
               : await runStageAction(cityKey, stage.id)
 
@@ -286,7 +286,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
           const isDone = done.includes(stage.id)
           const isRunning = current === stage.id
           const items =
-            isRunning && (stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
+            isRunning && (stage.id === 'verify' || stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
           const isFailed = failed?.stage === stage.id
           // The glyphs are load-bearing: scripts/dev/admin-e2e.mjs polls
           // [data-role="status-icon"] for '✓' to know the run finished.

@@ -18,7 +18,7 @@ export type GenerateArgs<T> = {
 
 // Research is transcription (find pages, copy names out) and runs on the cheaper model; every sentence a reader
 // sees is written by the writing model.
-export const MODELS = { writing: 'claude-opus-5', research: 'claude-sonnet-5' } as const
+export const MODELS = { writing: 'claude-opus-5', research: 'claude-sonnet-5', check: 'claude-haiku-5-5' } as const
 
 // Web searches per research pass. Research is three small passes (city-wide, the area list, one per area) rather
 // than one long call: each pass gets its own budget so none starves another, and search results never pile up.

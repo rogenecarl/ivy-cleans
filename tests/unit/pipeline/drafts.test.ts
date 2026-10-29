@@ -78,7 +78,7 @@ function fullResearch(): ResearchOutput {
       },
     ],
     conditions: [],
-    zips: ['00001', '00002'],
+    zips: ['55401', '55402'],
     keywords: ['cleaning services ztest'],
   }
 }
@@ -265,7 +265,7 @@ describe('drafts store', () => {
       expect(validated.hasSuburbPages).toBe(true)
       expect(validated.maps).toEqual({ front: null, home: null, contact: null })
       expect(validated.contactAddress).toBe('123 Ztest Ave')
-      expect(validated.research.zips).toEqual(['00001', '00002'])
+      expect(validated.research.zips).toEqual(['55401', '55402'])
       expect(validated.sections['service.deep-cleaning.local']).toBe('Deep cleans in Ztest begin in the bathrooms.')
       // The gap Task 18 closes: generated area copy must actually reach the
       // published document instead of being silently dropped at finalize.

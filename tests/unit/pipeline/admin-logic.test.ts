@@ -254,7 +254,7 @@ describe('stage run → finalize → publish', () => {
     const draft = await loadDraft(KEY)
     expect(draft.done).toEqual([...RUNNABLE_STAGE_IDS])
     expect(Object.keys(draft.sections)).toHaveLength(7)
-    expect(draft.research?.zips).toEqual(['00001', '00002'])
+    expect(draft.research?.zips).toEqual(['55401', '55402'])
   })
 
   // Task 18: finalizeLogic (below) now requires every surviving area's three
@@ -391,7 +391,7 @@ describe('updateSuburbsLogic', () => {
       { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [], neighbors: [] },
     ])
     // The rest of the research object is untouched.
-    expect(draft.research?.zips).toEqual(['00001', '00002'])
+    expect(draft.research?.zips).toEqual(['55401', '55402'])
   })
 
   it('edits the published document too, so the preview renders the change', async () => {
@@ -984,7 +984,7 @@ describe('listCities', () => {
     expect(row(await listCities(), KEY)).toMatchObject({
       status: 'generating',
       hasDraft: true,
-      doneCount: 2,
+      doneCount: 3,
     })
   })
 
@@ -1000,7 +1000,7 @@ describe('listCities', () => {
 
     const rows = await listCities()
     expect(rows.filter((r) => r.key === KEY)).toHaveLength(1)
-    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 4 })
+    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 5 })
   })
 
   it('shows a published city as LIVE with no sidecar left', async () => {

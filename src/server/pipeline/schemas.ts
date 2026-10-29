@@ -105,6 +105,17 @@ export const ResearchStructuredSchema = z
   .strict()
 export type ResearchStructured = z.infer<typeof ResearchStructuredSchema>
 
+// The fact check's answer: one verdict per claim id it was given.
+export const FactCheckSchema = z
+  .object({
+    verdicts: z.array(
+      z
+        .object({ id: z.string(), verdict: z.enum(['supported', 'unclear', 'contradicted']), reason: z.string() })
+        .strict(),
+    ),
+  })
+  .strict()
+
 export const FrontSectionsSchema = z
   .object({
     heroParagraphs: z.array(z.string()),

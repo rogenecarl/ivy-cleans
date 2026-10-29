@@ -1,6 +1,7 @@
 // Short stage names for the generate screen's step list. STAGES[].label (slots.ts) keeps the full sentence for the regenerate panel.
 export const STAGE_NAMES: Record<string, string> = {
   research: 'Research',
+  verify: 'Fact check',
   front: 'Front page',
   suburb: 'Area pages',
   service: 'Service pages',
@@ -9,6 +10,7 @@ export const STAGE_NAMES: Record<string, string> = {
 // rough duration shown next to a stage that hasn't started, so slow doesn't read as stuck. Deliberately vague.
 export const STAGE_EXPECTED: Record<string, string> = {
   research: '~3 min',
+  verify: '~5s each',
   front: '~30s',
   suburb: '~20s each',
   service: '~10s each',

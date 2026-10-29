@@ -9,6 +9,7 @@ import { requireAdmin } from '@/server/auth/auth-server'
 import {
   finalizeLogic,
   getProgressLogic,
+  isItemStage,
   isStageId,
   pendingItemsLogic,
   runStageLogic,
@@ -30,7 +31,7 @@ export async function runStageAction(
 // areas or service pages a per-item stage still owes; the client drives the loop one request per item
 export async function pendingItemsAction(key: string, stage: string): Promise<PendingItems> {
   await requireAdmin()
-  if (stage !== 'suburb' && stage !== 'service') return { ok: false, error: `"${stage}" is not a per-item stage` }
+  if (!isItemStage(stage)) return { ok: false, error: `"${stage}" is not a per-item stage` }
   return pendingItemsLogic(key, stage)
 }
 

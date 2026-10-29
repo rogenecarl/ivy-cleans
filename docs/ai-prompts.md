@@ -80,6 +80,25 @@ Every area, subdivision, housing description, condition and ZIP comes back with 
 
 On keywords specifically, this pass is told one of two things: with no real search-volume keywords supplied (today), return an empty list — never phrases guessed from the findings; once the keyword-research provider is wired in, it is handed an exact list and told to use it unchanged.
 
+### Step 1c. Checking every fact against its source
+
+Before anything is written, every area, neighbourhood, housing description, printable local condition and ZIP code is checked, one area at a time:
+
+1. **By code, against public data.** ZIP codes are looked up in the Census ZIP list: one that isn't there, or sits in another state or more than 40 miles from the city, is not used. Areas and neighbourhoods are looked up on OpenStreetMap: one the map finds in another state, or more than 40 miles away, is held for the owner. A place the map simply doesn't know is not held against it — small neighbourhoods often aren't on the map.
+2. **By a small, cheap AI model (Haiku), against the page it came from.** It sees each fact and only the exact lines quoted from its own sources. Its standing instruction:
+
+> You check research claims about a city against the source text they came from.
+>
+> For each claim you get its id, what it says, and the exact lines quoted from the web pages it was taken from. Judge ONLY from those quoted lines — not from your own knowledge of the place, and not from what seems likely.
+>
+> - supported: the quoted lines state the claim (a named place appears as a place in that area or city; a description matches what the lines say).
+> - unclear: the lines mention something related but do not actually state the claim, or the place they name could be somewhere else.
+> - contradicted: the lines say something incompatible (the place is in another city or state, the description is the opposite).
+>
+> Give one verdict per claim id, with a reason of one short sentence a non-technical operator can read.
+
+"Supported" facts are used. "Contradicted" ones are dropped. "Unclear" ones — and places the map puts too far away — are left out of everything the writers see until the owner decides (keep or drop) on the generate screen. Conditions marked never-to-be-printed are not checked at all.
+
 ---
 
 ## The shared voice guide (all three writing skills)

@@ -11,6 +11,8 @@ import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from '@/s
 import { appendProgress, clearProgress } from '@/server/pipeline/progress'
 import { asResearchResult, mergeSources, type ResearchResult } from '@/server/pipeline/sources'
 import { acceptedResearch, researchFromClaims, toResearchAndClaims } from '@/server/pipeline/claims'
+import { makeGeocoder, type Geocoder } from '@/server/pipeline/geo'
+import { pendingVerifyItems, verifyItem } from './verify'
 import { loadDraft, saveDraft, type DraftDoc } from '@/server/content/drafts'
 import {
   SERVICE_LOCAL_SLUGS,
@@ -59,7 +61,8 @@ async function executeStage(
   key: string,
   draft: DraftDoc,
   stage: StageId,
-  only?: string
+  only: string | undefined,
+  geocoder: Geocoder,
 ): Promise<void> {
   const { facts } = draft
 
@@ -163,6 +166,28 @@ async function executeStage(
             : ''),
       })
       await appendProgress(key, { stage: 'research', kind: 'done', label: 'Research complete' })
+      break
+    }
+    case 'verify': {
+      // one item per request from the browser; `only` names it. Without `only` every item runs (tests, scripts).
+      const items = only === undefined ? pendingVerifyItems(draft) : [only]
+      if (items.length > 0 && !draft.claims?.some((c) => c.status !== 'pending')) {
+        await appendProgress(key, { stage: 'verify', kind: 'start', label: 'Checking each fact against the page it came from' })
+      }
+      for (const item of items) {
+        await verifyItem({ client, geocoder, draft, item })
+        await saveDraft(key, draft)
+      }
+      if (stageComplete(draft, stage)) {
+        const claims = draft.claims ?? []
+        const confirmed = claims.filter((c) => c.status === 'confirmed').length
+        const open = claims.filter((c) => c.status === 'unconfirmed').length
+        const label = claims.length === 0
+          ? 'Researched before fact checking existed — nothing to check'
+          : `${confirmed} of ${claims.filter((c) => c.status !== 'unchecked').length} facts confirmed` +
+            (open ? ` · ${open} need your decision` : '')
+        await appendProgress(key, { stage: 'verify', kind: 'done', label })
+      }
       break
     }
     case 'front': {
@@ -359,6 +384,7 @@ async function executeStage(
 
 // every owned slot holds real copy; un-writable areas excluded
 function stageComplete(draft: DraftDoc, stage: StageId): boolean {
+  if (stage === 'verify') return !(draft.claims ?? []).some((c) => c.status === 'pending')
   // stageSlots already excludes un-writable areas, so this and finalize's
   // requiredSlotsFor now demand exactly the same set — the whole point.
   return stageSlots(draft.research)[stage].every((slot) => isWrittenSlot(draft.sections[slot]))
@@ -369,12 +395,13 @@ export async function runStage(
   client: ModelClient,
   key: string,
   stage: StageId,
-  only?: string
+  only?: string,
+  geocoder: Geocoder = makeGeocoder(),
 ): Promise<void> {
   const draft = await loadDraft(key)
   if (draft.done.includes(stage)) return
   try {
-    await executeStage(client, key, draft, stage, only)
+    await executeStage(client, key, draft, stage, only, geocoder)
   } catch (err) {
     const label = err instanceof Error ? err.message : String(err)
     await appendProgress(key, { stage, kind: 'error', label }).catch(() => {})
@@ -396,6 +423,7 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
     delete draft.sources
     delete draft.researchFull
     delete draft.claims
+    delete draft.geocodes
   }
 }
 
@@ -408,7 +436,7 @@ export async function regenerateStage(
   const draft = await loadDraft(key)
 
   // downstream first, while draft.research still says which slots they own
-  const targets: StageId[] = stage === 'research' ? ['front', 'suburb', 'service', 'research'] : [stage]
+  const targets: StageId[] = stage === 'research' ? ['verify', 'front', 'suburb', 'service', 'research'] : [stage]
   for (const target of targets) clearStageOutputs(draft, target)
   for (const target of targets) await clearProgress(key, target)
 

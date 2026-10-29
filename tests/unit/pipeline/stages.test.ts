@@ -85,7 +85,7 @@ describe('pipeline stages', () => {
     // — its generation isn't implemented until Task 16, but the stage id,
     // label and slot ownership are structural and land here.
     it('the home stage no longer exists and the suburb stage does', () => {
-      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'suburb', 'service'])
+      expect(STAGES.map((s) => s.id)).toEqual(['research', 'verify', 'front', 'suburb', 'service'])
       for (const stage of STAGES) expect(stage.label.length).toBeGreaterThan(10)
     })
 
@@ -235,7 +235,7 @@ describe('pipeline stages', () => {
     it('records every stage as done and stores the research object', async () => {
       const draft = await loadDraft(KEY)
       expect(draft.done).toEqual(['research', 'front'])
-      expect(draft.research?.zips).toEqual(['00001', '00002'])
+      expect(draft.research?.zips).toEqual(['55401', '55402'])
       // Fixture Heights (0 researched, everything blank) is a 'skip' verdict
       // under the uniqueness gate wired into the research stage — only the
       // two researched areas survive.
@@ -273,7 +273,7 @@ describe('pipeline stages', () => {
       const validated = validateCityContent(raw)
       expect(validated.city).toBe('Ztest Stubville')
       expect(validated.status).toBe('draft')
-      expect(validated.research.zips).toEqual(['00001', '00002'])
+      expect(validated.research.zips).toEqual(['55401', '55402'])
       expect(validated.sections['home.landmarksParagraph']).toBeUndefined()
       // The gap Task 18 closes: generated area copy must reach the
       // published document, not be silently dropped at finalize.
@@ -742,8 +742,8 @@ describe('pipeline stages', () => {
 
 
   describe('stage id typing', () => {
-    it('runStage accepts only the four known ids', async () => {
-      const ids: StageId[] = ['research', 'front', 'suburb', 'service']
+    it('runStage accepts only the five known ids', async () => {
+      const ids: StageId[] = ['research', 'verify', 'front', 'suburb', 'service']
       expect(ids).toEqual(STAGES.map((s) => s.id))
     })
   })

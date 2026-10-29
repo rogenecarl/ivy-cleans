@@ -3,7 +3,7 @@ import { SERVICE_LOCAL_SLUGS, isWritableArea, isWrittenSlot, serviceSlots, subur
 import { serviceBySlug } from '@/site/data/services/registry'
 import { makeClient } from '@/server/pipeline/model'
 import { readProgress, type ProgressEvent } from '@/server/pipeline/progress'
-import { regenerateStage, runStage, type StageId } from '@/server/pipeline/stages'
+import { CITY_ITEM, pendingVerifyItems, regenerateStage, runStage, type StageId } from '@/server/pipeline/stages'
 import { type ActionResult, attempt, errorMessage } from './shared'
 
 // ── Stage execution ──
@@ -17,7 +17,11 @@ export async function runStageLogic(
   return attempt(() => runStage(makeClient(), key, stage, only))
 }
 
-export type ItemStage = 'suburb' | 'service'
+export type ItemStage = 'verify' | 'suburb' | 'service'
+
+export function isItemStage(stage: string): stage is ItemStage {
+  return stage === 'verify' || stage === 'suburb' || stage === 'service'
+}
 export type PendingItems = { ok: true; items: { slug: string; name: string }[] } | { ok: false; error: string }
 
 // areas or service pages a per-item stage still owes; the client drives one request each. Services are known from
@@ -26,6 +30,14 @@ export async function pendingItemsLogic(key: string, stage: ItemStage): Promise<
   try {
     const draft = await loadDraft(key)
     const owed = (slots: readonly string[]) => !slots.every((slot) => isWrittenSlot(draft.sections[slot]))
+    if (stage === 'verify') {
+      const names = new Map((draft.researchFull?.suburbs ?? []).map((s) => [s.slug, s.name]))
+      const items = pendingVerifyItems(draft).map((slug) => ({
+        slug,
+        name: slug === CITY_ITEM ? 'City-wide facts' : (names.get(slug) ?? slug),
+      }))
+      return { ok: true, items }
+    }
     if (stage === 'service') {
       const items = SERVICE_LOCAL_SLUGS.filter((slug) => owed(serviceSlots(slug))).map((slug) => ({
         slug,

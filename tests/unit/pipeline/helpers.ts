@@ -33,7 +33,7 @@ export const KEY = 'ztest-stubville'
  * by the admin — each has its own describe below. Excluding them here keeps
  * "calls the model once per stage" meaning exactly what it says.
  */
-export const RUNNABLE_STAGES = STAGES.filter((s) => s.id !== 'suburb' && s.id !== 'service')
+export const RUNNABLE_STAGES = STAGES.filter((s) => s.id !== 'verify' && s.id !== 'suburb' && s.id !== 'service')
 
 export function draftPath(key: string): string {
   return path.join(DRAFTS_DIR, `${key}.json`)
