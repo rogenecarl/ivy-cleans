@@ -53,6 +53,15 @@ type Status = 'queued' | 'uploading' | 'done' | 'failed'
 
 export type UploadOne = (file: File, alt: string) => Promise<{ ok: true } | { ok: false; error: string }>
 
+// a request that never reaches the server (connection dropped, body too large) must fail the file, not hang the panel
+export async function safeUpload(upload: UploadOne, file: File, alt: string): ReturnType<UploadOne> {
+  try {
+    return await upload(file, alt)
+  } catch {
+    return { ok: false, error: 'the upload didn’t reach the server — check the connection and try again' }
+  }
+}
+
 type Props = {
   /** How many photos this city already has; counts against MAX_PHOTOS. */
   existing?: number
@@ -164,7 +173,7 @@ export function PhotoDropzone(props: Props) {
       n += 1
       setStatus((s) => ({ ...s, [p.id]: 'uploading' }))
       const alt = n === 1 ? caption.trim() : `${caption.trim()} (${n})`
-      const result = await props.upload(p.file, alt)
+      const result = await safeUpload(props.upload, p.file, alt)
       setStatus((s) => ({ ...s, [p.id]: result.ok ? 'done' : 'failed' }))
       if (!result.ok) {
         failed.add(p.id)
