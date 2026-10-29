@@ -1,0 +1,749 @@
+{
+  "at": "2026-10-29T12:24:32.818Z",
+  "rubric": true,
+  "writingModel": "claude-opus-5",
+  "rubricModel": "claude-opus-5",
+  "usage": {
+    "calls": 45,
+    "inputTokens": 58256,
+    "outputTokens": 68179,
+    "costUsd": 2.12
+  },
+  "crossFindings": [
+    "houston-ops ↔ miami-fl services.heroParagraphs: 108 chars",
+    "houston-ops ↔ miami-fl services.serviceIntro: 101 chars",
+    "houston-tx ↔ miami-fl services.heroParagraphs: 108 chars"
+  ],
+  "fixtures": [
+    {
+      "name": "houston-ops",
+      "city": "Houston",
+      "elapsedMs": 408298,
+      "areasResearched": 6,
+      "areasBuilt": 6,
+      "built": [
+        "katy",
+        "sugar-land",
+        "pearland",
+        "the-woodlands",
+        "missouri-city",
+        "memorial"
+      ],
+      "quality": [
+        {
+          "slot": "phone",
+          "rule": "area-code",
+          "detail": "area code 786 is not a TX code — every page carries this number",
+          "blocking": false
+        },
+        {
+          "slot": "services.heroParagraphs",
+          "rule": "unknown-place",
+          "detail": "names \"Gulf Coast\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "services.serviceIntro",
+          "rule": "unknown-place",
+          "detail": "names \"Gulf Coast\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.intro",
+          "rule": "unknown-place",
+          "detail": "names \"Texas Medical Center\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.homes",
+          "rule": "unknown-place",
+          "detail": "names \"Creek Ranch\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.homes",
+          "rule": "unknown-place",
+          "detail": "names \"Ashton Woods\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.memorial.intro",
+          "rule": "unknown-place",
+          "detail": "names \"Memorial Corridor\", which research never found",
+          "blocking": false
+        }
+      ],
+      "siblings": [
+        {
+          "kind": "intro",
+          "pair": "katy ↔ sugar-land",
+          "score": 0.034722222222222224
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ pearland",
+          "score": 0.06716417910447761
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ the-woodlands",
+          "score": 0.08396946564885496
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ missouri-city",
+          "score": 0.058394160583941604
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ memorial",
+          "score": 0.006896551724137931
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ pearland",
+          "score": 0.0547945205479452
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ the-woodlands",
+          "score": 0.026845637583892617
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ missouri-city",
+          "score": 0.02631578947368421
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ memorial",
+          "score": 0.00641025641025641
+        },
+        {
+          "kind": "intro",
+          "pair": "pearland ↔ the-woodlands",
+          "score": 0.05755395683453238
+        },
+        {
+          "kind": "intro",
+          "pair": "pearland ↔ missouri-city",
+          "score": 0.056338028169014086
+        },
+        {
+          "kind": "intro",
+          "pair": "pearland ↔ memorial",
+          "score": 0.006666666666666667
+        },
+        {
+          "kind": "intro",
+          "pair": "the-woodlands ↔ missouri-city",
+          "score": 0.04929577464788732
+        },
+        {
+          "kind": "intro",
+          "pair": "the-woodlands ↔ memorial",
+          "score": 0.006711409395973154
+        },
+        {
+          "kind": "intro",
+          "pair": "missouri-city ↔ memorial",
+          "score": 0.013245033112582781
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ sugar-land",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ pearland",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ pearland",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "pearland ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "pearland ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "pearland ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "the-woodlands ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "the-woodlands ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "missouri-city ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ sugar-land",
+          "score": 0.00851063829787234
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ pearland",
+          "score": 0.00851063829787234
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ the-woodlands",
+          "score": 0.02100840336134454
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ memorial",
+          "score": 0.012711864406779662
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ pearland",
+          "score": 0.008620689655172414
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ the-woodlands",
+          "score": 0.01694915254237288
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ missouri-city",
+          "score": 0.004310344827586207
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "local",
+          "pair": "pearland ↔ the-woodlands",
+          "score": 0.008403361344537815
+        },
+        {
+          "kind": "local",
+          "pair": "pearland ↔ missouri-city",
+          "score": 0.021929824561403508
+        },
+        {
+          "kind": "local",
+          "pair": "pearland ↔ memorial",
+          "score": 0.039647577092511016
+        },
+        {
+          "kind": "local",
+          "pair": "the-woodlands ↔ missouri-city",
+          "score": 0.01702127659574468
+        },
+        {
+          "kind": "local",
+          "pair": "the-woodlands ↔ memorial",
+          "score": 0.012552301255230125
+        },
+        {
+          "kind": "local",
+          "pair": "missouri-city ↔ memorial",
+          "score": 0.008583690987124463
+        }
+      ],
+      "rubric": [
+        {
+          "area": "Katy",
+          "score": 4,
+          "reason": "The development names, acreages and build dates (Cinco Ranch from 1991, Elyson's 3,600 acres, Firethorne's 1,400 acres since 2005, Cross Creek Ranch and Pine Mill Ranch lake/greenbelt lots) are real and checkable, and the housing description matches what Katy residents live in — but the claim that \"nearly everything we clean here sits inside a gated, master-planned community\" would draw a correction, since Cinco Ranch and Cross Creek Ranch are overwhelmingly ungated, and the whole humidity/mold/oak-pollen paragraph (\"Glass clouds fast in this humidity, and bathrooms never dry out fully\") would sit identically on a Sugar Land, Cypress or Pearland page."
+        },
+        {
+          "area": "Sugar Land",
+          "score": 4,
+          "reason": "A Sugar Land resident would recognise most of this — First Colony's scale, Sweetwater's country-club homes backing the fairways, the 1990s tile-and-cultured-marble vintage of New Territory and Commonwealth versus the quartz-and-plank newer builds in Telfair/Riverstone/Avalon, and the humidity/AC-vent and winter-mold reality of southeast Texas all check out; it loses a point because a few lines ('Shower glass, caulk lines and window tracks discolor faster than owners expect, and closets and under-sink cabinets stay damp behind a closed door') would sit equally well on a Katy, Pearland or Missouri City page, and the Oxford/Sutton Park pollen detail reads as a name dropped in rather than something distinctive to those sections."
+        },
+        {
+          "area": "Pearland",
+          "score": 5,
+          "reason": "The copy names real Pearland subdivisions (Shadow Creek Ranch, Silverlake, Silvercreek, Southern Trails, City Park, Green Tee Terrace) with accurate builder and acreage details, correctly ties the lake-and-canal layout to humidity problems, and cites local specifics a resident would confirm — Medical Center commuters on night shifts, year-round AC, and the February–April oak pollen film — none of which could be transplanted to a neighbouring suburb without becoming wrong."
+        },
+        {
+          "area": "The Woodlands",
+          "score": 5,
+          "reason": "The copy differentiates real villages by actual housing stock and era — 1970s Grogan's Mill with lower ceilings and wide grout versus newer Creekside Park and College Park open plans and two-story entries, with Town Center as the condo/apartment pocket — and ties the work to The Woodlands' defining pine-and-oak canopy, trail-borne leaf litter and shaded rooms that never dry, none of which could be lifted onto a neighbouring Houston suburb's page without becoming wrong; the regional details (oak pollen Feb–April, winter mold peak, year-round AC) are things a resident would confirm, and only a couple of lines about hard water on shower glass would fit anywhere in the metro."
+        },
+        {
+          "area": "Missouri City",
+          "score": 3,
+          "reason": "It drops two real names (Lakes of Brightwater, the First Colony/Sugar Land line) onto copy that is otherwise Houston-metro boilerplate — the housing description and the entire humidity/oak-pollen/AC-vent paragraph would run unchanged on a Katy, Pearland or Cypress page, and a Missouri City resident would notice the absence of Sienna, Quail Valley or Riverstone plus the questionable claim that mold peaks in late January rather than fall; the clearest transplantable line is \"Houses here sit on wide, quiet blocks, and the ones we clean... tend to be family-sized and two-story — hard flooring through the entry and kitchen, carpet up the stairs and in the bedrooms.\""
+        },
+        {
+          "area": "Memorial",
+          "score": 4,
+          "reason": "A Memorial resident would recognise the real split between the dense CityCentre condo/townhome stock and the older ranch streets behind it, plus the Gulf Coast damp, oak pollen and January mold-count details that ring true for Houston — though the climate paragraph is really generic to the whole metro (\"Late January brings foggy mornings and the year's highest mold counts\" would sit equally well on a Katy or Pearland page), and apart from CityCentre no actual subdivisions, streets or landmarks are named."
+        }
+      ],
+      "checks": [
+        {
+          "label": "uniqueness gate",
+          "ok": true,
+          "detail": "6 of 6 areas built"
+        },
+        {
+          "label": "entity coverage + ops used",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "banned phrases",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "sibling similarity",
+          "ok": true,
+          "detail": "worst 0.084 (katy ↔ the-woodlands intro)"
+        },
+        {
+          "label": "rubric — would a resident recognise it",
+          "ok": false,
+          "detail": "mean 4.2 · under 4: Missouri City (3)"
+        }
+      ]
+    },
+    {
+      "name": "houston-tx",
+      "city": "Houston",
+      "elapsedMs": 369849,
+      "areasResearched": 6,
+      "areasBuilt": 6,
+      "built": [
+        "katy",
+        "sugar-land",
+        "pearland",
+        "the-woodlands",
+        "missouri-city",
+        "memorial"
+      ],
+      "quality": [
+        {
+          "slot": "phone",
+          "rule": "area-code",
+          "detail": "area code 786 is not a TX code — every page carries this number",
+          "blocking": false
+        },
+        {
+          "slot": "services.cards.upholstery",
+          "rule": "unknown-place",
+          "detail": "names \"Gulf Coast\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.intro",
+          "rule": "unknown-place",
+          "detail": "names \"Texas Medical Center\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.homes",
+          "rule": "unknown-place",
+          "detail": "names \"Creek Ranch\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.homes",
+          "rule": "unknown-place",
+          "detail": "names \"Ashton Woods\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.pearland.homes",
+          "rule": "unknown-place",
+          "detail": "names \"Tee Terrace\", which research never found",
+          "blocking": false
+        },
+        {
+          "slot": "suburb.memorial.intro",
+          "rule": "unknown-place",
+          "detail": "names \"Memorial Corridor\", which research never found",
+          "blocking": false
+        }
+      ],
+      "siblings": [
+        {
+          "kind": "intro",
+          "pair": "katy ↔ sugar-land",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ pearland",
+          "score": 0.006329113924050633
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "katy ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ pearland",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "sugar-land ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "pearland ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "pearland ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "pearland ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "the-woodlands ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "the-woodlands ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "intro",
+          "pair": "missouri-city ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ sugar-land",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ pearland",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "katy ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ pearland",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "sugar-land ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "pearland ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "pearland ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "pearland ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "the-woodlands ↔ missouri-city",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "the-woodlands ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "homes",
+          "pair": "missouri-city ↔ memorial",
+          "score": 0
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ sugar-land",
+          "score": 0.004132231404958678
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ pearland",
+          "score": 0.01276595744680851
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ the-woodlands",
+          "score": 0.008368200836820083
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ missouri-city",
+          "score": 0.022123893805309734
+        },
+        {
+          "kind": "local",
+          "pair": "katy ↔ memorial",
+          "score": 0.039301310043668124
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ pearland",
+          "score": 0.016597510373443983
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ the-woodlands",
+          "score": 0
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ missouri-city",
+          "score": 0.00847457627118644
+        },
+        {
+          "kind": "local",
+          "pair": "sugar-land ↔ memorial",
+          "score": 0.00823045267489712
+        },
+        {
+          "kind": "local",
+          "pair": "pearland ↔ the-woodlands",
+          "score": 0.02100840336134454
+        },
+        {
+          "kind": "local",
+          "pair": "pearland ↔ missouri-city",
+          "score": 0.030973451327433628
+        },
+        {
+          "kind": "local",
+          "pair": "pearland ↔ memorial",
+          "score": 0.030042918454935622
+        },
+        {
+          "kind": "local",
+          "pair": "the-woodlands ↔ missouri-city",
+          "score": 0.008547008547008548
+        },
+        {
+          "kind": "local",
+          "pair": "the-woodlands ↔ memorial",
+          "score": 0.008298755186721992
+        },
+        {
+          "kind": "local",
+          "pair": "missouri-city ↔ memorial",
+          "score": 0.05429864253393665
+        }
+      ],
+      "rubric": [
+        {
+          "area": "Katy",
+          "score": 5,
+          "reason": "A Katy resident would confirm nearly every detail — Cinco Ranch dating to 1991 with aging grout and original tubs, newer Elyson/Cross Creek Ranch plans with plank flooring, Firethorne's ongoing construction dust, lake and greenbelt lots in Cane Island and Pine Mill Ranch, plus the Gulf Coast specifics of year-round humidity, late-January fog and February–April oak pollen — and swapping in a neighbouring area's name would make most of it factually wrong."
+        },
+        {
+          "area": "Sugar Land",
+          "score": 4,
+          "reason": "The first two paragraphs are tightly anchored to Sugar Land — First Colony's acreage and 60-plus subdivisions, Sweetwater's country-club estates, the older Sugar Creek grout-and-caulk housing stock, and the newer Telfair/Riverstone builds with builder dust still in the vents — all things a resident would confirm and that would be wrong if moved to Katy or Pearland; the closing weather material, however, is Houston-wide rather than Sugar Land-specific, e.g. \"The air conditioning runs nearly all year and greys the supply vents and ceilings around them. From February into April, oak pollen leaves a yellow film on sills, blinds and ceiling fans near every door,\" which would sit equally well on any page across the metro."
+        },
+        {
+          "area": "Pearland",
+          "score": 5,
+          "reason": "The copy names real Pearland subdivisions (Shadow Creek Ranch, Southern Trails, City Park, Silverlake/Silvercreek, Green Tee Terrace) with accurate distinctions in age, builders and housing stock, plus checkable local specifics — the ~10-mile TMC commute and hospital-shift households, the master-planned lakes and canals driving humidity/mildew, and the Gulf Coast mold and oak pollen seasons — none of which could be lifted onto a generic suburb's page without becoming wrong."
+        },
+        {
+          "area": "The Woodlands",
+          "score": 5,
+          "reason": "The copy is anchored in verifiable Woodlands specifics — the nine-village structure, Grogan's Mill's mid-1970s housing stock and dated finishes, Cochran's Crossing/Alden Bridge as middle-aged two-stories, Creekside Park and College Park as the newer open-plan builds, Carlton Woods' size and the Town Center condos/lofts — plus the pine-and-oak canopy, trail system and Gulf humidity/oak pollen cycle; a resident would confirm it and none of it could be lifted onto Katy or Kingwood without becoming wrong (the only soft spot is calling Cochran's Crossing 'three decades on' when it's closer to four)."
+        },
+        {
+          "area": "Missouri City",
+          "score": 4,
+          "reason": "The named developments are real and correctly placed \ninq Missouri City \ninq\ninq Lakes of Brightwater and the First Colony sections that spill over from Sugar Land \ninq and the housing detail (two-story entries with unreachable fixtures, tile-down/carpeted-stairs plans, aging grout and tub caulk in the older First Colony stock, pre-sale cleans) is the kind of thing a resident could confirm; however, the entire third paragraph on humidity, January mold counts, year-round AC and oak-then-grass pollen is southeast Texas boilerplate that would sit identically on a Katy, Pearland or Cypress page \ninq specifically \"Late January is the surprise here. Damp, foggy mornings push mold spore counts across southeast Texas to their yearly peak\" \ninq and the copy ignores the large older, non-master-planned parts of the city such as Quail Valley and the Texas Parkway side, which makes the \"most of what we clean here sits inside master-planned sections\" framing feel partial."
+        },
+        {
+          "area": "Memorial",
+          "score": 4,
+          "reason": "A Memorial resident would recognise the real split between the CityCentre condo/townhome cluster and the older, larger houses further along the corridor, and the housing details (hard flooring and frameless glass in the new units, aged grout and formal rooms in the established homes) are checkable; the Houston climate paragraph on humidity, January mold and oak pollen is true but would sit identically on any page in the metro, and no actual subdivisions — Hunters Creek, Bunker Hill, Memorial Bend, Frostwood — or the bayou/reservoir flooding history get a mention."
+        }
+      ],
+      "checks": [
+        {
+          "label": "uniqueness gate",
+          "ok": true,
+          "detail": "6 of 6 areas built"
+        },
+        {
+          "label": "entity coverage + ops used",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "banned phrases",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "sibling similarity",
+          "ok": true,
+          "detail": "worst 0.054 (missouri-city ↔ memorial local)"
+        },
+        {
+          "label": "rubric — would a resident recognise it",
+          "ok": true,
+          "detail": "mean 4.5"
+        }
+      ]
+    },
+    {
+      "name": "miami-fl",
+      "city": "Miami",
+      "elapsedMs": 143210,
+      "areasResearched": 11,
+      "areasBuilt": 0,
+      "built": [],
+      "quality": [
+        {
+          "slot": "services.serviceIntro",
+          "rule": "unknown-place",
+          "detail": "names \"South Florida\", which research never found",
+          "blocking": false
+        }
+      ],
+      "siblings": [],
+      "rubric": [],
+      "checks": [
+        {
+          "label": "uniqueness gate",
+          "ok": true,
+          "detail": "0 of 11 areas built"
+        },
+        {
+          "label": "entity coverage + ops used",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "banned phrases",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "sibling similarity",
+          "ok": true,
+          "detail": "worst 0.000 (— )"
+        }
+      ]
+    }
+  ]
+}

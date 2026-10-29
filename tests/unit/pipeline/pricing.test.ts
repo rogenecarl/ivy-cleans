@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { addUsage, costUsd } from '@/server/pipeline/pricing'
-import { usageFrom } from '@/server/pipeline/model'
+import { MODELS, usageFrom } from '@/server/pipeline/model'
 
 describe('pricing', () => {
   it('prices a million tokens in and out per model', () => {
@@ -48,5 +48,14 @@ describe('pricing', () => {
         },
       }),
     ).toEqual({ inputTokens: 10, outputTokens: 20, cacheWriteTokens: 30, cacheReadTokens: 40, searches: 3 })
+  })
+
+  it('prices the Opus 5.5 writing model at $4 / $20, with cache reads at $0.20', () => {
+    expect(costUsd({ 'claude-opus-5-5': { inputTokens: 1_000_000, outputTokens: 1_000_000 } })).toBe(24)
+    expect(costUsd({ 'claude-opus-5-5': { inputTokens: 0, outputTokens: 0, cacheReadTokens: 1_000_000 } })).toBeCloseTo(0.2)
+  })
+
+  it('uses Opus 5.5 for every word a customer reads', () => {
+    expect(MODELS.writing).toBe('claude-opus-5-5')
   })
 })

@@ -18,7 +18,10 @@ export type GenerateArgs<T> = {
 
 // Research is transcription (find pages, copy names out) and runs on the cheaper model; every sentence a reader
 // sees is written by the writing model.
-export const MODELS = { writing: 'claude-opus-5', research: 'claude-sonnet-5', check: 'claude-haiku-5-5' } as const
+export const MODELS = { writing: 'claude-opus-5-5', research: 'claude-sonnet-5', check: 'claude-haiku-5-5' } as const
+
+// Opus 5.5 defaults to medium effort; the copy was tuned at Opus 5's high, and evals measured it there
+const WRITING_EFFORT = 'high' as const
 
 // Web searches per research pass. Research is three small passes (city-wide, the area list, one per area) rather
 // than one long call: each pass gets its own budget so none starves another, and search results never pile up.
@@ -180,7 +183,7 @@ export class AnthropicModelClient implements ModelClient {
   }
 
   async generate<T>(args: GenerateArgs<T>): Promise<T> {
-    // no `thinking` (adaptive by default on claude-opus-5), no `temperature` (rejected); fallbacks reroute classifier declines
+    // no `thinking` (always adaptive on claude-opus-5-5), no `temperature` (rejected); fallbacks reroute classifier declines
     const stream = this.client.beta.messages.stream({
       model: args.model ?? MODELS.writing,
       max_tokens: 64000,
@@ -189,6 +192,7 @@ export class AnthropicModelClient implements ModelClient {
       output_config: {
         // @ts-expect-error the installed SDK's zodOutputFormat() takes only the schema; `key` kept for the stub lookup
         format: zodOutputFormat(args.schema, args.key),
+        ...((args.model ?? MODELS.writing) === MODELS.writing ? { effort: WRITING_EFFORT } : {}),
       },
       messages: [{ role: 'user', content: args.prompt }],
       ...fallbackFor(args.model ?? MODELS.writing),

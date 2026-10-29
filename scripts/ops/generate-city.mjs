@@ -14,7 +14,7 @@
  * decisive test for this whole project -- generate a city, then read two of
  * its area pages side by side -- needs to be runnable from a terminal.
  *
- * EVERY RUN SPENDS REAL MONEY. Budget $1.50-2.00 per city on claude-opus-5
+ * EVERY RUN SPENDS REAL MONEY. Budget about $5-7 per city (research, fact check and writing)
  * ($5/MTok in, $25/MTok out): a measured Houston run came to $1.18 before the
  * service stage existed, and that stage adds six more calls. Research alone is
  * ~106K input tokens, because web search pulls page content into context.
@@ -84,10 +84,9 @@ if (!process.env.ANTHROPIC_API_KEY) {
 // resolve. Imported dynamically, after the env load, so makeClient() sees the key.
 const { loadDraft } = await import('../../src/server/content/drafts.ts')
 const { runStage, regenerateStage, STAGES } = await import('../../src/server/pipeline/stages/index.ts')
-const { makeClient } = await import('../../src/server/pipeline/model.ts')
+const { makeClient, MODELS } = await import('../../src/server/pipeline/model.ts')
+const { addUsage, costUsd } = await import('../../src/server/pipeline/pricing.ts')
 
-const IN_PER_MTOK = 5
-const OUT_PER_MTOK = 25
 
 const draft = await loadDraft(KEY)
 
@@ -133,11 +132,11 @@ for (const stage of plan) {
 }
 
 const { calls, inputTokens, outputTokens } = client.usage
-const cost = (inputTokens / 1e6) * IN_PER_MTOK + (outputTokens / 1e6) * OUT_PER_MTOK
+const cost = costUsd(addUsage(undefined, client.usage.byModel)) ?? 0
 console.log(`\n${'─'.repeat(52)}`)
 console.log(`calls  : ${calls}`)
 console.log(`tokens : ${inputTokens.toLocaleString()} in · ${outputTokens.toLocaleString()} out`)
-console.log(`cost   : $${cost.toFixed(2)}   (measured, claude-opus-5)`)
+console.log(`cost   : $${cost.toFixed(2)}   (measured · writing ${MODELS.writing})`)
 console.log(`elapsed: ${((Date.now() - started) / 1000 / 60).toFixed(1)} min`)
 
 // research vs a hand-kept list of this city's areas (evals/known/<key>.json), when one exists
