@@ -6,6 +6,7 @@ import { SEARCH_BUDGET } from '@/server/pipeline/model'
 import { BANNED_PHRASES, SUBDIVISIONS_REQUIRED } from '@/server/content/quality'
 import { isWritableArea } from '@/server/content/slots'
 import { SERVICE_SLUGS, serviceBySlug } from '@/site/data/services/registry'
+import type { ResearchSource } from '@/server/pipeline/sources'
 
 // ── Shape examples: real Minneapolis copy, used as structural models in the prompts ──
 
@@ -181,11 +182,19 @@ Do NOT report phone numbers, street addresses, business names, prices, or contac
 }
 
 /** The findings of all passes as one document, in the lettered order the structuring pass expects. */
-export function composeFindings(parts: { metro: string; areas: string; perArea: Record<string, string> }): string {
+export function composeFindings(
+  parts: { metro: string; areas: string; perArea: Record<string, string> },
+  sources: readonly ResearchSource[],
+): string {
   const areaSections = Object.entries(parts.perArea)
     .map(([name, text]) => `## ${name}\n${text}`)
     .join('\n\n')
-  return `# (c) part 1 — CITY-WIDE HOUSING AND CONDITIONS\n${parts.metro}\n\n# (a) AREAS\n${parts.areas}\n\n# (b) and (c) part 2 — PER AREA: subdivisions, housing, conditions\n${areaSections}`
+  const findings = `# (c) part 1 — CITY-WIDE HOUSING AND CONDITIONS\n${parts.metro}\n\n# (a) AREAS\n${parts.areas}\n\n# (b) and (c) part 2 — PER AREA: subdivisions, housing, conditions\n${areaSections}`
+  if (sources.length === 0) return findings
+  const list = sources
+    .map((s) => [`${s.id} · ${s.title} · ${s.url}`, ...s.quotes.map((q) => `  "${q}"`)].join('\n'))
+    .join('\n')
+  return `${findings}\n\n# SOURCES\n${list}`
 }
 
 // findings -> ResearchSchema. No supplied keywords: the model derives them. A list: it uses that list.

@@ -5,6 +5,7 @@ import path from 'node:path'
 import Anthropic from '@anthropic-ai/sdk'
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { z } from 'zod'
+import type { ResearchResult, ResearchSource } from './sources'
 
 export type GenerateArgs<T> = {
   schema: z.ZodType<T>
@@ -48,13 +49,13 @@ export function searchQuery(input: unknown): string | null {
 }
 
 export interface ModelClient {
-  /** Web-grounded research call (server tool). Returns raw findings text. */
+  /** Web-grounded research call (server tool). Returns the findings text with [n] source markers, and the sources. */
   research(
     prompt: string,
     key: string,
     onEvent?: (event: ResearchEvent) => void,
     options?: ResearchOptions
-  ): Promise<string>
+  ): Promise<ResearchResult>
   /** Schema-validated structured generation. */
   generate<T>(args: GenerateArgs<T>): Promise<T>
   // running token tally for this client instance
@@ -85,6 +86,35 @@ function refusalError(stopDetails: { category: string | null } | null): Error {
 }
 
 /** Concatenate the text blocks of a finished (non-streaming-consumer) message. */
+type CitedBlock = {
+  type: string
+  text?: string
+  citations?: Array<{ type: string; url?: string; title?: string | null; cited_text?: string }> | null
+}
+
+// research text with a [n] marker after each cited block; n numbers the distinct URLs in order of first citation
+export function citationsToResult(content: CitedBlock[]): ResearchResult {
+  const sources: ResearchSource[] = []
+  let text = ''
+  for (const block of content) {
+    if (block.type !== 'text' || typeof block.text !== 'string') continue
+    text += block.text
+    const numbers: number[] = []
+    for (const c of block.citations ?? []) {
+      if (c.type !== 'web_search_result_location' || !c.url) continue
+      let index = sources.findIndex((s) => s.url === c.url)
+      if (index === -1) {
+        sources.push({ id: String(sources.length + 1), url: c.url, title: c.title ?? c.url, quotes: [] })
+        index = sources.length - 1
+      }
+      if (c.cited_text && !sources[index].quotes.includes(c.cited_text)) sources[index].quotes.push(c.cited_text)
+      if (!numbers.includes(index + 1)) numbers.push(index + 1)
+    }
+    if (numbers.length > 0) text += ` ${numbers.map((n) => `[${n}]`).join('')}`
+  }
+  return { text, sources }
+}
+
 function concatText(content: Array<{ type: string; text?: string }>): string {
   let text = ''
   for (const block of content) {
@@ -146,7 +176,7 @@ export class AnthropicModelClient implements ModelClient {
     key: string,
     onEvent?: (event: ResearchEvent) => void,
     options: ResearchOptions = { maxSearches: SEARCH_BUDGET.area }
-  ): Promise<string> {
+  ): Promise<ResearchResult> {
     void key // the stub uses it to look up canned findings
     // research: server tools without output_config; structured writing is a separate call
     const stream = this.client.beta.messages.stream({
@@ -193,7 +223,7 @@ export class AnthropicModelClient implements ModelClient {
     if (message.stop_reason === 'refusal') {
       throw refusalError(message.stop_details)
     }
-    return concatText(message.content)
+    return citationsToResult(message.content as CitedBlock[])
   }
 }
 
@@ -203,13 +233,13 @@ export class StubModelClient implements ModelClient {
 
   constructor(
     private readonly fixtures: {
-      research: Record<string, string>
+      research: Record<string, string | ResearchResult>
       generated: Record<string, unknown>
       events?: Record<string, ResearchEvent[]>
     }
   ) {}
 
-  async research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string> {
+  async research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<ResearchResult> {
     void prompt
     this.usage.calls += 1
     const value = this.fixtures.research[key]
@@ -219,7 +249,7 @@ export class StubModelClient implements ModelClient {
     if (onEvent) {
       for (const event of this.fixtures.events?.[key] ?? []) onEvent(event)
     }
-    return value
+    return typeof value === 'string' ? { text: value, sources: [] } : value
   }
 
   async generate<T>(args: GenerateArgs<T>): Promise<T> {
@@ -234,7 +264,7 @@ export class StubModelClient implements ModelClient {
 
 // stub fixture (tests/fixtures/stub-pipeline.json), read lazily when STUB_MODEL=1
 type StubFixtures = {
-  research: Record<string, string>
+  research: Record<string, string | ResearchResult>
   generated: Record<string, unknown>
   events?: Record<string, ResearchEvent[]>
 }

@@ -9,6 +9,7 @@ import {
 } from '@/server/pipeline/schemas'
 import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
 import { appendProgress, clearProgress } from '@/server/pipeline/progress'
+import { asResearchResult, mergeSources, type ResearchResult } from '@/server/pipeline/sources'
 import { loadDraft, saveDraft, type DraftDoc } from '@/server/content/drafts'
 import {
   SERVICE_LOCAL_SLUGS,
@@ -75,21 +76,22 @@ async function executeStage(
       }
       // one pass, saved as soon as it lands so an interrupted stage resumes here
       const pass = async (partKey: string, modelKey: string, prompt: string, maxSearches: number, label: string) => {
-        if (parts[partKey] !== undefined) return parts[partKey]
+        const stored = parts[partKey]
+        if (stored !== undefined) return asResearchResult(stored)
         await appendProgress(key, { stage: 'research', kind: 'search', label })
-        const text = await client.research(prompt, modelKey, onEvent, { maxSearches })
-        parts[partKey] = text
+        const result = await client.research(prompt, modelKey, onEvent, { maxSearches })
+        parts[partKey] = result
         await saveDraft(key, draft)
-        return text
+        return result
       }
 
-      const metro = await pass('metro', MODEL_KEYS.researchMetro, buildMetroResearchPrompt(facts), SEARCH_BUDGET.metro, `${facts.city} as a whole: climate, housing, conditions`)
-      const areasText = await pass('areas', MODEL_KEYS.researchAreas, buildAreasResearchPrompt(facts), SEARCH_BUDGET.areas, `The areas ${facts.city} serves`)
+      const metroResult = await pass('metro', MODEL_KEYS.researchMetro, buildMetroResearchPrompt(facts), SEARCH_BUDGET.metro, `${facts.city} as a whole: climate, housing, conditions`)
+      const areasResult = await pass('areas', MODEL_KEYS.researchAreas, buildAreasResearchPrompt(facts), SEARCH_BUDGET.areas, `The areas ${facts.city} serves`)
       const { areas } = await client.generate({
         schema: AreaListSchema,
         key: MODEL_KEYS.researchAreaList,
         system: RESEARCH_STRUCTURE_SYSTEM,
-        prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasText}`,
+        prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasResult.text}`,
         model: MODELS.research,
       })
       // the brief asks for 8 to 10; the model sometimes lists more, and every extra area is a research pass and a page
@@ -97,11 +99,24 @@ async function executeStage(
       if (areaNames.length === 0) {
         throw new Error(`research found no areas for ${facts.city} — the areas pass returned nothing usable; re-run research`)
       }
-      const perArea: Record<string, string> = {}
+      const perArea: Record<string, ResearchResult> = {}
       for (const name of areaNames) {
         perArea[name] = await pass(`area:${normalizeSlug(name)}`, MODEL_KEYS.researchArea(normalizeSlug(name)), buildAreaResearchPrompt(facts, name, areaNames), SEARCH_BUDGET.area, `${name}: subdivisions, housing, conditions`)
       }
-      const findings = composeFindings({ metro, areas: areasText, perArea })
+      const merged = mergeSources({
+        metro: metroResult,
+        areas: areasResult,
+        ...Object.fromEntries(Object.entries(perArea).map(([name, r]) => [`area:${name}`, r])),
+      })
+      const findings = composeFindings(
+        {
+          metro: merged.texts.metro,
+          areas: merged.texts.areas,
+          perArea: Object.fromEntries(areaNames.map((name) => [name, merged.texts[`area:${name}`]])),
+        },
+        merged.sources,
+      )
+      draft.sources = merged.sources
       // persist the raw findings before structuring: the only evidence of what research found
       draft.findings = findings
       await saveDraft(key, draft)
@@ -372,6 +387,7 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
     delete draft.research
     delete draft.findings
     delete draft.researchParts
+    delete draft.sources
   }
 }
 

@@ -5,6 +5,7 @@ import { mkdir, readdir, readFile, rm, stat, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '@/server/pipeline/facts'
 import type { ResearchOutput } from '@/server/pipeline/schemas'
+import type { ResearchResult, ResearchSource } from '@/server/pipeline/sources'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -27,7 +28,9 @@ export type DraftDoc = {
   // raw web-search findings, kept verbatim for debugging a bad city; never rendered
   findings?: string
   // the findings per research pass, so an interrupted research stage resumes where it stopped
-  researchParts?: Record<string, string>
+  researchParts?: Record<string, string | ResearchResult>
+  // every web source research cited, by id (S1…); facts point at these
+  sources?: ResearchSource[]
   research?: ResearchOutput
   sections: Record<string, string | string[]>
   links?: Record<string, SlotLink[]>

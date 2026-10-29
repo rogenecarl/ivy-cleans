@@ -5,6 +5,7 @@ import { createDraft } from '@/server/content/drafts'
 import { deriveFacts, type Facts } from '@/server/pipeline/facts'
 import { revalidateCity } from '@/server/content/store'
 import { StubModelClient, type GenerateArgs, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
+import type { ResearchResult } from '@/server/pipeline/sources'
 import { STAGES } from '@/server/pipeline/stages'
 import { type ResearchOutput } from '@/server/pipeline/schemas'
 
@@ -57,7 +58,7 @@ export class CountingClient implements ModelClient {
   }
   constructor(private readonly inner: ModelClient) {}
 
-  async research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<string> {
+  async research(prompt: string, key: string, onEvent?: (event: ResearchEvent) => void): Promise<ResearchResult> {
     this.calls.push(`research:${key}`)
     return this.inner.research(prompt, key, onEvent)
   }
