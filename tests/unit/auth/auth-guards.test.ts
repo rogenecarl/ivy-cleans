@@ -86,6 +86,7 @@ vi.mock('@/server/content/store', async () => {
  * is ever removed.
  */
 const createDraftFromFields = vi.fn()
+const cityKeyStatusLogic = vi.fn()
 const runStageLogic = vi.fn()
 const regenerateLogic = vi.fn()
 const finalizeLogic = vi.fn()
@@ -111,6 +112,7 @@ vi.mock('@/server/pipeline/admin-logic', async () => {
   return {
     ...actual,
     createDraftFromFields,
+    cityKeyStatusLogic,
     runStageLogic,
     regenerateLogic,
     finalizeLogic,
@@ -189,6 +191,7 @@ describe('admin-only pipeline actions', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cases: [string, () => Promise<any>, (m: any) => Promise<unknown>][] = [
     ['createDraftAction', NEW, (m) => m.createDraftAction(new FormData())],
+    ['checkCityKeyAction', NEW, (m) => m.checkCityKeyAction('Miami')],
     ['runStageAction', GENERATE, (m) => m.runStageAction('miami', 'facts')],
     ['regenerateAction', REVIEW, (m) => m.regenerateAction('miami', 'facts')],
     ['finalizeAction', GENERATE, (m) => m.finalizeAction('miami')],
@@ -227,6 +230,7 @@ describe('admin-only pipeline actions', () => {
    */
   function expectNoAdminLogicCalls() {
     expect(createDraftFromFields).not.toHaveBeenCalled()
+    expect(cityKeyStatusLogic).not.toHaveBeenCalled()
     expect(runStageLogic).not.toHaveBeenCalled()
     expect(regenerateLogic).not.toHaveBeenCalled()
     expect(finalizeLogic).not.toHaveBeenCalled()

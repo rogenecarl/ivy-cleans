@@ -3,6 +3,10 @@ import { deriveFacts, phoneDigitsFrom } from '@/server/pipeline/facts'
 import type { MarketOps } from '@/server/pipeline/schemas'
 import type { MarketProfile } from '@/server/content/types'
 import { type CreateResult, errorMessage } from './shared'
+import { stat } from 'node:fs/promises'
+import path from 'node:path'
+import { draftKeyFor, findDraft } from '@/server/content/drafts'
+import { CONTENT_DIR } from '@/server/content/store'
 
 // ── Create ──
 
@@ -209,5 +213,26 @@ export async function createDraftFromFields(fields: NewCityFields): Promise<Crea
     return { ok: true, key }
   } catch (err) {
     return { ok: false, error: errorMessage(err) }
+  }
+}
+
+// the site address a city name will get, and whether it is free — the new-site form checks this as you type
+export async function cityKeyStatusLogic(city: string): Promise<{ key: string; free: boolean; reason?: string }> {
+  const key = draftKeyFor(city)
+  if (key === '') return { key, free: false, reason: 'that name has no letters or numbers' }
+  const draft = await findDraft(key).catch(() => 'unreadable' as const)
+  if (draft !== null) return { key, free: false, reason: 'a draft already exists for this city' }
+  if (await fileExists(path.join(CONTENT_DIR, `${key}.json`))) {
+    return { key, free: false, reason: 'a published city already exists at this address' }
+  }
+  return { key, free: true }
+}
+
+async function fileExists(p: string): Promise<boolean> {
+  try {
+    await stat(p)
+    return true
+  } catch {
+    return false
   }
 }

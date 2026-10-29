@@ -5,7 +5,7 @@
 
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '@/server/auth/auth-server'
-import { addPhotoLogic, createDraftFromFields } from '@/server/pipeline/admin-logic'
+import { addPhotoLogic, cityKeyStatusLogic, createDraftFromFields } from '@/server/pipeline/admin-logic'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { checkPhotoUpload } from '@/server/pipeline/photos'
 
@@ -59,4 +59,10 @@ export async function createDraftAction(formData: FormData): Promise<void> {
     if (!stored.ok) console.error(`createDraftAction: photo "${file.name}" for "${result.key}" was not stored: ${stored.error}`)
   }
   redirect(`${ADMIN_BASE}/generate/${result.key}`)
+}
+
+/** The address a city name will get and whether it is taken; the form asks while the operator types. */
+export async function checkCityKeyAction(city: string) {
+  await requireAdmin()
+  return cityKeyStatusLogic(city)
 }

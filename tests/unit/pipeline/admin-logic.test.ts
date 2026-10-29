@@ -21,6 +21,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
+  cityKeyStatusLogic,
   createDraftFromFields,
   decideClaimLogic,
   listDecisionsLogic,
@@ -1547,5 +1548,25 @@ describe('cost and area progress for the console', () => {
     const mpls = rows.find((r) => r.key === 'minneapolis')!
     expect(mpls).toMatchObject({ stage: 'live', next: { label: 'Settings' } })
     await wipe(KEY)
+  })
+})
+
+describe('cityKeyStatusLogic', () => {
+  const KEY = 'ztest-editville'
+
+  it('says a new city name is free and what its address will be', async () => {
+    await wipe(KEY)
+    expect(await cityKeyStatusLogic('Ztest Editville')).toEqual({ key: KEY, free: true })
+  })
+
+  it('says when a draft or a published city already uses the name', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await cityKeyStatusLogic('Ztest Editville')).toMatchObject({ free: false, reason: expect.stringMatching(/draft/) })
+    await wipe(KEY)
+    expect(await cityKeyStatusLogic('Minneapolis')).toMatchObject({ key: 'minneapolis', free: false, reason: expect.stringMatching(/published/) })
+  })
+
+  it('refuses a name with no letters or numbers', async () => {
+    expect(await cityKeyStatusLogic('!!!')).toMatchObject({ key: '', free: false })
   })
 })

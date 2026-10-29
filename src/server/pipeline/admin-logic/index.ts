@@ -5,7 +5,7 @@ export { errorMessage, isStageId } from './shared'
 export type { ActionResult, CityRow, CityStatus, CreateResult, SuburbRow } from './shared'
 export {
   buildOps,
-  createDraftFromFields,
+  cityKeyStatusLogic, createDraftFromFields,
   formatOpsFields,
   MAX_PROFILES,
   MAX_REVIEWS,
