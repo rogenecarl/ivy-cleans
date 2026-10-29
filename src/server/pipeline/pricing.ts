@@ -1,12 +1,14 @@
 // What a city's generation cost: token usage recorded per draft, priced per model (USD per million tokens). Cache
-// writes bill at 1.25x input, cache reads at 0.1x, and each web search at $10 per thousand.
+// writes bill at 1.25x input, cache reads at 0.1x unless listed, and each web search at $10 per thousand.
 import type { UsageTally } from './model'
 
 type Usage = { inputTokens: number; outputTokens: number; cacheWriteTokens?: number; cacheReadTokens?: number; searches?: number }
 
 export type ModelUsage = Record<string, Usage>
 
-const PER_MILLION: Record<string, { input: number; output: number }> = {
+// cacheRead is listed where it isn't 0.1x input
+const PER_MILLION: Record<string, { input: number; output: number; cacheRead?: number }> = {
+  'claude-opus-5-5': { input: 4, output: 20, cacheRead: 0.2 },
   'claude-opus-5': { input: 5, output: 25 },
   'claude-sonnet-5': { input: 2, output: 10 },
   'claude-haiku-5-5': { input: 0.1, output: 0.5 },
@@ -37,8 +39,9 @@ export function costUsd(usage: ModelUsage | undefined): number | null {
     total += (u.searches ?? 0) * PER_SEARCH
     const price = PER_MILLION[model]
     if (!price) continue
-    const input = u.inputTokens + 1.25 * (u.cacheWriteTokens ?? 0) + 0.1 * (u.cacheReadTokens ?? 0)
-    total += (input * price.input + u.outputTokens * price.output) / 1_000_000
+    const input = u.inputTokens + 1.25 * (u.cacheWriteTokens ?? 0)
+    const cacheRead = (u.cacheReadTokens ?? 0) * (price.cacheRead ?? 0.1 * price.input)
+    total += (input * price.input + cacheRead + u.outputTokens * price.output) / 1_000_000
   }
   return total
 }
