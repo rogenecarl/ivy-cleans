@@ -64,6 +64,11 @@ function expectedMs(stageId: string, areaCount: number): number {
   }
 }
 
+/** 10:42, in the operator's own time zone. */
+function clock(iso: string): string {
+  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
 function remainingLabel(ms: number): string {
   if (ms < 60_000) return 'under a minute left'
   return `about ${Math.ceil(ms / 60_000)} min left`
@@ -243,6 +248,10 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
   }, [cityKey, finalizePhase])
 
   const allDone = done.length === stages.length
+  const costUsd = snapshot?.ok ? snapshot.costUsd : null
+  const areas = snapshot?.ok ? snapshot.areas : []
+  // newest first; the stage rows above show each stage's own last few lines
+  const feed = snapshot?.ok ? [...snapshot.events].reverse().slice(0, 8) : []
   const reviewHref = `${ADMIN_BASE}/review/${cityKey}`
 
   // overall estimate: expected durations of the stages still owed, less what the running one has already used
@@ -308,14 +317,18 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
   return (
     <>
       {/* where the whole run is, in one line; the rows below carry the detail */}
-      <div className="mb-3 rounded-md border border-border/60 bg-muted/40 px-3 py-2">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="text-[0.85rem] font-medium" data-role="overall">
+      <div className="mb-4 rounded-lg border border-border bg-card px-4 py-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <span className="text-[1rem] font-semibold" data-role="overall">
             {overallLeft}
           </span>
           <span className="shrink-0 font-mono text-[0.75rem] tabular-nums text-muted-foreground">{overallRight}</span>
         </div>
-        <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-muted">
+        <p className="mt-1 text-[0.8rem] text-muted-foreground" data-role="cost">
+          AI cost so far:{' '}
+          <span className="font-medium text-foreground">{costUsd === null ? '—' : `$${costUsd.toFixed(2)}`}</span>
+        </p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
             className={cn('h-full rounded-full transition-[width] duration-500', failed ? 'bg-destructive' : 'bg-primary')}
             style={{ width: `${Math.round(fraction * 100)}%` }}
@@ -487,11 +500,59 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
         })}
       </ol>
 
+      {(areas.length > 0 || feed.length > 0) && !allDone && (
+        <div className="mt-4 flex flex-wrap gap-4">
+          {areas.length > 0 && !done.includes('suburb') && (
+            <section className="min-w-0 flex-[999_1_420px] rounded-lg border border-border bg-card p-4" aria-labelledby="areas-title" data-role="area-grid">
+              <h2 id="areas-title" className="mb-3 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
+                Area pages · {areas.filter((a) => a.written).length} of {areas.length} written
+              </h2>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {areas.map((area) => {
+                  const writing = current === 'suburb' && itemProgress?.name === area.name && !area.written
+                  return (
+                    <li
+                      key={area.slug}
+                      className={cn(
+                        'flex items-center gap-2 rounded-md border px-3 py-2 text-[0.85rem]',
+                        writing ? 'border-blue-300 bg-blue-50' : 'border-border',
+                        !area.written && !writing && 'text-muted-foreground',
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn('size-2.5 shrink-0 rounded-full', area.written ? 'bg-emerald-600' : writing ? 'bg-blue-600' : 'bg-muted-foreground/30')}
+                      />
+                      <span className={cn('min-w-0 flex-1 truncate', writing && 'font-semibold')}>{area.name}</span>
+                      <span className="text-[0.75rem]">{area.written ? 'written' : writing ? 'writing…' : 'waiting'}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          )}
+          {feed.length > 0 && (
+            <section className="min-w-0 flex-[1_1_280px] rounded-lg border border-border bg-card p-4" aria-labelledby="feed-title" data-role="activity">
+              <h2 id="feed-title" className="mb-2 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
+                Live activity
+              </h2>
+              <ul className="divide-y divide-border/60">
+                {feed.map((event, i) => (
+                  <li key={`${event.at}-${i}`} className="grid grid-cols-[3.25rem_1fr] gap-2 py-1.5 text-[0.8rem]">
+                    <span className="font-mono text-[0.75rem] text-muted-foreground tabular-nums">{clock(event.at)}</span>
+                    <span className={cn(event.kind === 'error' && 'text-destructive')}>{event.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
+
       <div className="mt-6">
         {!allDone && !failed && (
           <p className="text-[0.85rem] text-muted-foreground">
-            Generating — this takes a few minutes. Leave this tab open; if it closes, reopening this
-            page resumes from the last finished stage.
+            Keep this tab open. If it stops, Resume picks up where it left off — nothing is paid for twice.
           </p>
         )}
 
