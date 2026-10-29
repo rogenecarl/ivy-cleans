@@ -248,7 +248,6 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
   }, [cityKey, finalizePhase])
 
   const allDone = done.length === stages.length
-  const costUsd = snapshot?.ok ? snapshot.costUsd : null
   const areas = snapshot?.ok ? snapshot.areas : []
   // newest first; the stage rows above show each stage's own last few lines
   const feed = snapshot?.ok ? [...snapshot.events].reverse().slice(0, 8) : []
@@ -324,10 +323,6 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
           </span>
           <span className="shrink-0 font-mono text-[0.75rem] tabular-nums text-muted-foreground">{overallRight}</span>
         </div>
-        <p className="mt-1 text-[0.8rem] text-muted-foreground" data-role="cost">
-          AI cost so far:{' '}
-          <span className="font-medium text-foreground">{costUsd === null ? '—' : `$${costUsd.toFixed(2)}`}</span>
-        </p>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
             className={cn('h-full rounded-full transition-[width] duration-500', failed ? 'bg-destructive' : 'bg-primary')}
@@ -552,7 +547,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
       <div className="mt-6">
         {!allDone && !failed && (
           <p className="text-[0.85rem] text-muted-foreground">
-            Keep this tab open. If it stops, Resume picks up where it left off — nothing is paid for twice.
+            Keep this tab open. If it stops, Resume picks up where it left off.
           </p>
         )}
 

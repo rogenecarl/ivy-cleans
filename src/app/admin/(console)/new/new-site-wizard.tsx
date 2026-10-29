@@ -269,19 +269,12 @@ export function NewSiteWizard() {
             <strong>Your review</strong> — nothing goes live until you publish.
           </li>
         </ol>
-        <div className="grid grid-cols-2 gap-3 border-t border-border pt-4">
-          <div>
-            <span className="text-[0.7rem] tracking-wider text-muted-foreground uppercase">Usually takes</span>
-            <strong className="block text-[1.1rem]">10–15 min</strong>
-          </div>
-          <div>
-            <span className="text-[0.7rem] tracking-wider text-muted-foreground uppercase">AI cost</span>
-            <strong className="block text-[1.1rem]">about $5–7</strong>
-          </div>
+        <div className="border-t border-border pt-4">
+          <span className="text-[0.7rem] tracking-wider text-muted-foreground uppercase">Usually takes</span>
+          <strong className="block text-[1.1rem]">10–15 min</strong>
         </div>
         <p className="text-[0.8rem] text-muted-foreground">
-          Keep this tab open while it runs. If it stops, opening the city again resumes from the last finished step,
-          and nothing is paid for twice.
+          Keep this tab open while it runs. If it stops, opening the city again resumes from the last finished step.
         </p>
       </aside>
     </div>
