@@ -79,6 +79,30 @@ export function validateCityContent(raw: unknown): CityContent {
     }
   }
 
+  // claims and sources (optional): the shapes the review panel and the publish gate read
+  const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v)
+  if (doc.claims !== undefined) {
+    const ok =
+      Array.isArray(doc.claims) &&
+      doc.claims.every(
+        (c) =>
+          isObj(c) &&
+          isString(c.id) &&
+          isString(c.kind) &&
+          isString(c.text) &&
+          isString(c.status) &&
+          (c.area === null || isString(c.area)) &&
+          isStringArray(c.sources),
+      )
+    if (!ok) errors.push('claims must be a list of { id, area, kind, text, sources, status } when present')
+  }
+  if (doc.sources !== undefined) {
+    const ok =
+      Array.isArray(doc.sources) &&
+      doc.sources.every((s) => isObj(s) && isString(s.id) && isString(s.url) && isString(s.title) && isStringArray(s.quotes))
+    if (!ok) errors.push('sources must be a list of { id, url, title, quotes } when present')
+  }
+
   // ops (optional): checked strictly since prompts use every field verbatim
   const ops = doc.ops
   if (ops !== undefined) {

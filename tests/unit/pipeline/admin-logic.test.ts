@@ -1454,3 +1454,26 @@ describe('deciding on unconfirmed facts before writing', () => {
     await wipe(KEY)
   })
 })
+
+describe('the suburbs editor and research claims', () => {
+  const KEY = 'ztest-editville'
+
+  it('drops the claims of an area the editor removes, so nothing orphaned holds up publishing', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    const { saveDraft } = await import('@/server/content/drafts')
+    const draft = await loadDraft(KEY)
+    // an undecided fact in Mock Hollow, then Mock Hollow removed in the editor
+    draft.claims!.find((c) => c.text === 'Mock Hollow Terrace')!.status = 'unconfirmed'
+    await saveDraft(KEY, draft)
+    const rows = draft.research!.suburbs.filter((s) => s.slug !== 'cleaning-services-mock-hollow').map((s) => ({ name: s.name, slug: s.slug }))
+    expect(await updateSuburbsLogic(KEY, rows)).toEqual({ ok: true })
+
+    const after = await loadDraft(KEY)
+    expect(after.claims!.some((c) => c.area === 'cleaning-services-mock-hollow')).toBe(false)
+    expect(after.researchFull!.suburbs.map((s) => s.slug)).not.toContain('cleaning-services-mock-hollow')
+    const r = await listDecisionsLogic(KEY)
+    expect(r.ok && r.claims).toEqual([])
+    await wipe(KEY)
+  })
+})

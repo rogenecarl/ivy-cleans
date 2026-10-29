@@ -131,12 +131,22 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
 
     if (draft?.research) {
       draft.research = { ...draft.research, suburbs: mergeSuburbRows(suburbs, draft.research.suburbs) }
+      // a row the editor removed takes its claims with it, so none is left waiting on a decision
+      const kept = new Set(suburbs.map((s) => s.slug))
+      if (draft.researchFull) {
+        draft.researchFull = { ...draft.researchFull, suburbs: mergeSuburbRows(suburbs, draft.researchFull.suburbs) }
+      }
+      if (draft.claims) draft.claims = draft.claims.filter((c) => c.area === null || kept.has(c.area))
       await saveDraft(key, draft)
       touched = true
     }
 
     if (doc) {
       doc.research = { ...doc.research, suburbs: mergeSuburbRows(suburbs, doc.research.suburbs) }
+      if (doc.claims) {
+        const kept = new Set(suburbs.map((s) => s.slug))
+        doc.claims = doc.claims.filter((c) => c.area === null || kept.has(c.area))
+      }
       await writeCityDoc(key, doc)
       touched = true
     }

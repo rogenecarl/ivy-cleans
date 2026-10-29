@@ -275,6 +275,9 @@ export async function finalizeDraft(key: string): Promise<void> {
   if (facts.ops !== undefined) {
     doc.ops = facts.ops
   }
+  // the evidence outlives the sidecar, which publish deletes
+  if (draft.claims?.length) doc.claims = draft.claims
+  if (draft.sources?.length) doc.sources = draft.sources
   if (published?.domain !== undefined) {
     doc.domain = published.domain
   }
@@ -317,6 +320,11 @@ export async function publishCity(
     throw new Error(
       `cannot publish "${key}": ${invisible.length} invisible character(s)\n${lines.join('\n')}`,
     )
+  }
+
+  const undecided = (doc.claims ?? []).filter((c) => c.status === 'pending' || c.status === 'unconfirmed').length
+  if (undecided > 0) {
+    throw new Error(`cannot publish "${key}": ${undecided} research facts still need a decision`)
   }
 
   const liveKeys = (await listLiveCityKeys()).filter((k) => k !== key)

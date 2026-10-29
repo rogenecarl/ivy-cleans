@@ -1,3 +1,5 @@
+import type { ResearchClaim } from '@/server/pipeline/claims'
+import type { ResearchSource } from '@/server/pipeline/sources'
 export type Condition = { condition: string; implication: string; copySafe: boolean }
 
 export type Suburb = {
@@ -75,6 +77,9 @@ export type CityContent = {
   }
   /** Suburb pages exist only for Minneapolis; false renders Areas We Serve unlinked. */
   hasSuburbPages: boolean
+  // research claims with their check status, and the web sources they cite; absent on documents that predate them
+  claims?: ResearchClaim[]
+  sources?: ResearchSource[]
   // domain routed but not yet observed serving; cleared once a liveness check succeeds
   provisioning?: { since: string; domain: string }
   // operator-entered facts, kept on the document so they survive publish. Nothing renders this directly.

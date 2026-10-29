@@ -170,3 +170,23 @@ describe('validateCityContent', () => {
     expect(() => validateCityContent(doc)).toThrow(/landmarks/)
   })
 })
+
+describe('research claims and sources on a document', () => {
+  it('accepts a document without them, as every document before them is', () => {
+    expect(() => validateCityContent(validDoc())).not.toThrow()
+  })
+
+  it('accepts well-formed claims and sources', () => {
+    const doc = {
+      ...validDoc(),
+      claims: [{ id: 'a:area:a', area: 'a', kind: 'area', text: 'A', sources: ['S1'], status: 'confirmed' }],
+      sources: [{ id: 'S1', url: 'https://a.example', title: 'A', quotes: ['q'] }],
+    }
+    expect(validateCityContent(doc).claims).toHaveLength(1)
+  })
+
+  it('rejects claims that are not a list of claims', () => {
+    expect(() => validateCityContent({ ...validDoc(), claims: [{ id: 1 }] })).toThrow(/claims/)
+    expect(() => validateCityContent({ ...validDoc(), sources: 'x' })).toThrow(/sources/)
+  })
+})

@@ -15,6 +15,7 @@ import { ProvisioningPoll } from './provisioning-poll'
 import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
+import { SourcesPanel } from './sources-panel'
 import { requireAdmin } from '@/server/auth/auth-server'
 
 // Review + publish. The preview at /<key> does the heavy lifting; this screen fixes the area list, re-rolls a stage,
@@ -184,6 +185,14 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         <Button asChild variant="outline" size="sm" className="mt-3 min-h-11 sm:min-h-8">
           <Link href={`${ADMIN_BASE}/sites/${key}#about`}>Open in Settings</Link>
         </Button>
+      </Panel>
+
+      <Panel title="Research & sources">
+        <SourcesPanel
+          claims={draft?.claims ?? doc.claims}
+          sources={draft?.sources ?? doc.sources}
+          areaNames={Object.fromEntries((draft?.researchFull ?? doc.research).suburbs.map((s) => [s.slug, s.name]))}
+        />
       </Panel>
 
       <Panel title="Service areas">
