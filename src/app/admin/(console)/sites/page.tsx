@@ -253,7 +253,6 @@ function Where({ site }: { site: View }) {
       )}
       <span className="text-[0.75rem] text-muted-foreground">
         {site.reason ?? (running ? `${site.doneCount ?? 0} of ${site.totalStages} stages` : null)}
-        {site.costUsd !== null && site.costUsd > 0 ? ` · $${site.costUsd.toFixed(2)} so far` : ''}
       </span>
     </div>
   )
