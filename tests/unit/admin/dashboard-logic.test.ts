@@ -279,4 +279,9 @@ describe('attentionItems', () => {
     const items = attentionItems([], [site({ stage: 'live', hasAddress: false }), site({ key: 'x', stage: 'generating', hasAddress: false })], 'admin')
     expect(items).toEqual([])
   })
+
+  it('asks for decisions on a run that paused for them', () => {
+    const items = attentionItems([], [site({ key: 'orlando', city: 'Orlando', stage: 'needs-review', undecided: 2 })], 'admin')
+    expect(items.map((i) => i.id)).toEqual(['facts:orlando'])
+  })
 })

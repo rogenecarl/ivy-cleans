@@ -21,14 +21,15 @@ export function siteStage(input: {
 
   if (row.status === 'live') return { stage: 'live', reason: null, next: { label: 'Settings', href: settings } }
   if (row.status === 'error') return { stage: 'needs-review', reason: row.error ?? 'the city file will not load', next: { label: 'Review', href: review } }
+  // a run waiting on fact decisions can't go on until someone decides them
+  if (input.undecided > 0) {
+    const n = input.undecided
+    return { stage: 'needs-review', reason: `${n} ${n === 1 ? 'fact' : 'facts'} to decide`, next: { label: 'Decide', href: generate } }
+  }
   if (row.status === 'generating' || row.status === 'draft-unfinalized') {
     return input.lastEventKind === 'error'
       ? { stage: 'stopped', reason: 'The last step failed — progress is kept', next: { label: 'Resume', href: generate } }
       : { stage: 'generating', reason: null, next: { label: 'Watch progress', href: generate } }
-  }
-  if (input.undecided > 0) {
-    const n = input.undecided
-    return { stage: 'needs-review', reason: `${n} ${n === 1 ? 'fact' : 'facts'} to decide`, next: { label: 'Decide', href: generate } }
   }
   if (!input.hasAddress) return { stage: 'needs-review', reason: 'No street address', next: { label: 'Add address', href: settings } }
   if (input.blockingQuality > 0) {

@@ -11,11 +11,16 @@ import { type ActionResult, attempt, errorMessage } from './shared'
 // ── Stage execution ──
 
 // what a request spent goes on the draft whether it succeeded or not; a city with no draft (published) has nowhere to keep it
+// never throws: a failed record must not hide the stage's own result
 export async function recordUsage(key: string, client: ModelClient): Promise<void> {
-  const draft = await findDraft(key).catch(() => null)
-  if (!draft) return
-  draft.usage = addUsage(draft.usage, client.usage.byModel)
-  await saveDraft(key, draft)
+  try {
+    const draft = await findDraft(key)
+    if (!draft) return
+    draft.usage = addUsage(draft.usage, client.usage.byModel)
+    await saveDraft(key, draft)
+  } catch (err) {
+    console.error(`recordUsage: could not record usage for "${key}":`, err)
+  }
 }
 
 // one stage per request so a serverless cap, reload or retry is survivable

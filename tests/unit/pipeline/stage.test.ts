@@ -59,4 +59,9 @@ describe('siteStage', () => {
     const s = siteStage({ ...base, row: row({ status: 'error', hasDraft: false, error: 'bad json' }) })
     expect(s).toMatchObject({ stage: 'needs-review', reason: 'bad json' })
   })
+
+  it('a run paused for fact decisions asks for them, not to be watched', () => {
+    const s = siteStage({ ...base, undecided: 3, row: row({ status: 'generating' }) })
+    expect(s).toMatchObject({ stage: 'needs-review', reason: '3 facts to decide', next: { label: 'Decide', href: '/admin/generate/orlando' } })
+  })
 })

@@ -40,6 +40,7 @@ import {
   regenerateLogic,
   runStageLogic,
   readMarketLogic,
+  recordUsage,
   readOpsLogic,
   updateContactLogic,
   updateOpsLogic,
@@ -1568,5 +1569,14 @@ describe('cityKeyStatusLogic', () => {
 
   it('refuses a name with no letters or numbers', async () => {
     expect(await cityKeyStatusLogic('!!!')).toMatchObject({ key: '', free: false })
+  })
+})
+
+describe('recordUsage', () => {
+  it('never turns a stage result into a thrown error, even when recording fails', async () => {
+    const broken = { get usage(): never { throw new Error('disk full') } } as unknown as Parameters<typeof recordUsage>[1]
+    expect((await freshDraft('ztest-editville')).ok).toBe(true)
+    await expect(recordUsage('ztest-editville', broken)).resolves.toBeUndefined()
+    await wipe('ztest-editville')
   })
 })

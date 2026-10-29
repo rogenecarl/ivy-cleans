@@ -40,6 +40,6 @@ export {
   publishLogic,
   updateSuburbsLogic,
 } from './review'
-export { decideClaimLogic, getProgressLogic, isItemStage, listDecisionsLogic, pendingItemsLogic, type UndecidedClaim, regenerateLogic, runStageLogic, type ItemStage, type PendingItems } from './run'
+export { decideClaimLogic, getProgressLogic, recordUsage, isItemStage, listDecisionsLogic, pendingItemsLogic, type UndecidedClaim, regenerateLogic, runStageLogic, type ItemStage, type PendingItems } from './run'
 export type { ProgressSnapshot } from './run'
 export { siteStage, type SiteStage, type StageView } from './stage'
