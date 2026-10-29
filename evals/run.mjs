@@ -145,7 +145,8 @@ async function seedDraft(name) {
   return { key, facts, research }
 }
 
-const WRITING_STAGES = STAGES.filter((s) => s.id !== 'research').map((s) => s.id)
+// research is frozen in the fixtures, so there is nothing for the fact check to check
+const WRITING_STAGES = STAGES.filter((s) => s.id !== 'research' && s.id !== 'verify').map((s) => s.id)
 
 async function runFixture(client, name) {
   const { key, facts, research } = await seedDraft(name)

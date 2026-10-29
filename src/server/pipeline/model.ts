@@ -154,7 +154,8 @@ export class AnthropicModelClient implements ModelClient {
     const stream = this.client.beta.messages.stream({
       model: args.model ?? MODELS.writing,
       max_tokens: 64000,
-      system: args.system,
+      // the system prompt repeats across every area and service call of a city: cache it
+      system: [{ type: 'text', text: args.system, cache_control: { type: 'ephemeral' } }],
       output_config: {
         // @ts-expect-error the installed SDK's zodOutputFormat() takes only the schema; `key` kept for the stub lookup
         format: zodOutputFormat(args.schema, args.key),

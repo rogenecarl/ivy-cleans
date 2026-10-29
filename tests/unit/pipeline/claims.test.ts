@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blockedNames, researchFromClaims, toResearchAndClaims, type ResearchClaim } from '@/server/pipeline/claims'
+import { agreement, blockedNames, researchFromClaims, toResearchAndClaims, type ResearchClaim } from '@/server/pipeline/claims'
 import type { ResearchStructured } from '@/server/pipeline/schemas'
 
 const S = new Set(['S1', 'S2'])
@@ -150,5 +150,25 @@ describe('blockedNames', () => {
 
   it('ignores a confirmed name, a word inside another word, and conditions', () => {
     expect(blockedNames('Norhill bungalows near Oakwood face hard water.', claims)).toEqual([])
+  })
+})
+
+describe('agreement with a known list', () => {
+  it('counts matched names, and lists the extra and the missing, ignoring case', () => {
+    const research = {
+      suburbs: [
+        { name: 'Edina', slug: 'edina', subdivisions: ['Morningside', 'Made Up Park'], housingCharacter: '', neighbors: [], conditions: [] },
+        { name: 'Nowhere', slug: 'nowhere', subdivisions: [], housingCharacter: '', neighbors: [], conditions: [] },
+      ],
+      conditions: [],
+      zips: [],
+      keywords: [],
+    }
+    const result = agreement(research, { EDINA: ['morningside', 'Country Club'], Hopkins: [] })
+    expect(result).toEqual({
+      matched: 2, // Edina, Morningside
+      extra: ['Nowhere', 'Edina › Made Up Park'],
+      missing: ['Hopkins', 'Edina › Country Club'],
+    })
   })
 })

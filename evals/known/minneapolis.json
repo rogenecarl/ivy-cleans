@@ -1,0 +1,29 @@
+{
+  "_note": "Minneapolis areas as listed on the client's original site (ground truth for area names). No neighbourhood lists are known yet; add them per area when hand-checked.",
+  "areas": {
+    "Apple Valley": [],
+    "Farmington": [],
+    "Rosemount": [],
+    "Lakeville": [],
+    "Eagan": [],
+    "Burnsville": [],
+    "Bloomington": [],
+    "Shakopee": [],
+    "Eden Prairie": [],
+    "Hopkins": [],
+    "St. Louis Park": [],
+    "Edina": [],
+    "Inver Grove": [],
+    "Maple Grove": [],
+    "Maplewood": [],
+    "St. Paul": [],
+    "New Brighton": [],
+    "Plymouth": [],
+    "Richfield": [],
+    "Roseville": [],
+    "Savage": [],
+    "Wayzata": [],
+    "Woodbury": [],
+    "Vadnais Heights": []
+  }
+}

@@ -123,3 +123,35 @@ export function blockedNames(text: string, claims: readonly ResearchClaim[]): st
   }
   return found
 }
+
+/** How research compares with a known list of areas → subdivisions (names as the list writes them; case ignored). */
+export function agreement(
+  research: ResearchOutput,
+  known: Record<string, readonly string[]>,
+): { matched: number; extra: string[]; missing: string[] } {
+  const lc = (s: string) => s.trim().toLowerCase()
+  const knownAreas = new Map(Object.entries(known).map(([name, subs]) => [lc(name), { name, subs }]))
+  let matched = 0
+  const extra: string[] = []
+  const missing: string[] = []
+  const extraSubs: string[] = []
+  const missingSubs: string[] = []
+  for (const s of research.suburbs) {
+    const k = knownAreas.get(lc(s.name))
+    if (!k) {
+      extra.push(s.name)
+      continue
+    }
+    matched += 1
+    const knownSubs = new Set(k.subs.map(lc))
+    for (const d of s.subdivisions) {
+      if (knownSubs.has(lc(d))) matched += 1
+      else extraSubs.push(`${s.name} › ${d}`)
+    }
+    const found = new Set(s.subdivisions.map(lc))
+    for (const d of k.subs) if (!found.has(lc(d))) missingSubs.push(`${s.name} › ${d}`)
+  }
+  const researched = new Set(research.suburbs.map((s) => lc(s.name)))
+  for (const [key, k] of knownAreas) if (!researched.has(key)) missing.push(k.name)
+  return { matched, extra: [...extra, ...extraSubs], missing: [...missing, ...missingSubs] }
+}
