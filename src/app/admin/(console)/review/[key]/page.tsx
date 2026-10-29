@@ -16,6 +16,10 @@ import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
 import { SourcesPanel } from './sources-panel'
+import { getSiteSettings } from '@/server/leads/store'
+import { publishChecklist } from '@/server/pipeline/admin-logic/checklist'
+import { sitePaths } from '@/site/data/routes'
+import { cn } from '@/lib/utils'
 import { requireAdmin } from '@/server/auth/auth-server'
 
 // Review + publish. The preview at /<key> does the heavy lifting; this screen fixes the area list, re-rolls a stage,
@@ -28,11 +32,26 @@ const SHOW_ADVISORY_FINDINGS = false
 
 export const dynamic = 'force-dynamic'
 
-export default async function ReviewPage({ params }: { params: Promise<{ key: string }> }) {
+const TABS = [
+  { id: 'checklist', label: 'Checklist' },
+  { id: 'sources', label: 'Research & sources' },
+  { id: 'pages', label: 'Pages' },
+] as const
+type Tab = (typeof TABS)[number]['id']
+
+export default async function ReviewPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ key: string }>
+  searchParams: Promise<{ tab?: string }>
+}) {
   // own guard: admin-only
   await requireAdmin()
 
   const { key } = await params
+  const tabParam = (await searchParams).tab
+  const tab: Tab = TABS.find((t) => t.id === tabParam)?.id ?? 'checklist'
 
   let doc
   try {
@@ -95,6 +114,21 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
   const quality = checkQuality(doc).filter((finding) => SHOW_ADVISORY_FINDINGS || finding.blocking)
   const thinAreas = SHOW_ADVISORY_FINDINGS ? scored.filter((entry) => entry.verdict !== 'build') : []
 
+  // the leads store is optional here: an outage only makes the inbox line unknown
+  const inboxCount = await getSiteSettings(key)
+    .then((s) => s?.notifyEmails.length ?? 0)
+    .catch(() => null)
+  const checklist = publishChecklist({
+    key,
+    doc,
+    undecided: (draft?.claims ?? doc.claims ?? []).filter((c) => c.status === 'pending' || c.status === 'unconfirmed').length,
+    duplicationFindings: duplicationUnavailable ? null : duplication.length,
+    invisibleChars: invisible.length,
+    blockingQuality: checkQuality(doc).filter((f) => f.blocking).length,
+    inboxCount,
+    aboutMissing: aboutMissing(doc.ops),
+  })
+
   return (
     <>
       <div className="mb-6">
@@ -117,13 +151,104 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         </p>
       </div>
 
-      <Button asChild size="lg" className="mb-6 min-h-11 sm:min-h-9">
-        <a href={`/${key}`} target="_blank" rel="noreferrer">
-          Open preview
-          <ExternalLink className="size-4" aria-hidden="true" />
-        </a>
-      </Button>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
+          <a href={`/${key}`} target="_blank" rel="noreferrer">
+            Open preview
+            <ExternalLink className="size-4" aria-hidden="true" />
+          </a>
+        </Button>
+        {!isLive && (
+          <span className={cn('text-[0.85rem]', checklist.canPublish ? 'text-emerald-700' : 'text-muted-foreground')} data-role="publish-state">
+            {checklist.canPublish ? 'Every required check passes — ready to publish.' : 'Publish unlocks when every required line is ticked.'}
+          </span>
+        )}
+      </div>
 
+      <nav aria-label="Review sections" className="mb-6 flex flex-wrap gap-5 border-b border-border">
+        {TABS.map((t) => (
+          <Link
+            key={t.id}
+            href={t.id === 'checklist' ? `${ADMIN_BASE}/review/${key}` : `${ADMIN_BASE}/review/${key}?tab=${t.id}`}
+            aria-current={tab === t.id ? 'page' : undefined}
+            className={cn(
+              '-mb-px border-b-2 py-2.5 text-[0.9rem] font-medium outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+              tab === t.id ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {t.label}
+            {t.id === 'sources' && checklist.items.find((i) => i.id === 'facts')?.state === 'fail' && (
+              <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 text-[0.7rem] text-amber-900">!</span>
+            )}
+          </Link>
+        ))}
+        <Link
+          href={`${ADMIN_BASE}/sites/${key}`}
+          className="py-2.5 text-[0.9rem] font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          Settings ↗
+        </Link>
+      </nav>
+
+      {tab === 'sources' && (
+        <Panel title="Research & sources">
+          <SourcesPanel
+            claims={draft?.claims ?? doc.claims}
+            sources={draft?.sources ?? doc.sources}
+            areaNames={Object.fromEntries((draft?.researchFull ?? doc.research).suburbs.map((s) => [s.slug, s.name]))}
+          />
+        </Panel>
+      )}
+
+      {tab === 'pages' && (
+        <Panel title="Pages">
+          <ul className="grid gap-1.5 text-[0.85rem] sm:grid-cols-2" data-role="pages">
+            {sitePaths(doc).map((p) => (
+              <li key={p}>
+                <a href={`/${key}${p === '/' ? '' : p}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:underline">
+                  {p}
+                  <ExternalLink className="size-3 text-muted-foreground" aria-hidden="true" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
+
+      {tab === 'checklist' && !isLive && (
+        <Panel title="Before it can go live">
+          <ul className="divide-y divide-border/60" data-role="checklist">
+            {checklist.items.map((item) => (
+              <li key={item.id} className="grid grid-cols-[1.5rem_1fr_auto] items-center gap-3 py-2.5 text-[0.9rem]" data-state={item.state}>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'font-bold',
+                    item.state === 'ok' ? 'text-emerald-600' : item.state === 'fail' ? 'text-destructive' : 'text-muted-foreground',
+                  )}
+                >
+                  {item.state === 'ok' ? '✓' : item.state === 'fail' ? '✕' : '–'}
+                </span>
+                <span>
+                  <span className={cn(item.state === 'fail' && 'font-semibold')}>{item.label}</span>
+                  <span className="ml-2 text-[0.8rem] text-muted-foreground">{item.detail}</span>
+                  <span className="sr-only">{item.state === 'ok' ? ' — done' : item.required ? ' — required' : ' — optional'}</span>
+                </span>
+                {item.action && item.state !== 'ok' ? (
+                  <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
+                    <Link href={item.action.href}>{item.action.label}</Link>
+                  </Button>
+                ) : (
+                  <span />
+                )}
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
+
+      {tab === 'checklist' && (
+        <>
       {/* renders nothing when nothing is wrong */}
       {!isLive &&
         (invisible.length > 0 ||
@@ -174,27 +299,6 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         </Panel>
       )}
 
-      <Panel title="About page">
-        {aboutMissing(doc.ops).length === 0 ? (
-          <p className="text-[0.85rem] text-muted-foreground">On. It has serving-since and at least one photo.</p>
-        ) : (
-          <p className="text-[0.85rem] text-muted-foreground">
-            Off until it has {aboutMissing(doc.ops).join(' and ')}. The site publishes without it; add the facts when you have them.
-          </p>
-        )}
-        <Button asChild variant="outline" size="sm" className="mt-3 min-h-11 sm:min-h-8">
-          <Link href={`${ADMIN_BASE}/sites/${key}#about`}>Open in Settings</Link>
-        </Button>
-      </Panel>
-
-      <Panel title="Research & sources">
-        <SourcesPanel
-          claims={draft?.claims ?? doc.claims}
-          sources={draft?.sources ?? doc.sources}
-          areaNames={Object.fromEntries((draft?.researchFull ?? doc.research).suburbs.map((s) => [s.slug, s.name]))}
-        />
-      </Panel>
-
       <Panel title="Service areas">
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />
       </Panel>
@@ -240,9 +344,11 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
             </Button>
           </div>
         ) : (
-          <PublishBox cityKey={key} city={doc.city} />
+          <PublishBox cityKey={key} city={doc.city} canPublish={checklist.canPublish} />
         )}
       </Panel>
+        </>
+      )}
     </>
   )
 }

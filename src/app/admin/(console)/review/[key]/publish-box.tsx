@@ -23,7 +23,7 @@ import { ErrorText } from '@/app/admin/_components/ui'
 // Publish, confirmed in an AlertDialog that says whether a domain will be attached. Mapping a host in _domains.json
 // is not the same as attaching it to the Vercel project; the success panel says so.
 
-export default function PublishBox({ cityKey, city }: { cityKey: string; city: string }) {
+export default function PublishBox({ cityKey, city, canPublish }: { cityKey: string; city: string; canPublish: boolean }) {
   const router = useRouter()
   const [domain, setDomain] = useState('')
   // OFF by default: buying a domain spends real money
@@ -85,9 +85,13 @@ export default function PublishBox({ cityKey, city }: { cityKey: string; city: s
         className="min-h-11 sm:min-h-9"
       />
       <p className="mt-1 text-[0.75rem] text-muted-foreground">
-        A domain you already own. Routing only &mdash; it still has to be attached to the Vercel
-        project by hand, and the app redeployed, unless Global Config is set up.
+        A domain you already own — paste it any way; the bare domain is kept. One another city already uses is refused.
       </p>
+      <ol className="mt-2 list-decimal space-y-0.5 pl-5 text-[0.75rem] text-muted-foreground">
+        <li>Point the domain&rsquo;s DNS at Vercel and add it to the Vercel project.</li>
+        <li>Publishing routes it to {city} straight away (with Global Config, no redeploy).</li>
+        <li>Open the domain once DNS has spread — usually minutes, sometimes hours.</li>
+      </ol>
 
       <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-[0.85rem]">
         <input
@@ -108,7 +112,7 @@ export default function PublishBox({ cityKey, city }: { cityKey: string; city: s
 
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <AlertDialogTrigger asChild>
-          <Button type="button" disabled={publishing} className="mt-3 min-h-11 sm:min-h-9">
+          <Button type="button" disabled={publishing || !canPublish} className="mt-3 min-h-11 sm:min-h-9" data-role="publish">
             {publishing && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
             {publishing ? 'Publishing…' : 'Publish'}
           </Button>
@@ -133,6 +137,9 @@ export default function PublishBox({ cityKey, city }: { cityKey: string; city: s
         </AlertDialogContent>
       </AlertDialog>
 
+      {!canPublish && (
+        <p className="mt-2 text-[0.8rem] text-muted-foreground">Finish the checklist above first.</p>
+      )}
       {error && <ErrorText>{error}</ErrorText>}
     </>
   )

@@ -434,7 +434,7 @@ describe('console page guards', () => {
   it('review/[key]/page.tsx refuses a manager and never reads the city document', async () => {
     asManager()
     const mod = await import('@/app/admin/(console)/review/[key]/page')
-    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    await expect(mod.default({ params: poison('params'), searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
     expect(getCity).not.toHaveBeenCalled()
     expect(loadDraft).not.toHaveBeenCalled()
   })
@@ -442,7 +442,7 @@ describe('console page guards', () => {
   it('review/[key]/page.tsx refuses a signed-out caller', async () => {
     signedOut()
     const mod = await import('@/app/admin/(console)/review/[key]/page')
-    await expect(mod.default({ params: poison('params') })).rejects.toThrow(REDIRECTED)
+    await expect(mod.default({ params: poison('params'), searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
     expect(getCity).not.toHaveBeenCalled()
     expect(loadDraft).not.toHaveBeenCalled()
   })

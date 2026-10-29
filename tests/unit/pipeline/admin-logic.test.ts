@@ -140,7 +140,7 @@ describe('framework independence', () => {
   it('admin-logic imports nothing from next/ — which is why this file can import it', async () => {
     const dir = path.join(process.cwd(), 'src/server/pipeline/admin-logic')
     const files = (await readdir(dir)).filter((f) => f.endsWith('.ts'))
-    expect(files.length).toBe(8)
+    expect(files.length).toBe(9)
     for (const file of files) {
       const source = await readFile(path.join(dir, file), 'utf-8')
       // Anchored to a line-initial `import`, so the rule can be *described* in a
