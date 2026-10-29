@@ -1,15 +1,15 @@
-import type { CityStatus } from '@/server/pipeline/admin-logic'
+import type { SiteStage } from '@/server/pipeline/admin-logic'
 import { FilterChip as Chip } from '@/app/admin/_components/ui'
 import { siteFilterHref, visibleStatuses, type SiteQuery } from './list-logic'
 
-// Site status as the primary filter, mirroring the Leads chips. Only statuses worth showing render (visibleStatuses). Plain links.
+// Site stage as the primary filter, mirroring the Leads chips. Only statuses worth showing render (visibleStatuses). Plain links.
 
-const LABEL: Record<CityStatus, string> = {
-  live: 'Live',
-  draft: 'Draft',
-  'draft-unfinalized': 'Needs finalize',
+const LABEL: Record<SiteStage, string> = {
   generating: 'Generating',
-  error: 'Error',
+  stopped: 'Stopped',
+  'needs-review': 'Needs review',
+  ready: 'Ready to publish',
+  live: 'Live',
 }
 
 export function SiteStatusChips({
@@ -18,7 +18,7 @@ export function SiteStatusChips({
   total,
 }: {
   query: SiteQuery
-  counts: Record<CityStatus, number>
+  counts: Record<SiteStage, number>
   total: number
 }) {
   return (
