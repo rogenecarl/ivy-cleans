@@ -106,6 +106,6 @@ The console at `/admin` sits behind a session. There is no signup page, and bett
 - **TypeScript:** strict mode, ESLint (`eslint-config-next`), Zod at every boundary — forms, webhooks, model output
 - **Copy:** user-visible text lives in `src/site/data/*.ts`, verbatim from the live site; never paraphrased
 - **Styling:** Tailwind arbitrary values traced to the reference CSS, not default utilities
-- **Git:** commit messages `area: description` (`feat`, `fix`, `content`, `admin`, `blog`)
+- **Git:** `main` is production; work happens on a `<type>/<topic>` branch cut from `dev` and merges into `dev`, and the owner merges `dev` → `main`. Commit messages `area: description` (`feat`, `fix`, `content`, `admin`, `blog`)
 
 For the folder layout and where new code goes, see [docs/architecture.md](docs/architecture.md). For coding conventions and agent rules, see [AGENTS.md](AGENTS.md) (also [CLAUDE.md](CLAUDE.md)). Every prompt the generator sends is written out in plain language in [docs/ai-prompts.md](docs/ai-prompts.md).

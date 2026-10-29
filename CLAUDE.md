@@ -199,6 +199,10 @@ Env fallbacks: `??` fires only on undefined, and env templates ship blank lines 
 
 ### Critical (git)
 
+- `main` is production (Vercel deploys it). Never commit to `main` and never merge into it yourself; the owner merges `dev` → `main`.
+- `dev` is the integration branch. Every change starts on its own branch cut from `dev` and is merged back into `dev` when its tests, lint and build pass:
+  - Branch name: `<type>/<short-kebab-topic>`, type = the commit area (`feat`, `fix`, `admin`, `content`, `blog`, `about`, `test`, `docs`, `refactor`, `chore`). Examples: `feat/validated-research`, `fix/publish-domain-check`.
+  - `git switch -c feat/<topic> dev` → commit → `git switch dev && git merge --no-ff feat/<topic>` → push `dev` → delete the branch.
 - NEVER commit unless explicitly asked. NEVER add Co-Authored-By or any AI attribution to commits.
 - Commit messages: `area: description`, lowercase (`feat`, `fix`, `content`, `admin`, `blog`, `about`, `test`).
 - Never commit: `.env*` (except the two templates), `docs/superpowers/`, `docs/ivy-cleans-handoff-1/`, `trip-scheduler/`, `peaktransport/` (sibling projects with their own history), `.superpowers/`, `.claude/`, `/fidelity-*/`.
