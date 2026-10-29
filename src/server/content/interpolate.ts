@@ -50,6 +50,11 @@ export function t(template: string, c: TokenSource): string {
   return result
 }
 
+// what finalizeDraft stores when no address was given; validate refuses it on a live city
+export function pendingAddress(city: string): string {
+  return `${city} — address pending`
+}
+
 // a real street address, or undefined for the finalizeDraft placeholder (exact suffix match)
 export function realAddress(address: string | undefined): string | undefined {
   if (address === undefined) return undefined

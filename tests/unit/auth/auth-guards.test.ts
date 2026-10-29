@@ -91,6 +91,7 @@ const regenerateLogic = vi.fn()
 const finalizeLogic = vi.fn()
 const updateSuburbsLogic = vi.fn()
 const updateOpsLogic = vi.fn()
+const updateContactLogic = vi.fn()
 const pendingItemsLogic = vi.fn()
 const checkProvisioningLogic = vi.fn()
 const publishLogic = vi.fn()
@@ -113,6 +114,7 @@ vi.mock('@/server/pipeline/admin-logic', async () => {
     finalizeLogic,
     updateSuburbsLogic,
     updateOpsLogic,
+    updateContactLogic,
     pendingItemsLogic,
     checkProvisioningLogic,
     publishLogic,
@@ -196,6 +198,7 @@ describe('admin-only pipeline actions', () => {
     ['savePhotoCaptionsAction', SITES, (m) => m.savePhotoCaptionsAction('miami', new FormData())],
     ['writeAboutStoryAction', SITES, (m) => m.writeAboutStoryAction('miami')],
     ['removeAboutStoryAction', SITES, (m) => m.removeAboutStoryAction('miami')],
+    ['saveContactAction', SITES, (m) => m.saveContactAction('miami', new FormData())],
   ]
 
   // actions covered by their own describes below, not by the admin-only loop
@@ -232,6 +235,7 @@ describe('admin-only pipeline actions', () => {
     expect(savePhotoCaptionsLogic).not.toHaveBeenCalled()
     expect(writeAboutStoryLogic).not.toHaveBeenCalled()
     expect(removeAboutStoryLogic).not.toHaveBeenCalled()
+    expect(updateContactLogic).not.toHaveBeenCalled()
   }
 
   for (const [name, load, call] of cases) {

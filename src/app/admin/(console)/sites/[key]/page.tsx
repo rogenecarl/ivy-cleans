@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ErrorText, Panel } from '@/app/admin/_components/ui'
 import { SettingsForm } from './settings-form'
 import { FactsForm } from './facts-form'
+import { ContactForm } from './contact-form'
 import { PhotosPanel } from './photos-panel'
 import { StoryPanel } from './story-panel'
 import { requireAdmin } from '@/server/auth/auth-server'
@@ -60,6 +61,15 @@ export default async function SiteSettingsPage({
       <h1 className="mt-2 mb-6 text-[1.4rem] font-semibold tracking-tight">{key} settings</h1>
 
       {error && <ErrorText>{error}</ErrorText>}
+
+      {market.ok && (
+        <Panel title="Phone and address">
+          {market.address === '' && (
+            <p className="mb-3 text-[0.8rem] text-amber-800">No street address yet, so this city can&rsquo;t be published.</p>
+          )}
+          <ContactForm cityKey={key} phone={market.phone} address={market.address} />
+        </Panel>
+      )}
 
       <Panel title="Notification inboxes">
         {settingsUnavailable ? (

@@ -9,6 +9,7 @@ import {
   removeAboutStoryLogic,
   removePhotoLogic,
   savePhotoCaptionsLogic,
+  updateContactLogic,
   updateOpsLogic,
   writeAboutStoryLogic,
   type ActionResult,
@@ -67,6 +68,22 @@ export async function saveOpsAction(cityKey: string, formData: FormData): Promis
   }
 
   revalidateAbout(cityKey)
+}
+
+// Phone and street address. The phone is printed on every page of the city, so the whole tree is revalidated.
+export async function saveContactAction(cityKey: string, formData: FormData): Promise<void> {
+  await requireAdmin()
+  await requireKnownCity(cityKey)
+
+  const phone = formData.get('phone')
+  const address = formData.get('address')
+  if (typeof phone !== 'string' || typeof address !== 'string') throw new Error('the contact form is missing a field')
+
+  const result = await updateContactLogic(cityKey, { phone, address })
+  if (!result.ok) redirect(`${ADMIN_BASE}/sites/${cityKey}?error=${encodeURIComponent(result.error)}`)
+
+  revalidatePath(`${ADMIN_BASE}/sites/${cityKey}`)
+  revalidatePath('/', 'layout')
 }
 
 // the Settings screen and the public About Us page both read the ops block

@@ -35,7 +35,9 @@ import {
   publishLogic,
   regenerateLogic,
   runStageLogic,
+  readMarketLogic,
   readOpsLogic,
+  updateContactLogic,
   updateOpsLogic,
   updateSuburbsLogic,
 } from '@/server/pipeline/admin-logic'
@@ -1260,6 +1262,113 @@ describe('editing the ops block after creation', () => {
   it('reads a live city with no ops as empty fields rather than failing', async () => {
     await liveOnly()
     expect(await readOpsLogic(KEY)).toEqual({ ok: true, fields: {} })
+    await wipe(KEY)
+  })
+})
+
+describe('updateContactLogic', () => {
+  const KEY = 'ztest-opsville'
+
+  async function draftOnly(): Promise<void> {
+    await wipe(KEY)
+    expect((await freshDraft(KEY)).ok).toBe(true)
+  }
+
+  async function finalized(): Promise<void> {
+    await draftOnly()
+    await runAllStages(KEY)
+    await runItemsAsTheClientDoes(KEY, 'suburb')
+    await runItemsAsTheClientDoes(KEY, 'service')
+    expect(await finalizeLogic(KEY)).toEqual({ ok: true })
+  }
+
+  async function live(): Promise<void> {
+    await finalized()
+    for (const other of KEYS) if (other !== KEY) await wipe(other)
+    expect(await publishLogic(KEY)).toEqual({ ok: true })
+  }
+
+  it('derives every phone format from what the operator typed, on the draft', async () => {
+    await draftOnly()
+    expect(await updateContactLogic(KEY, { phone: '+1 (651) 555-0199', address: '9 New Street' })).toEqual({ ok: true })
+    const { facts } = await loadDraft(KEY)
+    expect(facts.phone).toBe('651-555-0199')
+    expect(facts.phoneDisplay).toBe('(651) 555-0199')
+    expect(facts.phoneHref).toBe('tel:6515550199')
+    expect(facts.address).toBe('9 New Street')
+    await wipe(KEY)
+  })
+
+  it('updates the document too when the city is finalized, so the next finalize cannot revert it', async () => {
+    await finalized()
+    expect(await updateContactLogic(KEY, { phone: '651-555-0199', address: '9 New Street' })).toEqual({ ok: true })
+    const doc = await getCity(KEY)
+    expect(doc.phoneDisplay).toBe('(651) 555-0199')
+    expect(doc.address).toBe('9 New Street')
+    expect(doc.contactAddress).toBe('9 New Street')
+    expect((await loadDraft(KEY)).facts.address).toBe('9 New Street')
+    await wipe(KEY)
+  })
+
+  it('lets a city created without an address get one, and then publish', async () => {
+    await wipe(KEY)
+    expect((await createDraftFromFields({ city: CITY_NAMES[KEY], state: 'mn', phone: '(612) 555-0142' })).ok).toBe(true)
+    await runAllStages(KEY)
+    await runItemsAsTheClientDoes(KEY, 'suburb')
+    await runItemsAsTheClientDoes(KEY, 'service')
+    expect(await finalizeLogic(KEY)).toEqual({ ok: true })
+    for (const other of KEYS) if (other !== KEY) await wipe(other)
+    expect((await publishLogic(KEY)).ok).toBe(false)
+
+    expect(await updateContactLogic(KEY, { phone: '(612) 555-0142', address: '9 New Street' })).toEqual({ ok: true })
+    expect(await publishLogic(KEY)).toEqual({ ok: true })
+    expect((await getCity(KEY)).address).toBe('9 New Street')
+    await wipe(KEY)
+  })
+
+  it('refuses to blank the address of a live city and changes nothing', async () => {
+    await live()
+    const r = await updateContactLogic(KEY, { phone: '(651) 555-0199', address: '  ' })
+    expect(r.ok).toBe(false)
+    const doc = await getCity(KEY)
+    expect(doc.address).toBe('1 Fixture Way')
+    expect(doc.phoneDisplay).toBe('(612) 555-0142')
+    await wipe(KEY)
+  })
+
+  it('refuses a phone number that is not ten digits and changes nothing', async () => {
+    await draftOnly()
+    const r = await updateContactLogic(KEY, { phone: '555-0199', address: '9 New Street' })
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toMatch(/10 digits/)
+    expect((await loadDraft(KEY)).facts.address).toBe('1 Fixture Way')
+    await wipe(KEY)
+  })
+
+  it('keeps a hand-set contact-page address when the address itself did not change', async () => {
+    // Minneapolis prints a different address variant on its contact page; re-saving the phone must not flatten it
+    await live()
+    const raw = JSON.parse(await readFile(cityPath(KEY), 'utf-8'))
+    raw.contactAddress = '1 Fixture Way, Suite 2'
+    await writeFile(cityPath(KEY), JSON.stringify(raw, null, 2), 'utf-8')
+    revalidateCity(KEY)
+
+    expect(await updateContactLogic(KEY, { phone: '(651) 555-0199', address: '1 Fixture Way' })).toEqual({ ok: true })
+    const doc = await getCity(KEY)
+    expect(doc.phoneDisplay).toBe('(651) 555-0199')
+    expect(doc.contactAddress).toBe('1 Fixture Way, Suite 2')
+    await wipe(KEY)
+  })
+
+  it('reads phone and address back for the form, the placeholder as blank', async () => {
+    await wipe(KEY)
+    expect((await createDraftFromFields({ city: CITY_NAMES[KEY], state: 'mn', phone: '(612) 555-0142' })).ok).toBe(true)
+    const read = await readMarketLogic(KEY)
+    expect(read.ok).toBe(true)
+    if (!read.ok) return
+    expect(read.phone).toBe('(612) 555-0142')
+    expect(read.address).toBe('')
     await wipe(KEY)
   })
 })

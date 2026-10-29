@@ -112,6 +112,18 @@ function formatDisplay(digits: string): string {
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
 }
 
+// what an operator typed ("+1 (612) 555-0142") -> 10 digits, or null; a leading US country code is dropped
+export function phoneDigitsFrom(raw: string): string | null {
+  const digits = raw.replace(/\D/g, '')
+  const national = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits
+  return /^\d{10}$/.test(national) ? national : null
+}
+
+/** The three stored phone formats, from exactly 10 digits. */
+export function phoneFields(digits: string): Pick<Facts, 'phone' | 'phoneDisplay' | 'phoneHref'> {
+  return { phone: formatDashed(digits), phoneDisplay: formatDisplay(digits), phoneHref: `tel:${digits}` }
+}
+
 export function deriveFacts(input: DeriveFactsInput): Facts {
   const { phoneDigits, address, ops } = input
   const city = input.city.trim()
@@ -135,9 +147,7 @@ export function deriveFacts(input: DeriveFactsInput): Facts {
     city,
     state,
     stateName,
-    phone: formatDashed(phoneDigits),
-    phoneDisplay: formatDisplay(phoneDigits),
-    phoneHref: `tel:${phoneDigits}`,
+    ...phoneFields(phoneDigits),
   }
 
   if (address !== undefined) facts.address = address

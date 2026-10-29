@@ -22,7 +22,7 @@ export type {
   ParseProfilesResult,
   ParseReviewsResult,
 } from './create'
-export { listCities, readMarketLogic, readOpsLogic, updateOpsLogic } from './sites'
+export { listCities, readMarketLogic, readOpsLogic, updateContactLogic, updateOpsLogic } from './sites'
 export type { MarketSnapshot } from './sites'
 export {
   addPhotoLogic,

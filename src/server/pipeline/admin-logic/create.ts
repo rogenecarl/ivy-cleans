@@ -1,5 +1,5 @@
 import { createDraft } from '@/server/content/drafts'
-import { deriveFacts } from '@/server/pipeline/facts'
+import { deriveFacts, phoneDigitsFrom } from '@/server/pipeline/facts'
 import type { MarketOps } from '@/server/pipeline/schemas'
 import type { MarketProfile } from '@/server/content/types'
 import { type CreateResult, errorMessage } from './shared'
@@ -192,7 +192,7 @@ export function formatOpsFields(ops: MarketOps | undefined): OpsFields {
 // form -> derived facts -> draft sidecar. Phone stripped to digits; empty optionals omitted.
 export async function createDraftFromFields(fields: NewCityFields): Promise<CreateResult> {
   try {
-    const digits = fields.phone.replace(/\D/g, '')
+    const digits = phoneDigitsFrom(fields.phone) ?? fields.phone.replace(/\D/g, '')
     const address = fields.address?.trim()
 
     const built = buildOps(fields)

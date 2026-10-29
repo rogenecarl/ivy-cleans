@@ -14,7 +14,7 @@ import {
   stageSlots,
 } from './slots'
 import type { CityContent, SlotLink } from './types'
-import { citySlug } from './interpolate'
+import { citySlug, pendingAddress } from './interpolate'
 import { checkCity, findInvisibleChars } from './similarity'
 import { checkQuality } from './quality'
 import { buildProvisioners, buildRouter, provisionDomain } from '@/server/pipeline/provision'
@@ -236,7 +236,7 @@ export async function finalizeDraft(key: string): Promise<void> {
     phoneDisplay: facts.phoneDisplay,
     phoneHref: facts.phoneHref,
     // placeholder when the form left the address blank; validate refuses it on a live city
-    address: facts.address ?? `${facts.city} — address pending`,
+    address: facts.address ?? pendingAddress(facts.city),
     // carried from the previous document: a finalize never publishes or un-publishes
     status: published?.status ?? 'draft',
     // every finalized draft gets area pages once research.suburbs exists
