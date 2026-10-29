@@ -47,17 +47,17 @@ if (!DRY && !process.env.ANTHROPIC_API_KEY) {
 // Imported after the env load so makeClient() sees the key.
 const { createDraft, loadDraft, saveDraft, deleteDraft } = await import('../src/server/content/drafts.ts')
 const { runStage, STAGES } = await import('../src/server/pipeline/stages/index.ts')
-const { makeClient } = await import('../src/server/pipeline/model.ts')
+const { makeClient, MODELS } = await import('../src/server/pipeline/model.ts')
+const { addUsage, costUsd } = await import('../src/server/pipeline/pricing.ts')
 const { checkQuality } = await import('../src/server/content/quality.ts')
 const { shingleSimilarity, longestSharedRun, DEFAULT_THRESHOLDS } = await import('../src/server/content/similarity.ts')
 const { isWritableArea, suburbSlots } = await import('../src/server/content/slots.ts')
 
-const IN_PER_MTOK = 5
-const OUT_PER_MTOK = 25
 // the publish gate's own numbers, so a tuned threshold moves the evals with it
 const SIBLING_MAX = DEFAULT_THRESHOLDS.maxSibling
 const VERBATIM_FLOOR = DEFAULT_THRESHOLDS.maxRun
 const RUBRIC_MIN = 4
+const RUBRIC_MODEL = 'claude-opus-5'
 
 /* ────────────────────────────────────────────────────────────────────────────
  * The rubric — the only check here that a mechanical rule cannot make
@@ -101,6 +101,8 @@ async function gradeArea(client, city, areaName, text) {
     key: `rubric.${city}.${areaName}`,
     system: RUBRIC_SYSTEM,
     prompt: `Area: ${areaName}, in the ${city} metro.\n\nThe page:\n\n${text}\n\nScore it 1-5 on the single question above, and give one sentence saying why. If the score is under 4, name the specific sentence that would sit equally well on another area's page.`,
+    // a fixed judge, so a change of writing model is graded by the same reader as before
+    model: RUBRIC_MODEL,
   })
 }
 
@@ -330,7 +332,7 @@ try {
   if (!ok) failures.push(`cross-fixture: ${crossFindings.length} verbatim finding(s)`)
 
   const { calls, inputTokens, outputTokens } = client.usage
-  const cost = (inputTokens / 1e6) * IN_PER_MTOK + (outputTokens / 1e6) * OUT_PER_MTOK
+  const cost = costUsd(addUsage(undefined, client.usage.byModel)) ?? 0
 
   await mkdir(RESULTS, { recursive: true })
   const stamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -341,6 +343,8 @@ try {
       {
         at: new Date().toISOString(),
         rubric: !NO_RUBRIC,
+        writingModel: MODELS.writing,
+        rubricModel: RUBRIC_MODEL,
         usage: { calls, inputTokens, outputTokens, costUsd: Number(cost.toFixed(2)) },
         crossFindings,
         // Copy exactly what is worth keeping. The generated `sections` are
@@ -367,7 +371,7 @@ try {
 
   console.log(`\n${'─'.repeat(56)}`)
   console.log(`calls  : ${calls}`)
-  console.log(`cost   : $${cost.toFixed(2)}   (measured, claude-opus-5)`)
+  console.log(`cost   : $${cost.toFixed(2)}   (measured · writing ${MODELS.writing}, judge ${RUBRIC_MODEL})`)
   console.log(`results: ${path.relative(ROOT, outPath)}`)
   console.log(failures.length ? `\n✗ ${failures.length} failed check(s)\n  ${failures.join('\n  ')}\n` : '\n✓ all checks passed\n')
 } finally {
