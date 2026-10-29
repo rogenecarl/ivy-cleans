@@ -15,6 +15,7 @@ import { ProvisioningPoll } from './provisioning-poll'
 import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
+import { SourcesPanel } from './sources-panel'
 import { requireAdmin } from '@/server/auth/auth-server'
 
 // Review + publish. The preview at /<key> does the heavy lifting; this screen fixes the area list, re-rolls a stage,
@@ -186,6 +187,14 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
         </Button>
       </Panel>
 
+      <Panel title="Research & sources">
+        <SourcesPanel
+          claims={draft?.claims ?? doc.claims}
+          sources={draft?.sources ?? doc.sources}
+          areaNames={Object.fromEntries((draft?.researchFull ?? doc.research).suburbs.map((s) => [s.slug, s.name]))}
+        />
+      </Panel>
+
       <Panel title="Service areas">
         <SuburbsEditor cityKey={key} initial={doc.research.suburbs} meta={suburbMeta} />
       </Panel>
@@ -196,7 +205,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
           {hasDraft ? (
           <RegeneratePanel
             cityKey={key}
-            stages={STAGES.map((stage) => ({ id: stage.id, label: stage.label }))}
+            stages={STAGES.filter((stage) => stage.id !== 'verify').map((stage) => ({ id: stage.id, label: stage.label }))}
           />
         ) : (
           <p className="text-[0.85rem] text-muted-foreground">

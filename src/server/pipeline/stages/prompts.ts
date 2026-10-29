@@ -6,6 +6,7 @@ import { SEARCH_BUDGET } from '@/server/pipeline/model'
 import { BANNED_PHRASES, SUBDIVISIONS_REQUIRED } from '@/server/content/quality'
 import { isWritableArea } from '@/server/content/slots'
 import { SERVICE_SLUGS, serviceBySlug } from '@/site/data/services/registry'
+import type { ResearchSource } from '@/server/pipeline/sources'
 
 // ── Shape examples: real Minneapolis copy, used as structural models in the prompts ──
 
@@ -53,6 +54,7 @@ ${BANNED_PHRASES.map((p) => `  "${p}"`).join('\n')}
   "peace of mind" and "exceptional" — at most once per page each.
 
 SUBSTANCE — this is what separates a page worth reading from filler
+- Name only places that appear in the data you are given: the city, its areas, and the neighborhoods listed for them. A place that is not in the data does not go on the page, however well you know it.
 - Ground the copy in the real city: its climate and seasons, its housing stock (historic bungalows, brick row houses, ranch homes, stucco, high-rise condos, beach rentals), and how people there actually live — long indoor winters, humid summers, pollen season, road salt, blown sand, desert dust, coastal salt air, wildfire smoke.
 - Two or three concrete details that are true of that city beat a page of generic praise. If a sentence would read exactly the same for any other city in the country, rewrite it until it could not.
 - Write about cleaning, always. The local detail is the reason a room gets dirty; the sentence still has to end up at what we do about it.
@@ -98,7 +100,20 @@ You are a transcriber, not a researcher and not a writer. Every area name, subdi
 
 Drop anything the findings themselves flag as uncertain, disputed, or out of the service area, and drop any phone number, street address or business name that wandered into the findings — those fields do not exist in this output.
 
+Every item carries sources: the S-numbers from the SOURCES list at the end of the findings whose quoted lines state it. An item no source states is left out entirely; never attach a source that does not mention the item.
+
 Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.`
+
+// fact check: one claim at a time against the lines quoted from its own sources. Not on SYSTEM_BASE: it writes no copy.
+export const FACT_CHECK_SYSTEM = `You check research claims about a city against the source text they came from.
+
+For each claim you get its id, what it says, and the exact lines quoted from the web pages it was taken from. Judge ONLY from those quoted lines — not from your own knowledge of the place, and not from what seems likely.
+
+- supported: the quoted lines state the claim (a named place appears as a place in that area or city; a description matches what the lines say).
+- unclear: the lines mention something related but do not actually state the claim, or the place they name could be somewhere else.
+- contradicted: the lines say something incompatible (the place is in another city or state, the description is the opposite).
+
+Give one verdict per claim id, with a reason of one short sentence a non-technical operator can read.`
 
 // ── Prompt builders ──
 
@@ -181,11 +196,19 @@ Do NOT report phone numbers, street addresses, business names, prices, or contac
 }
 
 /** The findings of all passes as one document, in the lettered order the structuring pass expects. */
-export function composeFindings(parts: { metro: string; areas: string; perArea: Record<string, string> }): string {
+export function composeFindings(
+  parts: { metro: string; areas: string; perArea: Record<string, string> },
+  sources: readonly ResearchSource[],
+): string {
   const areaSections = Object.entries(parts.perArea)
     .map(([name, text]) => `## ${name}\n${text}`)
     .join('\n\n')
-  return `# (c) part 1 — CITY-WIDE HOUSING AND CONDITIONS\n${parts.metro}\n\n# (a) AREAS\n${parts.areas}\n\n# (b) and (c) part 2 — PER AREA: subdivisions, housing, conditions\n${areaSections}`
+  const findings = `# (c) part 1 — CITY-WIDE HOUSING AND CONDITIONS\n${parts.metro}\n\n# (a) AREAS\n${parts.areas}\n\n# (b) and (c) part 2 — PER AREA: subdivisions, housing, conditions\n${areaSections}`
+  if (sources.length === 0) return findings
+  const list = sources
+    .map((s) => [`${s.id} · ${s.title} · ${s.url}`, ...s.quotes.map((q) => `  "${q}"`)].join('\n'))
+    .join('\n')
+  return `${findings}\n\n# SOURCES\n${list}`
 }
 
 // findings -> ResearchSchema. No supplied keywords: the model derives them. A list: it uses that list.
@@ -203,11 +226,13 @@ export function buildResearchStructuringPrompt(
 
 EVERY ARRAY, ALL OF THEM. The findings are written in lettered parts and every part has somewhere to go: (a) and (b) become suburbs and their subdivisions, (c) becomes housingCharacter plus the two condition arrays. Work through the findings part by part and fill each array from its part. A field left empty because you stopped reading is the one failure this task can produce — you are transcribing, and everything present in the findings must come out the other side.
 
+Each area, subdivision, housing description, condition and ZIP code is an object with a sources array of S-numbers (e.g. ["S2", "S5"]). The findings mark cited statements with [S#].
+
 suburbs — one entry per real AREA named in the findings (aim for the 8 to 12 they contain). A named subdivision inside an area is never its own entry; it goes in that area's subdivisions array. Each entry has:
   name: the place name exactly as the findings write it, e.g. "St. Louis Park", "Sugar Land".
   slug: that name lowercased, with spaces and punctuation replaced by single hyphens — "St. Louis Park" gives "st-louis-park". Nothing else: no prefix, no suffix. Unique, lowercase, a-z 0-9 and hyphens only.
-  subdivisions: the named developments and neighborhoods the findings place inside this area. Empty array if the findings name none — do not fill it from your own knowledge.
-  housingCharacter: one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
+  subdivisions: { name, sources } for each named development and neighborhood the findings place inside this area. Empty array if the findings name none — do not fill it from your own knowledge.
+  housing: { text, sources } — text is one or two sentences from the findings on what the homes there are like — era, size, construction, whether they sit in master-planned communities.
   conditions: the local conditions the findings give for THIS area specifically, each with what it means for cleaning.
   neighbors: the two to four OTHER areas from this same suburbs list that the findings say border or sit next to this one, by their exact names. Only areas that are entries in this list; empty array if the findings give no sense of where it sits.
 
@@ -381,4 +406,24 @@ Working through every condition on the list is what makes six service pages read
 If none of the conditions genuinely change how this service is done here, say so plainly in two sentences rather than padding — "a move-out clean in ${facts.city} is the same job as anywhere; what changes is…" is an honest and useful paragraph, and a better one than three sentences of filler.
 
 links — up to two phrases you have already written above that name one of the areas listed, each with that area's name exactly as listed. The phrase must appear word for word in your paragraph and contain the area name. If none, return an empty list.`
+}
+
+/** One area's (or the city-wide) claims with the quoted lines of each claim's sources. */
+export function buildFactCheckPrompt(
+  facts: Facts,
+  claims: ReadonlyArray<{ id: string; kind: string; text: string; area: string | null; sources: readonly string[] }>,
+  sources: readonly ResearchSource[],
+  areaName: string | null,
+): string {
+  const byId = new Map(sources.map((s) => [s.id, s]))
+  const blocks = claims.map((c) => {
+    const quoted = c.sources
+      .map((id) => byId.get(id))
+      .filter((s): s is ResearchSource => s !== undefined)
+      .map((s) => `  From "${s.title}":\n${s.quotes.map((q) => `    "${q}"`).join('\n')}`)
+      .join('\n')
+    return `- id: ${c.id}\n  ${c.kind}: ${c.text}\n${quoted || '  (no quoted lines)'}`
+  })
+  const where = areaName ? `${areaName}, an area served from ${facts.city}, ${facts.stateName}` : `${facts.city}, ${facts.stateName} as a whole`
+  return `These claims are about ${where}. Check each one.\n\n${blocks.join('\n\n')}`
 }

@@ -221,3 +221,18 @@ describe('findings as a whole', () => {
     expect(checkQuality(c)).toEqual([])
   })
 })
+
+describe('unknown place names', () => {
+  it('lists a capitalised place the research never named, without blocking', () => {
+    const d = doc({ suburbs: [suburb()], sections: { 'suburb.katy.local': 'Families near Oak Ridge Estates and Cinco Ranch call us every spring.' } })
+    const found = checkQuality(d).filter((f) => f.rule === 'unknown-place')
+    expect(found).toHaveLength(1)
+    expect(found[0]).toMatchObject({ blocking: false, slot: 'suburb.katy.local' })
+    expect(found[0].detail).toContain('Oak Ridge Estates')
+  })
+
+  it('does not flag the brand, the city, areas, subdivisions or service names', () => {
+    const d = doc({ suburbs: [suburb()], sections: { 'suburb.katy.local': 'At Ivy Cleans our Deep Cleaning crews in Cinco Ranch serve Katy and Houston.' } })
+    expect(checkQuality(d).filter((f) => f.rule === 'unknown-place')).toEqual([])
+  })
+})

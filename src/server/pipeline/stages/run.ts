@@ -2,13 +2,17 @@
 
 import {
   FrontSectionsSchema,
-  ResearchSchema,
+  ResearchStructuredSchema,
   ServiceCopySchema,
   SuburbCopySchema,
   type ResearchOutput,
 } from '@/server/pipeline/schemas'
 import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
 import { appendProgress, clearProgress } from '@/server/pipeline/progress'
+import { asResearchResult, mergeSources, type ResearchResult } from '@/server/pipeline/sources'
+import { acceptedResearch, blockedNames, researchFromClaims, toResearchAndClaims } from '@/server/pipeline/claims'
+import { makeGeocoder, type Geocoder } from '@/server/pipeline/geo'
+import { pendingVerifyItems, verifyItem } from './verify'
 import { loadDraft, saveDraft, type DraftDoc } from '@/server/content/drafts'
 import {
   SERVICE_LOCAL_SLUGS,
@@ -40,12 +44,27 @@ import {
   MAX_AREAS,
   MODEL_KEYS,
   applyUniquenessGate,
-  linkNeighbors,
   normalizeResearchSlugs,
   normalizeSlug,
 } from './research'
 
+// written copy that names a place the check did not accept is refused before any of it is saved
+function refuseBlockedNames(draft: DraftDoc, item: string, texts: ReadonlyArray<string | readonly string[]>): void {
+  const names = blockedNames(texts.flat().join('\n'), draft.claims ?? [])
+  if (names.length > 0) {
+    throw new Error(`the copy for ${item} names "${names[0]}", which was not confirmed — regenerate it`)
+  }
+}
+
 function requireResearch(draft: DraftDoc, key: string, stage: StageId): ResearchOutput {
+  const unchecked = (draft.claims ?? []).filter((c) => c.status === 'pending').length
+  if (unchecked > 0) {
+    throw new Error(`cannot run stage "${stage}" for "${key}": ${unchecked} research facts have not been checked yet`)
+  }
+  const undecided = (draft.claims ?? []).filter((c) => c.status === 'unconfirmed').length
+  if (undecided > 0) {
+    throw new Error(`cannot run stage "${stage}" for "${key}": ${undecided} research facts still need a decision`)
+  }
   if (!draft.research) {
     throw new Error(`cannot run stage "${stage}" for "${key}": the research stage has not completed`)
   }
@@ -57,7 +76,8 @@ async function executeStage(
   key: string,
   draft: DraftDoc,
   stage: StageId,
-  only?: string
+  only: string | undefined,
+  geocoder: Geocoder,
 ): Promise<void> {
   const { facts } = draft
 
@@ -75,21 +95,22 @@ async function executeStage(
       }
       // one pass, saved as soon as it lands so an interrupted stage resumes here
       const pass = async (partKey: string, modelKey: string, prompt: string, maxSearches: number, label: string) => {
-        if (parts[partKey] !== undefined) return parts[partKey]
+        const stored = parts[partKey]
+        if (stored !== undefined) return asResearchResult(stored)
         await appendProgress(key, { stage: 'research', kind: 'search', label })
-        const text = await client.research(prompt, modelKey, onEvent, { maxSearches })
-        parts[partKey] = text
+        const result = await client.research(prompt, modelKey, onEvent, { maxSearches })
+        parts[partKey] = result
         await saveDraft(key, draft)
-        return text
+        return result
       }
 
-      const metro = await pass('metro', MODEL_KEYS.researchMetro, buildMetroResearchPrompt(facts), SEARCH_BUDGET.metro, `${facts.city} as a whole: climate, housing, conditions`)
-      const areasText = await pass('areas', MODEL_KEYS.researchAreas, buildAreasResearchPrompt(facts), SEARCH_BUDGET.areas, `The areas ${facts.city} serves`)
+      const metroResult = await pass('metro', MODEL_KEYS.researchMetro, buildMetroResearchPrompt(facts), SEARCH_BUDGET.metro, `${facts.city} as a whole: climate, housing, conditions`)
+      const areasResult = await pass('areas', MODEL_KEYS.researchAreas, buildAreasResearchPrompt(facts), SEARCH_BUDGET.areas, `The areas ${facts.city} serves`)
       const { areas } = await client.generate({
         schema: AreaListSchema,
         key: MODEL_KEYS.researchAreaList,
         system: RESEARCH_STRUCTURE_SYSTEM,
-        prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasText}`,
+        prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasResult.text}`,
         model: MODELS.research,
       })
       // the brief asks for 8 to 10; the model sometimes lists more, and every extra area is a research pass and a page
@@ -97,11 +118,24 @@ async function executeStage(
       if (areaNames.length === 0) {
         throw new Error(`research found no areas for ${facts.city} — the areas pass returned nothing usable; re-run research`)
       }
-      const perArea: Record<string, string> = {}
+      const perArea: Record<string, ResearchResult> = {}
       for (const name of areaNames) {
         perArea[name] = await pass(`area:${normalizeSlug(name)}`, MODEL_KEYS.researchArea(normalizeSlug(name)), buildAreaResearchPrompt(facts, name, areaNames), SEARCH_BUDGET.area, `${name}: subdivisions, housing, conditions`)
       }
-      const findings = composeFindings({ metro, areas: areasText, perArea })
+      const merged = mergeSources({
+        metro: metroResult,
+        areas: areasResult,
+        ...Object.fromEntries(Object.entries(perArea).map(([name, r]) => [`area:${name}`, r])),
+      })
+      const findings = composeFindings(
+        {
+          metro: merged.texts.metro,
+          areas: merged.texts.areas,
+          perArea: Object.fromEntries(areaNames.map((name) => [name, merged.texts[`area:${name}`]])),
+        },
+        merged.sources,
+      )
+      draft.sources = merged.sources
       // persist the raw findings before structuring: the only evidence of what research found
       draft.findings = findings
       await saveDraft(key, draft)
@@ -112,16 +146,21 @@ async function executeStage(
         label: `Collected ${findings.length.toLocaleString()} chars of findings — structuring`,
       })
       const structured = await client.generate({
-        schema: ResearchSchema,
+        schema: ResearchStructuredSchema,
         key: MODEL_KEYS.researchStructure,
         system: RESEARCH_STRUCTURE_SYSTEM,
         prompt: buildResearchStructuringPrompt(findings, facts, []),
         model: MODELS.research,
       })
-      const normalized = normalizeResearchSlugs(structured, facts.city)
+      for (const s of structured.suburbs) s.slug = normalizeSlug(s.slug)
+      const sourced = toResearchAndClaims(structured, new Set(merged.sources.map((s) => s.id)))
+      const normalized = normalizeResearchSlugs(sourced.research, facts.city)
+      const kept = new Set(normalized.suburbs.map((s) => s.slug))
+      draft.researchFull = normalized
+      draft.claims = sourced.claims.filter((c) => c.area === null || kept.has(c.area))
       // the gate runs here, before anything downstream can see a skipped area
-      const { research: gated, scored } = applyUniquenessGate(normalized)
-      const r = linkNeighbors(gated)
+      const { scored } = applyUniquenessGate(acceptedResearch(normalized, draft.claims))
+      const r = researchFromClaims(normalized, draft.claims)
       draft.research = r
       const skipped = scored.filter((s) => s.verdict === 'skip')
       // subdivisions, not landmarks, are the count that matters
@@ -144,6 +183,28 @@ async function executeStage(
       await appendProgress(key, { stage: 'research', kind: 'done', label: 'Research complete' })
       break
     }
+    case 'verify': {
+      // one item per request from the browser; `only` names it. Without `only` every item runs (tests, scripts).
+      const items = only === undefined ? pendingVerifyItems(draft) : [only]
+      if (items.length > 0 && !draft.claims?.some((c) => c.status !== 'pending')) {
+        await appendProgress(key, { stage: 'verify', kind: 'start', label: 'Checking each fact against the page it came from' })
+      }
+      for (const item of items) {
+        await verifyItem({ client, geocoder, draft, item })
+        await saveDraft(key, draft)
+      }
+      if (stageComplete(draft, stage)) {
+        const claims = draft.claims ?? []
+        const confirmed = claims.filter((c) => c.status === 'confirmed').length
+        const open = claims.filter((c) => c.status === 'unconfirmed').length
+        const label = claims.length === 0
+          ? 'Researched before fact checking existed — nothing to check'
+          : `${confirmed} of ${claims.filter((c) => c.status !== 'unchecked').length} facts confirmed` +
+            (open ? ` · ${open} need your decision` : '')
+        await appendProgress(key, { stage: 'verify', kind: 'done', label })
+      }
+      break
+    }
     case 'front': {
       const research = requireResearch(draft, key, stage)
       await appendProgress(key, {
@@ -157,6 +218,7 @@ async function executeStage(
         system: FRONT_SYSTEM,
         prompt: buildFrontPrompt(facts, research),
       })
+      refuseBlockedNames(draft, 'the front page', [out.heroParagraphs, out.serviceIntro, ...Object.values(out.cards)])
       draft.sections['services.heroParagraphs'] = out.heroParagraphs
       draft.sections['services.serviceIntro'] = out.serviceIntro
       draft.sections['services.cards.dusting'] = out.cards.dusting
@@ -219,6 +281,7 @@ async function executeStage(
           prompt: buildSuburbPrompt(facts, research, suburb),
         })
 
+        refuseBlockedNames(draft, `the ${suburb.name} page`, [out.intro, out.homes, out.local])
         draft.sections[introSlot] = out.intro
         draft.sections[homesSlot] = out.homes
         draft.sections[localSlot] = out.local
@@ -289,6 +352,7 @@ async function executeStage(
           prompt: buildServiceLocalPrompt(facts, research, slug),
         })
 
+        refuseBlockedNames(draft, `the ${slug} page`, [out.local])
         draft.sections[localSlot] = out.local
 
         delete draft.links?.[localSlot]
@@ -338,6 +402,7 @@ async function executeStage(
 
 // every owned slot holds real copy; un-writable areas excluded
 function stageComplete(draft: DraftDoc, stage: StageId): boolean {
+  if (stage === 'verify') return !(draft.claims ?? []).some((c) => c.status === 'pending')
   // stageSlots already excludes un-writable areas, so this and finalize's
   // requiredSlotsFor now demand exactly the same set — the whole point.
   return stageSlots(draft.research)[stage].every((slot) => isWrittenSlot(draft.sections[slot]))
@@ -348,12 +413,13 @@ export async function runStage(
   client: ModelClient,
   key: string,
   stage: StageId,
-  only?: string
+  only?: string,
+  geocoder: Geocoder = makeGeocoder(),
 ): Promise<void> {
   const draft = await loadDraft(key)
   if (draft.done.includes(stage)) return
   try {
-    await executeStage(client, key, draft, stage, only)
+    await executeStage(client, key, draft, stage, only, geocoder)
   } catch (err) {
     const label = err instanceof Error ? err.message : String(err)
     await appendProgress(key, { stage, kind: 'error', label }).catch(() => {})
@@ -372,6 +438,10 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
     delete draft.research
     delete draft.findings
     delete draft.researchParts
+    delete draft.sources
+    delete draft.researchFull
+    delete draft.claims
+    delete draft.geocodes
   }
 }
 
@@ -384,7 +454,7 @@ export async function regenerateStage(
   const draft = await loadDraft(key)
 
   // downstream first, while draft.research still says which slots they own
-  const targets: StageId[] = stage === 'research' ? ['front', 'suburb', 'service', 'research'] : [stage]
+  const targets: StageId[] = stage === 'research' ? ['verify', 'front', 'suburb', 'service', 'research'] : [stage]
   for (const target of targets) clearStageOutputs(draft, target)
   for (const target of targets) await clearProgress(key, target)
 

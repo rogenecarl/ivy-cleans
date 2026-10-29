@@ -5,6 +5,9 @@ import { mkdir, readdir, readFile, rm, stat, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '@/server/pipeline/facts'
 import type { ResearchOutput } from '@/server/pipeline/schemas'
+import type { ResearchResult, ResearchSource } from '@/server/pipeline/sources'
+import type { ResearchClaim } from '@/server/pipeline/claims'
+import type { GeoPoint } from '@/server/pipeline/geo'
 import {
   SERVICE_LOCAL_SLUGS,
   STAGES,
@@ -27,8 +30,15 @@ export type DraftDoc = {
   // raw web-search findings, kept verbatim for debugging a bad city; never rendered
   findings?: string
   // the findings per research pass, so an interrupted research stage resumes where it stopped
-  researchParts?: Record<string, string>
+  researchParts?: Record<string, string | ResearchResult>
+  // every web source research cited, by id (S1…); facts point at these
+  sources?: ResearchSource[]
   research?: ResearchOutput
+  // everything research found with a source, before checking; `research` is rebuilt from it and `claims`
+  researchFull?: ResearchOutput
+  claims?: ResearchClaim[]
+  // geocoder answers by query, so a resumed fact check never asks twice
+  geocodes?: Record<string, GeoPoint | null>
   sections: Record<string, string | string[]>
   links?: Record<string, SlotLink[]>
   done: string[]
@@ -265,6 +275,9 @@ export async function finalizeDraft(key: string): Promise<void> {
   if (facts.ops !== undefined) {
     doc.ops = facts.ops
   }
+  // the evidence outlives the sidecar, which publish deletes
+  if (draft.claims?.length) doc.claims = draft.claims
+  if (draft.sources?.length) doc.sources = draft.sources
   if (published?.domain !== undefined) {
     doc.domain = published.domain
   }
@@ -307,6 +320,11 @@ export async function publishCity(
     throw new Error(
       `cannot publish "${key}": ${invisible.length} invisible character(s)\n${lines.join('\n')}`,
     )
+  }
+
+  const undecided = (doc.claims ?? []).filter((c) => c.status === 'pending' || c.status === 'unconfirmed').length
+  if (undecided > 0) {
+    throw new Error(`cannot publish "${key}": ${undecided} research facts still need a decision`)
   }
 
   const liveKeys = (await listLiveCityKeys()).filter((k) => k !== key)

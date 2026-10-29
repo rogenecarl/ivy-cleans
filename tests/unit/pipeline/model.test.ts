@@ -170,7 +170,7 @@ describe('StubModelClient', () => {
       generated: {},
     })
 
-    await expect(client.research('prompt text', 'front')).resolves.toBe(
+    await expect(client.research('prompt text', 'front').then((r) => r.text)).resolves.toBe(
       'Stubville findings: 12 suburbs, 5 landmarks.'
     )
   })
@@ -254,7 +254,7 @@ describe('StubModelClient', () => {
   test('StubModelClient research works with no onEvent (backwards compatible)', async () => {
     const fixtures = JSON.parse(fs.readFileSync(FIXTURE_PATH, 'utf-8'))
     const client = new StubModelClient(fixtures)
-    await expect(client.research('any prompt', 'research.metro')).resolves.toBeTypeOf('string')
+    await expect(client.research('any prompt', 'research.metro').then((r) => r.text)).resolves.toBeTypeOf('string')
   })
 })
 
@@ -310,7 +310,7 @@ describe('makeClient', () => {
     const client = makeClient()
 
     expect(client).toBeInstanceOf(StubModelClient)
-    await expect(client.research('prompt', 'research.metro')).resolves.toMatch(/Stubville/)
+    await expect(client.research('prompt', 'research.metro').then((r) => r.text)).resolves.toMatch(/Stubville/)
     // The committed fixture's service copy is about the stub metro; assert it
     // came from the fixture rather than pinning one city name in the prose.
     const svc = await client.generate({

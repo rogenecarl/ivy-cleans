@@ -17,6 +17,7 @@ import { readFile, rm, writeFile } from 'node:fs/promises'
 import { REQUIRED_SLOTS, finalizeDraft, loadDraft, requiredSlotsFor, saveDraft } from '@/server/content/drafts'
 import { getCity, revalidateCity } from '@/server/content/store'
 import { validateCityContent } from '@/server/content/validate'
+import type { ResearchStructured } from '@/server/pipeline/schemas'
 import { StubModelClient, type ModelClient } from '@/server/pipeline/model'
 import { clearProgress, readProgress } from '@/server/pipeline/progress'
 import * as stagesModule from '@/server/pipeline/stages'
@@ -84,7 +85,7 @@ describe('pipeline stages', () => {
     // — its generation isn't implemented until Task 16, but the stage id,
     // label and slot ownership are structural and land here.
     it('the home stage no longer exists and the suburb stage does', () => {
-      expect(STAGES.map((s) => s.id)).toEqual(['research', 'front', 'suburb', 'service'])
+      expect(STAGES.map((s) => s.id)).toEqual(['research', 'verify', 'front', 'suburb', 'service'])
       for (const stage of STAGES) expect(stage.label.length).toBeGreaterThan(10)
     })
 
@@ -227,14 +228,19 @@ describe('pipeline stages', () => {
         'research:research.area.mock-hollow',
         'research:research.area.fixture-heights',
         'generate:research.structure',
+        // the fact check: one call per area with claims, then the city-wide item
+        'generate:verify.house-cleaning-north-stubville',
+        'generate:verify.cleaning-services-mock-hollow',
+        'generate:verify.fixture-heights-cleaning-services',
+        'generate:verify._city',
         'generate:front',
       ])
     })
 
     it('records every stage as done and stores the research object', async () => {
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front'])
-      expect(draft.research?.zips).toEqual(['00001', '00002'])
+      expect(draft.done).toEqual(['research', 'verify', 'front'])
+      expect(draft.research?.zips).toEqual(['55401', '55402'])
       // Fixture Heights (0 researched, everything blank) is a 'skip' verdict
       // under the uniqueness gate wired into the research stage — only the
       // two researched areas survive.
@@ -272,7 +278,7 @@ describe('pipeline stages', () => {
       const validated = validateCityContent(raw)
       expect(validated.city).toBe('Ztest Stubville')
       expect(validated.status).toBe('draft')
-      expect(validated.research.zips).toEqual(['00001', '00002'])
+      expect(validated.research.zips).toEqual(['55401', '55402'])
       expect(validated.sections['home.landmarksParagraph']).toBeUndefined()
       // The gap Task 18 closes: generated area copy must reach the
       // published document, not be silently dropped at finalize.
@@ -315,7 +321,7 @@ describe('pipeline stages', () => {
       // 'front' was removed from the middle and re-appended on completion —
       // proof the resume picks up exactly the missing stage, not just "the
       // next one in STAGES order".
-      expect(after.done).toEqual(['research', 'front'])
+      expect(after.done).toEqual(['research', 'verify', 'front'])
       expect((after.sections['services.heroParagraphs'] as string[])[0]).toMatch(/Stubville/)
     })
 
@@ -342,7 +348,7 @@ describe('pipeline stages', () => {
 
       expect(client.calls).toEqual(['generate:front'])
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front'])
+      expect(draft.done).toEqual(['research', 'verify', 'front'])
       expect(draft.sections['services.cards.dusting']).toMatch(/Stubville/)
     })
 
@@ -417,9 +423,9 @@ describe('pipeline stages', () => {
       const client = newClient()
       for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
 
-      expect(client.calls).toEqual(['generate:front'])
+      expect(client.calls.filter((c) => !c.startsWith('generate:verify.'))).toEqual(['generate:front'])
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front'])
+      expect(draft.done).toEqual(['research', 'verify', 'front'])
       expect(Object.keys(draft.sections)).toHaveLength(7)
     })
   })
@@ -445,6 +451,7 @@ describe('pipeline stages', () => {
 
     it('front done event carries the counts summary', async () => {
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
       await runStage(newClient(), KEY, 'front')
       const events = await readProgress(KEY)
       const done = events.filter((e) => e.stage === 'front' && e.kind === 'done')
@@ -493,13 +500,14 @@ describe('pipeline stages', () => {
       // every entry carries just enough (4 subdivisions + housing character,
       // scoring 6 — 'review', not 'skip') to survive it untouched.
       const enoughToSurvive = {
-        subdivisions: ['A', 'B', 'C', 'D'],
-        housingCharacter: 'Present.',
+        sources: ['S1'],
+        subdivisions: ['A', 'B', 'C', 'D'].map((name) => ({ name, sources: ['S1'] })),
+        housing: { text: 'Present.', sources: ['S1'] },
         neighbors: [],
         conditions: [],
       }
       const structured = {
-        ...(fixtures.generated['research.structure'] as ResearchOutput),
+        ...(fixtures.generated['research.structure'] as ResearchStructured),
         suburbs: [
           { name: 'Weird Slug', slug: 'Weird Slug!', ...enoughToSurvive },
           { name: 'Weird Slug Again', slug: 'weird--slug', ...enoughToSurvive },
@@ -538,6 +546,7 @@ describe('pipeline stages', () => {
     it('leaves already-clean fixture slugs untouched', async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const draft = await loadDraft(KEY)
       // Fixture Heights is dropped by the uniqueness gate (nothing researched
@@ -628,9 +637,15 @@ describe('pipeline stages', () => {
      * Proves the "dropped" text is conditional, not unconditionally appended.
      */
     function allGoodFixtures(): StubFixtures {
-      const researched = { subdivisions: ['A', 'B', 'C', 'D'], housingCharacter: 'Present.', neighbors: [], conditions: [] }
+      const researched = {
+        sources: ['S1'],
+        subdivisions: ['A', 'B', 'C', 'D'].map((name) => ({ name, sources: ['S1'] })),
+        housing: { text: 'Present.', sources: ['S1'] },
+        neighbors: [],
+        conditions: [],
+      }
       const structured = {
-        ...(fixtures.generated['research.structure'] as ResearchOutput),
+        ...(fixtures.generated['research.structure'] as ResearchStructured),
         suburbs: [
           { name: 'North Stubville', slug: 'house-cleaning-north-stubville', ...researched },
           { name: 'Mock Hollow', slug: 'cleaning-services-mock-hollow', ...researched },
@@ -654,6 +669,7 @@ describe('pipeline stages', () => {
       // verdict 'skip'. North Stubville and Mock Hollow are researched
       // enough to survive.
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const draft = await loadDraft(KEY)
       const names = draft.research!.suburbs.map((s) => s.name)
@@ -665,6 +681,7 @@ describe('pipeline stages', () => {
       // A dropped area must never look like research simply finding less
       // than usual, so its name is printed rather than swallowed.
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const events = await readProgress(KEY)
       const dropped = events.find((e) => /no developments found for/.test(e.label))
@@ -734,8 +751,8 @@ describe('pipeline stages', () => {
 
 
   describe('stage id typing', () => {
-    it('runStage accepts only the four known ids', async () => {
-      const ids: StageId[] = ['research', 'front', 'suburb', 'service']
+    it('runStage accepts only the five known ids', async () => {
+      const ids: StageId[] = ['research', 'verify', 'front', 'suburb', 'service']
       expect(ids).toEqual(STAGES.map((s) => s.id))
     })
   })
@@ -757,6 +774,7 @@ describe('pipeline stages', () => {
     it('reconciles its own arithmetic and names what was dropped, and why', async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const events = await readProgress(KEY)
       const summary = events.find((e) => e.label.includes('will get a page'))
@@ -777,6 +795,7 @@ describe('pipeline stages', () => {
     beforeEach(async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
     })
 
     it('writes one local slot per template service, matching stageSlots exactly', async () => {
@@ -850,6 +869,7 @@ describe('pipeline stages', () => {
     beforeEach(async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
     })
 
     it('writes all three slots for every kept area, matching suburbSlots(slug) exactly', async () => {
@@ -933,6 +953,7 @@ describe('pipeline stages', () => {
 
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
       await runStage(newClient(), KEY, 'suburb')
       const wholeStage = await loadDraft(KEY)
 

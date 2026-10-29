@@ -56,7 +56,7 @@ A small structuring call then pulls the area names out of those findings, exactl
 >
 > The other areas this branch serves are [THE OTHER AREA NAMES]. If a page says which of these [AREA] borders, note it.
 
-The three sets of findings are then joined into one document, in the order the structuring pass expects (city-wide, areas, per area).
+The three sets of findings are then joined into one document, in the order the structuring pass expects (city-wide, areas, per area). Every web page a pass quoted is kept: each gets a number (S1, S2, …), the findings carry `[S3]`-style markers where a statement came from a page, and a SOURCES list at the end gives each page's title, address and the exact lines quoted from it.
 
 Landmarks are no longer requested. They fed one sentence that read identically on every city site, and named subdivisions do the same job of proving local knowledge far better. ZIP codes are not researched either — which ZIPs a branch serves is the owner's decision, entered in the admin. Keywords are not researched: they come from real search-volume data (DataForSEO) when that is connected, and until then the front page is written without them.
 
@@ -70,11 +70,36 @@ A second pass converts the findings text into the site's data (the areas list wi
 >
 > Drop anything the findings themselves flag as uncertain, disputed, or out of the service area, and drop any phone number, street address or business name that wandered into the findings — those fields do not exist in this output.
 >
+> Every item carries sources: the S-numbers from the SOURCES list at the end of the findings whose quoted lines state it. An item no source states is left out entirely; never attach a source that does not mention the item.
+>
 > Mark a condition copySafe: false when it is background for deciding whether to work a market rather than something a cleaning company would ever print: household income, poverty, crime, flood risk, property values. Everything about climate, weather, housing construction and what dirties a home is copySafe: true.
 
 The brief this pass receives asks it to turn each area's findings into: a name and a URL slug (the name, lowercased and hyphenated), the subdivisions found inside it, a sentence or two on what the homes there are like, the local conditions specific to that area, and the two to four other areas from the same list that border it — plus the metro-wide conditions, the ZIP list, and the keywords. Code then turns the neighbour names into links both ways (if Lake Mary lists Sanford, Sanford lists Lake Mary), drops any name that is not an area on the list, and caps each area at four; the area page shows them as "Nearby areas we also serve".
 
+Every area, subdivision, housing description, condition and ZIP comes back with the S-numbers of the pages that state it. Code then throws away anything with no real source behind it — an area with no source loses its page and everything in it — and keeps the rest as a list of claims to be checked (see Step 1c), each remembering the pages it came from.
+
 On keywords specifically, this pass is told one of two things: with no real search-volume keywords supplied (today), return an empty list — never phrases guessed from the findings; once the keyword-research provider is wired in, it is handed an exact list and told to use it unchanged.
+
+### Step 1c. Checking every fact against its source
+
+Before anything is written, every area, neighbourhood, housing description, printable local condition and ZIP code is checked, one area at a time:
+
+1. **By code, against public data.** ZIP codes are looked up in the Census ZIP list: one that isn't there, or sits in another state or more than 40 miles from the city, is not used. Areas and neighbourhoods are looked up on OpenStreetMap: one the map finds in another state, or more than 40 miles away, is held for the owner. A place the map simply doesn't know is not held against it — small neighbourhoods often aren't on the map.
+2. **By a small, cheap AI model (Haiku), against the page it came from.** It sees each fact and only the exact lines quoted from its own sources. Its standing instruction:
+
+> You check research claims about a city against the source text they came from.
+>
+> For each claim you get its id, what it says, and the exact lines quoted from the web pages it was taken from. Judge ONLY from those quoted lines — not from your own knowledge of the place, and not from what seems likely.
+>
+> - supported: the quoted lines state the claim (a named place appears as a place in that area or city; a description matches what the lines say).
+> - unclear: the lines mention something related but do not actually state the claim, or the place they name could be somewhere else.
+> - contradicted: the lines say something incompatible (the place is in another city or state, the description is the opposite).
+>
+> Give one verdict per claim id, with a reason of one short sentence a non-technical operator can read.
+
+"Supported" facts are used. "Contradicted" ones are dropped. "Unclear" ones — and places the map puts too far away — are left out of everything the writers see until the owner decides (keep or drop) on the generate screen. Conditions marked never-to-be-printed are not checked at all.
+
+After every page is written, code reads it back: if it names an area, neighbourhood or ZIP code that was dropped or never confirmed, the page is refused before it is saved and has to be written again. Any other capitalised place name the research never found is listed on the review page as worth a look (it doesn't block anything — it may just be a proper noun).
 
 ---
 
@@ -114,6 +139,7 @@ Every writing skill starts from this same instruction block:
 >     "peace of mind" and "exceptional" — at most once per page each.
 >
 > SUBSTANCE — this is what separates a page worth reading from filler
+> - Name only places that appear in the data you are given: the city, its areas, and the neighborhoods listed for them. A place that is not in the data does not go on the page, however well you know it.
 > - Ground the copy in the real city: its climate and seasons, its housing stock (historic bungalows, brick row houses, ranch homes, stucco, high-rise condos, beach rentals), and how people there actually live — long indoor winters, humid summers, pollen season, road salt, blown sand, desert dust, coastal salt air, wildfire smoke.
 > - Two or three concrete details that are true of that city beat a page of generic praise. If a sentence would read exactly the same for any other city in the country, rewrite it until it could not.
 > - Write about cleaning, always. The local detail is the reason a room gets dirty; the sentence still has to end up at what we do about it.

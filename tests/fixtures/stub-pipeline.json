@@ -1,11 +1,71 @@
 {
   "_comment": "Canned model output for StubModelClient (src/server/pipeline/model.ts). Every test and every STUB_MODEL=1 run of the admin pipeline reads this file instead of calling Claude, so it must stay valid against src/server/pipeline/schemas.ts. The city is the fictional Stubville: obviously fake copy, so a stub run that accidentally reaches a real page is unmistakable. Keys match src/server/pipeline/stages/ MODEL_KEYS.",
   "research": {
-    "research.metro": "Stubville city-wide findings (fixture data — not from the web).\n\n(1) Housing and conditions: fixture-era bungalows on slab foundations; the test season drags assertion grit indoors for six months, which means entry mats and sills need doing every visit.\n\n(2) ZIP codes: 00001, 00002",
-    "research.areas": "STUBVILLE AREAS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\nNorth Stubville borders Fixture Heights. Mock Hollow borders North Stubville.",
-    "research.area.north-stubville": "NORTH STUBVILLE FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust.",
-    "research.area.mock-hollow": "MOCK HOLLOW FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust.",
-    "research.area.fixture-heights": "FIXTURE HEIGHTS FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust."
+    "research.metro": {
+      "text": "Stubville city-wide findings (fixture data — not from the web).\n\n(1) Housing and conditions: fixture-era bungalows on slab foundations; the test season drags assertion grit indoors for six months, which means entry mats and sills need doing every visit.\n\n(2) ZIP codes: 00001, 00002 [1]",
+      "sources": [
+        {
+          "id": "1",
+          "url": "https://stubville.example/guide",
+          "title": "Stubville area guide (fixture)",
+          "quotes": [
+            "Stubville fixture source"
+          ]
+        }
+      ]
+    },
+    "research.areas": {
+      "text": "STUBVILLE AREAS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\nNorth Stubville borders Fixture Heights. Mock Hollow borders North Stubville. [1]",
+      "sources": [
+        {
+          "id": "1",
+          "url": "https://stubville.example/guide",
+          "title": "Stubville area guide (fixture)",
+          "quotes": [
+            "Stubville fixture source"
+          ]
+        }
+      ]
+    },
+    "research.area.north-stubville": {
+      "text": "NORTH STUBVILLE FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust. [1]",
+      "sources": [
+        {
+          "id": "1",
+          "url": "https://stubville.example/guide",
+          "title": "Stubville area guide (fixture)",
+          "quotes": [
+            "Stubville fixture source"
+          ]
+        }
+      ]
+    },
+    "research.area.mock-hollow": {
+      "text": "MOCK HOLLOW FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust. [1]",
+      "sources": [
+        {
+          "id": "1",
+          "url": "https://stubville.example/guide",
+          "title": "Stubville area guide (fixture)",
+          "quotes": [
+            "Stubville fixture source"
+          ]
+        }
+      ]
+    },
+    "research.area.fixture-heights": {
+      "text": "FIXTURE HEIGHTS FINDINGS (fixture data — not from the web).\n\nSTUBVILLE RESEARCH FINDINGS (fixture data — not from the web).\n\n(a) Suburbs and neighbourhoods: North Stubville, a residential district north of the fixture line; Mock Hollow, an inner suburb of small fixture-era houses; Fixture Heights, on the ridge east of downtown Stubville.\n\n(b) ZIP codes: 00001 and 00002 cover residential Stubville.\n\n(c) Subdivisions: Assertion Acres in North Stubville; Mock Hollow Commons in Mock Hollow.\n\n(d) Keywords: cleaning services stubville, house cleaning stubville, maid service stubville, deep cleaning stubville.\n\nLocal conditions: Stubville has a placeholder climate — six months of test data followed by six months of assertions — and a housing stock of mock bungalows and stub-frame duplexes that trap fixture dust. [1]",
+      "sources": [
+        {
+          "id": "1",
+          "url": "https://stubville.example/guide",
+          "title": "Stubville area guide (fixture)",
+          "quotes": [
+            "Stubville fixture source"
+          ]
+        }
+      ]
+    }
   },
   "generated": {
     "research.structure.areas": {
@@ -26,53 +86,131 @@
         {
           "name": "North Stubville",
           "slug": "house-cleaning-north-stubville",
-          "subdivisions": [
-            "Assertion Acres",
-            "Mock Meadows",
-            "Fixture Court",
-            "Stub Village Estates",
-            "Placeholder Heights",
-            "Canned Creek"
+          "sources": [
+            "S1"
           ],
-          "housingCharacter": "Mock bungalows from the fixture era, mostly one story, with small fenced yards.",
-          "conditions": [],
-          "neighbors": []
+          "subdivisions": [
+            {
+              "name": "Assertion Acres",
+              "sources": [
+                "S1"
+              ]
+            },
+            {
+              "name": "Mock Meadows",
+              "sources": [
+                "S1"
+              ]
+            },
+            {
+              "name": "Fixture Court",
+              "sources": [
+                "S1"
+              ]
+            },
+            {
+              "name": "Stub Village Estates",
+              "sources": [
+                "S1"
+              ]
+            },
+            {
+              "name": "Placeholder Heights",
+              "sources": [
+                "S1"
+              ]
+            },
+            {
+              "name": "Canned Creek",
+              "sources": [
+                "S1"
+              ]
+            }
+          ],
+          "housing": {
+            "text": "Mock bungalows from the fixture era, mostly one story, with small fenced yards.",
+            "sources": [
+              "S1"
+            ]
+          },
+          "neighbors": [],
+          "conditions": []
         },
         {
           "name": "Mock Hollow",
           "slug": "cleaning-services-mock-hollow",
-          "subdivisions": [
-            "Mock Hollow Commons",
-            "Mock Hollow Terrace"
+          "sources": [
+            "S1"
           ],
-          "housingCharacter": "Stub-frame duplexes built close together along the fixture line.",
-          "conditions": [],
-          "neighbors": []
+          "subdivisions": [
+            {
+              "name": "Mock Hollow Commons",
+              "sources": [
+                "S1"
+              ]
+            },
+            {
+              "name": "Mock Hollow Terrace",
+              "sources": [
+                "S1"
+              ]
+            }
+          ],
+          "housing": {
+            "text": "Stub-frame duplexes built close together along the fixture line.",
+            "sources": [
+              "S1"
+            ]
+          },
+          "neighbors": [],
+          "conditions": []
         },
         {
           "name": "Fixture Heights",
           "slug": "fixture-heights-cleaning-services",
+          "sources": [
+            "S1"
+          ],
           "subdivisions": [],
-          "housingCharacter": "",
-          "conditions": [],
-          "neighbors": []
+          "housing": {
+            "text": "",
+            "sources": []
+          },
+          "neighbors": [],
+          "conditions": []
         }
       ],
       "conditions": [
         {
           "condition": "Six months of test season followed by six months of assertions",
           "implication": "Fixture dust settles on shelves and ledges for most of the year, so surfaces need regular dusting.",
-          "copySafe": true
+          "copySafe": true,
+          "sources": [
+            "S1"
+          ]
         },
         {
           "condition": "Internal QA note — placeholder parcel risk data",
           "implication": "For operator scheduling judgement only; never for customer-facing copy.",
-          "copySafe": false
+          "copySafe": false,
+          "sources": [
+            "S1"
+          ]
         }
       ],
       "zips": [
-        "00001",
-        "00002"
+        {
+          "zip": "55401",
+          "sources": [
+            "S1"
+          ]
+        },
+        {
+          "zip": "55402",
+          "sources": [
+            "S1"
+          ]
+        }
       ],
       "keywords": [
         "cleaning services stubville",
@@ -156,6 +294,92 @@
         "Ivy Cleans has cleaned homes in Ztest Aboutville since March 2024. Maria leads the crew here.",
         "Every visit is done by our own crew, and the job is not finished until your home is clean."
       ]
+    },
+    "verify.house-cleaning-north-stubville": {
+      "verdicts": [
+        {
+          "id": "house-cleaning-north-stubville:area:north-stubville",
+          "verdict": "supported",
+          "reason": "The source names North Stubville."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:assertion-acres",
+          "verdict": "supported",
+          "reason": "The source names Assertion Acres."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:mock-meadows",
+          "verdict": "supported",
+          "reason": "The source names Mock Meadows."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:fixture-court",
+          "verdict": "supported",
+          "reason": "The source names Fixture Court."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:stub-village-estates",
+          "verdict": "supported",
+          "reason": "The source names Stub Village Estates."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:placeholder-heights",
+          "verdict": "supported",
+          "reason": "The source names Placeholder Heights."
+        },
+        {
+          "id": "house-cleaning-north-stubville:subdivision:canned-creek",
+          "verdict": "supported",
+          "reason": "The source names Canned Creek."
+        },
+        {
+          "id": "house-cleaning-north-stubville:housing:mock-bungalows-from-the-fixture-era-mostly-one-story-with-small-fenced-yards",
+          "verdict": "supported",
+          "reason": "The source names the housing."
+        }
+      ]
+    },
+    "verify.cleaning-services-mock-hollow": {
+      "verdicts": [
+        {
+          "id": "cleaning-services-mock-hollow:area:mock-hollow",
+          "verdict": "supported",
+          "reason": "The source names Mock Hollow."
+        },
+        {
+          "id": "cleaning-services-mock-hollow:subdivision:mock-hollow-commons",
+          "verdict": "supported",
+          "reason": "The source names Mock Hollow Commons."
+        },
+        {
+          "id": "cleaning-services-mock-hollow:subdivision:mock-hollow-terrace",
+          "verdict": "supported",
+          "reason": "The source names Mock Hollow Terrace."
+        },
+        {
+          "id": "cleaning-services-mock-hollow:housing:stub-frame-duplexes-built-close-together-along-the-fixture-line",
+          "verdict": "supported",
+          "reason": "The source names the housing."
+        }
+      ]
+    },
+    "verify.fixture-heights-cleaning-services": {
+      "verdicts": [
+        {
+          "id": "fixture-heights-cleaning-services:area:fixture-heights",
+          "verdict": "supported",
+          "reason": "The source names Fixture Heights."
+        }
+      ]
+    },
+    "verify._city": {
+      "verdicts": [
+        {
+          "id": "_city:condition:six-months-of-test-season-followed-by-six-months-of-assertions",
+          "verdict": "supported",
+          "reason": "The source names the condition."
+        }
+      ]
     }
   },
   "events": {
@@ -173,5 +397,6 @@
         "label": "Reading search results…"
       }
     ]
-  }
+  },
+  "geocode": {}
 }

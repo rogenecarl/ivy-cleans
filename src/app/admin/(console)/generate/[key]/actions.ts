@@ -9,7 +9,10 @@ import { requireAdmin } from '@/server/auth/auth-server'
 import {
   finalizeLogic,
   getProgressLogic,
+  isItemStage,
   isStageId,
+  decideClaimLogic,
+  listDecisionsLogic,
   pendingItemsLogic,
   runStageLogic,
   type ActionResult,
@@ -30,7 +33,7 @@ export async function runStageAction(
 // areas or service pages a per-item stage still owes; the client drives the loop one request per item
 export async function pendingItemsAction(key: string, stage: string): Promise<PendingItems> {
   await requireAdmin()
-  if (stage !== 'suburb' && stage !== 'service') return { ok: false, error: `"${stage}" is not a per-item stage` }
+  if (!isItemStage(stage)) return { ok: false, error: `"${stage}" is not a per-item stage` }
   return pendingItemsLogic(key, stage)
 }
 
@@ -47,4 +50,16 @@ export async function finalizeAction(key: string): Promise<ActionResult> {
 export async function getProgressAction(key: string): Promise<ProgressSnapshot> {
   await requireAdmin()
   return getProgressLogic(key)
+}
+
+/** The facts the fact check could not confirm; writing waits until each is kept or dropped. */
+export async function listDecisionsAction(key: string) {
+  await requireAdmin()
+  return listDecisionsLogic(key)
+}
+
+export async function decideClaimAction(key: string, claimId: string, decision: string): Promise<ActionResult> {
+  await requireAdmin()
+  if (decision !== 'keep' && decision !== 'drop') return { ok: false, error: `unknown decision "${decision}"` }
+  return decideClaimLogic(key, claimId, decision)
 }

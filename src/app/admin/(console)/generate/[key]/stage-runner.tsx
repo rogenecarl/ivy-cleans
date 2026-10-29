@@ -3,17 +3,20 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Loader2, RotateCw } from 'lucide-react'
-import type { ProgressSnapshot } from '@/server/pipeline/admin-logic'
+import type { ProgressSnapshot, UndecidedClaim } from '@/server/pipeline/admin-logic'
 import type { ProgressEvent } from '@/server/pipeline/progress'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import {
+  decideClaimAction,
   finalizeAction,
   getProgressAction,
+  listDecisionsAction,
   pendingItemsAction,
   runStageAction,
 } from './actions'
+import { DecisionPanel } from './decision-panel'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { SERVICE_LOCAL_SLUGS } from '@/server/content/slots'
 import { STAGE_EXPECTED, stageName } from '@/app/admin/_components/stage-names'
@@ -48,6 +51,8 @@ function expectedMs(stageId: string, areaCount: number): number {
   switch (stageId) {
     case 'research':
       return 180_000
+    case 'verify':
+      return 5_000 * (areaCount + 1)
     case 'front':
       return 30_000
     case 'suburb':
@@ -74,6 +79,10 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
   // per-area progress for the suburb stage: the client drives that loop
   // per-item progress for suburb (per area) and service (per page); one state since only one stage runs at a time
   const [itemProgress, setItemProgress] = useState<{ done: number; total: number; name: string } | null>(null)
+  // facts the check could not confirm; while non-empty the run waits before writing
+  const [decisions, setDecisions] = useState<UndecidedClaim[]>([])
+  const [deciding, setDeciding] = useState<string | null>(null)
+  const [decisionError, setDecisionError] = useState<string | null>(null)
 
   /* Measured per stage as this session runs it — see StageTiming. */
   const [timings, setTimings] = useState<Record<string, StageTiming>>({})
@@ -109,7 +118,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
 
   // walk the areas or service pages still owed, one request each; the list comes from the server
   const runItems = useCallback(
-    async (stage: 'suburb' | 'service'): Promise<{ ok: true } | { ok: false; error: string }> => {
+    async (stage: 'verify' | 'suburb' | 'service'): Promise<{ ok: true } | { ok: false; error: string }> => {
       const pending = await pendingItemsAction(cityKey, stage)
       if (!pending.ok) return { ok: false, error: pending.error }
 
@@ -138,6 +147,19 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
       try {
         for (const stage of stages) {
           if (completed.includes(stage.id)) continue
+          // writing waits until every unconfirmed fact is kept or dropped; a reload lands back here too
+          if (stage.id === 'front' || stage.id === 'suburb' || stage.id === 'service') {
+            const open = await listDecisionsAction(cityKey)
+            if (!open.ok) {
+              setFailed({ stage: stage.id, message: open.error })
+              return
+            }
+            if (open.claims.length > 0) {
+              setDecisions(open.claims)
+              setCurrent(null)
+              return
+            }
+          }
           setCurrent(stage.id)
           const stageStart = Date.now()
           setRunStartedAt((v) => v ?? stageStart)
@@ -147,7 +169,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
 
           // suburb and service run one item per request (~20s each); minutes in one request is killed
           const result =
-            stage.id === 'suburb' || stage.id === 'service'
+            stage.id === 'verify' || stage.id === 'suburb' || stage.id === 'service'
               ? await runItems(stage.id)
               : await runStageAction(cityKey, stage.id)
 
@@ -170,6 +192,24 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
       }
     },
     [cityKey, stages, finalize, runItems],
+  )
+
+  const decide = useCallback(
+    async (id: string, decision: 'keep' | 'drop') => {
+      setDeciding(id)
+      setDecisionError(null)
+      const result = await decideClaimAction(cityKey, id, decision)
+      const open = await listDecisionsAction(cityKey)
+      setDeciding(null)
+      if (!result.ok) setDecisionError(result.error)
+      if (!open.ok) {
+        setDecisionError(open.error)
+        return
+      }
+      setDecisions(open.claims)
+      if (open.claims.length === 0) void run(done)
+    },
+    [cityKey, run, done],
   )
 
   // Kick off on mount, and only on mount: the operator lands here straight
@@ -221,7 +261,9 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
   const activeName = activeIndex === -1 ? '' : stageName(stages[activeIndex].id, stages[activeIndex].label)
   const overallLeft = allDone
     ? `Done · ${stages.length} of ${stages.length} stages`
-    : failed
+    : decisions.length > 0
+      ? `Waiting for you · ${decisions.length === 1 ? '1 fact' : `${decisions.length} facts`} to decide`
+      : failed
       ? `Stopped at stage ${activeIndex + 1} of ${stages.length} · ${activeName}`
       : current !== null
         ? `Stage ${activeIndex + 1} of ${stages.length} · ${activeName}`
@@ -281,12 +323,16 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
         </div>
       </div>
 
+      {decisions.length > 0 && (
+        <DecisionPanel claims={decisions} pendingId={deciding} error={decisionError} onDecide={(id, d) => void decide(id, d)} />
+      )}
+
       <ol className="divide-y divide-border/40">
         {stages.map((stage) => {
           const isDone = done.includes(stage.id)
           const isRunning = current === stage.id
           const items =
-            isRunning && (stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
+            isRunning && (stage.id === 'verify' || stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
           const isFailed = failed?.stage === stage.id
           // The glyphs are load-bearing: scripts/dev/admin-e2e.mjs polls
           // [data-role="status-icon"] for '✓' to know the run finished.

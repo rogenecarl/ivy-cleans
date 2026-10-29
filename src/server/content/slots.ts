@@ -51,6 +51,7 @@ export function serviceSlots(slug: string): readonly string[] {
 // the four stages. Here rather than pipeline/stages/ so drafts.ts can import without a cycle; stages/index.ts re-exports.
 export const STAGES = [
   { id: 'research', label: 'Researching the city — suburbs, ZIP codes, local conditions' },
+  { id: 'verify', label: 'Checking facts against their sources' },
   { id: 'front', label: 'Writing the front page — hero and services' },
   { id: 'suburb', label: 'Writing the area pages' },
   { id: 'service', label: 'Writing the local section of each service page' },
@@ -70,6 +71,7 @@ export function isWritableArea(suburb: { subdivisions: readonly string[] }): boo
 export function stageSlots(research: ResearchOutput | undefined): Record<StageId, readonly string[]> {
   return {
     research: [],
+    verify: [],
     front: [
       'services.heroParagraphs',
       'services.serviceIntro',

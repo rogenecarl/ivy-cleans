@@ -22,6 +22,8 @@ import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import {
   createDraftFromFields,
+  decideClaimLogic,
+  listDecisionsLogic,
   finalizeLogic,
   getProgressLogic,
   isStageId,
@@ -254,7 +256,7 @@ describe('stage run → finalize → publish', () => {
     const draft = await loadDraft(KEY)
     expect(draft.done).toEqual([...RUNNABLE_STAGE_IDS])
     expect(Object.keys(draft.sections)).toHaveLength(7)
-    expect(draft.research?.zips).toEqual(['00001', '00002'])
+    expect(draft.research?.zips).toEqual(['55401', '55402'])
   })
 
   // Task 18: finalizeLogic (below) now requires every surviving area's three
@@ -391,7 +393,7 @@ describe('updateSuburbsLogic', () => {
       { name: 'New Area', slug: 'new-area', subdivisions: [], housingCharacter: '', conditions: [], neighbors: [] },
     ])
     // The rest of the research object is untouched.
-    expect(draft.research?.zips).toEqual(['00001', '00002'])
+    expect(draft.research?.zips).toEqual(['55401', '55402'])
   })
 
   it('edits the published document too, so the preview renders the change', async () => {
@@ -745,6 +747,7 @@ describe('pendingItemsLogic: suburb', () => {
   it('lists the areas the suburb stage still owes, so the client can drive one request each', async () => {
     await freshDraft(KEY)
     await runStageLogic(KEY, 'research')
+    await runStageLogic(KEY, 'verify')
 
     const before = await pendingItemsLogic(KEY, 'suburb')
     expect(before.ok).toBe(true)
@@ -786,6 +789,7 @@ describe('pendingItemsLogic: service', () => {
      */
     await freshDraft(KEY)
     await runStageLogic(KEY, 'research')
+    await runStageLogic(KEY, 'verify')
 
     const before = await pendingItemsLogic(KEY, 'service')
     expect(before.ok).toBe(true)
@@ -984,7 +988,7 @@ describe('listCities', () => {
     expect(row(await listCities(), KEY)).toMatchObject({
       status: 'generating',
       hasDraft: true,
-      doneCount: 2,
+      doneCount: 3,
     })
   })
 
@@ -1000,7 +1004,7 @@ describe('listCities', () => {
 
     const rows = await listCities()
     expect(rows.filter((r) => r.key === KEY)).toHaveLength(1)
-    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 4 })
+    expect(row(rows, KEY)).toMatchObject({ status: 'draft', hasDraft: true, doneCount: 5 })
   })
 
   it('shows a published city as LIVE with no sidecar left', async () => {
@@ -1369,6 +1373,145 @@ describe('updateContactLogic', () => {
     if (!read.ok) return
     expect(read.phone).toBe('(612) 555-0142')
     expect(read.address).toBe('')
+    await wipe(KEY)
+  })
+})
+
+describe('deciding on unconfirmed facts before writing', () => {
+  const KEY = 'ztest-editville'
+
+  // research + fact check on the stub (all confirmed), then one subdivision turned unconfirmed by hand
+  async function withOneUnconfirmed(text = 'Mock Hollow Terrace'): Promise<string> {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'verify')).toEqual({ ok: true })
+    const { saveDraft } = await import('@/server/content/drafts')
+    const { researchFromClaims } = await import('@/server/pipeline/claims')
+    const draft = await loadDraft(KEY)
+    const claim = draft.claims!.find((c) => c.text === text)!
+    claim.status = 'unconfirmed'
+    claim.reason = 'the source does not mention it'
+    draft.research = researchFromClaims(draft.researchFull!, draft.claims!)
+    await saveDraft(KEY, draft)
+    return claim.id
+  }
+
+  const subdivisionsOf = async (slug: string) =>
+    (await loadDraft(KEY)).research!.suburbs.find((s) => s.slug === slug)?.subdivisions ?? []
+
+  it('lists the undecided facts with their area and source links', async () => {
+    const id = await withOneUnconfirmed()
+    const r = await listDecisionsLogic(KEY)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.claims).toHaveLength(1)
+    expect(r.claims[0]).toMatchObject({ id, areaName: 'Mock Hollow', reason: 'the source does not mention it' })
+    expect(r.claims[0].sourceLinks[0].url).toBe('https://stubville.example/guide')
+    await wipe(KEY)
+  })
+
+  it('Keep puts the fact back into the research the writers see', async () => {
+    const id = await withOneUnconfirmed()
+    expect(await subdivisionsOf('cleaning-services-mock-hollow')).not.toContain('Mock Hollow Terrace')
+    expect(await decideClaimLogic(KEY, id, 'keep')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).claims!.find((c) => c.id === id)?.status).toBe('kept')
+    expect(await subdivisionsOf('cleaning-services-mock-hollow')).toContain('Mock Hollow Terrace')
+    await wipe(KEY)
+  })
+
+  it('Drop keeps it out for good', async () => {
+    const id = await withOneUnconfirmed()
+    expect(await decideClaimLogic(KEY, id, 'drop')).toEqual({ ok: true })
+    expect((await loadDraft(KEY)).claims!.find((c) => c.id === id)?.status).toBe('dropped')
+    expect(await subdivisionsOf('cleaning-services-mock-hollow')).not.toContain('Mock Hollow Terrace')
+    await wipe(KEY)
+  })
+
+  it('refuses a second decision on the same fact, and an unknown fact', async () => {
+    const id = await withOneUnconfirmed()
+    expect(await decideClaimLogic(KEY, id, 'drop')).toEqual({ ok: true })
+    expect((await decideClaimLogic(KEY, id, 'keep')).ok).toBe(false)
+    expect((await decideClaimLogic(KEY, 'no:such:claim', 'keep')).ok).toBe(false)
+    await wipe(KEY)
+  })
+
+  it('will not write a page while a fact is undecided', async () => {
+    await withOneUnconfirmed()
+    const r = await runStageLogic(KEY, 'front')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toMatch(/need a decision/)
+    await wipe(KEY)
+  })
+
+  it('after a reload, lists only the facts still undecided', async () => {
+    const first = await withOneUnconfirmed('Mock Hollow Terrace')
+    const { saveDraft } = await import('@/server/content/drafts')
+    const draft = await loadDraft(KEY)
+    draft.claims!.find((c) => c.text === 'Mock Hollow Commons')!.status = 'unconfirmed'
+    await saveDraft(KEY, draft)
+    expect(await decideClaimLogic(KEY, first, 'keep')).toEqual({ ok: true })
+    const r = await listDecisionsLogic(KEY)
+    expect(r.ok && r.claims.map((c) => c.text)).toEqual(['Mock Hollow Commons'])
+    await wipe(KEY)
+  })
+})
+
+describe('the suburbs editor and research claims', () => {
+  const KEY = 'ztest-editville'
+
+  it('drops the claims of an area the editor removes, so nothing orphaned holds up publishing', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    const { saveDraft } = await import('@/server/content/drafts')
+    const draft = await loadDraft(KEY)
+    // an undecided fact in Mock Hollow, then Mock Hollow removed in the editor
+    draft.claims!.find((c) => c.text === 'Mock Hollow Terrace')!.status = 'unconfirmed'
+    await saveDraft(KEY, draft)
+    const rows = draft.research!.suburbs.filter((s) => s.slug !== 'cleaning-services-mock-hollow').map((s) => ({ name: s.name, slug: s.slug }))
+    expect(await updateSuburbsLogic(KEY, rows)).toEqual({ ok: true })
+
+    const after = await loadDraft(KEY)
+    expect(after.claims!.some((c) => c.area === 'cleaning-services-mock-hollow')).toBe(false)
+    expect(after.researchFull!.suburbs.map((s) => s.slug)).not.toContain('cleaning-services-mock-hollow')
+    const r = await listDecisionsLogic(KEY)
+    expect(r.ok && r.claims).toEqual([])
+    await wipe(KEY)
+  })
+})
+
+describe('final review fixes', () => {
+  const KEY = 'ztest-editville'
+
+  it('will not write a page while a fact is still unchecked', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    const r = await runStageLogic(KEY, 'front')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toMatch(/not been checked yet/)
+    await wipe(KEY)
+  })
+
+  it('keeps the claims of areas the editor never showed when the editor saves', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'verify')).toEqual({ ok: true })
+    // Fixture Heights is cut by the uniqueness gate, so the editor never lists it
+    const draft = await loadDraft(KEY)
+    expect(draft.research!.suburbs.map((s) => s.slug)).not.toContain('fixture-heights-cleaning-services')
+    const rows = draft.research!.suburbs.map((s) => ({ name: s.name, slug: s.slug }))
+    expect(await updateSuburbsLogic(KEY, rows)).toEqual({ ok: true })
+    const after = await loadDraft(KEY)
+    expect(after.claims!.some((c) => c.area === 'fixture-heights-cleaning-services')).toBe(true)
+    expect(after.researchFull!.suburbs.map((s) => s.slug)).toContain('fixture-heights-cleaning-services')
+    await wipe(KEY)
+  })
+
+  it('refuses to regenerate the fact check, which would check every area in one request', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    const r = await regenerateLogic(KEY, 'verify')
+    expect(r.ok).toBe(false)
     await wipe(KEY)
   })
 })

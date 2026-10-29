@@ -7,3 +7,4 @@ export { SERVICE_LOCAL_SLUGS, STAGES, STAGE_IDS, serviceSlots, stageSlots, subur
 export * from './prompts'
 export * from './research'
 export * from './run'
+export { CITY_ITEM, pendingVerifyItems } from './verify'

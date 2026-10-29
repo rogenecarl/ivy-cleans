@@ -78,7 +78,7 @@ function fullResearch(): ResearchOutput {
       },
     ],
     conditions: [],
-    zips: ['00001', '00002'],
+    zips: ['55401', '55402'],
     keywords: ['cleaning services ztest'],
   }
 }
@@ -265,7 +265,7 @@ describe('drafts store', () => {
       expect(validated.hasSuburbPages).toBe(true)
       expect(validated.maps).toEqual({ front: null, home: null, contact: null })
       expect(validated.contactAddress).toBe('123 Ztest Ave')
-      expect(validated.research.zips).toEqual(['00001', '00002'])
+      expect(validated.research.zips).toEqual(['55401', '55402'])
       expect(validated.sections['service.deep-cleaning.local']).toBe('Deep cleans in Ztest begin in the bathrooms.')
       // The gap Task 18 closes: generated area copy must actually reach the
       // published document instead of being silently dropped at finalize.
@@ -567,6 +567,29 @@ describe('drafts store', () => {
       await rm(cityPath(key), { force: true })
       revalidateCity(key)
       await writeFile(DOMAINS_JSON, domainsSnapshot, 'utf-8')
+    })
+
+    it('carries research claims and sources onto the document, and waits for every decision', async () => {
+      await finalized()
+      const draft = await loadDraft(key)
+      draft.claims = [
+        { id: 'x:area:x', area: 'x', kind: 'area', text: 'X', sources: ['S1'], status: 'unconfirmed' },
+        { id: 'x:subdivision:y', area: 'x', kind: 'subdivision', text: 'Y', sources: ['S1'], status: 'confirmed' },
+      ]
+      draft.sources = [{ id: 'S1', url: 'https://a.example', title: 'A', quotes: ['q'] }]
+      await saveDraft(key, draft)
+      await finalizeDraft(key)
+      const doc = validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8')))
+      expect(doc.claims).toHaveLength(2)
+      expect(doc.sources?.[0].url).toBe('https://a.example')
+
+      await expect(publishCity(key)).rejects.toThrow(/1 research facts still need a decision/)
+      expect(validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8'))).status).toBe('draft')
+
+      draft.claims[0].status = 'kept'
+      await saveDraft(key, draft)
+      await finalizeDraft(key)
+      await expect(publishCity(key)).resolves.toBeUndefined()
     })
 
     it('reduces a pasted URL to its host', async () => {

@@ -25,6 +25,9 @@
  * is killed long before six-to-twelve sequential model calls finish, which is
  * why the console drives those two stages one item per request.
  */
+import fs from 'node:fs'
+import path from 'node:path'
+
 // Same layering the test setup uses: .env.local wins, .env fills the gaps.
 // loadEnvFile throws on a missing file, and either may legitimately be absent.
 for (const f of ['.env.local', '.env']) {
@@ -136,3 +139,15 @@ console.log(`calls  : ${calls}`)
 console.log(`tokens : ${inputTokens.toLocaleString()} in · ${outputTokens.toLocaleString()} out`)
 console.log(`cost   : $${cost.toFixed(2)}   (measured, claude-opus-5)`)
 console.log(`elapsed: ${((Date.now() - started) / 1000 / 60).toFixed(1)} min`)
+
+// research vs a hand-kept list of this city's areas (evals/known/<key>.json), when one exists
+const knownPath = path.join(process.cwd(), 'evals', 'known', `${KEY}.json`)
+const after = await loadDraft(KEY)
+if (fs.existsSync(knownPath) && after.research) {
+  const { agreement } = await import('../../src/server/pipeline/claims.ts')
+  const known = JSON.parse(fs.readFileSync(knownPath, 'utf-8')).areas
+  const a = agreement(after.research, known)
+  const wrong = (after.claims ?? []).filter((c) => c.status === 'wrong').length
+  console.log(`known  : ${a.matched} matched · ${a.extra.length} not on the known list · ${a.missing.length} missed · ${wrong} marked wrong by the fact check`)
+  for (const name of a.extra) console.log(`  + ${name}`)
+}
