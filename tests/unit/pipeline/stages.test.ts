@@ -228,13 +228,18 @@ describe('pipeline stages', () => {
         'research:research.area.mock-hollow',
         'research:research.area.fixture-heights',
         'generate:research.structure',
+        // the fact check: one call per area with claims, then the city-wide item
+        'generate:verify.house-cleaning-north-stubville',
+        'generate:verify.cleaning-services-mock-hollow',
+        'generate:verify.fixture-heights-cleaning-services',
+        'generate:verify._city',
         'generate:front',
       ])
     })
 
     it('records every stage as done and stores the research object', async () => {
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front'])
+      expect(draft.done).toEqual(['research', 'verify', 'front'])
       expect(draft.research?.zips).toEqual(['55401', '55402'])
       // Fixture Heights (0 researched, everything blank) is a 'skip' verdict
       // under the uniqueness gate wired into the research stage — only the
@@ -316,7 +321,7 @@ describe('pipeline stages', () => {
       // 'front' was removed from the middle and re-appended on completion —
       // proof the resume picks up exactly the missing stage, not just "the
       // next one in STAGES order".
-      expect(after.done).toEqual(['research', 'front'])
+      expect(after.done).toEqual(['research', 'verify', 'front'])
       expect((after.sections['services.heroParagraphs'] as string[])[0]).toMatch(/Stubville/)
     })
 
@@ -343,7 +348,7 @@ describe('pipeline stages', () => {
 
       expect(client.calls).toEqual(['generate:front'])
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front'])
+      expect(draft.done).toEqual(['research', 'verify', 'front'])
       expect(draft.sections['services.cards.dusting']).toMatch(/Stubville/)
     })
 
@@ -418,9 +423,9 @@ describe('pipeline stages', () => {
       const client = newClient()
       for (const stage of RUNNABLE_STAGES) await runStage(client, KEY, stage.id)
 
-      expect(client.calls).toEqual(['generate:front'])
+      expect(client.calls.filter((c) => !c.startsWith('generate:verify.'))).toEqual(['generate:front'])
       const draft = await loadDraft(KEY)
-      expect(draft.done).toEqual(['research', 'front'])
+      expect(draft.done).toEqual(['research', 'verify', 'front'])
       expect(Object.keys(draft.sections)).toHaveLength(7)
     })
   })
@@ -446,6 +451,7 @@ describe('pipeline stages', () => {
 
     it('front done event carries the counts summary', async () => {
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
       await runStage(newClient(), KEY, 'front')
       const events = await readProgress(KEY)
       const done = events.filter((e) => e.stage === 'front' && e.kind === 'done')
@@ -540,6 +546,7 @@ describe('pipeline stages', () => {
     it('leaves already-clean fixture slugs untouched', async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const draft = await loadDraft(KEY)
       // Fixture Heights is dropped by the uniqueness gate (nothing researched
@@ -662,6 +669,7 @@ describe('pipeline stages', () => {
       // verdict 'skip'. North Stubville and Mock Hollow are researched
       // enough to survive.
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const draft = await loadDraft(KEY)
       const names = draft.research!.suburbs.map((s) => s.name)
@@ -673,6 +681,7 @@ describe('pipeline stages', () => {
       // A dropped area must never look like research simply finding less
       // than usual, so its name is printed rather than swallowed.
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const events = await readProgress(KEY)
       const dropped = events.find((e) => /no developments found for/.test(e.label))
@@ -765,6 +774,7 @@ describe('pipeline stages', () => {
     it('reconciles its own arithmetic and names what was dropped, and why', async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
 
       const events = await readProgress(KEY)
       const summary = events.find((e) => e.label.includes('will get a page'))
@@ -785,6 +795,7 @@ describe('pipeline stages', () => {
     beforeEach(async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
     })
 
     it('writes one local slot per template service, matching stageSlots exactly', async () => {
@@ -858,6 +869,7 @@ describe('pipeline stages', () => {
     beforeEach(async () => {
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
     })
 
     it('writes all three slots for every kept area, matching suburbSlots(slug) exactly', async () => {
@@ -941,6 +953,7 @@ describe('pipeline stages', () => {
 
       await resetDraft()
       await runStage(newClient(), KEY, 'research')
+      await runStage(newClient(), KEY, 'verify')
       await runStage(newClient(), KEY, 'suburb')
       const wholeStage = await loadDraft(KEY)
 

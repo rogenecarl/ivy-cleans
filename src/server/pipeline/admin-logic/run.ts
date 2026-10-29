@@ -58,6 +58,8 @@ export async function pendingItemsLogic(key: string, stage: ItemStage): Promise<
 
 /** Force a stage to run again. Research also clears front/home/deep — see stages/run.ts. */
 export async function regenerateLogic(key: string, stage: StageId): Promise<ActionResult> {
+  // checking every area in one request breaks the one-call-per-request rule; regenerate research to check again
+  if (stage === 'verify') return { ok: false, error: 'the fact check runs again when research is regenerated' }
   return attempt(() => regenerateStage(makeClient(), key, stage))
 }
 

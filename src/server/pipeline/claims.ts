@@ -115,11 +115,20 @@ const NOT_ACCEPTED: ReadonlySet<ClaimStatus> = new Set(['unconfirmed', 'wrong', 
 /** Place names (areas, subdivisions, ZIPs) the copy must not use: found case-insensitively, as whole words. */
 export function blockedNames(text: string, claims: readonly ResearchClaim[]): string[] {
   const lower = text.toLowerCase()
+  const escape = (t: string) => t.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const accepted = claims
+    .filter((c) => ACCEPTED.has(c.status) && (c.kind === 'area' || c.kind === 'subdivision'))
+    .map((c) => c.text.toLowerCase())
   const found: string[] = []
   for (const c of claims) {
     if (!NOT_ACCEPTED.has(c.status) || (c.kind !== 'area' && c.kind !== 'subdivision' && c.kind !== 'zip')) continue
-    const escaped = c.text.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    if (new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(lower) && !found.includes(c.text)) found.push(c.text)
+    const name = c.text.toLowerCase()
+    // blank out accepted names that contain this one ("Kenwood Park" when "Kenwood" was dropped) before matching
+    let masked = lower
+    for (const longer of accepted) {
+      if (longer !== name && longer.includes(name)) masked = masked.replaceAll(longer, ' '.repeat(longer.length))
+    }
+    if (new RegExp(`(^|[^a-z0-9])${escape(name)}($|[^a-z0-9])`).test(masked) && !found.includes(c.text)) found.push(c.text)
   }
   return found
 }

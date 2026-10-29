@@ -148,6 +148,15 @@ describe('blockedNames', () => {
     expect(blockedNames('Homes around heights park estates date to 1920.', claims)).toEqual(['Heights Park Estates'])
   })
 
+  it('does not refuse a dropped name that is only part of a confirmed one', () => {
+    const withPark: ResearchClaim[] = [
+      { id: 'a:subdivision:kenwood', area: 'a', kind: 'subdivision', text: 'Kenwood', sources: ['S1'], status: 'dropped' },
+      { id: 'a:subdivision:kenwood-park', area: 'a', kind: 'subdivision', text: 'Kenwood Park', sources: ['S1'], status: 'confirmed' },
+    ]
+    expect(blockedNames('Homes in Kenwood Park have plaster walls.', withPark)).toEqual([])
+    expect(blockedNames('Kenwood Park and Kenwood both have plaster walls.', withPark)).toEqual(['Kenwood'])
+  })
+
   it('ignores a confirmed name, a word inside another word, and conditions', () => {
     expect(blockedNames('Norhill bungalows near Oakwood face hard water.', claims)).toEqual([])
   })

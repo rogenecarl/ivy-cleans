@@ -57,6 +57,10 @@ function refuseBlockedNames(draft: DraftDoc, item: string, texts: ReadonlyArray<
 }
 
 function requireResearch(draft: DraftDoc, key: string, stage: StageId): ResearchOutput {
+  const unchecked = (draft.claims ?? []).filter((c) => c.status === 'pending').length
+  if (unchecked > 0) {
+    throw new Error(`cannot run stage "${stage}" for "${key}": ${unchecked} research facts have not been checked yet`)
+  }
   const undecided = (draft.claims ?? []).filter((c) => c.status === 'unconfirmed').length
   if (undecided > 0) {
     throw new Error(`cannot run stage "${stage}" for "${key}": ${undecided} research facts still need a decision`)

@@ -89,9 +89,9 @@ export class StubGeocoder implements Geocoder {
   }
 }
 
-/** The real geocoder, or with STUB_MODEL=1 the stub fixture's `geocode` map (no network in tests and E2E). */
+/** The real geocoder, or under Vitest or STUB_MODEL=1 the stub fixture's `geocode` map: tests never touch the network. */
 export function makeGeocoder(): Geocoder {
-  if (process.env.STUB_MODEL === '1') {
+  if (process.env.STUB_MODEL === '1' || process.env.VITEST) {
     const raw = fs.readFileSync(stubFixturePath(), 'utf-8')
     return new StubGeocoder((JSON.parse(raw) as { geocode?: Record<string, GeoPoint | null> }).geocode ?? {})
   }

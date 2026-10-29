@@ -205,7 +205,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ key: st
           {hasDraft ? (
           <RegeneratePanel
             cityKey={key}
-            stages={STAGES.map((stage) => ({ id: stage.id, label: stage.label }))}
+            stages={STAGES.filter((stage) => stage.id !== 'verify').map((stage) => ({ id: stage.id, label: stage.label }))}
           />
         ) : (
           <p className="text-[0.85rem] text-muted-foreground">

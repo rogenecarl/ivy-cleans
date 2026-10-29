@@ -747,6 +747,7 @@ describe('pendingItemsLogic: suburb', () => {
   it('lists the areas the suburb stage still owes, so the client can drive one request each', async () => {
     await freshDraft(KEY)
     await runStageLogic(KEY, 'research')
+    await runStageLogic(KEY, 'verify')
 
     const before = await pendingItemsLogic(KEY, 'suburb')
     expect(before.ok).toBe(true)
@@ -788,6 +789,7 @@ describe('pendingItemsLogic: service', () => {
      */
     await freshDraft(KEY)
     await runStageLogic(KEY, 'research')
+    await runStageLogic(KEY, 'verify')
 
     const before = await pendingItemsLogic(KEY, 'service')
     expect(before.ok).toBe(true)
@@ -1474,6 +1476,42 @@ describe('the suburbs editor and research claims', () => {
     expect(after.researchFull!.suburbs.map((s) => s.slug)).not.toContain('cleaning-services-mock-hollow')
     const r = await listDecisionsLogic(KEY)
     expect(r.ok && r.claims).toEqual([])
+    await wipe(KEY)
+  })
+})
+
+describe('final review fixes', () => {
+  const KEY = 'ztest-editville'
+
+  it('will not write a page while a fact is still unchecked', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    const r = await runStageLogic(KEY, 'front')
+    expect(r.ok).toBe(false)
+    if (r.ok) return
+    expect(r.error).toMatch(/not been checked yet/)
+    await wipe(KEY)
+  })
+
+  it('keeps the claims of areas the editor never showed when the editor saves', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    expect(await runStageLogic(KEY, 'research')).toEqual({ ok: true })
+    expect(await runStageLogic(KEY, 'verify')).toEqual({ ok: true })
+    // Fixture Heights is cut by the uniqueness gate, so the editor never lists it
+    const draft = await loadDraft(KEY)
+    expect(draft.research!.suburbs.map((s) => s.slug)).not.toContain('fixture-heights-cleaning-services')
+    const rows = draft.research!.suburbs.map((s) => ({ name: s.name, slug: s.slug }))
+    expect(await updateSuburbsLogic(KEY, rows)).toEqual({ ok: true })
+    const after = await loadDraft(KEY)
+    expect(after.claims!.some((c) => c.area === 'fixture-heights-cleaning-services')).toBe(true)
+    expect(after.researchFull!.suburbs.map((s) => s.slug)).toContain('fixture-heights-cleaning-services')
+    await wipe(KEY)
+  })
+
+  it('refuses to regenerate the fact check, which would check every area in one request', async () => {
+    expect((await freshDraft(KEY)).ok).toBe(true)
+    const r = await regenerateLogic(KEY, 'verify')
+    expect(r.ok).toBe(false)
     await wipe(KEY)
   })
 })

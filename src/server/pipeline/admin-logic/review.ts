@@ -106,6 +106,11 @@ function mergeSuburbRows(rows: readonly SuburbRow[], existing: readonly StoredSu
     }
   })
 }
+function removedSlugs(before: readonly { slug: string }[], after: readonly SuburbRow[]): Set<string> {
+  const now = new Set(after.map((r) => r.slug))
+  return new Set(before.map((s) => s.slug).filter((slug) => !now.has(slug)))
+}
+
 // a city between finalize and publish has both a sidecar and a document; update both
 export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promise<ActionResult> {
   try {
@@ -130,23 +135,27 @@ export async function updateSuburbsLogic(key: string, rows: SuburbRow[]): Promis
     let touched = false
 
     if (draft?.research) {
+      // only a row the editor showed and the operator removed takes its claims with it; areas the editor never
+      // listed (dropped, wrong, gated out) keep their record
+      const removed = removedSlugs(draft.research.suburbs, suburbs)
       draft.research = { ...draft.research, suburbs: mergeSuburbRows(suburbs, draft.research.suburbs) }
-      // a row the editor removed takes its claims with it, so none is left waiting on a decision
-      const kept = new Set(suburbs.map((s) => s.slug))
       if (draft.researchFull) {
-        draft.researchFull = { ...draft.researchFull, suburbs: mergeSuburbRows(suburbs, draft.researchFull.suburbs) }
+        const shown = new Set(suburbs.map((s) => s.slug))
+        const hidden = draft.researchFull.suburbs.filter((s) => !shown.has(s.slug) && !removed.has(s.slug))
+        draft.researchFull = {
+          ...draft.researchFull,
+          suburbs: [...mergeSuburbRows(suburbs, draft.researchFull.suburbs), ...hidden],
+        }
       }
-      if (draft.claims) draft.claims = draft.claims.filter((c) => c.area === null || kept.has(c.area))
+      if (draft.claims) draft.claims = draft.claims.filter((c) => c.area === null || !removed.has(c.area))
       await saveDraft(key, draft)
       touched = true
     }
 
     if (doc) {
+      const removedFromDoc = removedSlugs(doc.research.suburbs, suburbs)
       doc.research = { ...doc.research, suburbs: mergeSuburbRows(suburbs, doc.research.suburbs) }
-      if (doc.claims) {
-        const kept = new Set(suburbs.map((s) => s.slug))
-        doc.claims = doc.claims.filter((c) => c.area === null || kept.has(c.area))
-      }
+      if (doc.claims) doc.claims = doc.claims.filter((c) => c.area === null || !removedFromDoc.has(c.area))
       await writeCityDoc(key, doc)
       touched = true
     }
