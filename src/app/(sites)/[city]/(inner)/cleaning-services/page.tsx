@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { csMeta, rooms } from "@/site/data/cleaning-services";
@@ -8,10 +9,13 @@ import PlansHeader from "@/site/components/cleaning-services/PlansHeader";
 import PackagesBar from "@/site/components/cleaning-services/PackagesBar";
 import RoomChecklist from "@/site/components/cleaning-services/RoomChecklist";
 
-export const metadata: Metadata = {
-  title: csMeta.title,
-  description: csMeta.description,
-};
+export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
+  return {
+    title: csMeta.title,
+    description: csMeta.description,
+    ...canonicalFor(await cityFromParams(params), "/cleaning-services"),
+  };
+}
 
 export default async function CleaningServicesPage({ params }: { params: CityParams }) {
   const c = await cityFromParams(params);

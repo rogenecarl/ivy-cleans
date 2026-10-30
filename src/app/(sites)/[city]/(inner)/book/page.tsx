@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { cityFromParams, type CityParams } from "@/site/city-param";
@@ -11,10 +12,12 @@ export async function generateMetadata({
 }: {
   params: CityParams;
 }): Promise<Metadata> {
-  const { bookMeta } = bookData(await cityFromParams(params));
+  const c = await cityFromParams(params);
+  const { bookMeta } = bookData(c);
   return {
     title: bookMeta.title,
     description: bookMeta.description,
+    ...canonicalFor(c, "/book"),
   };
 }
 

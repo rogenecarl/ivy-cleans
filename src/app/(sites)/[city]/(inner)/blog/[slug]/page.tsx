@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
@@ -28,10 +29,11 @@ async function resolvePost(params: Params) {
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { post } = await resolvePost(params);
+  const { c, post } = await resolvePost(params);
   return {
     title: post.metaTitle ?? `${post.title} - Ivy Cleans`,
     description: post.metaDescription ?? post.excerpt,
+    ...canonicalFor(c, `/blog/${post.slug}`),
   };
 }
 

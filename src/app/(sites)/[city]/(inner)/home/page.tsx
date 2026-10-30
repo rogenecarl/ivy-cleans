@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import { cityBits } from "@/server/content/store";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
@@ -23,10 +24,12 @@ export async function generateMetadata({
 }: {
   params: CityParams;
 }): Promise<Metadata> {
-  const { homeMeta } = homeData(await cityFromParams(params));
+  const c = await cityFromParams(params);
+  const { homeMeta } = homeData(c);
   return {
     title: homeMeta.title,
     description: homeMeta.description,
+    ...canonicalFor(c, "/home"),
   };
 }
 

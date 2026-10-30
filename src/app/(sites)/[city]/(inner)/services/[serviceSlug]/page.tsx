@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import { notFound } from "next/navigation";
 import { cityFromParams } from "@/site/city-param";
 import type { CityContent } from "@/server/content/types";
@@ -56,12 +57,13 @@ export async function generateMetadata({
   // One title pattern for all seven (item 12); the description is still each
   // service's own.
   const title = serviceTitle(entry, c);
+  const path = `/services/${(await params).serviceSlug}`;
   if (entry.kind === "template") {
     const { meta } = entry.content(c);
-    return { title, description: meta.description };
+    return { title, description: meta.description, ...canonicalFor(c, path) };
   }
   const { moveOutMeta } = moveOutData(c);
-  return { title, description: moveOutMeta.description };
+  return { title, description: moveOutMeta.description, ...canonicalFor(c, path) };
 }
 
 export default async function ServicePage({ params }: { params: ServiceParams }) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,7 +17,7 @@ export const dynamicParams = true;
 export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
   const c = await cityFromParams(params);
   if (!aboutReady(c.ops)) return {};
-  return aboutData(c).meta;
+  return { ...aboutData(c).meta, ...canonicalFor(c, "/about") };
 }
 
 const SECTION = "mb-[5rem] last:mb-0";

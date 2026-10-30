@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Hero from "@/site/components/Hero";
 import FeaturedIn from "@/site/components/FeaturedIn";
 import Intro from "@/site/components/Intro";
@@ -37,6 +38,7 @@ export async function generateMetadata({
     title: t("House Cleaning Service in {city} {stateName} - Ivy Cleans", bits),
     // from the page's own hero, not the old Minneapolis line
     description: metaDescription(servicesData(c).heroParagraphs[0]),
+    ...canonicalFor(c, "/"),
   };
 }
 

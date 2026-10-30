@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { citySlug } from "@/server/content/interpolate";
 import { bookData } from "@/site/data/book";
@@ -10,9 +11,11 @@ export async function generateMetadata({
 }: {
   params: CityParams;
 }): Promise<Metadata> {
-  const { bookNowMeta } = bookData(await cityFromParams(params));
+  const c = await cityFromParams(params);
+  const { bookNowMeta } = bookData(c);
   return {
     title: bookNowMeta.title,
+    ...canonicalFor(c, "/book-now"),
   };
 }
 
