@@ -3,19 +3,18 @@ import { describe, expect, it } from 'vitest'
 import { leadQueryToSearch, parseLeadQuery } from '@/server/leads/filters'
 
 describe('parseLeadQuery', () => {
-  it('defaults to everything except test rows', () => {
+  it('defaults to no filters', () => {
     expect(parseLeadQuery({})).toEqual({
       city: null,
       status: null,
       formType: null,
-      includeTest: false,
     })
   })
 
-  it('reads all four params', () => {
+  it('reads all three params', () => {
     expect(
-      parseLeadQuery({ city: 'miami', status: 'contacted', form: 'booking', test: '1' }),
-    ).toEqual({ city: 'miami', status: 'contacted', formType: 'booking', includeTest: true })
+      parseLeadQuery({ city: 'miami', status: 'contacted', form: 'booking' }),
+    ).toEqual({ city: 'miami', status: 'contacted', formType: 'booking' })
   })
 
   it('drops an unknown status instead of erroring', () => {
@@ -38,12 +37,12 @@ describe('parseLeadQuery', () => {
 describe('leadQueryToSearch', () => {
   it('omits empty filters', () => {
     expect(
-      leadQueryToSearch({ city: null, status: null, formType: null, includeTest: false }),
+      leadQueryToSearch({ city: null, status: null, formType: null }),
     ).toBe('')
   })
 
   it('round-trips through parseLeadQuery', () => {
-    const query = { city: 'miami', status: 'quoted' as const, formType: 'contact' as const, includeTest: true }
+    const query = { city: 'miami', status: 'quoted' as const, formType: 'contact' as const }
     const search = leadQueryToSearch(query)
     expect(parseLeadQuery(Object.fromEntries(new URLSearchParams(search)))).toEqual(query)
   })

@@ -103,7 +103,7 @@ function leadWhere(query: LeadQuery, opts: { status?: boolean } = {}): Prisma.Le
     ...(query.city ? { cityKey: query.city } : {}),
     ...(query.status && opts.status !== false ? { status: query.status } : {}),
     ...(query.formType ? { formType: query.formType } : {}),
-    ...(query.includeTest ? {} : { isTest: false }),
+    isTest: false,
   }
 }
 
@@ -126,11 +126,6 @@ export async function leadStatusCounts(query: LeadQuery): Promise<LeadStatusCoun
   const counts: LeadStatusCounts = { new: 0, contacted: 0, quoted: 0, booked: 0, lost: 0 }
   for (const row of rows) counts[row.status] = row._count._all
   return counts
-}
-
-// how many rows the current filters would show if test rows were included — so hidden leads are never silent
-export async function countTestLeads(query: LeadQuery): Promise<number> {
-  return prisma.lead.count({ where: { ...leadWhere(query), isTest: true } })
 }
 
 export async function getLead(id: string): Promise<LeadRecord | null> {

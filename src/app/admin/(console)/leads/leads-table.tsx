@@ -193,7 +193,6 @@ export function LeadsTable({
                         <span className="flex flex-wrap items-center gap-1 text-[0.8rem] text-muted-foreground">
                           <Pill>{cityName}</Pill>
                           <Pill>{lead.formType.toUpperCase()}</Pill>
-                          {lead.isTest && <Pill>TEST</Pill>}
                           {lead.emailStatus === 'failed' && (
                             <Badge variant="danger" className="text-[0.65rem]">
                               email not sent
@@ -235,7 +234,6 @@ export function LeadsTable({
                   <span className="flex flex-wrap items-center gap-1 text-[0.8rem] text-muted-foreground">
                     <Pill>{cityName}</Pill>
                     <Pill>{lead.formType.toUpperCase()}</Pill>
-                    {lead.isTest && <Pill>TEST</Pill>}
                   </span>
                   <span className="flex items-center justify-between gap-2 text-[0.85rem]">
                     <span>{lead.email ?? lead.phone ?? 'No contact info'}</span>
@@ -302,11 +300,6 @@ export function LeadsTable({
                     <span className="text-[0.8rem]">{selected.submittedExact}</span>
                   </span>
                 </SheetDescription>
-                {selected.lead.isTest && (
-                  <span className="text-[0.8rem] font-semibold text-amber-700">
-                    Preview submission, not a real customer.
-                  </span>
-                )}
               </SheetHeader>
 
               <div className="space-y-6 px-4 py-5">
