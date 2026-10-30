@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import { Source_Serif_4 } from "next/font/google";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { privacyPolicyMeta, privacyPolicyHeader, privacyPolicyParagraphs } from "@/site/data/privacy-policy";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 
-export const metadata: Metadata = {
-  title: privacyPolicyMeta.title,
-  description: privacyPolicyMeta.description,
-};
+export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
+  return {
+    title: privacyPolicyMeta.title,
+    description: privacyPolicyMeta.description,
+    ...canonicalFor(await cityFromParams(params), "/privacy-policy"),
+  };
+}
 
 // post-3.css e217928: Source Serif Pro on live; Source Serif 4 is its successor on next/font
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });

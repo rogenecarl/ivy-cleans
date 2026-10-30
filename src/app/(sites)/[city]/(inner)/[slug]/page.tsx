@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -67,7 +68,7 @@ export const dynamicParams = true;
 export async function generateMetadata({ params }: { params: SlugParams }): Promise<Metadata> {
   const resolved = await resolveSlug(params);
   const { suburbMeta } = suburbData(resolved.c, resolved.suburb);
-  return { title: suburbMeta.title, description: suburbMeta.description };
+  return { title: suburbMeta.title, description: suburbMeta.description, ...canonicalFor(resolved.c, `/${resolved.suburb.slug}`) };
 }
 
 export default async function InnerSlugPage({ params }: { params: SlugParams }) {

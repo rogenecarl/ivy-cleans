@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
-import { cityFromParams } from "@/site/city-param";
+import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref, cityKeyOf } from "@/server/content/interpolate";
 import { blogMeta } from "@/site/data/blog";
 import { listPosts } from "@/server/blog/store";
@@ -9,10 +10,13 @@ import { postCards } from "@/server/blog/cards";
 import BlogCardGrid from "@/site/components/blog/BlogCardGrid";
 import Pagination from "@/site/components/blog/Pagination";
 
-export const metadata: Metadata = {
-  title: blogMeta.title,
-  ...(blogMeta.description ? { description: blogMeta.description } : {}),
-};
+export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
+  return {
+    title: blogMeta.title,
+    ...(blogMeta.description ? { description: blogMeta.description } : {}),
+    ...canonicalFor(await cityFromParams(params), "/blog"),
+  };
+}
 
 const PAGE_SIZE = 9;
 

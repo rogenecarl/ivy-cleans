@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonicalFor } from "@/site/data/seo";
 import Link from "next/link";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
@@ -8,10 +9,13 @@ import FaqAccordion from "@/site/components/faq-page/FaqAccordion";
 import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
 
-export const metadata: Metadata = {
-  title: faqPageMeta.title,
-  description: faqPageMeta.description,
-};
+export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
+  return {
+    title: faqPageMeta.title,
+    description: faqPageMeta.description,
+    ...canonicalFor(await cityFromParams(params), "/faq"),
+  };
+}
 
 // post-36.css: accordion answers are Source Serif Pro on live; Source Serif 4 is its successor on next/font. Page-scoped.
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
