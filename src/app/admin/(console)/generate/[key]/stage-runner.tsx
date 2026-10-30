@@ -46,11 +46,17 @@ function duration(ms: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
+type ItemStage = 'research' | 'verify' | 'suburb' | 'service'
+
+function isItemStage(stage: string): stage is ItemStage {
+  return stage !== 'front'
+}
+
 // rough per-stage durations behind the "about N min left" line; the two per-item stages scale with their counts
 function expectedMs(stageId: string, areaCount: number): number {
   switch (stageId) {
     case 'research':
-      return 180_000
+      return 1_800_000
     case 'verify':
       return 5_000 * (areaCount + 1)
     case 'front':
@@ -123,21 +129,33 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
 
   // walk the areas or service pages still owed, one request each; the list comes from the server
   const runItems = useCallback(
-    async (stage: 'verify' | 'suburb' | 'service'): Promise<{ ok: true } | { ok: false; error: string }> => {
-      const pending = await pendingItemsAction(cityKey, stage)
-      if (!pending.ok) return { ok: false, error: pending.error }
+    async (stage: ItemStage): Promise<{ ok: true } | { ok: false; error: string }> => {
+      try {
+        const seen = new Set<string>()
+        // asked again until nothing is owed: research only learns its areas partway through
+        for (;;) {
+          const pending = await pendingItemsAction(cityKey, stage)
+          if (!pending.ok) return { ok: false, error: pending.error }
+          if (pending.items.length === 0) break
 
-      const total = pending.items.length
-      for (const [i, item] of pending.items.entries()) {
-        setItemProgress({ done: i, total, name: item.name })
-        const r = await runStageAction(cityKey, stage, item.slug)
-        if (!r.ok) return r
+          const total = seen.size + pending.items.length
+          for (const item of pending.items) {
+            if (seen.has(item.slug)) return { ok: false, error: `${item.name} did not finish` }
+            setItemProgress({ done: seen.size, total, name: item.name })
+            const r = await runStageAction(cityKey, stage, item.slug)
+            if (!r.ok) return r
+            seen.add(item.slug)
+          }
+          setItemProgress({ done: total, total, name: '' })
+        }
+
+        // No pending items still has to reach the server: it is what marks the
+        // stage done when every item was already written on an earlier attempt.
+        return await runStageAction(cityKey, stage)
+      } catch {
+        // the platform stopped the request, or the connection dropped; every finished step is saved
+        return { ok: false, error: 'the server stopped this step before it finished — Resume continues from the last finished step' }
       }
-      setItemProgress({ done: total, total, name: '' })
-
-      // No pending items still has to reach the server: it is what marks the
-      // stage done when every item was already written on an earlier attempt.
-      return runStageAction(cityKey, stage)
     },
     [cityKey],
   )
@@ -172,9 +190,8 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
           setStageStartedAt(stageStart)
           setNow(stageStart)
 
-          // suburb and service run one item per request (~20s each); minutes in one request is killed
-          const result =
-            stage.id === 'verify' || stage.id === 'suburb' || stage.id === 'service'
+          // every stage but front runs one item per request; a whole stage in one request is killed
+          const result = isItemStage(stage.id)
               ? await runItems(stage.id)
               : await runStageAction(cityKey, stage.id)
 
@@ -340,7 +357,7 @@ export default function StageRunner({ cityKey, cityName, stages, initialDone }: 
           const isDone = done.includes(stage.id)
           const isRunning = current === stage.id
           const items =
-            isRunning && (stage.id === 'verify' || stage.id === 'suburb' || stage.id === 'service') ? itemProgress : null
+            isRunning && isItemStage(stage.id) ? itemProgress : null
           const isFailed = failed?.stage === stage.id
           // The glyphs are load-bearing: scripts/dev/admin-e2e.mjs polls
           // [data-role="status-icon"] for '✓' to know the run finished.

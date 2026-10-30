@@ -189,7 +189,7 @@ Env fallbacks: `??` fires only on undefined, and env templates ship blank lines 
 
 - No `.min()` / `.max()` / `.length()` in `src/server/pipeline/schemas.ts`: the Anthropic structured-output API rejects them. `MarketOpsSchema` is the sole exemption (operator input, never model output).
 - `isWritableArea()` has one definition (`src/server/content/slots.ts`) and several call sites (suburb loop, `stageComplete`, `stageSlots`, `buildSuburbPrompt`, `scoreSuburbs`). If they disagree, a city can never finalize.
-- One model call per request. Twelve areas in one server action is minutes; a serverless function is killed long before. The admin drives the suburb stage one area per request; DNS/TLS checks are polled the same way.
+- One model call per request. Twelve areas in one server action is minutes; a serverless function is killed long before (`maxDuration` is 300s). The admin drives every stage but `front` one item per request; research steps are in `stages/research-steps.ts` and its list grows once the area list exists. DNS/TLS checks are polled the same way.
 - A prompt section with an empty body invites invention. Omit the whole section (header included) when its content is empty.
 
 ### Critical (security)

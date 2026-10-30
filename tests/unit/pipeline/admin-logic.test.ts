@@ -883,7 +883,7 @@ describe('regenerateLogic', () => {
     expect(await regenerateLogic(KEY, 'research')).toEqual({ ok: true })
 
     const draft = await loadDraft(KEY)
-    expect(draft.done).toEqual(['research'])
+    expect(draft.done).toEqual([])
     expect(draft.sections['service.deep-cleaning.local']).toBeUndefined()
   })
 

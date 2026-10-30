@@ -271,7 +271,7 @@ export function NewSiteWizard() {
         </ol>
         <div className="border-t border-border pt-4">
           <span className="text-[0.7rem] tracking-wider text-muted-foreground uppercase">Usually takes</span>
-          <strong className="block text-[1.1rem]">10–15 min</strong>
+          <strong className="block text-[1.1rem]">30–45 min</strong>
         </div>
         <p className="text-[0.8rem] text-muted-foreground">
           Keep this tab open while it runs. If it stops, opening the city again resumes from the last finished step.

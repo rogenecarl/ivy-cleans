@@ -2,16 +2,15 @@
 
 import {
   FrontSectionsSchema,
-  ResearchStructuredSchema,
   ServiceCopySchema,
   SuburbCopySchema,
   type ResearchOutput,
 } from '@/server/pipeline/schemas'
-import { MODELS, SEARCH_BUDGET, type ModelClient, type ResearchEvent } from '@/server/pipeline/model'
+import type { ModelClient } from '@/server/pipeline/model'
 import { appendProgress, clearProgress } from '@/server/pipeline/progress'
-import { asResearchResult, mergeSources, type ResearchResult } from '@/server/pipeline/sources'
-import { acceptedResearch, blockedNames, researchFromClaims, toResearchAndClaims } from '@/server/pipeline/claims'
+import { blockedNames } from '@/server/pipeline/claims'
 import { makeGeocoder, type Geocoder } from '@/server/pipeline/geo'
+import { pendingResearchItems, researchStep } from './research-steps'
 import { pendingVerifyItems, verifyItem } from './verify'
 import { loadDraft, saveDraft, type DraftDoc } from '@/server/content/drafts'
 import {
@@ -27,26 +26,13 @@ import { serviceBySlug } from '@/site/data/services/registry'
 import { MAX_SERVICE_LINKS, MAX_SUBURB_LINKS, acceptLinks } from '@/server/content/links'
 import {
   FRONT_SYSTEM,
-  RESEARCH_STRUCTURE_SYSTEM,
   SERVICE_SYSTEM,
   SUBURB_SYSTEM,
-  buildAreaResearchPrompt,
-  buildAreasResearchPrompt,
   buildFrontPrompt,
-  buildMetroResearchPrompt,
-  buildResearchStructuringPrompt,
   buildServiceLocalPrompt,
   buildSuburbPrompt,
-  composeFindings,
 } from './prompts'
-import {
-  AreaListSchema,
-  MAX_AREAS,
-  MODEL_KEYS,
-  applyUniquenessGate,
-  normalizeResearchSlugs,
-  normalizeSlug,
-} from './research'
+import { MODEL_KEYS } from './research'
 
 // written copy that names a place the check did not accept is refused before any of it is saved
 function refuseBlockedNames(draft: DraftDoc, item: string, texts: ReadonlyArray<string | readonly string[]>): void {
@@ -83,104 +69,11 @@ async function executeStage(
 
   switch (stage) {
     case 'research': {
-      await appendProgress(key, {
-        stage: 'research',
-        kind: 'start',
-        label: `Researching ${facts.city}: the city, its areas, then each area in turn`,
-      })
-      const parts = (draft.researchParts ??= {})
-      const onEvent = (e: ResearchEvent) => {
-        // sync callback; the per-key progress chain serialises the writes
-        void appendProgress(key, { stage: 'research', kind: e.kind, label: e.label }).catch(() => {})
+      // one step per request from the browser; `only` names it. Without `only` every step runs (tests, scripts).
+      if (only !== undefined) await researchStep({ client, key, draft, item: only })
+      for (let next = pendingResearchItems(draft)[0]; only === undefined && next; next = pendingResearchItems(draft)[0]) {
+        await researchStep({ client, key, draft, item: next.slug })
       }
-      // one pass, saved as soon as it lands so an interrupted stage resumes here
-      const pass = async (partKey: string, modelKey: string, prompt: string, maxSearches: number, label: string) => {
-        const stored = parts[partKey]
-        if (stored !== undefined) return asResearchResult(stored)
-        await appendProgress(key, { stage: 'research', kind: 'search', label })
-        const result = await client.research(prompt, modelKey, onEvent, { maxSearches })
-        parts[partKey] = result
-        await saveDraft(key, draft)
-        return result
-      }
-
-      const metroResult = await pass('metro', MODEL_KEYS.researchMetro, buildMetroResearchPrompt(facts), SEARCH_BUDGET.metro, `${facts.city} as a whole: climate, housing, conditions`)
-      const areasResult = await pass('areas', MODEL_KEYS.researchAreas, buildAreasResearchPrompt(facts), SEARCH_BUDGET.areas, `The areas ${facts.city} serves`)
-      const { areas } = await client.generate({
-        schema: AreaListSchema,
-        key: MODEL_KEYS.researchAreaList,
-        system: RESEARCH_STRUCTURE_SYSTEM,
-        prompt: `Below are research findings listing the areas a cleaning company serves. Return each area's name exactly as the findings write it, in the order found, nothing else.\n\nFINDINGS\n${areasResult.text}`,
-        model: MODELS.research,
-      })
-      // the brief asks for 8 to 10; the model sometimes lists more, and every extra area is a research pass and a page
-      const areaNames = [...new Set(areas.map((a) => a.name.trim()).filter((n) => n !== ''))].slice(0, MAX_AREAS)
-      if (areaNames.length === 0) {
-        throw new Error(`research found no areas for ${facts.city} — the areas pass returned nothing usable; re-run research`)
-      }
-      const perArea: Record<string, ResearchResult> = {}
-      for (const name of areaNames) {
-        perArea[name] = await pass(`area:${normalizeSlug(name)}`, MODEL_KEYS.researchArea(normalizeSlug(name)), buildAreaResearchPrompt(facts, name, areaNames), SEARCH_BUDGET.area, `${name}: subdivisions, housing, conditions`)
-      }
-      const merged = mergeSources({
-        metro: metroResult,
-        areas: areasResult,
-        ...Object.fromEntries(Object.entries(perArea).map(([name, r]) => [`area:${name}`, r])),
-      })
-      const findings = composeFindings(
-        {
-          metro: merged.texts.metro,
-          areas: merged.texts.areas,
-          perArea: Object.fromEntries(areaNames.map((name) => [name, merged.texts[`area:${name}`]])),
-        },
-        merged.sources,
-      )
-      draft.sources = merged.sources
-      // persist the raw findings before structuring: the only evidence of what research found
-      draft.findings = findings
-      await saveDraft(key, draft)
-
-      await appendProgress(key, {
-        stage: 'research',
-        kind: 'found',
-        label: `Collected ${findings.length.toLocaleString()} chars of findings — structuring`,
-      })
-      const structured = await client.generate({
-        schema: ResearchStructuredSchema,
-        key: MODEL_KEYS.researchStructure,
-        system: RESEARCH_STRUCTURE_SYSTEM,
-        prompt: buildResearchStructuringPrompt(findings, facts, []),
-        model: MODELS.research,
-      })
-      for (const s of structured.suburbs) s.slug = normalizeSlug(s.slug)
-      const sourced = toResearchAndClaims(structured, new Set(merged.sources.map((s) => s.id)))
-      const normalized = normalizeResearchSlugs(sourced.research, facts.city)
-      const kept = new Set(normalized.suburbs.map((s) => s.slug))
-      draft.researchFull = normalized
-      draft.claims = sourced.claims.filter((c) => c.area === null || kept.has(c.area))
-      // the gate runs here, before anything downstream can see a skipped area
-      const { scored } = applyUniquenessGate(acceptedResearch(normalized, draft.claims))
-      const r = researchFromClaims(normalized, draft.claims)
-      draft.research = r
-      const skipped = scored.filter((s) => s.verdict === 'skip')
-      // subdivisions, not landmarks, are the count that matters
-      const subdivisionCount = r.suburbs.reduce((n, s) => n + s.subdivisions.length, 0)
-      await appendProgress(key, {
-        stage: 'research',
-        kind: 'found',
-        label: `${r.suburbs.length} areas · ${r.zips.length} ZIP codes · ${subdivisionCount} subdivisions · ${r.keywords.length} search phrases`,
-      })
-      // the line an operator reads: 'X of Y' so the arithmetic reconciles
-      await appendProgress(key, {
-        stage: 'research',
-        kind: 'found',
-        label:
-          `${r.suburbs.length} of ${scored.length} areas will get a page` +
-          (skipped.length
-            ? ` · no developments found for ${skipped.map((s) => s.suburb.name).join(', ')}`
-            : ''),
-      })
-      await appendProgress(key, { stage: 'research', kind: 'done', label: 'Research complete' })
       break
     }
     case 'verify': {
@@ -402,6 +295,7 @@ async function executeStage(
 
 // every owned slot holds real copy; un-writable areas excluded
 function stageComplete(draft: DraftDoc, stage: StageId): boolean {
+  if (stage === 'research') return draft.research !== undefined
   if (stage === 'verify') return !(draft.claims ?? []).some((c) => c.status === 'pending')
   // stageSlots already excludes un-writable areas, so this and finalize's
   // requiredSlotsFor now demand exactly the same set — the whole point.
@@ -438,6 +332,7 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
     delete draft.research
     delete draft.findings
     delete draft.researchParts
+    delete draft.researchAreaNames
     delete draft.sources
     delete draft.researchFull
     delete draft.claims
@@ -445,12 +340,8 @@ function clearStageOutputs(draft: DraftDoc, stage: StageId): void {
   }
 }
 
-// re-run a stage (per-item stages are only cleared). Regenerating research also clears front and suburb: both consumed it.
-export async function regenerateStage(
-  client: ModelClient,
-  key: string,
-  stage: StageId
-): Promise<void> {
+// strips a stage's outputs and leaves it to run again. Clearing research also clears everything written from it.
+export async function clearStage(key: string, stage: StageId): Promise<void> {
   const draft = await loadDraft(key)
 
   // downstream first, while draft.research still says which slots they own
@@ -459,7 +350,11 @@ export async function regenerateStage(
   for (const target of targets) await clearProgress(key, target)
 
   await saveDraft(key, draft)
-  // suburb and service are one model call per item; the generate screen's loop rewrites them one request each
+}
+
+// re-run a stage (suburb and service are only cleared: the generate screen's loop rewrites them one request each)
+export async function regenerateStage(client: ModelClient, key: string, stage: StageId): Promise<void> {
+  await clearStage(key, stage)
   if (stage === 'suburb' || stage === 'service') return
   await runStage(client, key, stage)
 }

@@ -32,6 +32,8 @@ export type DraftDoc = {
   findings?: string
   // the findings per research pass, so an interrupted research stage resumes where it stopped
   researchParts?: Record<string, string | ResearchResult>
+  // the areas the research stage walks, once the area list step has run
+  researchAreaNames?: string[]
   // every web source research cited, by id (S1…); facts point at these
   sources?: ResearchSource[]
   research?: ResearchOutput
