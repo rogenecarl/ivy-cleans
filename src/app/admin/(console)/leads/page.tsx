@@ -1,11 +1,10 @@
-import Link from 'next/link'
 import { TriangleAlert } from 'lucide-react'
 import { listCities } from '@/server/pipeline/admin-logic'
 import { parseLeadQuery } from '@/server/leads/filters'
-import { countTestLeads, leadStatusCounts, listLeads } from '@/server/leads/store'
+import { leadStatusCounts, listLeads } from '@/server/leads/store'
 import type { LeadRecord, LeadStatusCounts } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { buildCityLookup, cityDisplayName, filterHref } from './logic'
+import { buildCityLookup, cityDisplayName } from './logic'
 import { LeadFilters } from './lead-filters'
 import { LeadsTable, type LeadRow } from './leads-table'
 import { StatusChips } from './lead-status-chips'
@@ -38,19 +37,10 @@ export default async function LeadsPage({
 
   // no useful content without the store, so this fails legibly rather than degrading
   let leads: LeadRecord[] = []
-  let testCount = 0
   let statusCounts: LeadStatusCounts = { new: 0, contacted: 0, quoted: 0, booked: 0, lost: 0 }
   let leadsError = false
   try {
-    // the test-row count is in the same try: hidden rows must never be silent
-    const [rows, hidden, byStatus] = await Promise.all([
-      listLeads(query),
-      countTestLeads(query),
-      leadStatusCounts(query),
-    ])
-    leads = rows
-    testCount = hidden
-    statusCounts = byStatus
+    ;[leads, statusCounts] = await Promise.all([listLeads(query), leadStatusCounts(query)])
   } catch (err) {
     leadsError = true
     // loud, no lead contents: this catch only wraps the two store calls
@@ -92,18 +82,6 @@ export default async function LeadsPage({
         <h1 className="text-[1.4rem] font-semibold tracking-tight">Leads</h1>
         <p className="mt-1 text-[0.85rem] text-muted-foreground">
           {leads.length} shown, {unworked} still need action.
-          {!query.includeTest && testCount > 0 && (
-            <>
-              {' '}
-              <Link
-                href={filterHref(query, 'test', '1')}
-                className="cursor-pointer font-semibold text-amber-700 underline"
-              >
-                {testCount} test {testCount === 1 ? 'row is' : 'rows are'} hidden
-              </Link>
-              .
-            </>
-          )}
         </p>
       </div>
 

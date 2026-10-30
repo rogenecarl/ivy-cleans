@@ -79,7 +79,7 @@ describe.skipIf(!process.env.DATABASE_URL)('leads store', () => {
   it('filters by city, status and form type, newest first', async () => {
     await createLead(input())
     await createLead(input({ cityKey: OTHER, formType: 'contact', name: 'Marcus' }))
-    const miami = await listLeads({ city: CITY, status: null, formType: null, includeTest: false })
+    const miami = await listLeads({ city: CITY, status: null, formType: null })
     expect(miami).toHaveLength(1)
     expect(miami[0].name).toBe('Dana Whitfield')
 
@@ -91,17 +91,15 @@ describe.skipIf(!process.env.DATABASE_URL)('leads store', () => {
      * enquiry, or any seeded demo row, and it failed with nothing actually
      * broken. The `ztest-` prefix is the same boundary afterAll cleans on.
      */
-    const contacts = await listLeads({ city: null, status: null, formType: 'contact', includeTest: false })
+    const contacts = await listLeads({ city: null, status: null, formType: 'contact' })
     const ours = contacts.filter((l) => l.cityKey.startsWith('ztest-'))
     expect(ours.map((l) => l.name)).toEqual(['Marcus'])
   })
 
-  it('hides test rows unless asked for them', async () => {
+  it('never lists a preview submission', async () => {
     await createLead(input({ isTest: true, name: 'Preview Person' }))
-    const hidden = await listLeads({ city: CITY, status: null, formType: null, includeTest: false })
+    const hidden = await listLeads({ city: CITY, status: null, formType: null })
     expect(hidden).toHaveLength(0)
-    const shown = await listLeads({ city: CITY, status: null, formType: null, includeTest: true })
-    expect(shown).toHaveLength(1)
   })
 
   it('updates status and notes independently', async () => {

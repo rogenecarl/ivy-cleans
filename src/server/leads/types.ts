@@ -42,7 +42,6 @@ export type LeadQuery = {
   city: string | null
   status: LeadStatus | null
   formType: FormType | null
-  includeTest: boolean
 }
 
 export type LeadCounts = {

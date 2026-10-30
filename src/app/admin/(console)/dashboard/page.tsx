@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic'
 const RECENT_LIMIT = 6
 const WEEKS = 8
 
-const EMPTY_QUERY = { city: null, status: null, formType: null, includeTest: false } as const
+const EMPTY_QUERY = { city: null, status: null, formType: null } as const
 
 export default async function AdminDashboard() {
   // own guard: layouts don't re-render on soft navigation; React.cache makes it free

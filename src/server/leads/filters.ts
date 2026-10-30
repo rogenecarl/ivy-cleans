@@ -21,7 +21,6 @@ export function parseLeadQuery(params: Params): LeadQuery {
     city: rawCity && CITY_KEY.test(rawCity) ? rawCity : null,
     status: LEAD_STATUSES.includes(rawStatus as LeadStatus) ? (rawStatus as LeadStatus) : null,
     formType: FORM_TYPES.includes(rawForm as FormType) ? (rawForm as FormType) : null,
-    includeTest: first(params.test) === '1',
   }
 }
 
@@ -30,6 +29,5 @@ export function leadQueryToSearch(query: LeadQuery): string {
   if (query.city) search.set('city', query.city)
   if (query.status) search.set('status', query.status)
   if (query.formType) search.set('form', query.formType)
-  if (query.includeTest) search.set('test', '1')
   return search.toString()
 }
