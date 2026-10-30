@@ -1,5 +1,5 @@
-// host -> city rewrite as a pure function, no fs: both indexes are inlined at build. _cities.json is hand-maintained
-// and must list every key, drafts included, or the draft loses its preview path.
+// host -> city rewrite as a pure function, no fs and no database (the proxy runs on every request): both
+// indexes are inlined at build, and Global Config adds what was created since.
 import domainsJson from "@content/_domains.json";
 import cityKeys from "@content/_cities.json";
 

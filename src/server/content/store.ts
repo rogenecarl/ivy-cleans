@@ -1,50 +1,34 @@
 // src/server/content/store.ts
-// The city registry: async, per-process cached, Blob-or-file-backed, with a host -> key index
-import { readFile, readdir, writeFile } from 'fs/promises'
-import path from 'path'
+// The city registry: async, cached per process on local files, with a host -> key index
 import type { CityContent } from './types'
 import type { TokenSource } from './interpolate'
 import { citySlug } from './interpolate'
 import { validateCityContent } from './validate'
 import domainsJson from '@content/_domains.json'
 import { normalizeHost, type DomainsIndex } from './resolve-rewrite'
+import { CONTENT_DIR, listEntryKeys, listFileKeys, readEntry, readFileEntry, usesDatabase, writeEntry } from './entries'
 
 export type { DomainsIndex }
 
 const defaultDomains: DomainsIndex = domainsJson as DomainsIndex
 
-export const CONTENT_DIR = path.join(process.cwd(), 'content')
+export { CONTENT_DIR }
 export const KEY_PATTERN = /^[a-z0-9-]+$/
 
-/** Per-process cache: city key -> validated doc. */
+/** Per-process cache: city key -> validated doc. Files only: with the database another server may have changed it. */
 const cache = new Map<string, CityContent>()
 
 async function loadCityDoc(key: string): Promise<CityContent> {
-  let raw: string
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    // Blob-backed: fetch content/<key>.json from Vercel Blob.
-    const { head } = await import('@vercel/blob')
-    const pathname = `content/${key}.json`
-    let blob
-    try {
-      blob = await head(pathname, { token: process.env.BLOB_READ_WRITE_TOKEN })
-    } catch {
-      throw new Error(`unknown city "${key}"`)
-    }
-    const res = await fetch(blob.url)
-    if (!res.ok) throw new Error(`unknown city "${key}"`)
-    raw = await res.text()
-  } else {
-    // Local file, dev/build fallback.
-    const filePath = path.join(CONTENT_DIR, `${key}.json`)
-    try {
-      raw = await readFile(filePath, 'utf-8')
-    } catch {
-      throw new Error(`unknown city "${key}"`)
-    }
+  let data: unknown
+  try {
+    data = await readEntry('city', key)
+  } catch (err) {
+    // a Neon outage must not take a customer's site down; the deployed file may be older, but it renders
+    console.error(`content: database read of "${key}" failed, serving the deployed file:`, err)
+    data = await readFileEntry('city', key)
   }
-  const parsed: unknown = JSON.parse(raw)
-  return assertKeyMatchesCity(key, validateCityContent(parsed))
+  if (data === null) throw new Error(`unknown city "${key}"`)
+  return assertKeyMatchesCity(key, validateCityContent(data))
 }
 
 // citySlug(doc.city) must match the stored key or every preview link breaks; checked at load
@@ -64,6 +48,7 @@ export async function getCity(key: string): Promise<CityContent> {
   if (!KEY_PATTERN.test(key)) {
     throw new Error(`unknown city "${key}"`)
   }
+  if (usesDatabase()) return loadCityDoc(key)
   const cached = cache.get(key)
   if (cached) return cached
 
@@ -87,25 +72,9 @@ export function resolveCityKey(host: string, domains: DomainsIndex = defaultDoma
   return domains.hosts[normalizeHost(host)] ?? domains.default
 }
 
-/** Live city keys, for generateStaticParams. Local-file mode reads content/; Blob mode variant below. */
+/** Live city keys, for generateStaticParams and the duplication check. */
 export async function listLiveCityKeys(): Promise<string[]> {
-  let keys: string[]
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    // Blob-backed branch: list blobs under content/, same key filter as below.
-    const { list } = await import('@vercel/blob')
-    const { blobs } = await list({ prefix: 'content/', token: process.env.BLOB_READ_WRITE_TOKEN })
-    keys = blobs
-      .map((b) => path.basename(b.pathname))
-      .filter((name) => name.endsWith('.json') && !name.startsWith('_'))
-      .map((name) => name.slice(0, -'.json'.length))
-  } else {
-    // withFileTypes: content/_drafts/ must never look like a city document
-    const entries = await readdir(CONTENT_DIR, { withFileTypes: true })
-    keys = entries
-      .filter((entry) => entry.isFile() && entry.name.endsWith('.json') && !entry.name.startsWith('_'))
-      .map((entry) => entry.name.slice(0, -'.json'.length))
-  }
-
+  const keys = await listEntryKeys('city').catch(() => listFileKeys('city'))
   const docs = await Promise.all(keys.map((key) => getCity(key)))
   return keys.filter((_, i) => docs[i].status === 'live')
 }
@@ -122,17 +91,18 @@ export function cityBits(c: CityContent): TokenSource {
   }
 }
 
-/** content/<key>.json straight from disk (no cache, no Blob), or null when absent or invalid. For writers that must read fresh. */
+/** The stored document (no cache), or null when absent or invalid; a storage failure throws. For writers that must read fresh. */
 export async function readCityDoc(key: string): Promise<CityContent | null> {
+  const data = await readEntry('city', key)
+  if (data === null) return null
   try {
-    const raw = await readFile(path.join(CONTENT_DIR, `${key}.json`), 'utf-8')
-    return validateCityContent(JSON.parse(raw))
+    return validateCityContent(data)
   } catch {
     return null
   }
 }
 
-// validated before it reaches disk; the caller revalidates
+// validated before it is stored; the caller revalidates
 export async function writeCityDoc(key: string, doc: CityContent): Promise<void> {
-  await writeFile(path.join(CONTENT_DIR, `${key}.json`), JSON.stringify(validateCityContent(doc), null, 2), 'utf-8')
+  await writeEntry('city', key, validateCityContent(doc))
 }

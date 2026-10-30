@@ -31,6 +31,8 @@ const SHOW_REGENERATE = false
 const SHOW_ADVISORY_FINDINGS = false
 
 export const dynamic = 'force-dynamic'
+// one model call per request can run for minutes; the platform default kills it first
+export const maxDuration = 300
 
 const TABS = [
   { id: 'checklist', label: 'Checklist' },

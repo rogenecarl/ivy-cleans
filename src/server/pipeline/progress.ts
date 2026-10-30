@@ -1,8 +1,7 @@
 // src/server/pipeline/progress.ts
-// Per-draft progress log at content/_drafts/<key>.progress.json, capped at PROGRESS_CAP. Framework-free.
+// Per-draft progress log (a `progress` entry), capped at PROGRESS_CAP. Framework-free.
 // Appends for one key are serialised through a per-key promise chain.
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
-import path from 'node:path'
+import { deleteEntry, readEntry, writeEntry } from '@/server/content/entries'
 
 export type ProgressKind = 'start' | 'search' | 'reading' | 'found' | 'done' | 'error'
 
@@ -17,7 +16,6 @@ export type ProgressEvent = {
 
 export const PROGRESS_CAP = 500
 
-const DRAFTS_DIR = path.join(process.cwd(), 'content', '_drafts')
 const KEY_PATTERN = /^[a-z0-9-]+$/
 
 const chains = new Map<string, Promise<void>>()
@@ -26,10 +24,6 @@ function assertKeyShape(key: string): void {
   if (!KEY_PATTERN.test(key)) {
     throw new Error(`invalid progress key "${key}": must match ${KEY_PATTERN}`)
   }
-}
-
-function progressPath(key: string): string {
-  return path.join(DRAFTS_DIR, `${key}.progress.json`)
 }
 
 /** Runs `fn` after chaining onto any in-flight work for `key`, so writes for a given key never interleave. */
@@ -48,8 +42,7 @@ function enqueue(key: string, fn: () => Promise<void>): Promise<void> {
 export async function readProgress(key: string): Promise<ProgressEvent[]> {
   assertKeyShape(key)
   try {
-    const raw = await readFile(progressPath(key), 'utf-8')
-    const parsed = JSON.parse(raw)
+    const parsed = await readEntry('progress', key)
     return Array.isArray(parsed) ? (parsed as ProgressEvent[]) : []
   } catch {
     return []
@@ -61,8 +54,12 @@ export async function appendProgress(key: string, event: Omit<ProgressEvent, 'at
   await enqueue(key, async () => {
     const existing = await readProgress(key)
     const updated = [...existing, { ...event, at: new Date().toISOString() }].slice(-PROGRESS_CAP)
-    await mkdir(DRAFTS_DIR, { recursive: true })
-    await writeFile(progressPath(key), JSON.stringify(updated), 'utf-8')
+    try {
+      await writeEntry('progress', key, updated)
+    } catch (err) {
+      // an activity line is not worth failing a stage the model has already been paid for
+      console.error(`progress: append for "${key}" failed:`, err)
+    }
   })
 }
 
@@ -70,12 +67,11 @@ export async function clearProgress(key: string, stage?: string): Promise<void> 
   assertKeyShape(key)
   await enqueue(key, async () => {
     if (stage === undefined) {
-      await rm(progressPath(key), { force: true })
+      await deleteEntry('progress', key)
       return
     }
     const existing = await readProgress(key)
     const kept = existing.filter((e) => e.stage !== stage)
-    await mkdir(DRAFTS_DIR, { recursive: true })
-    await writeFile(progressPath(key), JSON.stringify(kept), 'utf-8')
+    await writeEntry('progress', key, kept)
   })
 }

@@ -1,5 +1,5 @@
-import { readFile } from 'node:fs/promises'
-import { CITIES_JSON, findDraft, listDrafts, saveDraft } from '@/server/content/drafts'
+import { readEntry } from '@/server/content/entries'
+import { findDraft, listDrafts, saveDraft } from '@/server/content/drafts'
 import { getCity, readCityDoc, revalidateCity, writeCityDoc } from '@/server/content/store'
 import { checkQuality } from '@/server/content/quality'
 import { readProgress } from '@/server/pipeline/progress'
@@ -57,7 +57,7 @@ export async function updateOpsLogic(key: string, fields: OpsFields): Promise<Ac
 
 async function readCityKeys(): Promise<string[]> {
   try {
-    return JSON.parse(await readFile(CITIES_JSON, 'utf-8')) as string[]
+    return ((await readEntry('index', 'cities')) ?? []) as string[]
   } catch {
     return []
   }
