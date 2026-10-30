@@ -5,7 +5,7 @@ import { SERVICE_LOCAL_SLUGS, isWritableArea, isWrittenSlot, serviceSlots, subur
 import { serviceBySlug } from '@/site/data/services/registry'
 import { makeClient, type ModelClient } from '@/server/pipeline/model'
 import { readProgress, type ProgressEvent } from '@/server/pipeline/progress'
-import { CITY_ITEM, pendingVerifyItems, regenerateStage, runStage, type StageId } from '@/server/pipeline/stages'
+import { CITY_ITEM, clearStage, pendingResearchItems, pendingVerifyItems, regenerateStage, runStage, type StageId } from '@/server/pipeline/stages'
 import { type ActionResult, attempt, errorMessage } from './shared'
 
 // ── Stage execution ──
@@ -35,10 +35,10 @@ export async function runStageLogic(
   return result
 }
 
-export type ItemStage = 'verify' | 'suburb' | 'service'
+export type ItemStage = 'research' | 'verify' | 'suburb' | 'service'
 
 export function isItemStage(stage: string): stage is ItemStage {
-  return stage === 'verify' || stage === 'suburb' || stage === 'service'
+  return stage === 'research' || stage === 'verify' || stage === 'suburb' || stage === 'service'
 }
 export type PendingItems = { ok: true; items: { slug: string; name: string }[] } | { ok: false; error: string }
 
@@ -48,6 +48,7 @@ export async function pendingItemsLogic(key: string, stage: ItemStage): Promise<
   try {
     const draft = await loadDraft(key)
     const owed = (slots: readonly string[]) => !slots.every((slot) => isWrittenSlot(draft.sections[slot]))
+    if (stage === 'research') return { ok: true, items: pendingResearchItems(draft) }
     if (stage === 'verify') {
       const names = new Map((draft.researchFull?.suburbs ?? []).map((s) => [s.slug, s.name]))
       const items = pendingVerifyItems(draft).map((slug) => ({
@@ -77,6 +78,8 @@ export async function pendingItemsLogic(key: string, stage: ItemStage): Promise<
 export async function regenerateLogic(key: string, stage: StageId): Promise<ActionResult> {
   // checking every area in one request breaks the one-call-per-request rule; regenerate research to check again
   if (stage === 'verify') return { ok: false, error: 'the fact check runs again when research is regenerated' }
+  // half an hour in one request is killed; the generate screen walks the steps
+  if (stage === 'research') return attempt(() => clearStage(key, stage))
   const client = makeClient()
   const result = await attempt(() => regenerateStage(client, key, stage))
   await recordUsage(key, client)
