@@ -11,6 +11,8 @@ import { requireAdmin } from '@/server/auth/auth-server'
 
 // Progress screen: reads the sidecar so the runner starts from the stages already done. force-dynamic.
 export const dynamic = 'force-dynamic'
+// one model call per request can run for minutes; the platform default kills it first
+export const maxDuration = 300
 
 export default async function GeneratePage({ params }: { params: Promise<{ key: string }> }) {
   // own guard: admin-only, and layouts don't re-render on soft navigation

@@ -1,7 +1,6 @@
 // src/server/content/drafts.ts
-// Draft sidecars at content/_drafts/<key>.json while stages run. finalizeDraft() assembles and validates a CityContent;
+// Draft sidecars (entries.ts) while stages run. finalizeDraft() assembles and validates a CityContent;
 // publishCity() flips it live and retires the sidecar. Framework-free: the server action calls revalidatePath itself.
-import { mkdir, readdir, readFile, rm, stat, writeFile } from 'fs/promises'
 import path from 'path'
 import type { Facts } from '@/server/pipeline/facts'
 import type { ResearchOutput } from '@/server/pipeline/schemas'
@@ -23,7 +22,8 @@ import { checkCity, findInvisibleChars } from './similarity'
 import { checkQuality } from './quality'
 import { buildProvisioners, buildRouter, provisionDomain } from '@/server/pipeline/provision'
 import { validateCityContent } from './validate'
-import { CONTENT_DIR, KEY_PATTERN, getCity, listLiveCityKeys, revalidateCity, writeCityDoc } from './store'
+import { CONTENT_DIR, DRAFTS_DIR, deleteEntry, listEntryKeys, readEntry, writeEntry } from './entries'
+import { KEY_PATTERN, getCity, listLiveCityKeys, readCityDoc, revalidateCity, writeCityDoc } from './store'
 import { loadRouting, parseDomainInput, type DomainsIndex } from './resolve-rewrite'
 
 export type DraftDoc = {
@@ -49,35 +49,12 @@ export type DraftDoc = {
   createdAt: string
 }
 
-export const DRAFTS_DIR = path.join(CONTENT_DIR, '_drafts')
+export { DRAFTS_DIR }
 export const CITIES_JSON = path.join(CONTENT_DIR, '_cities.json')
-const DOMAINS_JSON = path.join(CONTENT_DIR, '_domains.json')
-
-function draftPath(key: string): string {
-  return path.join(DRAFTS_DIR, `${key}.json`)
-}
-
-function cityPath(key: string): string {
-  return path.join(CONTENT_DIR, `${key}.json`)
-}
-
-// path built locally to avoid a cycle with progress.ts
-function progressPath(key: string): string {
-  return path.join(DRAFTS_DIR, `${key}.progress.json`)
-}
 
 function assertKeyShape(key: string): void {
   if (!KEY_PATTERN.test(key)) {
     throw new Error(`invalid draft key "${key}": must match ${KEY_PATTERN}`)
-  }
-}
-
-async function fileExists(p: string): Promise<boolean> {
-  try {
-    await readFile(p)
-    return true
-  } catch {
-    return false
   }
 }
 
@@ -90,10 +67,10 @@ export async function createDraft(facts: Facts): Promise<string> {
   const key = draftKeyFor(facts.city)
   assertKeyShape(key)
 
-  if (await fileExists(draftPath(key))) {
+  if ((await readEntry('draft', key)) !== null) {
     throw new Error(`a draft already exists for "${key}"`)
   }
-  if (await fileExists(cityPath(key))) {
+  if ((await readEntry('city', key)) !== null) {
     throw new Error(`a published city already exists for "${key}"`)
   }
 
@@ -109,13 +86,8 @@ export async function createDraft(facts: Facts): Promise<string> {
 
 export async function loadDraft(key: string): Promise<DraftDoc> {
   assertKeyShape(key)
-  let raw: string
-  try {
-    raw = await readFile(draftPath(key), 'utf-8')
-  } catch {
-    throw new Error(`unknown draft "${key}"`)
-  }
-  const doc = JSON.parse(raw) as DraftDoc
+  const doc = (await readEntry('draft', key)) as DraftDoc | null
+  if (doc === null) throw new Error(`unknown draft "${key}"`)
 
   // drop `done` entries for stages that no longer exist (removing `deep` left drafts reading '5 of 4')
   doc.done = doc.done.filter((id) => (STAGE_IDS as readonly string[]).includes(id))
@@ -125,36 +97,22 @@ export async function loadDraft(key: string): Promise<DraftDoc> {
 /** The sidecar, or null when there is none. A sidecar that exists but won't load throws: it is not "no draft". */
 export async function findDraft(key: string): Promise<DraftDoc | null> {
   if (!KEY_PATTERN.test(key)) return null
-  try {
-    await stat(draftPath(key))
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
-    throw err
-  }
+  if ((await readEntry('draft', key)) === null) return null
   return loadDraft(key)
 }
 
 export async function saveDraft(key: string, doc: DraftDoc): Promise<void> {
   assertKeyShape(key)
-  await mkdir(DRAFTS_DIR, { recursive: true })
-  await writeFile(draftPath(key), JSON.stringify(doc, null, 2), 'utf-8')
+  await writeEntry('draft', key, doc)
 }
 
 export async function listDrafts(): Promise<
   { key: string; city: string; done: string[]; createdAt: string }[]
 > {
-  let files: string[]
-  try {
-    files = await readdir(DRAFTS_DIR)
-  } catch {
-    return []
-  }
-  const keys = files
-    .filter((f) => f.endsWith('.json') && !f.endsWith('.progress.json'))
-    .map((f) => f.slice(0, -'.json'.length))
+  const keys = await listEntryKeys('draft')
   const entries = await Promise.all(
     keys.map(async (key) => {
-      // a sidecar can vanish between readdir and read (publish deletes it); omit it
+      // a sidecar can vanish between listing and read (publish deletes it); omit it
       try {
         const doc = await loadDraft(key)
         return { key, city: doc.facts.city, done: doc.done, createdAt: doc.createdAt }
@@ -168,8 +126,8 @@ export async function listDrafts(): Promise<
 
 export async function deleteDraft(key: string): Promise<void> {
   assertKeyShape(key)
-  await rm(draftPath(key), { force: true })
-  await rm(progressPath(key), { force: true })
+  await deleteEntry('draft', key)
+  await deleteEntry('progress', key)
 }
 
 // slots that don't depend on research: the front stage's eight plus one local section per template service.
@@ -190,17 +148,15 @@ export function requiredSlotsFor(research: ResearchOutput | undefined): readonly
   return STAGES.flatMap((stage) => stageSlots(research)[stage.id])
 }
 
-/** Idempotently appends `key` to content/_cities.json. */
+/** Idempotently appends `key` to the city index, and to Global Config so the preview path routes without a redeploy. */
 async function appendCityKey(key: string): Promise<void> {
-  let keys: string[] = []
+  const keys = ((await readEntry('index', 'cities')) ?? []) as string[]
+  if (!keys.includes(key)) await writeEntry('index', 'cities', [...keys, key])
   try {
-    keys = JSON.parse(await readFile(CITIES_JSON, 'utf-8')) as string[]
-  } catch {
-    keys = []
-  }
-  if (!keys.includes(key)) {
-    keys.push(key)
-    await writeFile(CITIES_JSON, JSON.stringify(keys, null, 2), 'utf-8')
+    await buildRouter()?.addCityKey(key)
+  } catch (err) {
+    // the city is finalized either way; only its preview link waits
+    console.error(`finalize: could not add "${key}" to Global Config:`, err)
   }
 }
 
@@ -208,14 +164,11 @@ async function appendCityKey(key: string): Promise<void> {
 async function existingPublication(
   key: string,
 ): Promise<{ status: CityContent['status']; domain?: string } | null> {
-  try {
-    const doc = validateCityContent(JSON.parse(await readFile(cityPath(key), 'utf-8')))
-    return doc.domain === undefined
-      ? { status: doc.status }
-      : { status: doc.status, domain: doc.domain }
-  } catch {
-    return null
-  }
+  const doc = await readCityDoc(key)
+  if (doc === null) return null
+  return doc.domain === undefined
+    ? { status: doc.status }
+    : { status: doc.status, domain: doc.domain }
 }
 
 export async function finalizeDraft(key: string): Promise<void> {
@@ -287,7 +240,7 @@ export async function finalizeDraft(key: string): Promise<void> {
 
   const validated = validateCityContent(doc)
 
-  await writeFile(cityPath(key), JSON.stringify(validated, null, 2), 'utf-8')
+  await writeEntry('city', key, validated)
   await appendCityKey(key)
   revalidateCity(key)
 }
@@ -299,15 +252,16 @@ export async function publishCity(
   log: (msg: string) => void = () => {},
 ): Promise<void> {
   assertKeyShape(key)
-  const raw = await readFile(cityPath(key), 'utf-8')
-  const doc = validateCityContent(JSON.parse(raw))
+  const stored = await readEntry('city', key)
+  if (stored === null) throw new Error(`unknown city "${key}"`)
+  const doc = validateCityContent(stored)
 
   let manualHost: string | undefined
   if (!opts.provisionDomain && opts.domain !== undefined) {
     const parsed = parseDomainInput(opts.domain)
     if (parsed === null) throw new Error(`cannot publish "${key}": "${opts.domain}" is not a domain`)
     // a host already routed elsewhere would silently take that city's traffic and leads
-    const fileHosts = (JSON.parse(await readFile(DOMAINS_JSON, 'utf-8')) as DomainsIndex).hosts
+    const fileHosts = ((await readEntry('index', 'domains')) as DomainsIndex).hosts
     const owner = fileHosts[parsed] ?? (await loadRouting()).domains.hosts[parsed]
     if (owner !== undefined && owner !== key) {
       throw new Error(`cannot publish "${key}": ${parsed} already routes to "${owner}"`)
@@ -385,15 +339,15 @@ export async function publishCity(
   await writeCityDoc(key, doc)
 
   if (host !== undefined) {
-    const domains = JSON.parse(await readFile(DOMAINS_JSON, 'utf-8')) as DomainsIndex
+    const domains = (await readEntry('index', 'domains')) as DomainsIndex
     // retire the old domain when re-publishing with a new one; only entries pointing at THIS key
     for (const [existingHost, mappedKey] of Object.entries(domains.hosts)) {
       if (mappedKey === key && existingHost !== host) delete domains.hosts[existingHost]
     }
     domains.hosts[host] = key
-    await writeFile(DOMAINS_JSON, JSON.stringify(domains, null, 2), 'utf-8')
+    await writeEntry('index', 'domains', domains)
 
-    // and into Global Config when configured; _domains.json stays the fallback
+    // and into Global Config when configured; the stored index stays the fallback
     const router = buildRouter()
     if (router) {
       await router.setHost(host, key)

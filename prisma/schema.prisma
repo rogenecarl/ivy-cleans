@@ -172,3 +172,15 @@ model BlogPost {
   @@unique([cityKey, slug])
   @@index([cityKey, publishedAt(sort: Desc)])
 }
+
+/// City documents, drafts, progress logs and the two indexes, as JSON. Layered over the committed content/ files:
+/// a row wins, `deleted` hides a file, and no row means the file is still the answer.
+model ContentEntry {
+  kind      String
+  key       String
+  data      Json
+  deleted   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@id([kind, key])
+}

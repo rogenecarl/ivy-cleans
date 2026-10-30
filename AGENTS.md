@@ -61,7 +61,7 @@ src/
 ├── components/ui/          # shadcn primitives (components.json points here)
 ├── lib/utils.ts            # shadcn's cn()
 └── generated/prisma        # Prisma 7 client output (gitignored, recreated by prisma generate)
-content/                    # <city>.json documents, _drafts/<key>.json sidecars, _cities.json, _domains.json
+content/                    # deployed base layer: <city>.json documents, _drafts/<key>.json sidecars, _cities.json, _domains.json
 prisma/schema.prisma        # Lead, SiteSettings, User/Session/Account/Verification, BlogPost
 scripts/checks/             # check-duplication, check-links (exit 1 on failure)
 scripts/ops/                # seed-user, generate-city, provision-probe
@@ -143,7 +143,7 @@ Flow: `/admin/new` (city, facts, ops, About Us inputs) → `createDraftFromField
 | `service` | Opus | `service.<slug>.local` for `SERVICE_LOCAL_SLUGS` |
 
 - Stages and their slots live in `src/server/content/slots.ts` (not `stages.ts`, to avoid an import cycle); prompts in `src/server/pipeline/stages/prompts.ts`, stage execution in `stages/run.ts`. The union of `stageSlots(research)` must equal the required slots — pinned by a test.
-- Drafts are sidecars at `content/_drafts/<key>.json` (+ `.progress.json`). Every stage is resumable; `regenerateStage` deletes exactly that stage's slots and clears downstream stages.
+- Drafts are sidecars (`draft` + `progress` entries, see Content storage). Every stage is resumable; `regenerateStage` deletes exactly that stage's slots and clears downstream stages.
 - The model is reached only through the `ModelClient` seam (`src/server/pipeline/model.ts`). `STUB_MODEL=1` swaps in fixtures — tests and E2E use it; never set it in production.
 - `src/server/pipeline/facts.ts` derives phone and state in code; fuzzy matching was rejected on purpose. Operator notes go in via `notesBlock()` as data, never as instructions.
 - `reservedSlugs()` / `normalizeResearchSlugs()` drop colliding and reserved slugs — extend, don't replace. New cities use a bare `<area>` slug; Minneapolis keeps its stored slugs (indexed URLs).
@@ -152,14 +152,16 @@ Flow: `/admin/new` (city, facts, ops, About Us inputs) → `createDraftFromField
 
 ## Content storage
 
-- City documents are JSON in `content/<key>.json`, validated by `src/server/content/validate.ts`, read through `src/server/content/store.ts` (per-process cache). Setting `BLOB_READ_WRITE_TOKEN` flips the store into Vercel Blob mode — never set it for photos.
-- Drafts, city JSON and both indexes are written with `fs`. **The Vercel filesystem is read-only**, so creating/generating/publishing a city and every Settings save only work on a local `next dev`; results reach production by committing `content/*.json`.
+- City documents, drafts, progress logs and both indexes go through `src/server/content/entries.ts`, the only place that knows where they live. City documents are validated by `src/server/content/validate.ts` and read through `src/server/content/store.ts`.
+- **The Vercel filesystem is read-only**, so on Vercel (`VERCEL=1`) entries are rows in the `ContentEntry` table, layered over the deployed `content/` files: a row wins, `deleted` hides a file, no row means the file answers. Locally and in tests they are the files. `CONTENT_STORE=db|file` overrides.
+- Once a city has a row, committing its `content/<key>.json` no longer changes production. Public reads fall back to the deployed file when Neon is down; writers throw instead, so a failed read is never mistaken for "no document".
+- The database has no per-process cache: another server may have changed the city. The proxy cannot read the database, so a new city's preview path and any domain reach it through Global Config (`EDGE_CONFIG`, `GLOBAL_CONFIG_ID`, `VERCEL_TOKEN`).
 
 ## Database (Prisma 7 + Neon)
 
 - Client in `src/server/infra/db.ts`: `@prisma/adapter-pg` over a real `pg` Pool, cached on `globalThis`, shared by the leads store, the blog store and better-auth. Keep the Pool's `connectionTimeoutMillis` — without it pg-pool never times out a hung connect.
 - Generator `provider = "prisma-client"`, output `src/generated/prisma`; config in `prisma.config.ts`. `DATABASE_URL` (Neon pooled, host contains `-pooler`) lives in `.env`, because the Prisma CLI reads only `.env`.
-- Only `src/server/leads/store.ts` and `src/server/blog/store.ts` import Prisma; everything else takes injected ports.
+- Only `src/server/leads/store.ts`, `src/server/blog/store.ts` and `src/server/content/db-store.ts` import Prisma; everything else takes injected ports.
 - Neon can stall on IPv6: `DB_DISABLE_HAPPY_EYEBALLS=1` sets both `setDefaultAutoSelectFamily(false)` and `ipv4first`. When Neon is unreachable the DB suites time out — re-run before blaming code.
 
 ## Leads, blog, photos, domains

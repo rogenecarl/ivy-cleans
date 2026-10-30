@@ -98,7 +98,7 @@ The console at `/admin` sits behind a session. There is no signup page, and bett
 
 ### Known Limits
 
-- **Creating and editing cities works only on a local `pnpm dev`.** City content is JSON in `content/`, and Vercel's filesystem is read-only. Generate locally, then commit `content/*.json` to publish.
+- **On Vercel, city content lives in Neon, layered over the `content/` files.** Locally it stays in those files unless `CONTENT_STORE=db` is set. A new city's preview and any domain also need Global Config (`EDGE_CONFIG`, `GLOBAL_CONFIG_ID`, `VERCEL_TOKEN`).
 - **`pnpm test` runs the leads-store suite against the database in `DATABASE_URL`.** Its writes are scoped to `ztest-` city keys; point it at a separate Neon branch where possible.
 
 ## Code Style

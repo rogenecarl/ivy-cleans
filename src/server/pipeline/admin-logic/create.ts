@@ -3,10 +3,8 @@ import { deriveFacts, phoneDigitsFrom } from '@/server/pipeline/facts'
 import type { MarketOps } from '@/server/pipeline/schemas'
 import type { MarketProfile } from '@/server/content/types'
 import { type CreateResult, errorMessage } from './shared'
-import { stat } from 'node:fs/promises'
-import path from 'node:path'
 import { draftKeyFor, findDraft } from '@/server/content/drafts'
-import { CONTENT_DIR } from '@/server/content/store'
+import { readEntry } from '@/server/content/entries'
 
 // ── Create ──
 
@@ -222,17 +220,8 @@ export async function cityKeyStatusLogic(city: string): Promise<{ key: string; f
   if (key === '') return { key, free: false, reason: 'that name has no letters or numbers' }
   const draft = await findDraft(key).catch(() => 'unreadable' as const)
   if (draft !== null) return { key, free: false, reason: 'a draft already exists for this city' }
-  if (await fileExists(path.join(CONTENT_DIR, `${key}.json`))) {
+  if ((await readEntry('city', key)) !== null) {
     return { key, free: false, reason: 'a published city already exists at this address' }
   }
   return { key, free: true }
-}
-
-async function fileExists(p: string): Promise<boolean> {
-  try {
-    await stat(p)
-    return true
-  } catch {
-    return false
-  }
 }
