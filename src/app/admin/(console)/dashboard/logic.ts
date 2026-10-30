@@ -70,7 +70,7 @@ export function activeAlarms(
   if (args.waiting > 0) {
     alarms.push({
       key: 'waiting',
-      label: args.waiting === 1 ? 'Lead waiting for a reply' : 'Leads waiting for a reply',
+      label: args.waiting === 1 ? 'New lead to answer' : 'New leads to answer',
       value: args.waiting,
       // The age is the point. "3 waiting" is a queue; "3 waiting, oldest 2 d"
       // is a problem, and only the second one gets acted on.

@@ -147,12 +147,12 @@ describe('activeAlarms', () => {
     )
     expect(alarms[0].value).toBe(3)
     expect(alarms[0].hint).toBe('oldest 2 d')
-    expect(alarms[0].label).toBe('Leads waiting for a reply')
+    expect(alarms[0].label).toBe('New leads to answer')
   })
 
   it('says "Lead" not "Leads" for exactly one', () => {
     const alarms = activeAlarms({ ...clear, waiting: 1, oldestWaitingAt: now }, now)
-    expect(alarms[0].label).toBe('Lead waiting for a reply')
+    expect(alarms[0].label).toBe('New lead to answer')
   })
 
   it('names the cities that cannot notify anyone', () => {
@@ -258,7 +258,7 @@ describe('attentionItems', () => {
   const site = (over: Partial<SiteSummary>) =>
     ({ key: 'houston', city: 'Houston', stage: 'needs-review', undecided: 0, hasAddress: true, ...over }) as SiteSummary
   const alarms = [
-    { key: 'waiting' as const, label: 'Lead waiting for a reply', value: 1, hint: 'oldest 3 d' },
+    { key: 'waiting' as const, label: 'New lead to answer', value: 1, hint: 'oldest 3 d' },
     { key: 'inbox' as const, label: 'Live sites with no inbox', value: 1, hint: 'Minneapolis' },
   ]
 

@@ -114,7 +114,7 @@ export default async function AdminDashboard() {
           <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
             <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden="true" />
             <p className="text-[0.85rem] text-emerald-900">
-              <strong className="font-semibold">All clear.</strong> Nothing waiting for a reply or a decision, and
+              <strong className="font-semibold">All clear.</strong> No new leads to answer, nothing waiting on a decision, and
               every live site notifies someone.
             </p>
           </div>
@@ -180,9 +180,9 @@ export default async function AdminDashboard() {
               ))}
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-[0.8rem] text-muted-foreground">
-              <Figure value={stats.bookings} label="booking requests" />
-              <Figure value={stats.enquiries} label="enquiries" />
-              <Figure value={stats.booked} label="booked all time" />
+              <Figure value={stats.bookings} label={stats.bookings === 1 ? 'booking request' : 'booking requests'} />
+              <Figure value={stats.enquiries} label={stats.enquiries === 1 ? 'enquiry' : 'enquiries'} />
+              <Figure value={stats.booked} label="total booked" />
             </div>
           </section>
 
