@@ -10,11 +10,8 @@ import { cityFromParams, type CityParams } from "@/site/city-param";
 import { cityHref } from "@/server/content/interpolate";
 
 export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
-  return {
-    title: faqPageMeta.title,
-    description: faqPageMeta.description,
-    ...canonicalFor(await cityFromParams(params), "/faq"),
-  };
+  const c = await cityFromParams(params);
+  return { ...faqPageMeta(c), ...canonicalFor(c, "/faq") };
 }
 
 // post-36.css: accordion answers are Source Serif Pro on live; Source Serif 4 is its successor on next/font. Page-scoped.
@@ -35,9 +32,9 @@ export default async function FaqPage({ params }: { params: CityParams }) {
           <h3 className="text-rust mb-[1.5rem] text-[1.6rem] leading-[1.2em] font-semibold uppercase">
             {faqPageHeader.overline}
           </h3>
-          <h2 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
+          <h1 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
             {faqPageHeader.h2}
-          </h2>
+          </h1>
         </div>
       </section>
       <section className="bg-[linear-gradient(180deg,#EEF7F4_20%,#FFFFFF_20%)] px-[1rem] pb-[3rem] md:pb-[4rem] lg:px-0 lg:pb-[9.6rem]">

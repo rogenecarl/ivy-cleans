@@ -11,11 +11,8 @@ import BlogCardGrid from "@/site/components/blog/BlogCardGrid";
 import Pagination from "@/site/components/blog/Pagination";
 
 export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
-  return {
-    title: blogMeta.title,
-    ...(blogMeta.description ? { description: blogMeta.description } : {}),
-    ...canonicalFor(await cityFromParams(params), "/blog"),
-  };
+  const c = await cityFromParams(params);
+  return { ...blogMeta(c), ...canonicalFor(c, "/blog") };
 }
 
 const PAGE_SIZE = 9;
@@ -45,9 +42,9 @@ export default async function BlogPage({
           <h3 className="text-rust mt-[5rem] mb-[1.5rem] text-[1.6rem] leading-[1.2em] font-semibold uppercase">
             BLOGS
           </h3>
-          <h2 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
+          <h1 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
             Ivy Cleans news
-          </h2>
+          </h1>
         </div>
       </section>
       <section className="mt-0 mb-0 bg-white pt-[1rem] pb-[1rem] md:mt-[95px] md:mb-[95px] md:pt-0 md:pb-[3rem] lg:pb-[8.6rem]">

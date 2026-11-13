@@ -173,11 +173,12 @@ exports[`bookData(minneapolis) is stable > book 1`] = `
     "phoneHref": "tel:6124240391",
   },
   "bookMeta": {
-    "description": "A Couple of Questions For Your FREE Quote!",
-    "title": "Book - Ivy Cleans",
+    "description": "Answer a couple of questions to get a free house cleaning quote from Ivy Cleans in Minneapolis, MN.",
+    "title": "Free Cleaning Quote in Minneapolis, MN | Ivy Cleans",
   },
   "bookNowMeta": {
-    "title": "Book Now - Ivy Cleans",
+    "description": "Book a house cleaning with Ivy Cleans in Minneapolis, MN. Fill in the short form and we’ll get back to you with your free quote.",
+    "title": "Book House Cleaning in Minneapolis, MN | Ivy Cleans",
   },
   "bookSubmitLabel": "Claim",
   "comingSoon": {

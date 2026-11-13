@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { canonicalFor } from "@/site/data/seo";
 import { cityFromParams, type CityParams } from "@/site/city-param";
-import { citySlug } from "@/server/content/interpolate";
+import { citySlug, t } from "@/server/content/interpolate";
 import { bookData } from "@/site/data/book";
 import BookNowSection from "@/site/components/book/BookNowSection";
 
-// live /book-now has no meta description; the city is resolved per request, never at module scope
+// the city is resolved per request, never at module scope
 export async function generateMetadata({
   params,
 }: {
@@ -15,6 +15,7 @@ export async function generateMetadata({
   const { bookNowMeta } = bookData(c);
   return {
     title: bookNowMeta.title,
+    description: bookNowMeta.description,
     ...canonicalFor(c, "/book-now"),
   };
 }
@@ -25,6 +26,7 @@ export default async function BookNowPage({ params }: { params: CityParams }) {
   const { bookFields, bookSubmitLabel, comingSoon } = bookData(c);
   return (
     <BookNowSection
+      heading={t("Book House Cleaning in {city}, {state}", c)}
       bookFields={bookFields}
       bookSubmitLabel={bookSubmitLabel}
       comingSoon={comingSoon}

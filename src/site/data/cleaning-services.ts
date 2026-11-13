@@ -1,8 +1,14 @@
-export const csMeta = {
-  title: "Cleaning Services - Ivy Cleans",
-  description:
-    "CLEANING PLANS Choose a cleaning package Most Popular Packages Basic Book Now Deep Book Now Moving Book Now Living Rooms / Bedrooms / Hallways Basic Deep",
-};
+import type { CityContent } from "@/server/content/types";
+import { t } from "@/server/content/interpolate";
+
+// our SEO copy, not the live page's: live had a city-less title and a description scraped from the page text
+export const csMeta = (c: CityContent) => ({
+  title: t("House Cleaning Packages in {city}, {state} | Ivy Cleans", c),
+  description: t(
+    "Compare the Basic, Deep and Moving cleaning packages from Ivy Cleans in {city}, {state}, with a room-by-room list of what each one covers.",
+    c,
+  ),
+});
 
 export const tiers = ["Basic", "Deep", "Moving"] as const;
 

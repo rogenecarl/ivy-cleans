@@ -10,11 +10,8 @@ import PackagesBar from "@/site/components/cleaning-services/PackagesBar";
 import RoomChecklist from "@/site/components/cleaning-services/RoomChecklist";
 
 export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
-  return {
-    title: csMeta.title,
-    description: csMeta.description,
-    ...canonicalFor(await cityFromParams(params), "/cleaning-services"),
-  };
+  const c = await cityFromParams(params);
+  return { ...csMeta(c), ...canonicalFor(c, "/cleaning-services") };
 }
 
 export default async function CleaningServicesPage({ params }: { params: CityParams }) {

@@ -104,6 +104,8 @@ Aliases: `@/*` → `./src/*`, `@content/*` → `./content/*` (both also mapped i
 ## Copy and data
 
 - All user-visible copy lives in `src/site/data/*.ts`, byte-verbatim from `docs/superpowers/reference/ivycleans-live/*content-dump*.txt` (typos included). Never paraphrase.
+- Exception: inner-page `<title>` and meta descriptions name the city and are our SEO copy, not the live site's (2026-11 SEO audit).
+- `*.vercel.app` hosts get `X-Robots-Tag: noindex` from the proxy (`isPreviewHost`): a city is indexed only on its own domain.
 - Template copy carries tokens (`{city}`, `{suburb}`, `{ST}`) resolved by `src/server/content/interpolate.ts`. Generated copy comes from the city document's `sections` slots.
 - Slot reads (`src/server/content/slots.ts`): `s()` / `sl()` throw on a missing slot (the request fails, not the build); `sOpt()` returns undefined. Area and service-local slots are always read with `sOpt` — Minneapolis has no generated area copy and falls back to template.
 - Seven services in `src/site/data/services/registry.ts`; slugs are the client's, stored not derived. Six render through the shared template; move-out is bespoke.

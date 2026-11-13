@@ -1,7 +1,11 @@
-export const blogMeta: { title: string; description?: string } = {
-  title: "Blog - Ivy Cleans",
-  description: "BLOGS Ivy Cleans news",
-};
+import type { CityContent } from "@/server/content/types";
+import { t } from "@/server/content/interpolate";
+
+// our SEO copy, not the live page's (live: "Blog - Ivy Cleans" / "BLOGS Ivy Cleans news")
+export const blogMeta = (c: CityContent) => ({
+  title: t("House Cleaning Tips & News | Ivy Cleans {city}, {state}", c),
+  description: t("Cleaning tips, guides and news from Ivy Cleans, your house cleaning service in {city}, {state}.", c),
+});
 
 export type BlogCard = {
   title: string;

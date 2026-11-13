@@ -37,7 +37,7 @@ export default function ContactInfo({
         {contactInfo.location2Heading}
       </h2>
       <p className="text-herogreen mb-0 text-[1.6rem] leading-[1.5em]">
-        {contactInfo.phone}
+        <a href={contactInfo.phoneHref}>{contactInfo.phone}</a>
         <br />
         {contactInfo.email}
       </p>

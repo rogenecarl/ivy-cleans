@@ -40,6 +40,11 @@ export function normalizeHost(host: string): string {
   return host.toLowerCase().split(":")[0];
 }
 
+// *.vercel.app serves the same pages as a city's real domain, so it must never be indexed
+export function isPreviewHost(host: string): boolean {
+  return normalizeHost(host).endsWith('.vercel.app')
+}
+
 const HOSTNAME = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 
 // what an operator typed or pasted ("https://Example.com/contact", "example.com:3000") -> bare host, or null

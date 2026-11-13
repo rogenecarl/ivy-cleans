@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie, getCookieCache } from "better-auth/cookies";
-import { isMappedHost, loadRouting, resolveRewrite } from "@/server/content/resolve-rewrite";
+import { isMappedHost, isPreviewHost, loadRouting, resolveRewrite } from "@/server/content/resolve-rewrite";
 import { resolveAdminRedirect } from "@/server/content/resolve-admin";
 import { isUnder } from "@/server/auth/access";
 import { ADMIN_BASE } from "@/server/auth/admin-routes";
@@ -37,10 +37,11 @@ export async function proxy(req: NextRequest) {
   }
 
   const target = resolveRewrite(host, pathname, domains, cityKeys);
-  if (target === null) return;
   const url = req.nextUrl.clone();
-  url.pathname = target;
-  return NextResponse.rewrite(url);
+  if (target !== null) url.pathname = target;
+  const res = target === null ? NextResponse.next() : NextResponse.rewrite(url);
+  if (isPreviewHost(host)) res.headers.set("X-Robots-Tag", "noindex");
+  return res;
 }
 
 // keep static assets from paying for the hop; matcher values must be literals

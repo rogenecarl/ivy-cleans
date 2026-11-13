@@ -23,7 +23,7 @@ export type BookField =
     };
 
 export type BookData = {
-  bookNowMeta: { title: string };
+  bookNowMeta: { title: string; description: string };
   bookMeta: { title: string; description: string };
   bookHeader: { overline: string; h2: string };
   bookLeadIn: {
@@ -52,15 +52,20 @@ export type BookData = {
 
 export function bookData(c: CityContent): BookData {
   return {
+    // our SEO copy, not the live pages' ("Book Now - Ivy Cleans" with no description, "Book - Ivy Cleans")
     bookNowMeta: {
-      title: "Book Now - Ivy Cleans",
+      title: t("Book House Cleaning in {city}, {state} | Ivy Cleans", c),
+      description: t(
+        "Book a house cleaning with Ivy Cleans in {city}, {state}. Fill in the short form and we’ll get back to you with your free quote.",
+        c,
+      ),
     },
-
-    // live /book-now has NO meta description — omit the field (confirmed: no
-    // <meta name="description"> tag in book-now.html's <head>, unlike book.html).
     bookMeta: {
-      title: "Book - Ivy Cleans",
-      description: "A Couple of Questions For Your FREE Quote!",
+      title: t("Free Cleaning Quote in {city}, {state} | Ivy Cleans", c),
+      description: t(
+        "Answer a couple of questions to get a free house cleaning quote from Ivy Cleans in {city}, {state}.",
+        c,
+      ),
     },
 
     // /book only (book-content-dump.txt: <h3>REQUEST OUR SERVICES / <h2>Book

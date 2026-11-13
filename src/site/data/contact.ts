@@ -1,7 +1,7 @@
 // Verbatim from contact.html and contact-content-dump.txt.
 
 import type { CityContent } from '@/server/content/types'
-import { realAddress } from '@/server/content/interpolate'
+import { realAddress, t } from '@/server/content/interpolate'
 import { mapSrc } from "./maps";
 
 export type ContactField =
@@ -42,6 +42,7 @@ export type ContactData = {
     hours: string[];
     location2Heading: string;
     phone: string;
+    phoneHref: string;
     email: string;
   };
   contactResult: {
@@ -54,10 +55,13 @@ export type ContactData = {
 
 export function contactData(c: CityContent): ContactData {
   return {
+    // our SEO copy, not the live page's city-less "Contact - Ivy Cleans"
     contactMeta: {
-      title: "Contact - Ivy Cleans",
-      description:
-        "Give us a call, we try to answer all enquiries within 24 hours on business days.",
+      title: t("Contact Ivy Cleans | House Cleaning in {city}, {state}", c),
+      description: t(
+        "Call or message Ivy Cleans in {city}, {state}. We try to answer all enquiries within 24 hours on business days.",
+        c,
+      ),
     },
 
     contactHeader: {
@@ -132,6 +136,7 @@ export function contactData(c: CityContent): ContactData {
       location2Heading: "Location",
       // contact.html 7416574: phone / email split by <br />
       phone: c.phone,
+      phoneHref: c.phoneHref,
       email: "Support@ivycleans.com",
     },
 

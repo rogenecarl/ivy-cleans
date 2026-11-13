@@ -17,7 +17,6 @@ export type SiteData = {
   innerSite: {
     phone: string;
     phoneHref: string;
-    footerPhone: string;
     email: string;
     bookUrl: string;
     copyright: string;
@@ -62,8 +61,6 @@ export function siteData(c: CityContent): SiteData {
       // one number per city (the live Minneapolis site had a second line here)
       phone: c.phone,
       phoneHref: c.phoneHref,
-      // inner footer phone: plain text on live, no tel: href
-      footerPhone: c.phone,
       email: "support@ivycleans.com",
       bookUrl: cityHref(c, "/book"),
       copyright: "© 2026 IvyCleans. All rights reserved.",
