@@ -157,6 +157,23 @@ describe('proxy — console branch, wired end to end', () => {
   })
 })
 
+describe('proxy — preview hosts stay out of the index', () => {
+  it('marks every city page on a vercel.app host noindex', async () => {
+    const res = await proxy(request('https://ivycleans.vercel.app/contact', 'ivycleans.vercel.app'))
+    expect(res?.headers.get('x-robots-tag')).toBe('noindex')
+  })
+
+  it('marks a draft preview path on a vercel.app host noindex too', async () => {
+    const res = await proxy(request('https://ivycleans.vercel.app/houston', 'ivycleans.vercel.app'))
+    expect(res?.headers.get('x-robots-tag')).toBe('noindex')
+  })
+
+  it('leaves a city on its own domain indexable', async () => {
+    const res = await proxy(request('https://ivycleanshouston.com/contact', 'ivycleanshouston.com'))
+    expect(res?.headers.get('x-robots-tag') ?? null).toBeNull()
+  })
+})
+
 describe('loadRouting', () => {
   /*
    * Task 9. The host map moves from a build-time JSON import into Vercel

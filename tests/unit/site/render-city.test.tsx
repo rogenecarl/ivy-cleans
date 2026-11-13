@@ -180,7 +180,6 @@ describe('cityHref-built navigation', () => {
      */
     expect(innerSite.phone).toBe(testville.phone)
     expect(innerSite.phoneHref).toBe(testville.phoneHref)
-    expect(innerSite.footerPhone).toBe(testville.phone)
     expect(areasData(testville).areas[0].href).toBe(
       '/testville/house-cleaning-north-testburg',
     )

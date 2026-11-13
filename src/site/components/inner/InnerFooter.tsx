@@ -40,7 +40,7 @@ export default function InnerFooter({
           <ul className="space-y-[1rem] md:space-y-[1.5rem]">
             <li className={`${itemClass} justify-center md:justify-start`}>
               <PhoneIcon className={iconClass} />
-              <span>{innerSite.footerPhone}</span>
+              <a href={innerSite.phoneHref}>{innerSite.phone}</a>
             </li>
             {/* client instruction 2026-08-22: no office address in the footer */}
             <li className={`${itemClass} justify-center md:justify-start`}>

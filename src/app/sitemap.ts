@@ -11,8 +11,8 @@ import { listPosts } from '@/server/blog/store'
 // answer. headers() opts the route out of caching. Hosts come from loadRouting(), the same tables the proxy uses.
 export const dynamic = 'force-dynamic'
 
-/** Every path a tenant publishes, relative to the city root. */
-export const sitemapPaths = sitePaths
+/** Every path a tenant publishes, relative to the city root; /home is left out because its canonical is the front page. */
+export const sitemapPaths = (c: CityContent) => sitePaths(c).filter((path) => path !== '/home')
 
 // no lastModified on purpose: claiming every page changed on every fetch is a signal crawlers learn to discount
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

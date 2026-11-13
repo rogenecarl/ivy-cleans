@@ -17,6 +17,8 @@ import OtherServices from "@/site/components/area/OtherServices";
 import NearbyAreas from "@/site/components/area/NearbyAreas";
 import WorkInAction from "@/site/components/area/WorkInAction";
 import SuburbClosing from "@/site/components/area/Closing";
+import JsonLd from "@/site/components/JsonLd";
+import { localBusinessJsonLd } from "@/site/data/structured-data";
 
 // Root-level slugs: stored suburb slugs render here; /deep-cleaning-<city> and /<city>-move-out-cleaning-services
 // 308 to /services/..., and the WordPress-era post slugs 308 to /blog (all indexed URLs). Anything else 404s.
@@ -93,6 +95,7 @@ function SuburbPage({ c, suburb }: { c: CityContent; suburb: SuburbRef }) {
       <OtherServices otherServices={otherServices} />
       <WorkInAction workInAction={workInAction} />
       <SuburbClosing closing={closing} bookHref={innerSite.bookUrl} />
+      <JsonLd data={localBusinessJsonLd(c)} />
     </>
   );
 }

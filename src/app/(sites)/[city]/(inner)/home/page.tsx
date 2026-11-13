@@ -29,7 +29,8 @@ export async function generateMetadata({
   return {
     title: homeMeta.title,
     description: homeMeta.description,
-    ...canonicalFor(c, "/home"),
+    // same content as the front page: point search engines there
+    ...canonicalFor(c, "/"),
   };
 }
 

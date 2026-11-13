@@ -16,9 +16,9 @@ export default function ContactHeader({
           <h3 className="text-rust mt-0 mb-[1.5rem] text-[1.6rem] leading-[1.2em] font-semibold uppercase">
             {contactHeader.overline}
           </h3>
-          <h2 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
+          <h1 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
             {contactHeader.h2a}
-          </h2>
+          </h1>
         </div>
       </section>
     );

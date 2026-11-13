@@ -165,14 +165,15 @@ exports[`data module values are unchanged by the content-layer refactor > contac
     "location2Heading": "Location",
     "locationHeading": "Location",
     "phone": "612-424-0391",
+    "phoneHref": "tel:6124240391",
   },
   "contactMap": {
     "src": "https://maps.google.com/maps?q=ivy%20cleans&t=m&z=16&output=embed&iwloc=near",
     "title": "ivy cleans",
   },
   "contactMeta": {
-    "description": "Give us a call, we try to answer all enquiries within 24 hours on business days.",
-    "title": "Contact - Ivy Cleans",
+    "description": "Call or message Ivy Cleans in Minneapolis, MN. We try to answer all enquiries within 24 hours on business days.",
+    "title": "Contact Ivy Cleans | House Cleaning in Minneapolis, MN",
   },
   "contactResult": {
     "errorBody": "Please call us instead and we’ll get straight to it.",
@@ -654,7 +655,6 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
         "label": "Privacy Policy",
       },
     ],
-    "footerPhone": "612-424-0391",
     "phone": "612-424-0391",
     "phoneHref": "tel:6124240391",
     "servicesLinks": [

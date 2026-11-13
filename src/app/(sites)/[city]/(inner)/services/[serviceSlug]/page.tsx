@@ -22,7 +22,7 @@ import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { areasData } from "@/site/data/areas";
 import { mapSrc } from "@/site/data/maps";
-import { serviceJsonLd } from "@/site/data/structured-data";
+import { localBusinessJsonLd, serviceJsonLd } from "@/site/data/structured-data";
 import JsonLd from "@/site/components/JsonLd";
 import { cityBits } from "@/server/content/store";
 import type { ServiceEntry } from "@/site/data/services/registry";
@@ -77,6 +77,7 @@ export default async function ServicePage({ params }: { params: ServiceParams })
         <MoveOutPage c={c} />
       )}
       <WhereWeDoIt c={c} entry={entry} />
+      <JsonLd data={localBusinessJsonLd(c)} />
       <JsonLd data={serviceJsonLd(c, entry)} />
     </>
   );

@@ -23,9 +23,13 @@ const noAreas = await loadCityFixture('testville')
 describe('sitemapPaths', () => {
   it('lists every static route the app actually serves', () => {
     const paths = sitemapPaths(withAreas)
-    for (const route of ['/', '/home', '/cleaning-services', '/contact', '/faq', '/book', '/book-now', '/blog', '/privacy-policy']) {
+    for (const route of ['/', '/cleaning-services', '/contact', '/faq', '/book', '/book-now', '/blog', '/privacy-policy']) {
       expect(paths).toContain(route)
     }
+  })
+
+  it('leaves out /home, whose canonical is the front page', () => {
+    expect(sitemapPaths(withAreas)).not.toContain('/home')
   })
 
   it('lists all seven service pages', () => {

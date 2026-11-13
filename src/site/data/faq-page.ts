@@ -1,10 +1,17 @@
 // /faq data from faq.html (accordion 664764d in section 0a61e2d): 5 pairs, cross-checked with faq-content-dump.txt lines 32-36.
 // Separate from src/site/data/faqs.ts (the front page's 10).
 
-export const faqPageMeta = {
-  title: "FAQ - Ivy Cleans",
-  description: "Do you accept online bookings?", // faq.html line 24 <meta name="description">
-};
+import type { CityContent } from "@/server/content/types";
+import { t } from "@/server/content/interpolate";
+
+// our SEO copy, not the live page's (live: "FAQ - Ivy Cleans" / "Do you accept online bookings?")
+export const faqPageMeta = (c: CityContent) => ({
+  title: t("House Cleaning FAQ | Ivy Cleans {city}, {state}", c),
+  description: t(
+    "Answers about booking online, payment, cleaning equipment and carpet or window cleaning with Ivy Cleans in {city}, {state}.",
+    c,
+  ),
+});
 
 export const faqPageHeader = {
   overline: "QUESTIONS", // faq dump line 30
