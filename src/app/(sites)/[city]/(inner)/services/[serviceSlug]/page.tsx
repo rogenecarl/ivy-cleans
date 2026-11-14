@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { canonicalFor } from "@/site/data/seo";
+import { metaDescription } from "@/site/data/meta";
 import { notFound } from "next/navigation";
 import { cityFromParams } from "@/site/city-param";
 import type { CityContent } from "@/server/content/types";
@@ -60,10 +61,10 @@ export async function generateMetadata({
   const path = `/services/${(await params).serviceSlug}`;
   if (entry.kind === "template") {
     const { meta } = entry.content(c);
-    return { title, description: meta.description, ...canonicalFor(c, path) };
+    return { title, description: metaDescription(meta.description), ...canonicalFor(c, path) };
   }
   const { moveOutMeta } = moveOutData(c);
-  return { title, description: moveOutMeta.description, ...canonicalFor(c, path) };
+  return { title, description: metaDescription(moveOutMeta.description), ...canonicalFor(c, path) };
 }
 
 export default async function ServicePage({ params }: { params: ServiceParams }) {

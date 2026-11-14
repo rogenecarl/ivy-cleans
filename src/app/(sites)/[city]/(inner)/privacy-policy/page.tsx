@@ -5,12 +5,15 @@ import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { privacyPolicyMeta, privacyPolicyHeader, privacyPolicyParagraphs } from "@/site/data/privacy-policy";
 import { cityFromParams, type CityParams } from "@/site/city-param";
+import { t } from "@/server/content/interpolate";
 
 export async function generateMetadata({ params }: { params: CityParams }): Promise<Metadata> {
+  const c = await cityFromParams(params);
+  // our SEO title; the live one ("Privacy Policy - Ivy Cleans") named no city
   return {
-    title: privacyPolicyMeta.title,
+    title: t("Privacy Policy | Ivy Cleans {city}, {state}", c),
     description: privacyPolicyMeta.description,
-    ...canonicalFor(await cityFromParams(params), "/privacy-policy"),
+    ...canonicalFor(c, "/privacy-policy"),
   };
 }
 
@@ -31,9 +34,9 @@ export default async function PrivacyPolicyPage({ params }: { params: CityParams
           <h3 className="text-rust mb-[1.5rem] text-[1.6rem] leading-[1.2em] font-semibold uppercase">
             {privacyPolicyHeader.overline}
           </h3>
-          <h2 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
+          <h1 className="text-herogreen text-[2.5rem] leading-[1.2em] font-semibold md:text-[2.8rem] lg:text-[3.6rem]">
             {privacyPolicyHeader.h2}
-          </h2>
+          </h1>
         </div>
       </section>
       <section className="bg-[linear-gradient(180deg,#EEF7F4_13%,#FFFFFF_13%)] px-[1rem] pb-[3rem] md:pb-[4rem] lg:px-0 lg:pb-[9.6rem]">
