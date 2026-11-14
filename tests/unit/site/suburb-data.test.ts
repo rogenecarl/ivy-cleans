@@ -17,6 +17,11 @@ import { BANNED_PHRASES } from '@/server/content/quality'
 import { pickOtherServices } from '@/site/data/other-services'
 
 const minneapolis = await getCity('minneapolis')
+// every live area now has written copy: the template fallback is pinned on a copy of the city without it
+const templateOnly = {
+  ...minneapolis,
+  sections: Object.fromEntries(Object.entries(minneapolis.sections).filter(([slot]) => !slot.startsWith('suburb.'))),
+}
 const miami = await loadCityFixture('miami')
 const orlando = await getCity('orlando')
 
@@ -35,7 +40,7 @@ function dumpLineContaining(needle: string): string {
 describe('suburbData', () => {
   describe('Savage (live city) byte-equality against the content dump', () => {
     const savage = { name: 'Savage', slug: 'cleaning-service-savage-mn' }
-    const data = suburbData(minneapolis, savage)
+    const data = suburbData(templateOnly, savage)
 
     test('meta title', () => {
       expect(data.suburbMeta.title).toBe('House Cleaning Service In Savage, MN')
@@ -303,8 +308,8 @@ describe('suburbData', () => {
 
     test('with NO generated copy, all three fall back to the template and nothing throws (protects the 24 live Minneapolis pages)', () => {
       const savage = { name: 'Savage', slug: 'cleaning-service-savage-mn' }
-      expect(() => suburbData(minneapolis, savage)).not.toThrow()
-      const data = suburbData(minneapolis, savage)
+      expect(() => suburbData(templateOnly, savage)).not.toThrow()
+      const data = suburbData(templateOnly, savage)
       expect(data.hero.paragraphs.length).toBeGreaterThan(0)
       expect(data.houseCleaning.paragraph).toContain('You’re in luck')
       expect(data.benefits.paragraphs.length).toBeGreaterThan(0)
