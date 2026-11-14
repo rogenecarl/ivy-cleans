@@ -19,170 +19,548 @@
       {
         "name": "Apple Valley",
         "slug": "house-cleaning-apple-valley",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Cobblestone Lake",
+          "Scott Highlands",
+          "Palomino Hills",
+          "Cedar Isle"
+        ],
+        "housingCharacter": "Two generations of housing. Older additions such as Scott Highlands are full of 1970s split-entry and three-level split homes, with a short stair run up and down from the front door. Cobblestone Lake is newer, built from the early 2000s through the mid-2010s around a 36-acre lake, with single-family homes, townhomes and detached villas on small, tidy yards.",
+        "conditions": [
+          {
+            "condition": "Cobblestone Lake has a 1.5-mile paved trail, docks and a shared pool used year round",
+            "implication": "Walkers, dogs and kids coming in off the trail and the dock bring sand, damp and grass clippings onto entry floors and the first few stairs.",
+            "copySafe": true
+          },
+          {
+            "condition": "Many older homes are 1970s split-entry and three-level splits",
+            "implication": "The landing at the front door and the two short stair runs off it take the heaviest foot traffic in the house, so carpeted stairs and the entry tile need attention every visit.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Farmington",
         "slug": "cleaning-services-farmington",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Charleswood",
+          "Mystic Meadows",
+          "Fairhill",
+          "Meadowview Preserve",
+          "Vermillion Commons"
+        ],
+        "housingCharacter": "Two kinds of neighbourhood. Close to the historic downtown, lots are compact and the homes are older, a few from the early 1900s but most built in the 1950s, 60s and 70s. Further out the city is newer subdivisions and townhome communities, with a citywide median build year of 1997 and new single-family homes, one-level villas and townhomes still going up.",
+        "conditions": [
+          {
+            "condition": "Active new-construction communities such as Meadowview Preserve and Vermillion Commons",
+            "implication": "Fine drywall and site dust keeps settling on sills, vents, baseboards and cabinet tops for months after move-in, and mud from unfinished lots and streets comes in on shoes.",
+            "copySafe": true
+          },
+          {
+            "condition": "Older homes around the historic downtown, mostly 1950s to 1970s, on compact lots",
+            "implication": "Older trim, original floors and tighter rooms collect dust in corners and along woodwork, so detail work on baseboards and door frames matters more than square footage.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Rosemount",
         "slug": "cleaning-services-rosemount",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Amber Fields",
+          "Evermoor",
+          "Bloomfield",
+          "Talamore"
+        ],
+        "housingCharacter": "Most homes were built in the early 2000s, with a few 1950s houses near the older core and a steady run of brand-new construction, around 300 new single-family homes a year. Styles range from condo and townhouse clusters to ranch, split-level and Craftsman-influenced single-family homes. Newer building is concentrated in master-planned communities such as Amber Fields, where townhomes and single-family homes are connected to a central park.",
+        "conditions": [
+          {
+            "condition": "Amber Fields is still being built out, with several builders working at once",
+            "implication": "Construction dust drifts into newly finished homes and settles on window tracks, vents and ledges, and muddy lots mean grit on entry floors well after move-in.",
+            "copySafe": true
+          },
+          {
+            "condition": "Amber Fields has about 4.5 miles of paths and trails around a central park, and Bloomfield sits by a park with walking trails",
+            "implication": "Daily walks with kids and dogs bring dirt, grass and damp in through the front door, so entries, mudrooms and the first stretch of flooring need the most attention.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Lakeville",
         "slug": "cleaning-services-lakeville",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Spirit of Brandtjen Farm",
+          "Marion Heights",
+          "Marion Hills",
+          "Prairie Lake"
+        ],
+        "housingCharacter": "Mostly newer housing: the median home in the Dakota County part of Lakeville was built around 2000, with a good share from 1970 to 1999 and new construction still going up on the east side. Ramblers, including walkout ramblers, and two-story homes are common in communities like Spirit of Brandtjen Farm. Around Lake Marion, homes from the 1990s sit right on the water with their own lake frontage.",
+        "conditions": [
+          {
+            "condition": "Lake Marion and Orchard Lake, the city's two largest lakes, are lined with homes and private docks",
+            "implication": "Sand, lake water and wet swimwear come straight in from the dock in summer, so walkout lower levels, patio doors and bathrooms near the lake entrance take the most wear.",
+            "copySafe": true
+          },
+          {
+            "condition": "Spirit of Brandtjen Farm has trails around its lakes and two outdoor pools",
+            "implication": "Pool and trail traffic means damp towels, chlorine drips and tracked-in grass on entry floors, plus walkout rambler basements that see as much traffic as the main floor.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Eagan",
         "slug": "cleaning-services-eagan",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Blackhawk",
+          "Lexington Square"
+        ],
+        "housingCharacter": "Most of Eagan's housing went up between 1970 and 1999, so homes are established rather than old, with a smaller share built since 2000. Neighborhoods such as Blackhawk mix medium to large single-family homes with townhomes, and split-level homes are common around Lexington Square.",
+        "conditions": [
+          {
+            "condition": "Lebanon Hills Regional Park, about 2,000 acres of wooded trails, lakes, ponds and wetlands, sits inside Eagan",
+            "implication": "Hikers, paddlers, skiers and their dogs bring trail dirt, sand and damp gear back through the entry, so mudroom floors, entry rugs and the laundry area need extra attention.",
+            "copySafe": true
+          },
+          {
+            "condition": "Many homes are split-levels built from the 1970s through the 1990s",
+            "implication": "The short stair runs off the front landing carry most of the household's foot traffic, so stair carpet and the entry floor get the hardest wear.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Burnsville",
         "slug": "cleaning-services-burnsville",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Chateaulin",
+          "Southwind",
+          "West View Hills",
+          "Oak Shores"
+        ],
+        "housingCharacter": "Much of Burnsville was built from about 1970 into the early 1990s, and split-entry (bi-level) and multi-level split homes are everywhere, often on quiet cul-de-sacs in established neighborhoods like Chateaulin. Around Crystal Lake, older ramblers and larger homes sit on lakeshore lots in additions such as Oak Shores.",
+        "conditions": [
+          {
+            "condition": "Crystal Lake, nearly 300 acres with a public beach and boat launch, is ringed by lakeshore homes",
+            "implication": "Swimmers and boaters track sand and lake water in through the lake-side door, so walkout floors, entry rugs and bathrooms near the back of the house need the most attention.",
+            "copySafe": true
+          },
+          {
+            "condition": "Split-entry and multi-level split homes from the 1970s and 1980s are the most common style",
+            "implication": "Every trip through the house crosses a short stair run, so the stair carpet and the landing by the front door wear fastest and need a thorough vacuum each visit.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Bloomington",
         "slug": "cleaning-services-bloomington",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "West Bloomington",
+          "Normandale Hills",
+          "Normandale Highlands",
+          "Hyland Hills"
+        ],
+        "housingCharacter": "Bloomington is mostly established single-family housing from the middle of the last century, with a median build year around 1968. Mid-century ramblers and split-levels (split-entry, three-level and four-level splits) are the common styles, alongside condos and some waterfront homes. On the west side, walkout ramblers sit on wooded lots and along the Minnesota River bluffs.",
+        "conditions": [
+          {
+            "condition": "West Bloomington homes sit beside Hyland Lake Park Reserve, Bush Lake Beach, Normandale Lake Park and the Hyland Hills ski area",
+            "implication": "Households that walk the park trails, swim at the beach or ski come home with sand, mud and wet gear, so the entry, mudroom and walkout lower level collect most of the grit.",
+            "copySafe": true
+          },
+          {
+            "condition": "Homes along the Minnesota River bluffs, near the river-valley trails and the wildlife refuge",
+            "implication": "Wooded bluff lots mean leaf litter, pollen and trail dirt tracked onto floors, and big view windows that show every smudge and need regular glass cleaning.",
+            "copySafe": true
+          },
+          {
+            "condition": "Many homes are mid-century split-levels and split-entry houses",
+            "implication": "The front landing and the short stair runs off it take the heaviest foot traffic, so stairs and entry floors need attention every visit.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Shakopee",
         "slug": "cleaning-services-shakopee",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Southbridge",
+          "Amberglen",
+          "Downtown Shakopee"
+        ],
+        "housingCharacter": "Shakopee's homes are among the newest in the metro, with only a small share built before 1970. Southbridge, in the northeast of the city, is mostly two-story and modified two-story homes from about 1999 to 2002, with some multi-level splits, while Amberglen is a newer neighborhood of four- and five-bedroom homes with three-car garages, including raised ranch plans. The oldest homes sit near Downtown Shakopee along the Minnesota River.",
+        "conditions": [
+          {
+            "condition": "Southbridge has a walking trail leading to a playground and an off-leash dog park",
+            "implication": "Dog walks and trips to the park bring paw prints, grass and dirt in through the entry, so floors by the door, rugs and pet hair on furniture need attention every visit.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Eden Prairie",
         "slug": "cleaning-services-eden-prairie",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Bearpath",
+          "Cardinal Creek",
+          "Amsden Hills",
+          "Bent Creek"
+        ],
+        "housingCharacter": "Mostly 1980s and later: the city's median year built is 1987. Older streets like Cardinal Creek have large early-1980s homes, some over 5,000 finished square feet. Bearpath is a gated golf community built around 1997 to 2002, with custom two-story homes and single-story golf villas under a homeowners association.",
+        "conditions": [
+          {
+            "condition": "Bearpath is a gated community with staffed access around a Jack Nicklaus 18-hole golf course",
+            "implication": "Crews are cleared through the gate ahead of each visit, and fine clippings from the fairways come in on shoes and settle on entry floors and patio-door tracks.",
+            "copySafe": true
+          },
+          {
+            "condition": "Many homes are large, from early-1980s houses over 5,000 square feet to custom builds",
+            "implication": "Big square footage means more finished rooms, more stairs and more glass than a crew can rush, so the visit is planned room by room.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Hopkins",
         "slug": "cleaning-services-hopkins",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "The Avenues",
+          "Bellgrove",
+          "Downtown Hopkins"
+        ],
+        "housingCharacter": "Hopkins is a compact, older suburb: more than a third of its housing went up between 1940 and 1969, and apartments make up over half of all homes. Single-family streets such as the walkable Avenues neighborhood near downtown are lined with 1950s ramblers, many with later additions.",
+        "conditions": [
+          {
+            "condition": "The Lake Minnetonka Regional Trail, a rails-to-trails biking and hiking path, runs through Hopkins, and Minnehaha Creek backs onto some yards",
+            "implication": "Bikes, strollers and dogs coming in off the trail and the creek path track grit and damp onto entry floors and into garages that open into the house.",
+            "copySafe": true
+          },
+          {
+            "condition": "Much of the housing is apartments and 1950s-era ramblers",
+            "implication": "Smaller, single-level floor plans mean kitchens, baths and living areas share the same traffic paths, so floors and high-touch surfaces need attention every visit.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "St. Louis Park",
         "slug": "cleaning-services-st-louis-park",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Fern Hill",
+          "Brooklawns",
+          "Cobblecrest",
+          "Elmwood"
+        ],
+        "housingCharacter": "Most of the city was built in one burst after the war: about sixty percent of homes date from the late 1940s to the early 1950s, and the most common house is a Cape Cod or small rambler. Neighborhoods like Brooklawns and Cobblecrest are mostly 1940s and 1950s ranch homes and bungalows, while Fern Hill mixes 1 1/2 story post-war homes, Cape Cods, colonials and mid-century moderns. Elmwood is the exception, with some homes from the 1890s.",
+        "conditions": [
+          {
+            "condition": "Most homes are compact post-war Cape Cods, 1 1/2 stories and small ramblers",
+            "implication": "Steep, narrow stairs to finished upper half-stories and small rooms with built-ins and older trim gather dust in corners and on ledges that need detail work by hand.",
+            "copySafe": true
+          },
+          {
+            "condition": "The Cedar Lake Trail runs through neighborhoods such as Bronx Park, and Minnehaha Creek runs through the city",
+            "implication": "Walkers, bikers and dogs coming home off the trail and creek paths carry grit and damp onto entry floors, so the front and back entries take the heaviest wear.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Edina",
         "slug": "cleaning-services-edina",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Country Club District",
+          "Morningside",
+          "Pamela Park",
+          "Indian Hills",
+          "Countryside"
+        ],
+        "housingCharacter": "Edina's oldest neighborhoods are in the east: the Country Club District, built from 1924 into the early 1930s, is full of period revival homes, and Morningside is mostly bungalows from 1905 to 1940. Most of the city grew between 1945 and 1974, so ramblers, Cape Cods and split-levels are common, and many are now being torn down and replaced with larger two-story homes. To the west, Indian Hills has rolling hills, larger lots and more privacy.",
+        "conditions": [
+          {
+            "condition": "Steady teardown and rebuild activity in east Edina and in western neighborhoods like Countryside and Indian Hills",
+            "implication": "Next-door construction puts fine dust on window sills, ledges and floors, and a newly built home needs a thorough post-construction clean before move-in.",
+            "copySafe": true
+          },
+          {
+            "condition": "Older period revival homes in the Country Club District and bungalows in Morningside",
+            "implication": "Original woodwork, plaster detail, built-ins and older windows hold dust in their profiles and need gentle hand cleaning rather than harsh products.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Inver Grove",
         "slug": "cleaning-services-inver-grove",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Arbor Pointe",
+          "Arbor Gables",
+          "Scenic Hills",
+          "Peltier Reserve"
+        ],
+        "housingCharacter": "Inver Grove Heights spans several generations: one-story ramblers from the late 1950s and 1960s, a large share of homes from the 1970s through the 1990s, and townhome communities such as Arbor Pointe beside its golf course. On the south side, new single-family and villa neighborhoods like Scenic Hills and Peltier Reserve are still being built.",
+        "conditions": [
+          {
+            "condition": "New single-family and villa homes are still going up in Scenic Hills and Peltier Reserve",
+            "implication": "Construction dust from the homes being built nearby drifts in and settles on window sills, door tracks, vents and baseboards, and a newly finished home needs a deep first clean to lift the leftover drywall dust.",
+            "copySafe": true
+          },
+          {
+            "condition": "Arbor Pointe's townhomes sit next to the Arbor Pointe Golf Course",
+            "implication": "Grass clippings and damp turf come in on shoes and golf bags, so entry floors and the closet or garage door where gear is dropped need regular attention.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Maple Grove",
         "slug": "cleaning-services-maple-grove",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Lakes at Maple Grove",
+          "Fish Lake Woods",
+          "Rice Lake North",
+          "HighGrove at Arbor Lakes"
+        ],
+        "housingCharacter": "Maple Grove is built around its lakes, with many subdivisions named for Fish Lake, Rice Lake and Weaver Lake and built in numbered phases. Neighborhoods mix two-story and ranch-style homes, and newer areas like the Lakes at Maple Grove pair large two-story homes with townhomes from the 2010s. Around Arbor Lakes, the residential communities date mostly from the 2000s, with villas and townhome-style living close to downtown shops.",
+        "conditions": [
+          {
+            "condition": "Many neighborhoods sit beside Fish Lake, Rice Lake and Weaver Lake, and Weaver Lake Park is close to tree-lined streets",
+            "implication": "Lake sand, damp towels and dog paws come through the door all summer, so entry floors, mudroom tile and lower-level carpet take the most wear.",
+            "copySafe": true
+          },
+          {
+            "condition": "Large two-story homes are common in newer subdivisions such as the Lakes at Maple Grove",
+            "implication": "Open stairways, high ledges and tall windows in two-story foyers collect dust out of easy reach and need a crew that works top to bottom.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Maplewood",
         "slug": "cleaning-service-maplewood",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Maplewood Heights",
+          "Carver Ridge",
+          "Highwood East"
+        ],
+        "housingCharacter": "Most Maplewood homes were built after 1950, and split-level homes are very common, alongside midcentury ranches and some early 2000s townhouses. Maplewood Heights has Neocolonial, split-level and ranch-style homes, while Carver Ridge has custom-built ranch and split-level homes from the late 1980s on spacious lots. A smaller set of older homes from the 1920s to 1960s sits on the shoreline around Keller Lake.",
+        "conditions": [
+          {
+            "condition": "Split-level homes are very common across the city",
+            "implication": "The front landing and the short stair runs up and down from it take most of the foot traffic, so stairs and the entry floor need attention every visit.",
+            "copySafe": true
+          },
+          {
+            "condition": "Carver Ridge and Highwood East sit beside Carver Lake Park, Fish Creek Natural Area and preserves on quiet, tree-lined streets",
+            "implication": "Leaves, needles and trail dirt come in on shoes and pets, so entry mats, mudroom floors and baseboards near the doors collect the most debris.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "St. Paul",
         "slug": "cleaning-service-st-paul",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Summit Hill",
+          "Highland Park",
+          "Macalester-Groveland",
+          "Como Park",
+          "Summit-University"
+        ],
+        "housingCharacter": "St. Paul is a city of older homes on established streets. Summit Hill keeps many of its original Victorian houses, Highland Park is built mostly of large early 20th century homes with midcentury ramblers at its south end and Tudors near the golf course, and Macalester-Groveland mixes bungalows and Craftsman homes from around 1919. In Como Park more than 80% of homes were built before 1960, mostly single-family houses near the lake.",
+        "conditions": [
+          {
+            "condition": "Much of the housing stock is a century old: Victorians in Summit Hill, bungalows and Craftsman homes in Macalester-Groveland, and pre-1960 homes across Como Park",
+            "implication": "Original woodwork, trim, built-ins and detailed staircases collect dust in grooves and ledges that newer homes do not have, and need hand-detailing rather than a quick wipe.",
+            "copySafe": true
+          },
+          {
+            "condition": "Homes around Como Lake sit a few blocks from the lake's perimeter walking path, the park, zoo and golf course",
+            "implication": "Walkers and dogs coming back from the lake path track grit and damp onto entry floors and rugs, so entries and the first stretch of flooring need extra attention.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "New Brighton",
         "slug": "cleaning-service-new-brighton",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "South Innsbruck",
+          "Pine Lake East",
+          "Brightwood Hills"
+        ],
+        "housingCharacter": "Most homes on the market in New Brighton date from the 1960s, with a smaller share from the 1970s. Split-entry and bi-level houses are the most common style, alongside mid-century ramblers, some with walk-out lower levels, and the occasional four-level split.",
+        "conditions": [
+          {
+            "condition": "Many homes are 1960s split-entry and bi-level houses, with some 1970s four-level splits",
+            "implication": "Every trip in and out crosses the short stair runs off the front landing, so those carpeted stairs and the entry tile wear fastest and need attention every visit.",
+            "copySafe": true
+          },
+          {
+            "condition": "Long Lake Regional Park has a sandy swimming beach and paved trails that join the Rice Creek trail system",
+            "implication": "In summer, beach sand and damp towels come home with families, so entry floors, bathrooms and laundry areas collect grit that needs vacuuming before mopping.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Plymouth",
         "slug": "cleaning-service-plymouth-mn",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Parkers Lake",
+          "Creekside Hills"
+        ],
+        "housingCharacter": "Much of Plymouth is established but not old, with many homes built between about 1970 and the mid-2000s. Around Medicine Lake the homes run from updated lake cottages to larger custom builds, while areas like Parkers Lake have newer developments and townhome communities sit near Bass Lake. New-home communities such as Camelot 9 are still going up on wide homesites near ponds and wetlands.",
+        "conditions": [
+          {
+            "condition": "Homes sit near Medicine Lake, Parkers Lake and Bass Lake, with trails winding around the lakes",
+            "implication": "Sand, damp and grass come in on shoes, paws and lake gear, so entry floors, mudroom tile and the lower level need extra attention through the warm months.",
+            "copySafe": true
+          },
+          {
+            "condition": "Creekside Hills and Elm Creek Highlands sit in wooded settings with Elm Creek and walking trails running through",
+            "implication": "Leaf litter, pollen and trail dirt drift in through patio doors and settle on sills and floors near the back of the house.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Richfield",
         "slug": "cleaning-service-richfield",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Wood Lake",
+          "Memorial Park",
+          "Rich Highlands"
+        ],
+        "housingCharacter": "Richfield is a first-ring suburb built mostly in one burst: the majority of its single-family homes went up in the 1950s, with a median build year of about 1959, and its apartments date from the 1960s and early 1970s. The houses are modest in size, mainly capes, one-and-a-half-story homes and ramblers on regular city streets. The oldest homes are around Wood Lake Nature Center, where condos and 55+ buildings also cluster.",
+        "conditions": [
+          {
+            "condition": "Wood Lake Nature Center, a 150-acre city nature park with homes and condo buildings around it",
+            "implication": "Residents who walk the nature-center trails bring in mud, leaves and seeds on shoes and dogs' paws, so entry rugs and hard floors near the door need the most work.",
+            "copySafe": true
+          },
+          {
+            "condition": "Most homes are 1940s and 1950s capes, one-and-a-half-story houses and ramblers",
+            "implication": "Older, compact homes have original trim, built-ins and steep, narrow stairs up to finished half-story bedrooms, which collect dust and need careful hand detailing rather than a quick pass.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Roseville",
         "slug": "cleaning-services-roseville",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Owassodale",
+          "Swanson Shores",
+          "Victoria Shores",
+          "The Woods of Roseville"
+        ],
+        "housingCharacter": "Roseville is a first-ring suburb whose housing is mostly mid-century: close to half of its homes date from the 1950s and 1960s, and about half of all units are single-family detached houses. The typical home from that era is a one-story rambler, some with a walkout lower level.",
+        "conditions": [
+          {
+            "condition": "Much of the housing is 1950s and 1960s one-story ramblers, some with walkout lower levels",
+            "implication": "Living space is spread over one main floor plus a finished lower level, so the walkout door and lower-level floors pick up yard dirt and need the same attention as the main entry.",
+            "copySafe": true
+          },
+          {
+            "condition": "Central Park and its paved loop around Lake Bennett, plus trails at Langton Lake and Reservoir Woods, are used by walkers and dog owners",
+            "implication": "Households that walk the lake trails bring grit, damp and grass in on shoes and paws, so entry floors and mudroom areas get the heaviest wear.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Savage",
         "slug": "cleaning-service-savage-mn",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Southridge",
+          "Big Sky Estates"
+        ],
+        "housingCharacter": "Much of Savage was built between 1970 and 1999, with about 40% of homes from 2000 or later. Split-entry and four-level split homes from the late 1980s and 1990s are common, often with walkout lower levels. Newer pockets such as Woodhill have larger two-story homes on wooded, roughly 0.4-acre lots built around 2001.",
+        "conditions": [
+          {
+            "condition": "Wooded, hilly lots in areas like Woodhill, and yards backing onto natural land",
+            "implication": "Leaves, pine needles and dirt get tracked in through walkout doors and decks, and tree pollen settles on sills and screens, so lower-level floors and window tracks need regular attention.",
+            "copySafe": true
+          },
+          {
+            "condition": "Many homes are four-level and split-entry designs",
+            "implication": "Several short stair runs and a landing at the front door take the heaviest foot traffic, so stairs and entry flooring get dirty faster than the rest of the house.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Wayzata",
         "slug": "cleaning-service-wayzata",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Bushaway",
+          "Holdridge",
+          "Highcroft"
+        ],
+        "housingCharacter": "Wayzata's homes run from minimal traditionals and Tudor cottages to condos and townhouses near a walkable downtown, with larger estates along the shores of Lake Minnetonka. Areas such as Bushaway and Holdridge began as summer homes and estate-style farms before joining the city in 1956, and Highcroft has mid-century homes, some since renovated.",
+        "conditions": [
+          {
+            "condition": "Larger estates sit along the Lake Minnetonka shore, and life here centres on boating and the lakefront",
+            "implication": "Lake sand, damp from the dock and boat gear come in through lake-side doors, so walkout levels, entry tile and the floors nearest the water need the most attention.",
+            "copySafe": true
+          },
+          {
+            "condition": "Condos and townhouses sit close to a walkable downtown on the lake",
+            "implication": "Smaller homes with shared hallways and heavy daily foot traffic from walks into town benefit from regular entry and floor care between deeper cleans.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Woodbury",
         "slug": "cleaning-service-woodbury",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "Stonemill Farms",
+          "Dancing Waters",
+          "Bailey's Arbor",
+          "Eagle Valley"
+        ],
+        "housingCharacter": "Woodbury is young: its median home was built in 2005. Planned neighborhoods such as Dancing Waters, Stonemill Farms and Bailey's Arbor were built out in phases, mixing single-family homes with townhomes, and Stonemill Farms has homes from 2003 through the mid-2010s, many on walkout lots. Eagle Valley has custom homes from around 2000 alongside some older 1970s to 1990s houses.",
+        "conditions": [
+          {
+            "condition": "Stonemill Farms has a shared pool, splash pad, ice rink, ponds and miles of walking paths",
+            "implication": "Wet swimsuits, towels and trail shoes come straight into the house in summer, so entry floors, laundry rooms and bathrooms take the brunt.",
+            "copySafe": true
+          },
+          {
+            "condition": "Many newer homes sit on walkout lots with a finished lower level opening onto the yard",
+            "implication": "The lower level gets its own back-door traffic of grass and dirt, so a clean covers two entries and two living levels, not just the main floor.",
+            "copySafe": true
+          }
+        ]
       },
       {
         "name": "Vadnais Heights",
         "slug": "vadnais-heights-cleaning-services",
-        "subdivisions": [],
-        "housingCharacter": "",
-        "conditions": []
+        "subdivisions": [
+          "John Mitchell Preserve",
+          "Heritage Estates"
+        ],
+        "housingCharacter": "Most of the older homes in Vadnais Heights are ranch-style and split-level houses built in the 1970s and 1980s, with newer two-story homes in the neighbourhoods around the lakes. John Mitchell Preserve holds large late-1990s two-stories and walkout ramblers on cul-de-sacs by Vadnais Lake, while Heritage Estates is association-managed townhomes.",
+        "conditions": [
+          {
+            "condition": "Older housing is largely 1970s and 1980s ranches and split-levels",
+            "implication": "Split-level homes funnel every trip through a short stair run off the entry landing, so those stairs and the entry floor need attention every visit.",
+            "copySafe": true
+          },
+          {
+            "condition": "Vadnais-Snail Lakes Regional Park, with East and West Vadnais Lakes and about 12 miles of mostly paved trail, sits beside the city",
+            "implication": "Families who walk the lake trails or use Snail Lake Beach bring sand and damp onto entry floors and into bathrooms and laundry areas.",
+            "copySafe": true
+          },
+          {
+            "condition": "Lakeside homes in John Mitchell Preserve are large walkout two-stories and ramblers of 3,000 to 4,000+ square feet",
+            "implication": "Big finished walkout lower levels open straight onto the yard, so the lower-level door and floors pick up as much grass and grit as the front entry.",
+            "copySafe": true
+          }
+        ]
       }
     ],
     "zips": [
@@ -239,7 +617,79 @@
     "about.story": [
       "Ivy Cleans is a local house cleaning company in Minneapolis, Minnesota. We have cleaned homes here since 2023, and Bailey leads a crew of 4 who have cleaned 300 homes across the city between them.",
       "We are a small crew, and we would rather be known for the homes we have cleaned than for what we say about ourselves. If you would like yours to be the next one, call us or book online."
-    ]
+    ],
+    "suburb.house-cleaning-apple-valley.intro": "At Ivy Cleans, we clean homes all across Apple Valley, from the older split-levels in Scott Highlands to the newer houses around Cobblestone Lake. A clean home is one you can relax in, so we plan every visit around your house and the way your family actually uses it. Contact us today to book your quote, and let our team take the cleaning off your list.",
+    "suburb.house-cleaning-apple-valley.homes": "If you live in Apple Valley, you know the town has two kinds of houses. In Scott Highlands and the older additions, many homes are split-entry and three-level splits, with a small landing at the door and short carpeted stairs going up and down from it. Around Cobblestone Lake, the homes are newer, with open rooms, bigger kitchens, and townhomes and detached villas mixed in among single-family houses. Whether your home is in Palomino Hills, Cedar Isle or anywhere in between, our cleaners come ready for the house you actually have. Just give us a call and we’ll make your home cleaner and tidier than ever.",
+    "suburb.house-cleaning-apple-valley.local": "The benefits of our house cleaning in Apple Valley really show at the front door. Families around Cobblestone Lake use the paved trail, the docks and the pool all year, and sand, lake damp and grass clippings come home on shoes and paws. We wash the entry floors, vacuum the stairs edge to edge, and wipe down the baseboards and lower walls where that dirt ends up. In the split-levels of the older neighborhoods, the front landing gets the same care, because every trip in and out of the house crosses it. Nothing by the door gets skipped.",
+    "suburb.cleaning-services-eden-prairie.intro": "At Ivy Cleans, we clean homes all over Eden Prairie, from the gated streets of Bearpath to the established neighborhoods along Cardinal Creek. Many homes here are large, with more rooms, stairs and windows than most, and we give each one the time it needs instead of rushing through. Contact us today to book your quote, and let our team handle the cleaning while you enjoy your home.",
+    "suburb.cleaning-services-eden-prairie.homes": "If you live in Eden Prairie, you know the homes here are built big. Along Cardinal Creek there are houses with more than 5,000 square feet of finished space, where the lower level gets used as much as the main floor. Bearpath, set along its golf course, has custom two-story homes and single-story golf villas. Amsden Hills and Bent Creek are two more neighborhoods we serve. In homes this size, dust collects on tall trim, ceiling fans, stair spindles and the tops of cabinets, and we clean all of it, not just what’s at eye level. Give us a call and we’ll get your home cleaner than ever.",
+    "suburb.cleaning-services-eden-prairie.local": "What makes our cleaning in Eden Prairie worth it is the planning. Bearpath is gated with a staffed entrance, so we arrange access with you before the first visit. Inside, fine clippings from the golf course come in on shoes and golf bags, collect in the patio-door tracks and get walked across the floors. We clean out the door tracks, wash the entry and back-door floors, and vacuum the rugs nearest the yard first. Across the rest of town, bigger homes mean more stairs, more glass and more finished rooms, so we schedule each home for the time it really needs.",
+    "suburb.cleaning-service-st-paul.intro": "Ivy Cleans takes care of homes all over St. Paul, from the Victorian houses of Summit Hill to the bungalows of Macalester-Groveland and the streets around Como Park. Older homes like these have more detail to clean than most, and we give them the time they need. Reach out today for your quote, and let our team look after the house while you enjoy it.",
+    "suburb.cleaning-service-st-paul.homes": "Living in St. Paul usually means living in an older home, and each neighborhood has its own kind. Summit Hill still has many of its original Victorian houses. Highland Park is mostly large older homes, with ramblers at its south end and Tudors near the golf course. Macalester-Groveland is full of bungalows and Craftsman homes, and Como Park is mostly single-family houses a short walk from the lake. Homes like these have original woodwork, trim, built-ins and detailed staircases, and dust settles into every groove. Call us, and our cleaners will treat your home with the care a house like that deserves.",
+    "suburb.cleaning-service-st-paul.local": "In St. Paul, the difference our cleaning makes is in the detail. Original trim, built-ins and staircase spindles have ledges and grooves that a quick wipe misses, so we hand-detail them instead of rushing past. In Como Park, walkers and dogs coming back from the path around the lake bring grit and damp onto entry floors and rugs, and we give those spots extra attention on every visit. The result is a home where the features that make an older house special actually look cared for.",
+    "suburb.cleaning-service-maplewood.intro": "We clean homes throughout Maplewood, from the split-levels of Maplewood Heights to the custom homes of Carver Ridge. Many houses here send everyone through the same front landing and short flights of stairs, and we plan our visits around that. Contact us today for your quote, and let us take the cleaning off your plate.",
+    "suburb.cleaning-service-maplewood.homes": "If your home is in Maplewood, there’s a good chance it’s a split-level. They’re common across the city, along with mid-century ranches and some newer townhouses. Maplewood Heights has a mix of colonial-style, split-level and ranch homes, while Carver Ridge has custom-built ranches and split-levels on roomy lots. Highwood East sits beside parks and nature preserves on quiet, tree-lined streets. Split-levels clean differently from other houses, because the short stairs and the landing at the door carry most of the traffic. Give us a call and we’ll keep every level of your home looking its best.",
+    "suburb.cleaning-service-maplewood.local": "Most of the mess in a Maplewood home starts at the door. Carver Ridge and Highwood East sit beside parks and nature preserves, so leaves, needles and trail dirt come in on shoes and pets. We clean the entry mats and mudroom floors and wipe down the baseboards near the doors, where that debris collects. In the split-levels across town, we vacuum the landing and both short stair runs on every visit, since that is where the whole household walks.",
+    "suburb.cleaning-service-woodbury.intro": "Our team cleans homes across Woodbury, from the walkout homes of Stonemill Farms to the planned streets of Dancing Waters. Newer houses here come with open layouts, more living space and more than one way in from the yard, and we clean them with that in mind. Book your quote today and let us handle the cleaning.",
+    "suburb.cleaning-service-woodbury.homes": "Woodbury homes are mostly newer builds, and many sit in planned neighborhoods that were built out in phases. Dancing Waters, Stonemill Farms and Bailey’s Arbor mix single-family homes with townhomes, and many Stonemill Farms homes sit on walkout lots with a finished lower level opening onto the yard. Eagle Valley has custom homes alongside some older houses. In a walkout home, the lower level is a second living floor with its own door to the yard, so it needs as much attention as the main floor. Reach out and we’ll clean every level of your home, not just the one you walk into.",
+    "suburb.cleaning-service-woodbury.local": "Life in Woodbury happens outdoors in summer, and it shows up inside. Stonemill Farms has a shared pool, splash pad, ponds and miles of walking paths, so wet swimsuits, towels and trail shoes come straight into the house. We clean the entry floors, laundry rooms and bathrooms that take the brunt of it. In walkout homes, the back door to the yard brings in its own grass and dirt, so we clean both entries and both living levels on every visit.",
+    "suburb.cleaning-services-roseville.intro": "We clean homes all over Roseville, from the mid-century ramblers of Owassodale to the streets of Swanson Shores and Victoria Shores. Many houses here have a walkout lower level that gets real use, and we treat it as part of the home, not an afterthought. Get in touch today for your quote, and let us take care of the cleaning.",
+    "suburb.cleaning-services-roseville.homes": "Roseville is one of the older suburbs we serve, and close to half of its homes date from the middle of the last century. The typical house from that time is a one-story rambler, and many have a walkout lower level that adds a second living floor. You’ll find homes like these across Owassodale, Swanson Shores, Victoria Shores and the neighborhoods around them. A rambler keeps most of daily life on one floor, but the lower level picks up its own traffic straight from the yard. Call us and we’ll give both floors of your home the same care.",
+    "suburb.cleaning-services-roseville.local": "Roseville families spend a lot of time on the trails, and it shows at the door. The paved loop around the lake in the city’s central park and the trails through the nearby woods send walkers and dogs home with grit, damp and grass on their shoes and paws. We give entry floors and mudroom areas extra attention, and we clean the walkout door and the lower-level floors as carefully as the main entry, since yard dirt comes in both ways.",
+    "suburb.cleaning-service-new-brighton.intro": "Ivy Cleans looks after homes across New Brighton, from South Innsbruck to the neighborhoods around Brightwood Hills. Most homes here have short stair runs right off the front door, and those stairs see more traffic than any room in the house. Request your quote today, and let our team keep things clean while you get on with your week.",
+    "suburb.cleaning-service-new-brighton.homes": "If you own a home in New Brighton, it’s likely a split-entry or bi-level house, since that’s the most common style in the city. Mid-century ramblers sit alongside them, some with walk-out lower levels, and you’ll come across the occasional four-level split. We clean homes in South Innsbruck, Pine Lake East, Brightwood Hills and every neighborhood in between. In a split-entry home, the landing by the front door connects every part of the house, so it takes a beating. Reach out and we’ll make sure the stairs and entry look as good as the rest of your home.",
+    "suburb.cleaning-service-new-brighton.local": "Summer in New Brighton means trips to the beach at the regional park and rides along the creek trails. Beach sand and damp towels come home with the family and end up on entry floors, in bathrooms and in the laundry area. We vacuum up the grit before we mop, so it doesn’t get smeared across the floor. In split-entry homes, we also vacuum the carpeted stairs and clean the entry tile on every visit, since every trip in and out crosses them.",
+    "suburb.cleaning-services-st-louis-park.intro": "At Ivy Cleans, we clean homes all over St. Louis Park, from the post-war ramblers of Brooklawns and Cobblecrest to the older houses of Elmwood. Compact homes with steep stairs and older trim need careful hands, and that’s exactly how we clean them. Get in touch today to book your quote.",
+    "suburb.cleaning-services-st-louis-park.homes": "Most of St. Louis Park was built in one burst after the war, so many homes are cape-style houses, one-and-a-half-story homes and small ramblers. Brooklawns and Cobblecrest are mostly ranch homes and bungalows from that era. Fern Hill mixes one-and-a-half-story homes, cape-style houses, colonials and mid-century moderns, and Elmwood has some of the oldest homes in the city. Houses like these often have steep, narrow stairs up to finished upper half-stories, small rooms with built-ins and older trim. If that sounds like your home, call us and we’ll give it the detail work it needs.",
+    "suburb.cleaning-services-st-louis-park.local": "The detail is what matters in St. Louis Park homes. Dust gathers in corners, on built-ins and along older trim, so we clean those by hand instead of giving them a quick pass. Many neighborhoods also sit close to the city’s trail and the creek paths, and walkers, bikers and dogs coming home bring grit and damp onto entry floors. We give the front and back entries extra attention on every visit, since that is where most of the outdoor dirt lands.",
+    "suburb.cleaning-service-plymouth-mn.intro": "Our team cleans homes throughout Plymouth, from the newer developments around Parkers Lake to the wooded streets of Creekside Hills. With lakes and trails all over town, the outdoors finds its way inside, and we plan our visits with that in mind. Book your quote today, and let us do the cleaning.",
+    "suburb.cleaning-service-plymouth-mn.homes": "Plymouth homes are established rather than old, with most built over the last few decades. Around the lakes you’ll find everything from updated lake cottages to larger custom homes. Parkers Lake has newer developments, and townhome communities sit near another of the city’s lakes. Creekside Hills sits in a wooded setting, with a creek and walking trails running through. Homes like these often have patio doors facing the yard and a lower level that takes its share of traffic. Reach out and we’ll clean your home from the front door to the back.",
+    "suburb.cleaning-service-plymouth-mn.local": "In Plymouth, lake days and trail walks show up on the floors. Sand, damp and grass come in on shoes, paws and lake gear, so we give entry floors, mudroom tile and the lower level extra attention through the warm months. In wooded neighborhoods like Creekside Hills, leaf litter, pollen and trail dirt drift in through the patio doors and settle on sills and floors near the back of the house. We wipe down those sills and door tracks and clean the floors around them on every visit.",
+    "suburb.cleaning-services-bloomington.intro": "We clean homes all over Bloomington, from the split-levels of Normandale Hills to the walkout ramblers of West Bloomington. Parks, trails and the river valley are part of daily life here, and a good deal of what we clean comes in from outdoors. Contact us today to book your quote.",
+    "suburb.cleaning-services-bloomington.homes": "Most Bloomington homes date from the middle of the last century, and ramblers and split-levels are the common styles. You’ll find split-entry, three-level and four-level splits across the city, and Normandale Hills and Normandale Highlands are two of the neighborhoods we serve. On the west side, near Hyland Hills, walkout ramblers sit on wooded lots and along the river bluffs. In a split-level, the landing by the front door and the short stairs off it see more traffic than any room. If you live in one, give us a call and we’ll keep those stairs looking new.",
+    "suburb.cleaning-services-bloomington.local": "West Bloomington households live close to parks, a beach and a ski hill, and they come home with sand, mud and wet gear. We give the entry, mudroom and walkout lower level the most attention, since that is where most of the grit collects. On the wooded bluff lots, leaf litter and pollen get tracked onto the floors, and big view windows show every smudge, so we clean the glass as part of the visit. In split-levels, we vacuum the landing and stairs thoroughly every time.",
+    "suburb.vadnais-heights-cleaning-services.intro": "We clean homes all around Vadnais Heights, from the lakeside two-stories of John Mitchell Preserve to the townhomes of Heritage Estates. With lakes and trails so close by, a lot of what we clean here comes in from outside. Contact us for a quote today, and we’ll take the cleaning off your hands.",
+    "suburb.vadnais-heights-cleaning-services.homes": "Vadnais Heights has a mix of older and newer homes. Many of the older houses are ranch-style and split-level homes, while newer two-story homes sit in the neighborhoods closer to the lakes. In John Mitchell Preserve, large two-stories and walkout ramblers line cul-de-sacs near the lake, many with more than 3,000 square feet of living space. Heritage Estates is a community of association-managed townhomes. Big walkout lower levels open straight onto the yard, so they need as much care as the main floor. Give us a call and we’ll keep every level of your home clean.",
+    "suburb.vadnais-heights-cleaning-services.local": "Life near the lakes brings its own kind of mess. The regional park beside the city has miles of mostly paved trail and a swimming beach, and families who use them bring sand and damp onto entry floors and into bathrooms and laundry areas. In walkout homes, the lower-level door picks up as much grass and grit as the front entry, so we clean both. In split-levels, the short stair run off the entry landing gets a thorough vacuum every time we visit.",
+    "suburb.cleaning-services-maple-grove.intro": "We clean homes all across Maple Grove, a city built around its lakes, from Fish Lake Woods to Rice Lake North. Lake days and big two-story homes shape the work here, and we clean with both in mind. Whether your home is a lakeside two-story or a townhome near the shops, we’ll match the clean to the house. Contact us today for your quote, and we’ll handle the rest.",
+    "suburb.cleaning-services-maple-grove.homes": "Maple Grove neighborhoods mix two-story and ranch-style homes, and many subdivisions take their names from the lakes they sit beside. Two of them are Fish Lake Woods and Rice Lake North. Newer areas like the Lakes at Maple Grove pair large two-story homes with townhomes. Big two-story homes come with open stairways, tall foyer windows and high ledges, which collect dust well out of easy reach. If you live in one, call us and our cleaners will work through your home from top to bottom.",
+    "suburb.cleaning-services-maple-grove.local": "Summer in Maple Grove is spent at the lake, and the evidence comes home. Lake sand, damp towels and dog paws come through the door all season, so we give entry floors, mudroom tile and lower-level carpet the most attention. In two-story homes we start high, dusting the stair rails, ledges and tall windows in the foyer before working down to the floors, so nothing settles on a surface we’ve already cleaned. We also give the bathrooms and laundry room extra care, since that is where wet swimsuits and towels usually end up.",
+    "suburb.cleaning-service-wayzata.intro": "Ivy Cleans takes care of homes across Wayzata, from the lakefront estates to the mid-century homes of Highcroft and the condos near downtown. Life here centers on the lake, and that shapes how we clean. Whether you live by the water or a short walk from the shops downtown, we’ll plan the visit around your home. Reach out today for your quote, and let our team handle the cleaning.",
+    "suburb.cleaning-service-wayzata.homes": "Wayzata homes are as varied as any town we serve. There are small traditional houses and cottage-style homes, condos and townhouses near the walkable downtown, and larger estates along the lakeshore. Bushaway and Holdridge began as areas of summer homes and estate-style farms, and Highcroft has mid-century homes, some of them since renovated. A lakefront estate and a downtown condo need very different cleans, so we plan each visit around the home you actually have. Give us a call and we’ll set up the right clean for yours.",
+    "suburb.cleaning-service-wayzata.local": "Along the lake, boating season means sand, dock damp and boat gear coming in through the lake-side doors. We give walkout levels, entry tile and the floors nearest the water the most attention, and we clean them thoroughly so the grit doesn’t spread through the house. Closer to downtown, condos and townhouses see heavy daily foot traffic from walks into town, so regular entry and floor care between deeper cleans keeps them looking their best. We also wipe down the door tracks and sills on the lake side of the house, where sand and damp settle first.",
+    "suburb.cleaning-service-richfield.intro": "Ivy Cleans looks after homes throughout Richfield, from Memorial Park and Rich Highlands to the homes and condos around Wood Lake. These are compact, older homes with plenty of character, and we clean them with care. Whether you live in a cape-style house or a condo by the nature center, we’ll fit the visit to your home. Request your quote today, and let us take care of the rest.",
+    "suburb.cleaning-service-richfield.homes": "Most Richfield homes went up in one burst in the middle of the last century. They’re modest in size, mostly cape-style houses, one-and-a-half-story homes and ramblers on regular city streets, with apartments built a little later. The oldest homes are around the nature center at Wood Lake, where condos and senior buildings also cluster. Homes of this age often have original trim, built-ins and steep, narrow stairs up to finished half-story bedrooms. Whether you’re in Memorial Park, Rich Highlands or anywhere else in town, call us and we’ll give your home the careful detailing it needs.",
+    "suburb.cleaning-service-richfield.local": "Neighbors who walk the trails at Wood Lake bring mud, leaves and seeds home on their shoes and their dogs’ paws, so we give entry rugs and the hard floors near the door the most work on every visit. Inside, older homes need a gentler, more careful clean. We detail the original trim and built-ins by hand and work the narrow stairs step by step, so dust doesn’t sit in the corners that a quick pass would miss. We also vacuum under the furniture closest to the door, where tracked-in seeds and leaves tend to end up.",
+    "suburb.cleaning-services-edina.intro": "At Ivy Cleans, we clean homes across Edina, from the period homes of the Country Club District to the larger lots of Indian Hills. Homes here range from older houses full of original detail to brand-new rebuilds, and we adjust our cleaning to each one. Whether yours is a bungalow in Morningside or a new two-story, contact us today to book your quote.",
+    "suburb.cleaning-services-edina.homes": "Edina’s oldest neighborhoods are in the east. The Country Club District is full of period revival homes, and Morningside is mostly bungalows. Much of the rest of the city grew in the years after the war, so ramblers, cape-style homes and split-levels are common, and many of them are now being replaced with larger two-story homes. To the west, Indian Hills and Countryside have rolling hills, larger lots and more privacy. Every one of these homes needs a different approach, so call us and we’ll match the clean to your home, whether it’s a historic bungalow or a new build.",
+    "suburb.cleaning-services-edina.local": "In Edina, teardown and rebuild work never seems to stop, especially in the east and in neighborhoods like Countryside and Indian Hills. Next-door construction puts fine dust on window sills, ledges and floors, so we wipe those down carefully, and a newly built home gets a thorough post-construction clean before move-in. In the older homes of the Country Club District and Morningside, original woodwork, plaster detail and built-ins hold dust in every profile, and we clean them by hand with gentle products that won’t harm the finish.",
+    "suburb.cleaning-services-hopkins.intro": "We clean homes all over Hopkins, from the walkable streets of The Avenues near Downtown Hopkins to Bellgrove. It’s a compact, older suburb with plenty of apartments and ramblers, and we keep our cleaning just as practical, focusing on the rooms and paths you use the most. Book your quote today, and let our team handle the cleaning for you.",
+    "suburb.cleaning-services-hopkins.homes": "Hopkins is a compact, older suburb, and apartments make up more than half of its homes. On single-family streets like those in The Avenues, near the downtown, you’ll find mid-century ramblers, many with later additions. Bellgrove is another of the neighborhoods we serve. Ramblers and apartments keep life on a single level, so the kitchen, bathroom and living areas all share the same traffic paths and wear in the same places. If you live in Hopkins, give us a call and we’ll keep the busiest parts of your home in shape.",
+    "suburb.cleaning-services-hopkins.local": "A regional trail built on an old rail line runs right through Hopkins, and some yards back onto the creek. Bikes, strollers and dogs coming home from the trail and the creek path track grit and damp onto entry floors and in through garages that open into the house. We clean those entries and the floors leading from them on every visit. With single-level floor plans, we also give the shared traffic paths and the high-touch surfaces in the kitchen and bathroom steady attention, so the whole home stays fresh between visits.",
+    "suburb.cleaning-services-farmington.intro": "Ivy Cleans takes care of homes across Farmington, from the older houses near the historic downtown to newer communities like Meadowview Preserve and Vermillion Commons. Older and newer homes here need very different cleans, and we plan each visit to match the house in front of us. Contact us today to book your quote, and let our team do the work.",
+    "suburb.cleaning-services-farmington.homes": "Farmington has two kinds of neighborhoods. Close to the historic downtown, lots are compact and most homes are a few decades old, with a handful much older than that. Further out are newer subdivisions and townhome communities, and new single-family homes, one-level villas and townhomes are still going up in places like Meadowview Preserve and Vermillion Commons. Charleswood, Mystic Meadows and Fairhill are among the other neighborhoods we serve. In the older homes, tighter rooms and original floors collect dust along the woodwork. Call us and we’ll give your home the clean it needs, whatever its age.",
+    "suburb.cleaning-services-farmington.local": "New construction is a big part of life in Farmington. In growing communities like Meadowview Preserve and Vermillion Commons, fine drywall and site dust keeps settling on sills, vents, baseboards and cabinet tops for months after move-in, and mud from unfinished lots comes in on shoes. We wipe those surfaces down thoroughly and give the entry floors extra care. In the older homes near downtown, detail work on baseboards and door frames matters more than square footage, so that is where we spend our time.",
+    "suburb.cleaning-services-rosemount.intro": "Our team cleans homes across Rosemount, from Evermoor and Talamore to the brand-new homes going up in Amber Fields. Most homes here are fairly new, and new construction brings its own kind of dust that keeps showing up long after move-in. Reach out today for your quote, and let us take care of the cleaning while you settle in.",
+    "suburb.cleaning-services-rosemount.homes": "Most Rosemount homes were built in the last few decades, with a few older houses near the original town center and plenty of brand-new construction. Styles range from condo and townhouse clusters to ranch, split-level and Craftsman-influenced single-family homes. Newer building is focused in master-planned communities like Amber Fields, where townhomes and single-family homes connect to a central park, and Bloomfield sits beside a park with walking trails. A newer home is easier to clean in some ways, but construction dust and busy entries keep it working hard. Give us a call and we’ll keep yours fresh.",
+    "suburb.cleaning-services-rosemount.local": "Amber Fields is still being built out, with several builders working at once, so construction dust drifts into newly finished homes and settles on window tracks, vents and ledges, and muddy lots leave grit on entry floors well after move-in. We clean those tracks and ledges carefully and give the entries extra attention. With miles of paths and trails around the community park, daily walks with kids and dogs bring dirt, grass and damp through the front door, so the entry, the mudroom and the first stretch of flooring get the most care.",
+    "suburb.cleaning-services-lakeville.intro": "We clean homes throughout Lakeville, from Marion Heights and Marion Hills to Prairie Lake and the newer neighborhoods on the east side. Lakes, pools and trails are part of everyday life here, and a lot of what we clean comes in with them. Contact us today for a quote, and we’ll take the cleaning off your list for good.",
+    "suburb.cleaning-services-lakeville.homes": "Most Lakeville homes are on the newer side, with plenty built over the last few decades and new construction still going up on the east side. Ramblers, including walkout ramblers, and two-story homes are common in the city’s master-planned communities. Around the two biggest lakes, homes sit right on the water with their own lake frontage and private docks. Marion Heights, Marion Hills and Prairie Lake are among the neighborhoods we serve. Walkout lower levels here see as much traffic as the main floor, so they need the same care. Call us and we’ll clean every level of your home.",
+    "suburb.cleaning-services-lakeville.local": "Lakeville summers are spent on the water. Homes along the two largest lakes have private docks, so sand, lake water and wet swimwear come straight in, and walkout lower levels, patio doors and bathrooms near the lake entrance take the most wear. In the master-planned communities, trails and outdoor pools mean damp towels, chlorine drips and tracked-in grass on entry floors. We vacuum up sand and grit before we mop, and we give those entries and lower levels extra attention on every visit.",
+    "suburb.cleaning-service-savage-mn.intro": "Ivy Cleans looks after homes across Savage, from Southridge to Big Sky Estates. Many houses here are built on several levels with walkout lower levels, and wooded, hilly yards are common, so a lot of what we clean comes in from outside. Request your quote today, and let our team keep your home clean from the top level to the bottom.",
+    "suburb.cleaning-service-savage-mn.homes": "Much of Savage was built in the later decades of the last century, and plenty more has gone up since. Split-entry and four-level split homes are common, often with walkout lower levels, and newer pockets have larger two-story homes on wooded lots. Southridge and Big Sky Estates are two of the neighborhoods we serve. In a four-level split, several short stair runs and the landing at the front door take the heaviest foot traffic, so they get dirty faster than the rest of the house. Give us a call and we’ll keep every level of your home clean.",
+    "suburb.cleaning-service-savage-mn.local": "On the wooded, hilly lots around Savage, leaves, pine needles and dirt get tracked in through walkout doors and decks, and tree pollen settles on sills and screens. We clean the lower-level floors, the window tracks and the sills carefully, and we keep up with them on every visit so the pollen doesn’t build up. In split-entry and four-level homes, we vacuum every short stair run and clean the entry flooring each time, since that is where most of the household walks.",
+    "suburb.cleaning-services-eagan.intro": "We clean homes all across Eagan, from Blackhawk to the split-levels around Lexington Square. With a big wooded regional park right in town, trail dirt and damp gear are part of life here, and we plan for them. Book your quote today, and let our team take over the cleaning so you can enjoy the trails instead.",
+    "suburb.cleaning-services-eagan.homes": "Most Eagan homes went up in the later decades of the last century, so they’re established rather than old, with some newer homes built since. Neighborhoods like Blackhawk mix medium to large single-family homes with townhomes, and split-level homes are common around Lexington Square. In a split-level, the short stair runs off the front landing carry most of the household’s foot traffic, so the stair carpet and the entry floor wear faster than anywhere else in the house. If that sounds like your home, give us a call and we’ll keep it looking its best.",
+    "suburb.cleaning-services-eagan.local": "Eagan has a huge regional park right inside the city, with about 2,000 acres of wooded trails, lakes, ponds and wetlands. Hikers, paddlers, skiers and their dogs bring trail dirt, sand and damp gear back through the entry, so mudroom floors, entry rugs and the laundry area get extra attention on every visit. In split-level homes, we vacuum the stair carpet edge to edge and clean the entry floor thoroughly, since those spots take the hardest wear in the house.",
+    "suburb.cleaning-services-burnsville.intro": "At Ivy Cleans, we clean homes throughout Burnsville, from the cul-de-sacs of Chateaulin to the lakeshore homes of Oak Shores. Split-entry homes and lake living shape a lot of the work here, and we bring the right approach for each. Get in touch today to book your quote, and let our team handle the cleaning from here.",
+    "suburb.cleaning-services-burnsville.homes": "Much of Burnsville was built over a few busy decades, and split-entry and multi-level split homes are everywhere, often on quiet cul-de-sacs in established neighborhoods like Chateaulin. Around the lake, older ramblers and larger homes sit on lakeshore lots in additions like Oak Shores. Southwind and West View Hills are among the neighborhoods we serve as well. In a split-entry home, every trip through the house crosses a short stair run, so the stair carpet and the landing by the door wear fastest. Call us and we’ll keep them looking good.",
+    "suburb.cleaning-services-burnsville.local": "The biggest lake in Burnsville has a public beach and boat launch, and it’s ringed by homes. Swimmers and boaters track sand and lake water in through the lake-side door, so walkout floors, entry rugs and the bathrooms near the back of the house need the most attention, and that is where we focus. In the split-entry homes found across the city, we give the stair carpet and the front landing a thorough vacuum on every visit, so the busiest part of the house never looks worn.",
+    "suburb.cleaning-services-inver-grove.intro": "Our team cleans homes across Inver Grove, from the townhomes of Arbor Pointe to the new homes of Scenic Hills and Peltier Reserve. The city spans several generations of housing, and we clean each one the way it needs, from a first deep clean in a new build to regular care in an older rambler. Reach out today for your quote.",
+    "suburb.cleaning-services-inver-grove.homes": "Inver Grove spans several generations of homes. There are one-story ramblers from the middle of the last century, a large share of homes from the decades after, and townhome communities like Arbor Pointe beside its golf course. On the south side, new single-family and villa neighborhoods like Scenic Hills and Peltier Reserve are still being built. Arbor Gables is another of the neighborhoods we serve. A brand-new villa and a mid-century rambler need very different cleans, so we plan each visit around your home. Give us a call to set up yours.",
+    "suburb.cleaning-services-inver-grove.local": "In Scenic Hills and Peltier Reserve, homes are still going up nearby, and construction dust drifts in and settles on window sills, door tracks, vents and baseboards. A newly finished home needs a deep first clean to lift the leftover drywall dust, and we give it one. At Arbor Pointe, grass clippings and damp turf from the golf course come in on shoes and golf bags, so we keep the entry floors and the closet or garage door where the gear gets dropped clean on every visit.",
+    "suburb.cleaning-services-shakopee.intro": "We clean homes throughout Shakopee, from the two-story homes of Southbridge to the newer homes of Amberglen. Homes here are among the newest in the metro, with big garages, busy entries and plenty of time spent outdoors, and our visits are planned around all three. Contact us today to book your quote, and let us handle the cleaning.",
+    "suburb.cleaning-services-shakopee.homes": "Most Shakopee homes are fairly new, with only a small share more than a few decades old. Southbridge, in the northeast of the city, is mostly two-story and modified two-story homes, with some multi-level splits. Amberglen is a newer neighborhood of four- and five-bedroom homes with three-car garages, including raised ranch plans. The oldest homes sit near Downtown Shakopee along the river. Bigger, newer homes mean more bedrooms, more bathrooms and more floor to cover. Call us and we’ll plan a visit that covers all of it.",
+    "suburb.cleaning-services-shakopee.local": "Southbridge has a walking trail leading to a playground and an off-leash dog park, so dog walks and park trips bring paw prints, grass and dirt in through the entry. We give the floors by the door and the rugs attention on every visit and take care of the pet hair on the furniture. In homes with three-car garages, a lot of grit comes in through the garage entry too, so we clean that doorway as carefully as the front one and keep the mudroom floor clear."
   },
   "ops": {
     "photos": [
@@ -307,5 +757,13 @@
     "crewLead": "Bailey",
     "crewSize": 4,
     "homesCleaned": 300
+  },
+  "links": {
+    "suburb.cleaning-services-edina.local": [
+      {
+        "anchor": "a thorough post-construction clean",
+        "href": "/services/post-construction-cleaning"
+      }
+    ]
   }
 }
