@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getCity } from '@/server/content/store'
-import { cleanArticleHtml, excerptOf, plainText, wrapTables } from '@/server/blog/html'
+import { cleanArticleHtml, excerptOf, plainText, postOwnHosts, wrapTables } from '@/server/blog/html'
 
 const minneapolis = await getCity('minneapolis')
 
@@ -89,5 +89,26 @@ describe('plainText / excerptOf', () => {
     expect(excerpt.length).toBeLessThanOrEqual(161)
     expect(excerpt.endsWith('…')).toBe(true)
     expect(excerpt).not.toContain('Heading')
+  })
+})
+
+describe('postOwnHosts', () => {
+  it('is the request host and the Vercel production host, with www variants', () => {
+    expect(postOwnHosts('ivycleans.com', 'ivycleans.vercel.app')).toEqual([
+      'ivycleans.com', 'www.ivycleans.com', 'ivycleans.vercel.app', 'www.ivycleans.vercel.app',
+    ])
+  })
+
+  it('drops a missing or blank host', () => {
+    expect(postOwnHosts(null, '')).toEqual([])
+    expect(postOwnHosts('ivycleans.vercel.app:443', undefined)).toEqual(['ivycleans.vercel.app', 'www.ivycleans.vercel.app'])
+  })
+
+  it('lets a stored post with absolute links to its own host render them as paths, legacy posts as text', () => {
+    const stored =
+      '<p><a href="https://ivycleans.vercel.app/services/deep-cleaning">deep</a> ' +
+      '<a href="https://ivycleans.vercel.app/how-to-clean-bathroom-walls">walls</a></p>'
+    const html = cleanArticleHtml(stored, 't', minneapolis, postOwnHosts('ivycleans.com', 'ivycleans.vercel.app'))
+    expect(html).toBe('<p><a href="/services/deep-cleaning">deep</a> <span>walls</span></p>')
   })
 })
