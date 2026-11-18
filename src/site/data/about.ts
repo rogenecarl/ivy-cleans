@@ -33,7 +33,7 @@ export function aboutData(c: CityContent): AboutData {
 
   return {
     meta: {
-      title: `About Ivy Cleans in ${c.city}, ${c.state} | Ivy Cleans`,
+      title: `About Ivy Cleans | House Cleaning in ${c.city}, ${c.state}`,
       description: [
         `Ivy Cleans in ${c.city}`,
         ops.servingSince ? `serving since ${sinceLabel(ops.servingSince)}` : '',

@@ -26,17 +26,18 @@ describe('item 11 · the CTA band is not a heading', () => {
 })
 
 describe('item 12 · service page titles', () => {
-  it('follow "{Service} Services in {City}, {ST} | Ivy Cleans" from the registry name', () => {
+  it('follow "{Service} in {City}, {ST} | Ivy Cleans" from the registry search name', () => {
     expect(serviceTitle(serviceBySlug('deep-cleaning')!, { city: 'Orlando', state: 'FL' })).toBe(
-      'Deep Cleaning Services in Orlando, FL | Ivy Cleans',
+      'Deep Cleaning in Orlando, FL | Ivy Cleans',
     )
     expect(serviceTitle(serviceBySlug('move-in-move-out-cleaning')!, minneapolis)).toBe(
-      'Move In / Move Out Cleaning Services in Minneapolis, MN | Ivy Cleans',
+      'Move Out Cleaning in Minneapolis, MN | Ivy Cleans',
     )
     for (const slug of SERVICE_SLUGS) {
-      const title = serviceTitle(serviceBySlug(slug)!, testville)
-      expect(title.endsWith(` Services in ${testville.city}, ${testville.state} | Ivy Cleans`)).toBe(true)
-      expect(title.startsWith(serviceBySlug(slug)!.name)).toBe(true)
+      const title = serviceTitle(serviceBySlug(slug)!, minneapolis)
+      expect(title.endsWith(` in ${minneapolis.city}, ${minneapolis.state} | Ivy Cleans`)).toBe(true)
+      // Google cuts titles around 60 characters
+      expect(title.length).toBeLessThanOrEqual(60)
     }
   })
 })

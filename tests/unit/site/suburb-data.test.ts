@@ -43,7 +43,7 @@ describe('suburbData', () => {
     const data = suburbData(templateOnly, savage)
 
     test('meta title', () => {
-      expect(data.suburbMeta.title).toBe('House Cleaning Service In Savage, MN')
+      expect(data.suburbMeta.title).toBe('House Cleaning Service in Savage, MN | Ivy Cleans')
     })
 
     test('meta description falls back to the template line when there is no generated copy', () => {
@@ -143,7 +143,7 @@ describe('suburbData', () => {
     const data = suburbData(miami, coconutGrove)
 
     test('meta title uses the draft city state', () => {
-      expect(data.suburbMeta.title).toBe('House Cleaning Service In Coconut Grove, FL')
+      expect(data.suburbMeta.title).toBe('House Cleaning Service in Coconut Grove, FL | Ivy Cleans')
     })
 
     test('houseCleaning paragraph interpolates suburb, state, and metro', () => {
