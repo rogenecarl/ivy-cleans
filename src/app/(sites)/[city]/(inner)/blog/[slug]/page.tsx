@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { canonicalFor } from "@/site/data/seo";
 import { cache } from "react";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import Breadcrumbs from "@/site/components/inner/Breadcrumbs";
 import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { cityFromParams } from "@/site/city-param";
@@ -10,6 +11,8 @@ import { postBySlug } from "@/server/blog/store";
 import { postDate } from "@/server/blog/format";
 import { PostShell } from "@/site/components/blog/PostShell";
 import HtmlBody from "@/site/components/blog/HtmlBody";
+import { cleanArticleHtml, postOwnHosts } from "@/server/blog/html";
+import { postAreaLinks } from "@/site/data/blog";
 
 // Blog-tool posts live under /blog/<slug>; the file-based posts keep their root slugs. Rendered on demand: a post
 // published after the last deploy must not 404 until the next one.
@@ -39,6 +42,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ToolPostPage({ params }: { params: Params }) {
   const { c, post } = await resolvePost(params);
+  // posts saved before their host was known keep absolute links to it: re-clean them for the host serving them now
+  const html = cleanArticleHtml(post.html, post.title, c, postOwnHosts((await headers()).get("host"), process.env.VERCEL_PROJECT_PRODUCTION_URL));
+  const areas = postAreaLinks(c, post.slug);
   return (
     <>
       <Breadcrumbs trail={breadcrumbs(c, { kind: "post", title: post.title, slug: post.slug })} />
@@ -50,7 +56,21 @@ export default async function ToolPostPage({ params }: { params: Params }) {
         info={{ date: postDate(post.publishedAt), commentCount: "No Comments" }}
         authorBox={{ name: "Ivy Cleans", avatar: "/images/avatar-aj.jpg", href: "" }}
       >
-        <HtmlBody html={post.html} />
+        <HtmlBody html={html} />
+        {areas.length > 0 && (
+          <p className="mb-[2rem] leading-[1.5]">
+            Ivy Cleans cleans homes across {c.city} and nearby, including{" "}
+            {areas.map((a, i) => (
+              <span key={a.href}>
+                <a href={a.href} className="text-[#cc3366] no-underline">
+                  {a.name}
+                </a>
+                {i < areas.length - 2 ? ", " : i === areas.length - 2 ? " and " : ""}
+              </span>
+            ))}
+            .
+          </p>
+        )}
       </PostShell>
     </>
   );

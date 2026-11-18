@@ -52,6 +52,14 @@ export function cleanArticleHtml(html: string, title: string, c: CityContent, ow
   return stripTitleHeading(cleaned, title).trim()
 }
 
+/** The hosts a stored post is shown on: the request's and the Vercel production host, so links saved as absolute URLs become paths. */
+export function postOwnHosts(requestHost: string | null | undefined, productionHost: string | undefined): string[] {
+  return [requestHost, productionHost]
+    .map((h) => normalizeHost(h ?? '').trim())
+    .filter((h, i, all) => h !== '' && all.indexOf(h) === i)
+    .flatMap((h) => [h, `www.${h}`])
+}
+
 // an absolute link to a host this site is served on becomes a bare path, so tenantHref can judge it
 function localizeHref(href: string, own: Set<string>): string {
   if (!/^https?:\/\//i.test(href)) return href
