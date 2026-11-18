@@ -50,7 +50,7 @@ describe('about page data', () => {
     expect(about.photos).toEqual([ops.photos![1]])
     expect(about.story).toHaveLength(2)
     expect(about.reviews).toHaveLength(1)
-    expect(about.meta.title).toBe('About Ivy Cleans in Houston, TX | Ivy Cleans')
+    expect(about.meta.title).toBe('About Ivy Cleans | House Cleaning in Houston, TX')
     expect(about.meta.description).toContain('serving since March 2024')
   })
 

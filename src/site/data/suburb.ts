@@ -33,9 +33,9 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
   const local = sOpt(c, localSlot)
 
   return {
-    // title/description from suburb-savage.html
+    // description from suburb-savage.html; the title gained the brand in the 2026-11 title pass
     suburbMeta: {
-      title: `House Cleaning Service In ${name}, ${c.state}`,
+      title: `House Cleaning Service in ${name}, ${c.state} | Ivy Cleans`,
       // generated homes copy when present; the template line is only the fallback
       description:
         homes !== undefined
