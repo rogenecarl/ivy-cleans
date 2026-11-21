@@ -54,7 +54,7 @@ export function aboutData(c: CityContent): AboutData {
       phoneHref: c.phoneHref,
       address: realAddress(c.address),
       contactHref: cityHref(c, '/contact'),
-      bookHref: cityHref(c, '/book'),
+      bookHref: cityHref(c, '/book-now'),
     },
   }
 }

@@ -9,11 +9,22 @@
 import { describe, expect, test } from 'vitest'
 import { getDefaultCity } from '@/server/content/store'
 import { bookData } from '@/site/data/book'
+import { allServices } from '@/site/data/services/registry'
 
 const c = await getDefaultCity()
 
 describe('bookData(minneapolis) is stable', () => {
   test('book', () => {
     expect(JSON.parse(JSON.stringify(bookData(c)))).toMatchSnapshot()
+  })
+})
+
+describe('booking form service choices', () => {
+  test('offer every service in the menu, then Recurring', () => {
+    const service = bookData(c).bookFields[0]
+    if (service.kind !== 'select') throw new Error('first field must be the service dropdown')
+    const menu = allServices().map((s) => s.name)
+    expect(service.options.map((o) => o.value)).toEqual([...menu, 'Recurring Cleaning'])
+    expect(menu).toHaveLength(7)
   })
 })

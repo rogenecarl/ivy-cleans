@@ -16,7 +16,7 @@ export default function ServicesList({
   services: ServiceContent["services"];
   servicesLinkHref: ServiceContent["servicesLinkHref"];
   servicesLinkedItemIndex: ServiceContent["servicesLinkedItemIndex"];
-  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  /* innerSite.bookUrl — "/book-now", or "/<cityKey>/book-now" inside a draft preview. */
   bookHref: string;
 }) {
   return (

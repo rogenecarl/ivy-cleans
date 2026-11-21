@@ -23,6 +23,7 @@ describe('tenantHref', () => {
     expect(tenantHref(minneapolis, 'https://ivycleans.com/contact/')).toBe('/contact')
     expect(tenantHref(testville, 'https://ivycleans.com/contact/')).toBe('/testville/contact')
     expect(tenantHref(minneapolis, 'https://ivycleans.com/')).toBe('/')
+    expect(tenantHref(minneapolis, 'https://ivycleans.com/book/')).toBe('/book-now')
     expect(tenantHref(testville, 'https://ivycleans.com')).toBe('/testville')
     expect(tenantHref(testville, 'https://ivycleans.com/deep-cleaning-minneapolis/')).toBe('/testville/services/deep-cleaning')
   })
@@ -62,7 +63,7 @@ describe('rendered template links stay inside the tenant', () => {
             services={content.services}
             servicesLinkHref={content.servicesLinkHref}
             servicesLinkedItemIndex={content.servicesLinkedItemIndex}
-            bookHref="/book"
+            bookHref="/book-now"
           />,
         )
       }

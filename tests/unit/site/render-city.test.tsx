@@ -167,7 +167,7 @@ describe('cityHref-built navigation', () => {
       true,
     )
     expect(site.bookingUrl).toBe('/testville/book-now')
-    expect(innerSite.bookUrl).toBe('/testville/book')
+    expect(innerSite.bookUrl).toBe('/testville/book-now')
 
     /*
      * Every phone on a city's pages is THAT city's number.
@@ -192,7 +192,7 @@ describe('cityHref-built navigation', () => {
       SERVICE_SLUGS.map((slug) => `/services/${slug}`),
     )
     expect(site.bookingUrl).toBe('/book-now')
-    expect(innerSite.bookUrl).toBe('/book')
+    expect(innerSite.bookUrl).toBe('/book-now')
     expect(areasData(minneapolis).areas[0].href).toBe('/house-cleaning-apple-valley')
   })
 })

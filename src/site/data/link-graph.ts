@@ -83,7 +83,6 @@ export function linkGraph(c: CityContent): LinkGraph {
     ['/blog', 'Blog'],
     ['/contact', 'Contact'],
     ['/faq', 'FAQ'],
-    ['/book', 'Book Now'],
     ['/cleaning-services', 'Cleaning Services'],
     ['/privacy-policy', 'Privacy Policy'],
   ] as const) {
@@ -92,7 +91,7 @@ export function linkGraph(c: CityContent): LinkGraph {
   link('/faq', `${prefix}/contact`)
   if (aboutReady(c.ops)) {
     link('/about', `${prefix}/contact`)
-    link('/about', `${prefix}/book`)
+    link('/about', `${prefix}/book-now`)
   }
 
   // service pages

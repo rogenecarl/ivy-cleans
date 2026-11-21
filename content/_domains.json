@@ -1,4 +1,7 @@
 {
   "default": "minneapolis",
-  "hosts": {}
+  "hosts": {
+    "www.ivycleans.com": "minneapolis",
+    "ivycleans.com": "minneapolis"
+  }
 }

@@ -1,8 +1,10 @@
-// Verbatim from book-now.html / book.html. Same 10-field form on both; only the size class differs (BookingForm).
+// Verbatim from book-now.html, with book.html's lead-in above the form (/book was merged into /book-now). The service
+// choices follow the services menu instead of the live page's four.
 // Live quirks kept: the address field's placeholder is "Message", and field 5 opens on a blank option.
 
 import type { CityContent } from "@/server/content/types";
 import { t } from "@/server/content/interpolate";
+import { allServices } from "./services/registry";
 
 export type BookField =
   | {
@@ -24,8 +26,6 @@ export type BookField =
 
 export type BookData = {
   bookNowMeta: { title: string; description: string };
-  bookMeta: { title: string; description: string };
-  bookHeader: { overline: string; h2: string };
   bookLeadIn: {
     heading: string;
     intro: string;
@@ -34,7 +34,6 @@ export type BookData = {
     phone: string;
     phoneHref: string;
   };
-  bookCallNow: { label: string; href: string };
   bookFields: BookField[];
   bookSubmitLabel: string;
   comingSoon: {
@@ -60,22 +59,7 @@ export function bookData(c: CityContent): BookData {
         c,
       ),
     },
-    bookMeta: {
-      title: t("Free Cleaning Quote in {city}, {state} | Ivy Cleans", c),
-      description: t(
-        "Answer a couple of questions to get a free house cleaning quote from Ivy Cleans in {city}, {state}.",
-        c,
-      ),
-    },
-
-    // /book only (book-content-dump.txt: <h3>REQUEST OUR SERVICES / <h2>Book
-    // Now); /book-now renders the form with no page heading above it.
-    bookHeader: {
-      overline: "REQUEST OUR SERVICES",
-      h2: "Book Now",
-    },
-
-    // /book only: lead-in block between the H2 and the form (book.html:319-323, widgets 6d970af1 / 30422d1e)
+    // lead-in above the form, from book.html:319-323 (widgets 6d970af1 / 30422d1e)
     bookLeadIn: {
       heading: "A Couple of Questions For Your FREE Quote!",
       intro: "You’re just 3 steps away from a clean house!",
@@ -83,12 +67,6 @@ export function bookData(c: CityContent): BookData {
       hours: "We’re Available Monday-Friday 7 am-7 pm",
       phone: c.phoneDisplay,
       phoneHref: c.phoneHref,
-    },
-
-    // /book only: button widget 5dafbb39 — see BookSection for its visibility
-    bookCallNow: {
-      label: "Call Now",
-      href: c.phoneHref,
     },
 
     // the 10 fields in live order
@@ -99,23 +77,12 @@ export function bookData(c: CityContent): BookData {
         id: "form-field-email",
         name: "form_fields[email]",
         required: true,
+        // the services menu, so a customer can name every service the site offers; Recurring is a visit plan, not a page
         options: [
-          {
-            value: "Standard Cleaning",
-            label: "Standard Cleaning (Basic Cleaning Package)",
-          },
+          ...allServices().map((s) => ({ value: s.name, label: s.name })),
           {
             value: "Recurring Cleaning",
-            label: "Recurring Cleaning ( Standard + Additional Discounts)",
-          },
-          {
-            value: "Deep Cleaning",
-            label: "Deep Cleaning ( Most Popular Option)",
-          },
-          {
-            value: "Moving Cleaning",
-            label:
-              "Move-In/Move-Out Cleaning (Most Comprehensive, Total Clean)",
+            label: "Recurring Cleaning (Standard + Additional Discounts)",
           },
         ],
       },

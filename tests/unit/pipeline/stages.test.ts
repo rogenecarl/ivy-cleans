@@ -36,7 +36,7 @@ import {
   type StageId,
 } from '@/server/pipeline/stages'
 import { type ResearchOutput, type Suburb } from '@/server/pipeline/schemas'
-import { LEGACY_POST_SLUGS } from '@/site/data/legacy-posts'
+import { LEGACY_POST_SLUGS } from '@/site/data/legacy-urls'
 import {
   CONTENT_DIR,
   DRAFTS_DIR,
