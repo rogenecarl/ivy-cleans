@@ -12,7 +12,7 @@ export default function WhyChoose({
   bookHref,
 }: {
   whyChoose: ServiceContent["whyChoose"];
-  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  /* innerSite.bookUrl — "/book-now", or "/<cityKey>/book-now" inside a draft preview. */
   bookHref: string;
 }) {
   return (

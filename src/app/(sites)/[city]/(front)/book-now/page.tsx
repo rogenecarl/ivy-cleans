@@ -20,13 +20,14 @@ export async function generateMetadata({
   };
 }
 
-// book-now.html uses the front templates (2338/2342), hence the (front) group; /book uses 47/186 and lives in (inner)
+// book-now.html uses the front templates (2338/2342), hence the (front) group; the old /book 308s here
 export default async function BookNowPage({ params }: { params: CityParams }) {
   const c = await cityFromParams(params);
-  const { bookFields, bookSubmitLabel, comingSoon } = bookData(c);
+  const { bookLeadIn, bookFields, bookSubmitLabel, comingSoon } = bookData(c);
   return (
     <BookNowSection
       heading={t("Book House Cleaning in {city}, {state}", c)}
+      bookLeadIn={bookLeadIn}
       bookFields={bookFields}
       bookSubmitLabel={bookSubmitLabel}
       comingSoon={comingSoon}

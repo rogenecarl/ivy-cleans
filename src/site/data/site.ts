@@ -62,10 +62,10 @@ export function siteData(c: CityContent): SiteData {
       phone: c.phone,
       phoneHref: c.phoneHref,
       email: "support@ivycleans.com",
-      bookUrl: cityHref(c, "/book"),
+      bookUrl: cityHref(c, "/book-now"),
       copyright: "© 2026 IvyCleans. All rights reserved.",
       servicesLinks: [
-        { label: "Book Now", href: cityHref(c, "/book") },
+        { label: "Book Now", href: cityHref(c, "/book-now") },
         { label: "Cleaning Services", href: cityHref(c, "/cleaning-services") },
       ],
       companyLinks: [

@@ -2,10 +2,6 @@
 
 exports[`bookData(minneapolis) is stable > book 1`] = `
 {
-  "bookCallNow": {
-    "href": "tel:6124240391",
-    "label": "Call Now",
-  },
   "bookFields": [
     {
       "id": "form-field-email",
@@ -14,20 +10,36 @@ exports[`bookData(minneapolis) is stable > book 1`] = `
       "name": "form_fields[email]",
       "options": [
         {
-          "label": "Standard Cleaning (Basic Cleaning Package)",
+          "label": "Standard Cleaning",
           "value": "Standard Cleaning",
         },
         {
-          "label": "Recurring Cleaning ( Standard + Additional Discounts)",
-          "value": "Recurring Cleaning",
-        },
-        {
-          "label": "Deep Cleaning ( Most Popular Option)",
+          "label": "Deep Cleaning",
           "value": "Deep Cleaning",
         },
         {
-          "label": "Move-In/Move-Out Cleaning (Most Comprehensive, Total Clean)",
-          "value": "Moving Cleaning",
+          "label": "Move In / Move Out Cleaning",
+          "value": "Move In / Move Out Cleaning",
+        },
+        {
+          "label": "Apartment & Condo Cleaning",
+          "value": "Apartment & Condo Cleaning",
+        },
+        {
+          "label": "Airbnb & Short-Term Rental Cleaning",
+          "value": "Airbnb & Short-Term Rental Cleaning",
+        },
+        {
+          "label": "Post-Construction & Renovation Cleaning",
+          "value": "Post-Construction & Renovation Cleaning",
+        },
+        {
+          "label": "Real Estate & Pre-Listing Cleaning",
+          "value": "Real Estate & Pre-Listing Cleaning",
+        },
+        {
+          "label": "Recurring Cleaning (Standard + Additional Discounts)",
+          "value": "Recurring Cleaning",
         },
       ],
       "required": true,
@@ -160,10 +172,6 @@ exports[`bookData(minneapolis) is stable > book 1`] = `
       "required": true,
     },
   ],
-  "bookHeader": {
-    "h2": "Book Now",
-    "overline": "REQUEST OUR SERVICES",
-  },
   "bookLeadIn": {
     "callPrompt": "Prefer To Call? Sure!",
     "heading": "A Couple of Questions For Your FREE Quote!",
@@ -171,10 +179,6 @@ exports[`bookData(minneapolis) is stable > book 1`] = `
     "intro": "You’re just 3 steps away from a clean house!",
     "phone": "(612) 424-0391",
     "phoneHref": "tel:6124240391",
-  },
-  "bookMeta": {
-    "description": "Answer a couple of questions to get a free house cleaning quote from Ivy Cleans in Minneapolis, MN.",
-    "title": "Free Cleaning Quote in Minneapolis, MN | Ivy Cleans",
   },
   "bookNowMeta": {
     "description": "Book a house cleaning with Ivy Cleans in Minneapolis, MN. Fill in the short form and we’ll get back to you with your free quote.",

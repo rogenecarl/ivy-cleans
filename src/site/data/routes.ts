@@ -11,7 +11,6 @@ export function sitePaths(c: CityContent): string[] {
     '/cleaning-services',
     '/contact',
     '/faq',
-    '/book',
     '/book-now',
     '/blog',
     '/privacy-policy',
@@ -48,6 +47,7 @@ export function tenantHref(c: CityContent, href: string): string | null {
   // the two old city-named service URLs, on any city
   if (/^\/deep-cleaning-[a-z0-9-]+$/.test(path)) path = '/services/deep-cleaning'
   if (/^\/[a-z0-9-]+-move-out-cleaning-services$/.test(path)) path = '/services/move-in-move-out-cleaning'
+  if (path === '/book') path = '/book-now'
   if (path === `/${citySlug(c.city)}`) path = '/'
   return sitePaths(c).includes(path) ? cityHref(c, path) : null
 }

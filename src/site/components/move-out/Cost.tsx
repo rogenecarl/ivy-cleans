@@ -7,7 +7,7 @@ export default function Cost({
   bookHref,
 }: {
   cost: MoveOutData["cost"];
-  /* innerSite.bookUrl — "/book", or "/<cityKey>/book" inside a draft preview. */
+  /* innerSite.bookUrl — "/book-now", or "/<cityKey>/book-now" inside a draft preview. */
   bookHref: string;
 }) {
   return (

@@ -65,7 +65,6 @@ describe('inner page titles name the city', () => {
     'cleaning-services': csMeta(c),
     contact: contactData(c).contactMeta,
     faq: faqPageMeta(c),
-    book: bookData(c).bookMeta,
     'book-now': bookData(c).bookNowMeta,
     blog: blogMeta(c),
   }

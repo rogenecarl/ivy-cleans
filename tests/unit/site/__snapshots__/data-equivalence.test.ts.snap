@@ -612,7 +612,7 @@ exports[`data module values are unchanged by the content-layer refactor > servic
 exports[`data module values are unchanged by the content-layer refactor > site 1`] = `
 {
   "innerSite": {
-    "bookUrl": "/book",
+    "bookUrl": "/book-now",
     "companyLinks": [
       {
         "href": "/privacy-policy",
@@ -659,7 +659,7 @@ exports[`data module values are unchanged by the content-layer refactor > site 1
     "phoneHref": "tel:6124240391",
     "servicesLinks": [
       {
-        "href": "/book",
+        "href": "/book-now",
         "label": "Book Now",
       },
       {

@@ -83,7 +83,7 @@ describe('about page wiring', () => {
     expect(graph.crumbs.get('/about')).toBe(2)
     const outbound = graph.edges.get('/about')!
     expect(outbound.has('/contact')).toBe(true)
-    expect(outbound.has('/book')).toBe(true)
+    expect(outbound.has('/book-now')).toBe(true)
   })
 
   it('carries the profiles as sameAs on the business node', () => {

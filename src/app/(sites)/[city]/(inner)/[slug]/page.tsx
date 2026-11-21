@@ -9,7 +9,7 @@ import type { CityContent } from "@/server/content/types";
 import { getCity } from "@/server/content/store";
 import { suburbData, type SuburbRef } from "@/site/data/suburb";
 import { siteData } from "@/site/data/site";
-import { isLegacyPostSlug } from "@/site/data/legacy-posts";
+import { legacyTarget } from "@/site/data/legacy-urls";
 import SuburbHero from "@/site/components/area/SuburbHero";
 import HouseCleaning from "@/site/components/area/HouseCleaning";
 import SuburbBenefits from "@/site/components/area/Benefits";
@@ -21,7 +21,7 @@ import JsonLd from "@/site/components/JsonLd";
 import { localBusinessJsonLd } from "@/site/data/structured-data";
 
 // Root-level slugs: stored suburb slugs render here; /deep-cleaning-<city> and /<city>-move-out-cleaning-services
-// 308 to /services/..., and the WordPress-era post slugs 308 to /blog (all indexed URLs). Anything else 404s.
+// 308 to /services/..., and the WordPress-era slugs 308 to their replacement (all indexed URLs). Anything else 404s.
 // Static sibling routes win because Next matches them first.
 type SlugParams = Promise<{ city: string; slug: string }>;
 
@@ -46,7 +46,8 @@ async function resolveSlug(params: SlugParams): Promise<Resolved> {
   if (slug === redirects.move) {
     permanentRedirect(cityHref(c, "/services/move-in-move-out-cleaning"));
   }
-  if (isLegacyPostSlug(slug)) permanentRedirect(cityHref(c, "/blog"));
+  const legacy = legacyTarget(slug);
+  if (legacy !== null) permanentRedirect(cityHref(c, legacy));
   const suburb = c.research.suburbs.find((s) => s.slug === slug);
   if (suburb !== undefined) return { c, suburb };
   notFound();

@@ -52,8 +52,12 @@ export default function TopBar({
               <h3 className="mt-[0.5rem] text-[1.4rem] leading-[1.2em] font-light">
                 <a href={`mailto:${site.email}`}>Email</a>
               </h3>
-              <p className="text-[1.8rem] leading-[1.5em] font-medium break-words md:text-[2rem]">
-                <a href={`mailto:${site.email}`}>{site.email}</a>
+              {/* phones break the address at the @, never inside ".com" */}
+              <p className="text-[1.6rem] leading-[1.5em] font-medium md:text-[2rem]">
+                <a href={`mailto:${site.email}`}>
+                  {site.email.split("@")[0]}
+                  <wbr />@{site.email.split("@")[1]}
+                </a>
               </p>
             </div>
           </div>
