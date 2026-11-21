@@ -1,10 +1,12 @@
 // Verbatim from book-now.html, with book.html's lead-in above the form (/book was merged into /book-now). The service
 // choices follow the services menu instead of the live page's four.
-// Live quirks kept: the address field's placeholder is "Message", and field 5 opens on a blank option.
+// Live quirks kept: the address field's placeholder is "Message", and field 5 opens on a blank option (an empty value,
+// so `required` refuses it).
 
 import type { CityContent } from "@/server/content/types";
 import { t } from "@/server/content/interpolate";
 import { allServices } from "./services/registry";
+import { BOOKING_FIELDS, browserLimits, type BrowserLimits } from "@/server/leads/schema";
 
 export type BookField =
   | {
@@ -13,6 +15,7 @@ export type BookField =
       id: string;
       name: string;
       required: boolean;
+      limits: BrowserLimits;
       options: { value: string; label: string }[];
     }
   | {
@@ -21,6 +24,7 @@ export type BookField =
       id: string;
       name: string;
       required: boolean;
+      limits: BrowserLimits;
       placeholder: string;
     };
 
@@ -69,8 +73,8 @@ export function bookData(c: CityContent): BookData {
       phoneHref: c.phoneHref,
     },
 
-    // the 10 fields in live order
-    bookFields: [
+    // the 10 fields in live order; limits come from the server's rules so the browser checks the same thing
+    bookFields: withLimits([
       {
         kind: "select",
         label: "What Type of Service Are Your Looking For?",
@@ -131,7 +135,7 @@ export function bookData(c: CityContent): BookData {
         name: "form_fields[message]",
         required: true,
         options: [
-          { value: " ", label: " " },
+          { value: "", label: " " },
           { value: "ASAP (It’s an emergency)", label: "ASAP (It’s an emergency)" },
           { value: "Sometime this week", label: "Sometime this week" },
           { value: "Sometime next week", label: "Sometime next week" },
@@ -187,7 +191,7 @@ export function bookData(c: CityContent): BookData {
           { value: "It’s all the same to me", label: "It’s all the same to me" },
         ],
       },
-    ],
+    ]),
 
     // live: `<span class="elementor-button-text">Claim </span>`, trailing space dropped
     bookSubmitLabel: "Claim",
@@ -210,4 +214,14 @@ export function bookData(c: CityContent): BookData {
       errorHeading: "Something went wrong.",
     },
   };
+}
+
+// Omit per member, so each field shape keeps its own keys
+type Unlimited = BookField extends infer F ? (F extends unknown ? Omit<F, "limits"> : never) : never;
+
+function withLimits(fields: Unlimited[]): BookField[] {
+  return fields.map((f) => {
+    const rule = BOOKING_FIELDS.find((r) => r.name === f.name);
+    return { ...f, limits: rule ? browserLimits(rule) : {} } as BookField;
+  });
 }

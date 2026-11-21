@@ -110,6 +110,9 @@ exports[`data module values are unchanged by the content-layer refactor > contac
       "id": "form-field-name",
       "kind": "text",
       "label": "Name",
+      "limits": {
+        "maxLength": 200,
+      },
       "placeholder": "Your Name",
       "required": false,
     },
@@ -117,6 +120,9 @@ exports[`data module values are unchanged by the content-layer refactor > contac
       "id": "form-field-email",
       "kind": "email",
       "label": "Email",
+      "limits": {
+        "maxLength": 320,
+      },
       "placeholder": "Email",
       "required": true,
     },
@@ -124,6 +130,9 @@ exports[`data module values are unchanged by the content-layer refactor > contac
       "id": "form-field-field_66433ea",
       "kind": "text",
       "label": "Phone Number",
+      "limits": {
+        "maxLength": 50,
+      },
       "placeholder": "(777) 777-7777",
       "required": false,
     },
@@ -131,6 +140,7 @@ exports[`data module values are unchanged by the content-layer refactor > contac
       "id": "form-field-message",
       "kind": "select",
       "label": "Are You Looking For Help With A Cleaning Project?",
+      "limits": {},
       "options": [
         "-",
         "Yes",
@@ -142,6 +152,9 @@ exports[`data module values are unchanged by the content-layer refactor > contac
       "id": "form-field-field_45db7dd",
       "kind": "textarea",
       "label": "How Can We Help?",
+      "limits": {
+        "maxLength": 2000,
+      },
       "placeholder": "Give us some more details on how we can help.",
       "required": false,
       "rows": 4,
