@@ -78,6 +78,7 @@ export default function ContactFormDisplay({
       }}
     >
       {contactFields.map((field) => {
+        // same rule as contactFieldName in src/site/data/contact.ts; not imported, this file runs in the browser
         const name = `form_fields[${field.id.replace("form-field-", "")}]`;
         return (
           <div
@@ -103,7 +104,8 @@ export default function ContactFormDisplay({
                 style={SELECT_ARROW}
               >
                 {field.options.map((option) => (
-                  <option key={option} value={option}>
+                  // the "-" prompt is not an answer: an empty value lets `required` refuse it
+                  <option key={option} value={option === "-" ? "" : option}>
                     {option}
                   </option>
                 ))}
@@ -115,6 +117,7 @@ export default function ContactFormDisplay({
                 placeholder={field.placeholder}
                 rows={field.rows}
                 required={field.required}
+                {...field.limits}
                 className={TEXTAREA_CLASS}
               />
             ) : (
@@ -124,6 +127,7 @@ export default function ContactFormDisplay({
                 type={field.kind}
                 placeholder={field.placeholder}
                 required={field.required}
+                {...field.limits}
                 className={INPUT_CLASS}
               />
             )}

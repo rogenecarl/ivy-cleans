@@ -3,6 +3,7 @@
 import type { CityContent } from '@/server/content/types'
 import { realAddress, t } from '@/server/content/interpolate'
 import { mapSrc } from "./maps";
+import { CONTACT_FIELDS, browserLimits, type BrowserLimits } from "@/server/leads/schema";
 
 export type ContactField =
   | {
@@ -11,6 +12,7 @@ export type ContactField =
       id: string;
       placeholder: string;
       required: boolean;
+      limits: BrowserLimits;
     }
   | {
       kind: "select";
@@ -18,6 +20,7 @@ export type ContactField =
       id: string;
       options: string[];
       required: boolean;
+      limits: BrowserLimits;
     }
   | {
       kind: "textarea";
@@ -26,6 +29,7 @@ export type ContactField =
       placeholder: string;
       rows: number;
       required: boolean;
+      limits: BrowserLimits;
     };
 
 export type ContactData = {
@@ -72,8 +76,8 @@ export function contactData(c: CityContent): ContactData {
         "Give us a call, we try to answer all enquiries within 24 hours on business days.",
     },
 
-    // contact.html form 30bda89, fields verbatim; WP hidden fields omitted
-    contactFields: [
+    // contact.html form 30bda89, fields verbatim; WP hidden fields omitted. Limits from the server's rules.
+    contactFields: withLimits([
       {
         kind: "text",
         label: "Name",
@@ -110,7 +114,7 @@ export function contactData(c: CityContent): ContactData {
         rows: 4,
         required: false,
       },
-    ],
+    ]),
 
     contactSubmitLabel: "Send",
 
@@ -148,4 +152,19 @@ export function contactData(c: CityContent): ContactData {
       errorBody: "Please call us instead and we’ll get straight to it.",
     },
   };
+}
+
+/** The submitted `name` of a contact field, built from its id the way ContactFormDisplay renders it. */
+export function contactFieldName(id: string): string {
+  return `form_fields[${id.replace("form-field-", "")}]`;
+}
+
+// Omit per member, so each field shape keeps its own keys
+type Unlimited = ContactField extends infer F ? (F extends unknown ? Omit<F, "limits"> : never) : never;
+
+function withLimits(fields: Unlimited[]): ContactField[] {
+  return fields.map((f) => {
+    const rule = CONTACT_FIELDS.find((r) => r.name === contactFieldName(f.id));
+    return { ...f, limits: rule ? browserLimits(rule) : {} } as ContactField;
+  });
 }

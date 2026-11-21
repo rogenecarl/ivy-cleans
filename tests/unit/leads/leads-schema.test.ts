@@ -1,6 +1,6 @@
 // tests/unit/leads/leads-schema.test.ts
 import { describe, expect, it } from 'vitest'
-import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS } from '@/server/leads/schema'
+import { HONEYPOT_FIELD, parseBookingForm, parseContactForm, BOOKING_FIELDS, CONTACT_FIELDS, browserLimits } from '@/server/leads/schema'
 import { getDefaultCity } from '@/server/content/store'
 import { bookData } from '@/site/data/book'
 import { contactData } from '@/site/data/contact'
@@ -63,6 +63,51 @@ describe('parseBookingForm', () => {
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(result.fields.name).toBe('Dana')
+  })
+})
+
+describe('parseBookingForm checks every field, not only name, email and phone', () => {
+  const rejects = (over: Record<string, string>, key: string) => {
+    const result = parseBookingForm(booking(over))
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.fieldErrors[key]).toBeTruthy()
+  }
+
+  it('rejects a blank service, address or contact preference', () => {
+    rejects({ 'form_fields[email]': '' }, 'form_fields[email]')
+    rejects({ 'form_fields[field_1872bc3]': '   ' }, 'form_fields[field_1872bc3]')
+    rejects({ 'form_fields[field_1abcd81]': '' }, 'form_fields[field_1abcd81]')
+  })
+
+  it('rejects the blank first "how soon" choice', () => {
+    rejects({ 'form_fields[message]': ' ' }, 'form_fields[message]')
+  })
+
+  it('takes bedrooms and bathrooms as whole numbers from 0 to 20', () => {
+    rejects({ 'form_fields[field_c4cfac1]': '50' }, 'form_fields[field_c4cfac1]')
+    rejects({ 'form_fields[field_caacb3a]': '-1' }, 'form_fields[field_caacb3a]')
+    rejects({ 'form_fields[field_c4cfac1]': 'three' }, 'form_fields[field_c4cfac1]')
+    rejects({ 'form_fields[field_caacb3a]': '1.5' }, 'form_fields[field_caacb3a]')
+    expect(parseBookingForm(booking({ 'form_fields[field_c4cfac1]': '0' })).ok).toBe(true)
+    expect(parseBookingForm(booking({ 'form_fields[field_c4cfac1]': '20' })).ok).toBe(true)
+  })
+
+  it('rejects an over-long address', () => {
+    rejects({ 'form_fields[field_1872bc3]': 'x'.repeat(301) }, 'form_fields[field_1872bc3]')
+  })
+})
+
+describe('parseContactForm checks every field', () => {
+  it('rejects the "-" placeholder choice', () => {
+    const result = parseContactForm(contact({ 'form_fields[message]': '-' }))
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.fieldErrors['form_fields[message]']).toBeTruthy()
+  })
+
+  it('rejects an over-long message', () => {
+    expect(parseContactForm(contact({ 'form_fields[field_45db7dd]': 'x'.repeat(2001) })).ok).toBe(false)
   })
 })
 
@@ -131,6 +176,7 @@ describe('schema validation against live data', () => {
       expect(field.name).toBe(actualField.name)
       expect(field.label).toBe(actualField.label)
       expect(field.required).toBe(actualField.required)
+      expect(actualField.limits).toEqual(browserLimits(field))
     }
   })
 
@@ -150,6 +196,7 @@ describe('schema validation against live data', () => {
       expect(field.name).toBe(expectedFieldName)
       expect(field.label).toBe(actualField.label)
       expect(field.required).toBe(actualField.required)
+      expect(actualField.limits).toEqual(browserLimits(field))
     }
   })
 

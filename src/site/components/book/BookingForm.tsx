@@ -97,6 +97,8 @@ export default function BookingForm({
               type={field.kind}
               placeholder={field.placeholder}
               required={field.required}
+              {...field.limits}
+              {...(field.kind === "number" ? { step: 1, inputMode: "numeric" as const } : {})}
               className={inputClass}
             />
           )}
