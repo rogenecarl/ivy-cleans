@@ -232,3 +232,34 @@ describe('loadRouting', () => {
     )
   })
 })
+
+describe('proxy — the brand domain is also the operator host', () => {
+  // ivycleans.com is Minneapolis's site AND where the operator signs in; other city domains never show the console
+  beforeEach(() => isMappedHost.mockReturnValue(true))
+
+  it('sends a signed-out /admin on www.ivycleans.com to the login page', async () => {
+    const res = await proxy(request('https://www.ivycleans.com/admin', 'www.ivycleans.com'))
+    expect(res?.headers.get('location')).toBe('https://www.ivycleans.com/admin/login?next=%2Fadmin')
+  })
+
+  it('serves /admin/login on www.ivycleans.com and on the bare domain', async () => {
+    await expect(proxy(request('https://www.ivycleans.com/admin/login', 'www.ivycleans.com'))).resolves.toBeUndefined()
+    await expect(proxy(request('https://ivycleans.com/admin/login', 'ivycleans.com'))).resolves.toBeUndefined()
+  })
+
+  it('opens a draft preview there only for a signed-in operator', async () => {
+    const out = await proxy(request('https://www.ivycleans.com/orlando', 'www.ivycleans.com'))
+    expect(out?.headers.get('x-middleware-rewrite')).toContain('/minneapolis/orlando')
+
+    getSessionCookie.mockReturnValue('signed-cookie-value')
+    const signedIn = await proxy(request('https://www.ivycleans.com/orlando', 'www.ivycleans.com'))
+    expect(signedIn?.headers.get('x-middleware-rewrite')).toBeNull()
+  })
+
+  it('still keeps the console off any other city domain', async () => {
+    await proxy(request('https://ivycleanshouston.com/admin', 'ivycleanshouston.com'))
+    await proxy(request('https://ivycleanshouston.com/orlando', 'ivycleanshouston.com'))
+    expect(getSessionCookie).not.toHaveBeenCalled()
+    expect(getCookieCache).not.toHaveBeenCalled()
+  })
+})

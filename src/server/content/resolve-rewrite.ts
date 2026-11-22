@@ -53,6 +53,17 @@ export function parseDomainInput(raw: string): string | null {
   return HOSTNAME.test(host) ? host : null;
 }
 
+// the brand's own domain is also where the operator works: the console answers there, and so do draft previews for a
+// signed-in operator. Every other city domain keeps both off.
+const OPERATOR_HOSTS = ["ivycleans.com", "www.ivycleans.com"];
+
+export function isOperatorHost(host: string): boolean {
+  return OPERATOR_HOSTS.includes(normalizeHost(host));
+}
+
+/** Origins the sign-in form may post from: the brand domain and the vercel.app host. */
+export const OPERATOR_ORIGINS = [...OPERATOR_HOSTS.map((h) => `https://${h}`), "https://ivycleans.vercel.app"];
+
 // is this host a customer domain? proxy.ts uses it to keep the console off customer domains
 export function isMappedHost(
   host: string,
@@ -64,17 +75,19 @@ export function isMappedHost(
 // paths never rewritten into a city tree: Next internals, assets, route handlers, anything with an extension
 const INTERNAL = /^\/(_next|images|icons|favicon|icon|api)\b|\.\w+$/;
 
-// internal pathname to rewrite to, or null: internal path -> null; mapped host -> /<city><path>;
-// default host -> /<default><path> unless the first segment is a city key (preview) or `admin`
+// internal pathname to rewrite to, or null: internal path -> null; mapped host -> /<city><path> (a city-key path is
+// left alone when previewAllowed); default host -> /<default><path> unless the first segment is a city key or `admin`
 export function resolveRewrite(
   host: string,
   pathname: string,
   domains: DomainsIndex = domainsJson as DomainsIndex,
   cities: string[] = cityKeys as string[],
+  previewAllowed = false,
 ): string | null {
   if (INTERNAL.test(pathname)) return null;
 
   const mapped = domains.hosts[normalizeHost(host)];
+  if (mapped && previewAllowed && cities.includes(pathname.split("/")[1])) return null;
 
   if (!mapped) {
     const first = pathname.split("/")[1];

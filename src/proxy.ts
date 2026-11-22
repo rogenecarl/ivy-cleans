@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie, getCookieCache } from "better-auth/cookies";
-import { isMappedHost, isPreviewHost, loadRouting, resolveRewrite } from "@/server/content/resolve-rewrite";
+import { isMappedHost, isOperatorHost, isPreviewHost, loadRouting, resolveRewrite } from "@/server/content/resolve-rewrite";
 import { resolveAdminRedirect } from "@/server/content/resolve-admin";
 import { isUnder } from "@/server/auth/access";
 import { ADMIN_BASE } from "@/server/auth/admin-routes";
@@ -15,9 +15,10 @@ export async function proxy(req: NextRequest) {
   // host map from Global Config with the build-time JSON as fallback; read once for both pure functions
   const { domains, cityKeys } = await loadRouting();
 
-  // console paths, on the operator's own host only — on a mapped customer domain /admin falls through and 404s.
-  // Cookie and cached role are client-held; see resolve-admin.ts for why that is acceptable here and nowhere else.
-  if (!isMappedHost(host, domains) && isUnder(pathname, ADMIN_BASE)) {
+  // console paths, on the operator's own hosts only (unmapped, or the brand domain) — on any other city domain /admin
+  // falls through and 404s. Cookie and cached role are client-held; see resolve-admin.ts for why that is acceptable.
+  const operatorHost = isOperatorHost(host);
+  if ((operatorHost || !isMappedHost(host, domains)) && isUnder(pathname, ADMIN_BASE)) {
     const hasSession = !!getSessionCookie(req);
     let cached = null;
     if (hasSession) {
@@ -36,7 +37,9 @@ export async function proxy(req: NextRequest) {
     return;
   }
 
-  const target = resolveRewrite(host, pathname, domains, cityKeys);
+  // draft previews on the brand domain are for the signed-in operator; the cookie check is UX, the drafts are noindex
+  const previewAllowed = operatorHost && !!getSessionCookie(req);
+  const target = resolveRewrite(host, pathname, domains, cityKeys, previewAllowed);
   const url = req.nextUrl.clone();
   if (target !== null) url.pathname = target;
   const res = target === null ? NextResponse.next() : NextResponse.rewrite(url);
