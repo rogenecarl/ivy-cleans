@@ -5,9 +5,13 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { nextCookies } from 'better-auth/next-js'
 import { prisma } from '@/server/infra/db'
+import { OPERATOR_ORIGINS } from '@/server/content/resolve-rewrite'
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
+
+  // BETTER_AUTH_URL is trusted already; these let the console sign in on the brand domain and the vercel.app host alike
+  trustedOrigins: OPERATOR_ORIGINS,
 
   emailAndPassword: {
     enabled: true,

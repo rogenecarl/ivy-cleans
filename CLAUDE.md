@@ -131,7 +131,7 @@ The operator console lives at `/admin` (`src/app/admin/`) and requires a session
 - `src/server/auth/auth-server.ts` is the enforcement point. Every server action under `(console)/` must start with `requireAdmin()` or `requireSession()`: a layout guard does not run for an action POST. The proxy's cookie check is UX only.
 - An unknown role on a session is treated as signed out, never as manager. `?next=` goes through `safeNext()`.
 - Operator accounts come from `scripts/ops/seed-user.mjs` only. better-auth exposes `/api/auth/sign-up/email` by default whenever `emailAndPassword` is enabled — `disableSignUp: true` in `src/server/auth/auth.ts` is what actually refuses it. Removing that line reopens anonymous account creation (as `manager`, since `role.input` is `false`) even though nothing else in the UI links to a signup page. Adding a signup flow is a decision, not a convenience.
-- On a mapped customer domain `/admin` falls through and 404s; the console only answers on the operator's own host.
+- On a mapped customer domain `/admin` falls through and 404s; the console only answers on the operator's own hosts: an unmapped host (`*.vercel.app`) and the brand domain ivycleans.com (`OPERATOR_HOSTS` in `resolve-rewrite.ts`), where draft previews also open for a signed-in operator.
 
 ## City generation pipeline
 
