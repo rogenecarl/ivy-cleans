@@ -21,7 +21,7 @@ const lead: LeadInput = {
 describe('buildLeadEmail', () => {
   it('names the city and the person in the subject', () => {
     const mail = buildLeadEmail({ cityName: 'Miami', lead, dashboardUrl: 'https://x/admin/leads/1' })
-    expect(mail.subject).toBe('[Miami] New booking request — Dana Whitfield')
+    expect(mail.subject).toBe('[Ivy Cleans Miami] New booking request — Dana Whitfield')
   })
 
   it('uses different wording for a contact submission', () => {
@@ -30,7 +30,7 @@ describe('buildLeadEmail', () => {
       lead: { ...lead, formType: 'contact', name: 'Marcus Reed' },
       dashboardUrl: 'https://x',
     })
-    expect(mail.subject).toBe('[Houston] New contact message — Marcus Reed')
+    expect(mail.subject).toBe('[Ivy Cleans Houston] New contact message — Marcus Reed')
   })
 
   it('falls back when there is no name', () => {
@@ -39,7 +39,38 @@ describe('buildLeadEmail', () => {
       lead: { ...lead, name: null },
       dashboardUrl: 'https://x',
     })
-    expect(mail.subject).toBe('[Miami] New booking request')
+    expect(mail.subject).toBe('[Ivy Cleans Miami] New booking request')
+  })
+
+  it('opens both bodies with the site the lead came from', () => {
+    const mail = buildLeadEmail({ cityName: 'Minneapolis', lead, dashboardUrl: null })
+    expect(mail.text.split('\n')[0]).toBe('Ivy Cleans Minneapolis')
+    expect(mail.text).toContain('New booking request from the Ivy Cleans Minneapolis website.')
+    expect(mail.html).toContain('>Ivy Cleans Minneapolis</h1>')
+  })
+
+  it('marks a booking and a contact message with different badges', () => {
+    const b = buildLeadEmail({ cityName: 'Minneapolis', lead, dashboardUrl: null })
+    const c = buildLeadEmail({ cityName: 'Minneapolis', lead: { ...lead, formType: 'contact' }, dashboardUrl: null })
+    expect(b.html).toContain('New Booking Request')
+    expect(c.html).toContain('New Contact Message')
+    expect(c.html).not.toContain('New Booking Request')
+  })
+
+  it('makes the phone and email tappable and the address a map link', () => {
+    const mail = buildLeadEmail({
+      cityName: 'Minneapolis',
+      lead: { ...lead, payload: { ...lead.payload, 'What’s the Address of the Property?': '1 Main St, Minneapolis' } },
+      dashboardUrl: null,
+    })
+    expect(mail.html).toContain('href="tel:3055550184"')
+    expect(mail.html).toContain('href="mailto:dana@example.com"')
+    expect(mail.html).toContain('google.com/maps/search/?api=1&amp;query=1%20Main%20St%2C%20Minneapolis')
+  })
+
+  it('shows when the lead came in, in Minneapolis time', () => {
+    const mail = buildLeadEmail({ cityName: 'Minneapolis', lead, dashboardUrl: null, submittedAt: new Date('2026-11-24T23:57:00Z') })
+    expect(mail.text).toContain("Submitted Tuesday, November 24, 2026 at 5:57 PM CST")
   })
 
   it('lists every payload field in both bodies', () => {
@@ -74,9 +105,10 @@ describe('buildLeadEmail', () => {
     expect(mail.text).toContain('https://x/admin/leads/abc')
   })
 
-  it('renders no link in either body when dashboardUrl is null, and leaks no undefined/null', () => {
+  it('renders no dashboard link in either body when dashboardUrl is null, and leaks no undefined/null', () => {
     const mail = buildLeadEmail({ cityName: 'Miami', lead, dashboardUrl: null })
-    expect(mail.html).not.toContain('href=')
+    expect(mail.html).not.toContain('Open in dashboard')
+    expect(mail.html).not.toMatch(/href="(?!mailto:|tel:)/)
     expect(mail.html).not.toContain('undefined')
     expect(mail.html).not.toContain('null')
     expect(mail.text).not.toContain('undefined')
@@ -94,8 +126,8 @@ describe('buildLeadEmail', () => {
       dashboardUrl: 'https://x',
     })
     const lines = mail.text.split('\n')
-    // Fixed shape: greeting, blank, one collapsed field line, blank, real dashboard line.
-    expect(lines).toHaveLength(5)
+    // the submitted value never starts a line of its own: only the real dashboard line does
+    expect(lines.filter((line) => line.startsWith('Open in dashboard:'))).toEqual(['Open in dashboard: https://x'])
     const fieldLine = lines.find((line) => line.startsWith('Message:'))
     expect(fieldLine).toContain('evil.example')
     // The forged "Open in dashboard" text must live on the same line as its
@@ -113,7 +145,8 @@ describe('buildLeadEmail', () => {
       dashboardUrl: 'https://x',
     })
     const lines = mail.text.split('\n')
-    expect(lines).toHaveLength(5)
+    // the submitted value never starts a line of its own: only the real dashboard line does
+    expect(lines.filter((line) => line.startsWith('Open in dashboard:'))).toEqual(['Open in dashboard: https://x'])
     const fieldLine = lines.find((line) => line.startsWith('Message:'))
     expect(fieldLine).toContain('evil.example')
     expect(lines.filter((line) => line === 'Open in dashboard: https://evil.example')).toHaveLength(0)
@@ -126,7 +159,7 @@ describe('buildLeadEmail', () => {
       dashboardUrl: 'https://x',
     })
     expect(mail.subject).not.toContain('\n')
-    expect(mail.subject).toBe('[Miami] New booking request — Dana Bcc: attacker@evil.example')
+    expect(mail.subject).toBe('[Ivy Cleans Miami] New booking request — Dana Bcc: attacker@evil.example')
   })
 })
 
