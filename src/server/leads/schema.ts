@@ -64,6 +64,12 @@ export const CONTACT_FIELDS: readonly LeadFormField[] = [
   { name: "form_fields[field_45db7dd]", label: "How Can We Help?", required: false, rule: { kind: 'text', max: 2000 } },
 ]
 
+/** The fields lifted onto the lead as name, email and phone, per form. */
+export const IDENTITY_KEYS = {
+  booking: ['form_fields[name]', 'form_fields[field_ca2243e]', 'form_fields[field_deeaf01]'],
+  contact: ['form_fields[name]', 'form_fields[email]', 'form_fields[field_66433ea]'],
+} as const
+
 export type BrowserLimits = { maxLength?: number; min?: number; max?: number }
 
 /** The HTML attributes that hold a field to its rule in the browser, before anything is sent. */
@@ -141,21 +147,9 @@ function parse(
 }
 
 export function parseBookingForm(form: FormData): ParseResult {
-  return parse(
-    form,
-    BOOKING_FIELDS,
-    'form_fields[name]',
-    'form_fields[field_ca2243e]',
-    'form_fields[field_deeaf01]',
-  )
+  return parse(form, BOOKING_FIELDS, ...IDENTITY_KEYS.booking)
 }
 
 export function parseContactForm(form: FormData): ParseResult {
-  return parse(
-    form,
-    CONTACT_FIELDS,
-    'form_fields[name]',
-    'form_fields[email]',
-    'form_fields[field_66433ea]',
-  )
+  return parse(form, CONTACT_FIELDS, ...IDENTITY_KEYS.contact)
 }
