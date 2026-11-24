@@ -1,6 +1,7 @@
 // tests/unit/leads/leads-submit.test.ts
 import { describe, expect, it } from 'vitest'
 import { submitLead, type SubmitPorts } from '@/server/leads/submit'
+import { LEAD_RECIPIENTS } from '@/server/leads/recipients'
 import type { DomainsIndex } from '@/server/content/resolve-rewrite'
 import type { LeadInput, LeadRecord } from '@/server/leads/types'
 
@@ -38,6 +39,8 @@ type Call = string
  * default set marks only 'testville' a draft, so 'miami' and 'minneapolis'
  * behave as the live cities they are in content/.
  */
+const sentTo: string[][] = []
+
 function ports(
   over: Partial<SubmitPorts> = {},
   draftCities: string[] = ['testville'],
@@ -59,12 +62,9 @@ function ports(
     async markLeadEmail(_id, status) {
       calls.push(`mark:${status}`)
     },
-    async getSiteSettings() {
-      calls.push('settings')
-      return { cityKey: 'miami', notifyEmails: ['miami@example.com'] }
-    },
-    async sendEmail() {
+    async sendEmail({ to }) {
       calls.push('send')
+      sentTo.push(to)
       return { ok: true }
     },
     cityNameFor: async () => 'Miami',
@@ -132,11 +132,18 @@ describe('submitLead', () => {
     expect(calls).not.toContain('mark:failed')
   })
 
-  it('marks skipped and sends nothing when the city has no inbox', async () => {
-    const { ports: p, calls } = ports({ async getSiteSettings() { return null } })
+  it('emails the same fixed inboxes for every city', async () => {
+    sentTo.length = 0
+    const { ports: p } = ports()
     await submitLead(args(bookingForm()), p)
-    expect(calls).toContain('mark:skipped')
-    expect(calls).not.toContain('send')
+    await submitLead(args(bookingForm(), { host: 'ivycleanshouston.com', renderedCityKey: 'houston' }), p)
+    expect(sentTo).toEqual([[...LEAD_RECIPIENTS], [...LEAD_RECIPIENTS]])
+    expect(LEAD_RECIPIENTS).toEqual([
+      'christine@ivycleans.com',
+      'support@ivycleans.com',
+      'quenee@ivycleans.com',
+      'rogenerosalijos2@gmail.com',
+    ])
   })
 
   it('marks sent on success', async () => {

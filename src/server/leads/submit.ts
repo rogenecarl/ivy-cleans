@@ -7,13 +7,13 @@ import { buildLeadEmail, type LeadEmail } from './email'
 import type { SendResult } from './mailer'
 import { HONEYPOT_FIELD, parseBookingForm, parseContactForm } from './schema'
 import { RATE_WINDOW_MS, hashIp, honeypotFilled, overRateLimit } from './spam'
-import type { EmailStatus, FormType, LeadInput, LeadRecord, SiteSettingsRecord } from './types'
+import { LEAD_RECIPIENTS } from './recipients'
+import type { EmailStatus, FormType, LeadInput, LeadRecord } from './types'
 
 export type SubmitPorts = {
   countRecentByIpHash(ipHash: string, windowMs: number): Promise<number>
   createLead(input: LeadInput): Promise<LeadRecord>
   markLeadEmail(id: string, status: EmailStatus, error: string | null): Promise<void>
-  getSiteSettings(cityKey: string): Promise<SiteSettingsRecord | null>
   // is this city still a draft? MUST NOT THROW and MUST FAIL OPEN (false = real): a real lead misfiled as a test
   // disappears from every screen; a preview misfiled as real is just a labelled row.
   isDraftCity(cityKey: string): Promise<boolean>
@@ -101,20 +101,13 @@ async function notify(
       return
     }
 
-    const settings = await ports.getSiteSettings(lead.cityKey)
-    const to = settings?.notifyEmails ?? []
-    if (to.length === 0) {
-      await ports.markLeadEmail(lead.id, 'skipped', 'no notification inbox configured')
-      return
-    }
-
     const email = buildLeadEmail({
       cityName: await ports.cityNameFor(lead.cityKey),
       lead: input,
       dashboardUrl: ports.dashboardUrlFor(lead.id),
     })
 
-    const result = await ports.sendEmail({ to, replyTo: input.email, email })
+    const result = await ports.sendEmail({ to: [...LEAD_RECIPIENTS], replyTo: input.email, email })
     if (result.ok) {
       // a failure to record success is not a failure to send
       try {

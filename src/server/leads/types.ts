@@ -51,11 +51,6 @@ export type LeadCounts = {
   emailFailed: number
 }
 
-export type SiteSettingsRecord = {
-  cityKey: string
-  notifyEmails: string[]
-}
-
 // dashboard aggregates computed by the database, not from listLeads() (which caps at 200). Test rows excluded.
 export type LeadDashboardStats = {
   /** Leads still in `new` -- nobody has responded yet. */

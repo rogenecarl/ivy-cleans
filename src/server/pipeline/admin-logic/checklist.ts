@@ -20,8 +20,6 @@ export function publishChecklist(input: {
   duplicationFindings: number | null
   invisibleChars: number
   blockingQuality: number
-  /** null = the leads store could not be reached */
-  inboxCount: number | null
   aboutMissing: readonly string[]
 }): { items: CheckItem[]; canPublish: boolean } {
   const settings = `${ADMIN_BASE}/sites/${input.key}`
@@ -56,11 +54,6 @@ export function publishChecklist(input: {
     input.blockingQuality === 0
       ? { id: 'quality', state: 'ok', required: true, label: 'Quality checks', detail: 'no banned phrases, real places used' }
       : { id: 'quality', state: 'fail', required: true, label: `${input.blockingQuality} quality problems`, detail: 'listed below' },
-    input.inboxCount === null
-      ? { id: 'inbox', state: 'todo', required: false, label: 'Lead inbox', detail: 'recommended · could not be checked' }
-      : input.inboxCount > 0
-        ? { id: 'inbox', state: 'ok', required: false, label: 'Lead inbox', detail: `${input.inboxCount} ${input.inboxCount === 1 ? 'address' : 'addresses'}` }
-        : { id: 'inbox', state: 'todo', required: false, label: 'Lead inbox', detail: 'recommended · leads are emailed to nobody', action: { label: 'Add', href: settings } },
     input.aboutMissing.length === 0
       ? { id: 'about', state: 'ok', required: false, label: 'About Us page', detail: 'on' }
       : { id: 'about', state: 'todo', required: false, label: 'About Us page', detail: `optional · needs ${input.aboutMissing.join(' and ')}`, action: { label: 'Set up', href: `${settings}#about` } },

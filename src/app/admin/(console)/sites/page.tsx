@@ -3,8 +3,8 @@ import { Building2, ChevronLeft, ChevronRight, ExternalLink, MoreHorizontal, Tri
 import { loadRouting } from '@/server/content/resolve-rewrite'
 import { listSiteSummaries, type SiteSummary } from '@/server/pipeline/admin-logic'
 import { domainFor, siteReadiness } from '@/server/leads/readiness'
-import { getSiteSettingsMany, leadCountsByCity } from '@/server/leads/store'
-import type { LeadCounts, SiteSettingsRecord } from '@/server/leads/types'
+import { leadCountsByCity } from '@/server/leads/store'
+import type { LeadCounts } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,7 +27,6 @@ export const dynamic = 'force-dynamic'
 
 type View = SiteSummary & {
   domain: string | null
-  inbox: number | null
   problemCount: number
 }
 
@@ -44,30 +43,27 @@ export default async function SitesPage({
 
   // lead data is an enhancement: the table must survive a Postgres outage
   let counts: Record<string, LeadCounts> = {}
-  let settingsByCity: Record<string, SiteSettingsRecord> = {}
   let leadsUnavailable = false
   try {
-    ;[counts, settingsByCity] = await Promise.all([leadCountsByCity(), getSiteSettingsMany(sites.map((s) => s.key))])
+    counts = await leadCountsByCity()
   } catch (err) {
     leadsUnavailable = true
-    // loud: this catch only wraps the two aggregate queries, no PII
+    // loud: this catch only wraps the aggregate query, no PII
     console.error('SitesPage: lead data unavailable:', err)
   }
   const { domains } = await loadRouting()
 
   const views: View[] = sites.map((site) => {
     const domain = domainFor(site.key, domains)
-    const inbox = leadsUnavailable ? null : (settingsByCity[site.key]?.notifyEmails.length ?? 0)
     const readiness = leadsUnavailable
       ? null
       : siteReadiness({
           isLive: site.stage === 'live',
           domain,
-          notifyEmails: settingsByCity[site.key]?.notifyEmails ?? [],
           counts: counts[site.key] ?? { total: 0, unworked: 0, emailFailed: 0 },
         })
     const stuck = site.stage === 'stopped' || site.stage === 'needs-review' ? 1 : 0
-    return { ...site, domain, inbox, problemCount: (readiness?.problems.length ?? 0) + stuck }
+    return { ...site, domain, problemCount: (readiness?.problems.length ?? 0) + stuck }
   })
 
   const statusCounts = siteStatusCounts(views)
@@ -96,7 +92,7 @@ export default async function SitesPage({
           <TriangleAlert className="size-4 text-amber-700" aria-hidden="true" />
           <AlertTitle>Lead data is unavailable</AlertTitle>
           <AlertDescription className="text-amber-800">
-            Inbox and lead details are not shown below because the leads store could not be reached. The sites
+            Lead details are not shown below because the leads store could not be reached. The sites
             themselves and every action on them are unaffected.
           </AlertDescription>
         </Alert>
@@ -141,7 +137,7 @@ export default async function SitesPage({
                   <TableRow>
                     <TableHead>City</TableHead>
                     <TableHead>Where it is</TableHead>
-                    <TableHead>Domain · inbox</TableHead>
+                    <TableHead>Domain</TableHead>
                     <TableHead className="text-right">Next step</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -156,7 +152,7 @@ export default async function SitesPage({
                         <Where site={site} />
                       </TableCell>
                       <TableCell className="text-[0.8rem]">
-                        <DomainInbox site={site} />
+                        <Domain site={site} />
                       </TableCell>
                       <TableCell>
                         <NextStep site={site} />
@@ -176,7 +172,7 @@ export default async function SitesPage({
                   </div>
                   <Where site={site} />
                   <p className="text-[0.8rem]">
-                    <DomainInbox site={site} />
+                    <Domain site={site} />
                   </p>
                   <NextStep site={site} />
                 </div>
@@ -258,22 +254,8 @@ function Where({ site }: { site: View }) {
   )
 }
 
-function DomainInbox({ site }: { site: View }) {
-  return (
-    <>
-      <span className={site.domain ? '' : 'text-muted-foreground'}>{site.domain ?? 'Not attached'}</span>
-      {' · '}
-      {site.inbox === null ? (
-        <span className="text-muted-foreground">inbox unknown</span>
-      ) : site.inbox === 0 ? (
-        <span className={site.stage === 'live' ? 'font-semibold text-destructive' : 'text-muted-foreground'}>no inbox</span>
-      ) : (
-        <span>
-          {site.inbox} {site.inbox === 1 ? 'inbox' : 'inboxes'}
-        </span>
-      )}
-    </>
-  )
+function Domain({ site }: { site: View }) {
+  return <span className={site.domain ? '' : 'text-muted-foreground'}>{site.domain ?? 'Not attached'}</span>
 }
 
 function NextStep({ site }: { site: View }) {

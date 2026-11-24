@@ -65,8 +65,8 @@
  *
  *     fuser -k 3100/tcp; STUB_MODEL=1 STUB_EMAIL=1 pnpm dev --port 3100
  *
- *   STUB_EMAIL=1 is required for the Task 13 case specifically: without it, a
- *   real minneapolis SiteSettings.notifyEmails row would make the contact
+ *   STUB_EMAIL=1 is required for the Task 13 case specifically: without it,
+ *   the fixed lead recipients (src/server/leads/recipients.ts) would make the contact
  *   submission attempt a real Resend send. The vitest suite forces this
  *   centrally (see vitest.config.ts); this script talks to a server running
  *   in a separate process, so it has to be set on that process's own

@@ -1,14 +1,14 @@
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Inbox, TriangleAlert } from 'lucide-react'
 import { listCities, listSiteSummaries, type SiteSummary } from '@/server/pipeline/admin-logic'
-import { getSiteSettingsMany, leadDashboardStats, leadsPerWeek, listLeads } from '@/server/leads/store'
-import type { LeadDashboardStats, LeadRecord, SiteSettingsRecord } from '@/server/leads/types'
+import { leadDashboardStats, leadsPerWeek, listLeads } from '@/server/leads/store'
+import type { LeadDashboardStats, LeadRecord } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
 import { EmptyState, LeadStatusChip, initials } from '@/app/admin/_components/ui'
 import { buildCityLookup, cityDisplayName } from '@/app/admin/(console)/leads/logic'
-import { activeAlarms, attentionItems, describeTrend, pipelineBuckets, sitesWithNoInbox } from './logic'
+import { activeAlarms, attentionItems, describeTrend, pipelineBuckets } from './logic'
 import { requireSession } from '@/server/auth/auth-server'
 import { cn } from '@/lib/utils'
 
@@ -34,14 +34,12 @@ export default async function AdminDashboard() {
   let stats: LeadDashboardStats | null = null
   let recent: LeadRecord[] = []
   let weeks: number[] = []
-  let settings: Record<string, SiteSettingsRecord> = {}
   let leadsUnavailable = false
   try {
-    ;[stats, recent, weeks, settings] = await Promise.all([
+    ;[stats, recent, weeks] = await Promise.all([
       leadDashboardStats(now),
       listLeads(EMPTY_QUERY, RECENT_LIMIT),
       leadsPerWeek(now, WEEKS),
-      isAdmin ? getSiteSettingsMany(sites.map((s) => s.key)) : Promise.resolve({}),
     ])
   } catch (err) {
     leadsUnavailable = true
@@ -55,7 +53,6 @@ export default async function AdminDashboard() {
           waiting: stats.waiting,
           oldestWaitingAt: stats.oldestWaitingAt,
           emailFailed: stats.emailFailed,
-          noInbox: isAdmin ? sitesWithNoInbox(sites, settings) : [],
         },
         now,
       )
@@ -103,8 +100,7 @@ export default async function AdminDashboard() {
           <TriangleAlert className="size-4" aria-hidden="true" />
           <AlertTitle>Lead data is unavailable.</AlertTitle>
           <AlertDescription>
-            The leads store could not be reached, so no lead figures can be shown and no site can be checked for a
-            missing inbox. Do not read this as “nothing needs attention”. Check the database connection and reload.
+            The leads store could not be reached, so no lead figures can be shown. Do not read this as “nothing needs attention”. Check the database connection and reload.
           </AlertDescription>
         </Alert>
       )}

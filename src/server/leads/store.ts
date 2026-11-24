@@ -12,7 +12,6 @@ import type {
   LeadQuery,
   LeadRecord,
   LeadStatus,
-  SiteSettingsRecord,
 } from './types'
 
 /** Re-exported so existing consumers and tests keep their import path. */
@@ -189,32 +188,6 @@ export async function leadsPerWeek(now: Date, weeks: number, cityKey?: string): 
     now,
     weeks,
   )
-}
-
-export async function getSiteSettings(cityKey: string): Promise<SiteSettingsRecord | null> {
-  const row = await prisma.siteSettings.findUnique({ where: { cityKey } })
-  return row ? { cityKey: row.cityKey, notifyEmails: row.notifyEmails } : null
-}
-
-// settings for every requested city in one query (avoids N+1 on the Sites table)
-export async function getSiteSettingsMany(
-  cityKeys: string[],
-): Promise<Record<string, SiteSettingsRecord>> {
-  if (cityKeys.length === 0) return {}
-  const rows = await prisma.siteSettings.findMany({ where: { cityKey: { in: cityKeys } } })
-  const out: Record<string, SiteSettingsRecord> = {}
-  for (const row of rows) {
-    out[row.cityKey] = { cityKey: row.cityKey, notifyEmails: row.notifyEmails }
-  }
-  return out
-}
-
-export async function upsertSiteSettings(cityKey: string, notifyEmails: string[]): Promise<void> {
-  await prisma.siteSettings.upsert({
-    where: { cityKey },
-    create: { cityKey, notifyEmails },
-    update: { notifyEmails },
-  })
 }
 
 // every dashboard figure via COUNT, not findMany (listLeads caps at 200). `now` is a parameter for testability.

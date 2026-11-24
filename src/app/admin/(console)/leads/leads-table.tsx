@@ -5,7 +5,7 @@
 // /leads/<id> still exists for the email deep link; both render <LeadSubmission>.
 import { useMemo, useState, type ReactNode } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, ExternalLink, Inbox, Search, SearchX } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Inbox, Search, SearchX } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -336,13 +336,6 @@ export function LeadsTable({
                   </p>
                 </div>
 
-                <Link
-                  href={`${ADMIN_BASE}/leads/${selected.lead.id}`}
-                  className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-sm text-[0.85rem] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9"
-                >
-                  <ExternalLink className="size-4" aria-hidden="true" />
-                  Open as a full page
-                </Link>
               </div>
             </>
           )}

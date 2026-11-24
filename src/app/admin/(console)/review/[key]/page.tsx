@@ -16,7 +16,6 @@ import PublishBox from './publish-box'
 import RegeneratePanel from './regenerate-panel'
 import SuburbsEditor from './suburbs-editor'
 import { SourcesPanel } from './sources-panel'
-import { getSiteSettings } from '@/server/leads/store'
 import { publishChecklist } from '@/server/pipeline/admin-logic/checklist'
 import { sitePaths } from '@/site/data/routes'
 import { cn } from '@/lib/utils'
@@ -116,10 +115,6 @@ export default async function ReviewPage({
   const quality = checkQuality(doc).filter((finding) => SHOW_ADVISORY_FINDINGS || finding.blocking)
   const thinAreas = SHOW_ADVISORY_FINDINGS ? scored.filter((entry) => entry.verdict !== 'build') : []
 
-  // the leads store is optional here: an outage only makes the inbox line unknown
-  const inboxCount = await getSiteSettings(key)
-    .then((s) => s?.notifyEmails.length ?? 0)
-    .catch(() => null)
   const checklist = publishChecklist({
     key,
     doc,
@@ -127,7 +122,6 @@ export default async function ReviewPage({
     duplicationFindings: duplicationUnavailable ? null : duplication.length,
     invisibleChars: invisible.length,
     blockingQuality: checkQuality(doc).filter((f) => f.blocking).length,
-    inboxCount,
     aboutMissing: aboutMissing(doc.ops),
   })
 
