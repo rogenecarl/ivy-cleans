@@ -1,6 +1,6 @@
 'use server'
-// Per-city notification settings (domain mapping lives elsewhere). Every input validated (./logic.ts), every action
-// guarded — the layout guard doesn't run for an action POST. Addresses are never logged; only a count.
+// Per-city settings (domain mapping lives elsewhere). Every input validated (./logic.ts), every action guarded —
+// the layout guard doesn't run for an action POST.
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import {
@@ -14,39 +14,9 @@ import {
   writeAboutStoryLogic,
   type ActionResult,
 } from '@/server/pipeline/admin-logic'
-import { upsertSiteSettings } from '@/server/leads/store'
 import { ADMIN_BASE } from '@/server/auth/admin-routes'
 import { requireAdmin } from '@/server/auth/auth-server'
-import { parseNotifyEmails, parseOpsForm } from './logic'
-
-export async function saveNotifyEmailsAction(cityKey: string, formData: FormData): Promise<void> {
-  await requireAdmin()
-
-  // `cityKey` is a bound argument (untrusted); checked so a typo can't create a settings row for nothing
-  await requireKnownCity(cityKey)
-
-  const result = parseNotifyEmails(formData.get('emails'))
-
-  // absent/non-string is malformed, not "cleared": reject before upsertSiteSettings
-  if (!result.ok) {
-    throw new Error(result.reason)
-  }
-
-  await upsertSiteSettings(cityKey, result.emails)
-  revalidatePath(`${ADMIN_BASE}/sites/${cityKey}`)
-  revalidatePath(ADMIN_BASE)
-
-  // only the error path redirects; revalidatePath is enough on success
-  if (result.invalidCount > 0) {
-    const noun = result.invalidCount === 1 ? 'entry' : 'entries'
-    const verb = result.invalidCount === 1 ? 'was' : 'were'
-    redirect(
-      `${ADMIN_BASE}/sites/${cityKey}?error=${encodeURIComponent(
-        `${result.invalidCount} ${noun} ${verb} not saved (not a valid email address, or over the per-save limit).`,
-      )}`,
-    )
-  }
-}
+import { parseOpsForm } from './logic'
 
 // Saves market facts to the sidecar and/or document (works on a live city). REPLACES the whole ops block, so
 // cityKey is checked against listCities() and parseOpsForm refuses an absent field. Reviews are never logged.

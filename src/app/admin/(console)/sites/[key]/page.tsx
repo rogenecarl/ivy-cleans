@@ -1,15 +1,12 @@
 import Link from 'next/link'
 import { ChevronLeft, TriangleAlert } from 'lucide-react'
 import { ExternalLink } from 'lucide-react'
-import { getSiteSettings } from '@/server/leads/store'
 import { formatOpsFields, readMarketLogic } from '@/server/pipeline/admin-logic'
 import { aboutMissing } from '@/server/pipeline/about'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Label } from '@/components/ui/label'
 import { ADMIN_SITES } from '@/server/auth/admin-routes'
 import { Button } from '@/components/ui/button'
 import { ErrorText, Panel } from '@/app/admin/_components/ui'
-import { SettingsForm } from './settings-form'
 import { FactsForm } from './facts-form'
 import { ContactForm } from './contact-form'
 import { PhotosPanel } from './photos-panel'
@@ -27,27 +24,12 @@ export default async function SiteSettingsPage({
   params: Promise<{ key: string }>
   searchParams: Promise<{ error?: string }>
 }) {
-  // own guard: admin-only, and this screen writes a city's inbox list
+  // own guard: admin-only
   await requireAdmin()
 
   const { key } = await params
   const { error } = await searchParams
   const market = await readMarketLogic(key)
-
-  // getSiteSettings THROWING (unknown) is not null (no row yet). On a throw the form is hidden entirely: a pre-filled
-  // empty textarea would wipe the real inbox list on save.
-  let settings: Awaited<ReturnType<typeof getSiteSettings>> = null
-  let settingsUnavailable = false
-  try {
-    settings = await getSiteSettings(key)
-  } catch (err) {
-    settingsUnavailable = true
-    // loud, no addresses: this catch only wraps getSiteSettings
-    console.error(
-      `SiteSettingsPage: getSiteSettings(key) failed for city "${key}" -- settings are unavailable:`,
-      err,
-    )
-  }
 
   return (
     <>
@@ -70,29 +52,6 @@ export default async function SiteSettingsPage({
           <ContactForm cityKey={key} phone={market.phone} address={market.address} />
         </Panel>
       )}
-
-      <Panel title="Notification inboxes">
-        {settingsUnavailable ? (
-          <Alert variant="destructive">
-            <TriangleAlert className="size-4" aria-hidden="true" />
-            <AlertTitle>Settings are unavailable.</AlertTitle>
-            <AlertDescription>
-              The leads store could not be reached, so this city&rsquo;s configured inboxes
-              can&rsquo;t be confirmed. The form is hidden rather than shown empty, because
-              saving an empty list here would overwrite a real, configured one. Check the
-              database connection and reload before changing this city&rsquo;s notification
-              inboxes.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            <Label htmlFor="emails" className="mb-1.5 block text-[0.8rem] font-semibold">
-              One address per line. Every lead from this city is emailed to all of them.
-            </Label>
-            <SettingsForm cityKey={key} defaultValue={(settings?.notifyEmails ?? []).join('\n')} />
-          </>
-        )}
-      </Panel>
 
       {/* About Us: every fact is typed by the operator; the page stays off the site until it has a year and a photo */}
       <h2 id="about" className="mt-10 mb-1 scroll-mt-6 text-[1.15rem] font-semibold tracking-tight">About Us page</h2>

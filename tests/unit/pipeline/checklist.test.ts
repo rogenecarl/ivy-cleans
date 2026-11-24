@@ -5,7 +5,7 @@ import type { CityContent } from '@/server/content/types'
 const doc = (over: Partial<CityContent> = {}) =>
   ({ city: 'Houston', phone: '713-555-0118', phoneDisplay: '(713) 555-0118', address: '1 Main St, Houston, TX', ...over }) as CityContent
 
-const clean = { undecided: 0, duplicationFindings: 0, invisibleChars: 0, blockingQuality: 0, inboxCount: 1, aboutMissing: [] as string[] }
+const clean = { undecided: 0, duplicationFindings: 0, invisibleChars: 0, blockingQuality: 0, aboutMissing: [] as string[] }
 const state = (r: ReturnType<typeof publishChecklist>, id: string) => r.items.find((i) => i.id === id)?.state
 
 describe('publishChecklist', () => {
@@ -39,10 +39,9 @@ describe('publishChecklist', () => {
     expect(state(publishChecklist({ key: 'houston', doc: doc(), ...clean, invisibleChars: 1 }), 'duplication')).toBe('fail')
   })
 
-  it('does not block on a missing inbox or About page, but lists them to do', () => {
-    const r = publishChecklist({ key: 'houston', doc: doc(), ...clean, inboxCount: 0, aboutMissing: ['serving since'] })
+  it('does not block on a missing About page, but lists it to do', () => {
+    const r = publishChecklist({ key: 'houston', doc: doc(), ...clean, aboutMissing: ['serving since'] })
     expect(r.canPublish).toBe(true)
-    expect(state(r, 'inbox')).toBe('todo')
     expect(state(r, 'about')).toBe('todo')
   })
 

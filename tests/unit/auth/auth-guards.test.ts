@@ -29,7 +29,6 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 const setLeadStatus = vi.fn()
 const setLeadNotes = vi.fn()
-const upsertSiteSettings = vi.fn()
 /*
  * The read paths the eight console pages call, mocked here too (not just the
  * three write paths above) so the page-guard tests below can assert the
@@ -38,27 +37,22 @@ const upsertSiteSettings = vi.fn()
  */
 const leadDashboardStats = vi.fn()
 const listLeads = vi.fn()
-const getSiteSettingsMany = vi.fn()
 const countTestLeads = vi.fn()
 const leadStatusCounts = vi.fn()
 const getLead = vi.fn()
 const leadCountsByCity = vi.fn()
-const getSiteSettings = vi.fn()
 vi.mock('@/server/leads/store', async () => {
   const actual = await vi.importActual<typeof import('@/server/leads/store')>('@/server/leads/store')
   return {
     ...actual,
     setLeadStatus,
     setLeadNotes,
-    upsertSiteSettings,
     leadDashboardStats,
     listLeads,
-    getSiteSettingsMany,
     countTestLeads,
     leadStatusCounts,
     getLead,
     leadCountsByCity,
-    getSiteSettings,
   }
 })
 
@@ -211,7 +205,7 @@ describe('admin-only pipeline actions', () => {
   ]
 
   // actions covered by their own describes below, not by the admin-only loop
-  const COVERED_ELSEWHERE = ['saveNotifyEmailsAction', 'saveOpsAction', 'setStatusAction', 'saveNotesAction']
+  const COVERED_ELSEWHERE = ['saveOpsAction', 'setStatusAction', 'saveNotesAction']
 
   it('covers every action every console actions.ts exports', async () => {
     const modules = [NEW, GENERATE, REVIEW, SITES, () => import('@/app/admin/(console)/leads/actions')]
@@ -266,17 +260,6 @@ describe('admin-only pipeline actions', () => {
       expectNoAdminLogicCalls()
     })
   }
-})
-
-describe('saveNotifyEmailsAction', () => {
-  it('refuses a manager and never writes settings', async () => {
-    asManager()
-    const mod = await import('@/app/admin/(console)/sites/actions')
-    const form = new FormData()
-    form.set('emails', 'x@y.com')
-    await expect(mod.saveNotifyEmailsAction('miami', form)).rejects.toThrow(REDIRECTED)
-    expect(upsertSiteSettings).not.toHaveBeenCalled()
-  })
 })
 
 describe('saveOpsAction', () => {
@@ -351,7 +334,6 @@ describe('console page guards', () => {
     await expect(mod.default()).rejects.toThrow(REDIRECTED)
     expect(leadDashboardStats).not.toHaveBeenCalled()
     expect(listLeads).not.toHaveBeenCalled()
-    expect(getSiteSettingsMany).not.toHaveBeenCalled()
     expect(listCities).not.toHaveBeenCalled()
   })
 
@@ -378,7 +360,6 @@ describe('console page guards', () => {
     await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
     expect(listCities).not.toHaveBeenCalled()
     expect(leadCountsByCity).not.toHaveBeenCalled()
-    expect(getSiteSettingsMany).not.toHaveBeenCalled()
   })
 
   it('sites/page.tsx refuses a signed-out caller', async () => {
@@ -387,13 +368,12 @@ describe('console page guards', () => {
     await expect(mod.default({ searchParams: poison('searchParams') })).rejects.toThrow(REDIRECTED)
   })
 
-  it("sites/[key]/page.tsx refuses a manager and never reads that city's settings", async () => {
+  it("sites/[key]/page.tsx refuses a manager before reading anything", async () => {
     asManager()
     const mod = await import('@/app/admin/(console)/sites/[key]/page')
     await expect(
       mod.default({ params: poison('params'), searchParams: poison('searchParams') }),
     ).rejects.toThrow(REDIRECTED)
-    expect(getSiteSettings).not.toHaveBeenCalled()
   })
 
   it('sites/[key]/page.tsx refuses a signed-out caller', async () => {
@@ -402,7 +382,6 @@ describe('console page guards', () => {
     await expect(
       mod.default({ params: poison('params'), searchParams: poison('searchParams') }),
     ).rejects.toThrow(REDIRECTED)
-    expect(getSiteSettings).not.toHaveBeenCalled()
   })
 
   it('new/page.tsx refuses a manager before its searchParams are ever read', async () => {

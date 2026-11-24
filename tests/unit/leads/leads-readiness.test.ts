@@ -5,40 +5,29 @@ import { domainFor, siteReadiness, type DomainsIndex } from '@/server/leads/read
 const counts = { total: 0, unworked: 0, emailFailed: 0 }
 
 describe('siteReadiness', () => {
-  it('is ready when live, domain mapped and an inbox is set', () => {
+  it('is ready when live and the domain is mapped', () => {
     expect(
-      siteReadiness({ isLive: true, domain: 'miamicleans.com', notifyEmails: ['a@b.c'], counts }),
+      siteReadiness({ isLive: true, domain: 'miamicleans.com', counts }),
     ).toEqual({ ready: true, problems: [], domain: 'miamicleans.com' })
   })
 
   it('reports a missing domain', () => {
-    const result = siteReadiness({ isLive: true, domain: null, notifyEmails: ['a@b.c'], counts })
+    const result = siteReadiness({ isLive: true, domain: null, counts })
     expect(result.ready).toBe(false)
     expect(result.problems).toContain('no-domain')
-  })
-
-  it('reports a missing inbox', () => {
-    const result = siteReadiness({
-      isLive: true,
-      domain: 'miamicleans.com',
-      notifyEmails: [],
-      counts,
-    })
-    expect(result.problems).toContain('no-inbox')
   })
 
   it('reports failed deliveries', () => {
     const result = siteReadiness({
       isLive: true,
       domain: 'miamicleans.com',
-      notifyEmails: ['a@b.c'],
       counts: { total: 3, unworked: 1, emailFailed: 2 },
     })
     expect(result.problems).toContain('email-failures')
   })
 
   it('does not flag a draft site for having no domain', () => {
-    const result = siteReadiness({ isLive: false, domain: null, notifyEmails: [], counts })
+    const result = siteReadiness({ isLive: false, domain: null, counts })
     expect(result.problems).toEqual([])
     expect(result.ready).toBe(true)
   })
@@ -47,10 +36,9 @@ describe('siteReadiness', () => {
     const result = siteReadiness({
       isLive: true,
       domain: null,
-      notifyEmails: [],
       counts: { total: 1, unworked: 1, emailFailed: 1 },
     })
-    expect(result.problems.sort()).toEqual(['email-failures', 'no-domain', 'no-inbox'])
+    expect(result.problems.sort()).toEqual(['email-failures', 'no-domain'])
   })
 })
 
@@ -91,7 +79,6 @@ describe('siteReadiness + domainFor (ruling 1 integration)', () => {
     const result = siteReadiness({
       isLive: true,
       domain: domainFor('minneapolis', domains),
-      notifyEmails: ['a@b.c'],
       counts,
     })
     expect(result.problems).not.toContain('no-domain')

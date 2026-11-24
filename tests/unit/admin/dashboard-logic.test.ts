@@ -12,14 +12,11 @@ import { describe, expect, it } from 'vitest'
 import { canAccess } from '@/server/auth/access'
 import {
   activeAlarms,
-  type Alarm,
   describeAge,
   describeTrend,
   quickActionsFor,
-  sitesWithNoInbox,
   topCity,
   trendDirection,
-  visibleAlarms,
   attentionItems,
   bucketByWeek,
   pipelineBuckets,
@@ -90,41 +87,9 @@ describe('topCity', () => {
   })
 })
 
-describe('sitesWithNoInbox', () => {
-  const cities = [
-    { key: 'minneapolis', city: 'Minneapolis', status: 'live' },
-    { key: 'miami', city: 'Miami', status: 'live' },
-    { key: 'testville', city: 'Testville', status: 'draft' },
-  ]
-
-  it('flags a LIVE city whose notify list is empty', () => {
-    const result = sitesWithNoInbox(cities, {
-      minneapolis: { notifyEmails: ['abdi@example.com'] },
-      miami: { notifyEmails: [] },
-    })
-    expect(result).toEqual([{ key: 'miami', city: 'Miami' }])
-  })
-
-  it('flags a LIVE city with no settings row at all', () => {
-    // No row is the same failure as an empty row: nobody gets emailed.
-    const result = sitesWithNoInbox(cities, {
-      minneapolis: { notifyEmails: ['abdi@example.com'] },
-    })
-    expect(result).toEqual([{ key: 'miami', city: 'Miami' }])
-  })
-
-  it('exempts drafts, which have not launched and cannot miss a lead', () => {
-    const result = sitesWithNoInbox(cities, {
-      minneapolis: { notifyEmails: ['abdi@example.com'] },
-      miami: { notifyEmails: ['abdi@example.com'] },
-    })
-    expect(result).toEqual([])
-  })
-})
-
 describe('activeAlarms', () => {
   const now = new Date('2026-08-22T12:00:00Z')
-  const clear = { waiting: 0, oldestWaitingAt: null, emailFailed: 0, noInbox: [] }
+  const clear = { waiting: 0, oldestWaitingAt: null, emailFailed: 0 }
 
   it('is empty when every check passes, so the page can show one all-clear line', () => {
     expect(activeAlarms(clear, now)).toEqual([])
@@ -155,53 +120,9 @@ describe('activeAlarms', () => {
     expect(alarms[0].label).toBe('New lead to answer')
   })
 
-  it('names the cities that cannot notify anyone', () => {
-    const alarms = activeAlarms(
-      { ...clear, noInbox: [{ key: 'miami', city: 'Miami' }, { key: 'mpls', city: 'Minneapolis' }] },
-      now,
-    )
-    expect(alarms[0].value).toBe(2)
-    expect(alarms[0].hint).toBe('Miami, Minneapolis')
-  })
-
-  it('orders by urgency: a waiting customer before a config problem', () => {
-    const alarms = activeAlarms(
-      {
-        waiting: 1,
-        oldestWaitingAt: now,
-        emailFailed: 1,
-        noInbox: [{ key: 'miami', city: 'Miami' }],
-      },
-      now,
-    )
-    expect(alarms.map((a) => a.key)).toEqual(['waiting', 'email', 'inbox'])
-  })
-})
-
-describe('visibleAlarms', () => {
-  const waiting: Alarm = { key: 'waiting', label: 'Leads waiting', value: 3, hint: '' }
-  const email: Alarm = { key: 'email', label: 'Notifications failed', value: 1, hint: '' }
-  const inbox: Alarm = { key: 'inbox', label: 'Live sites with no inbox', value: 2, hint: '' }
-
-  it('shows an admin everything', () => {
-    expect(visibleAlarms([waiting, email, inbox], 'admin')).toEqual([waiting, email, inbox])
-  })
-
-  it('hides the site alarm from a manager', () => {
-    // The no-inbox alarm links to /admin/sites and is fixed there. A manager
-    // can do nothing about it, and an alarm nobody can act on trains people
-    // to ignore the panel.
-    expect(visibleAlarms([waiting, email, inbox], 'manager')).toEqual([waiting, email])
-  })
-
-  it('keeps the ordering it was given', () => {
-    expect(visibleAlarms([email, waiting], 'manager')).toEqual([email, waiting])
-  })
-
-  it('returns empty for a manager whose only alarm is the site one', () => {
-    // Which makes the page render its "All clear" line — correct for a
-    // manager, whose checks really are all clear.
-    expect(visibleAlarms([inbox], 'manager')).toEqual([])
+  it('orders by urgency: a waiting customer before a failed notification', () => {
+    const alarms = activeAlarms({ waiting: 1, oldestWaitingAt: now, emailFailed: 1 }, now)
+    expect(alarms.map((a) => a.key)).toEqual(['waiting', 'email'])
   })
 })
 
@@ -259,12 +180,11 @@ describe('attentionItems', () => {
     ({ key: 'houston', city: 'Houston', stage: 'needs-review', undecided: 0, hasAddress: true, ...over }) as SiteSummary
   const alarms = [
     { key: 'waiting' as const, label: 'New lead to answer', value: 1, hint: 'oldest 3 d' },
-    { key: 'inbox' as const, label: 'Live sites with no inbox', value: 1, hint: 'Minneapolis' },
   ]
 
   it('gives every item one action, including drafts missing an address or waiting on facts', () => {
     const items = attentionItems(alarms, [site({ hasAddress: false }), site({ key: 'orlando', city: 'Orlando', undecided: 2 })], 'admin')
-    expect(items.map((i) => i.id)).toEqual(['waiting', 'inbox', 'address:houston', 'facts:orlando'])
+    expect(items.map((i) => i.id)).toEqual(['waiting', 'address:houston', 'facts:orlando'])
     expect(items.every((i) => i.action.href.startsWith('/admin'))).toBe(true)
     expect(items.find((i) => i.id === 'address:houston')?.action.href).toBe('/admin/sites/houston')
     expect(items.find((i) => i.id === 'facts:orlando')?.action.href).toBe('/admin/generate/orlando')

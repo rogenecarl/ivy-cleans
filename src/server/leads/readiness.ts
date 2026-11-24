@@ -1,9 +1,9 @@
 // src/server/leads/readiness.ts
-// "Can this site deliver a lead to a human?" Derived, never stored. Drafts are exempt from the domain/inbox checks.
+// "Can this site deliver a lead to a human?" Derived, never stored. Drafts are exempt from the domain check.
 import type { DomainsIndex } from '@/server/content/resolve-rewrite'
 import type { LeadCounts } from './types'
 
-export type ReadinessProblem = 'no-domain' | 'no-inbox' | 'email-failures'
+export type ReadinessProblem = 'no-domain' | 'email-failures'
 
 export type Readiness = {
   ready: boolean
@@ -14,12 +14,10 @@ export type Readiness = {
 export function siteReadiness(args: {
   isLive: boolean
   domain: string | null
-  notifyEmails: string[]
   counts: LeadCounts
 }): Readiness {
   const problems: ReadinessProblem[] = []
   if (args.isLive && !args.domain) problems.push('no-domain')
-  if (args.isLive && args.notifyEmails.length === 0) problems.push('no-inbox')
   if (args.counts.emailFailed > 0) problems.push('email-failures')
   return { ready: problems.length === 0, problems, domain: args.domain }
 }

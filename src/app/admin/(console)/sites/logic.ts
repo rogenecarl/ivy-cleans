@@ -1,41 +1,5 @@
 // src/app/admin/(console)/sites/logic.ts
-// Pure decisions behind the notification settings screen, testable without the Next runtime.
-
-// one @, something each side, a dot after: a notification inbox, not signup
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-// bounds on the raw submission: an authenticated but untrusted RPC boundary
-export const MAX_RAW_LENGTH = 5000
-export const MAX_ENTRIES = 50
-
-export type ParseNotifyEmailsResult =
-  | { ok: true; emails: string[]; invalidCount: number }
-  | { ok: false; reason: string }
-
-// present-and-empty clears the list; absent or non-string is REJECTED (a malformed POST must not wipe the inbox).
-// Over-limit and malformed entries are counted in invalidCount rather than dropped silently.
-export function parseNotifyEmails(raw: unknown): ParseNotifyEmailsResult {
-  if (typeof raw !== 'string') {
-    return { ok: false, reason: 'missing or invalid "emails" field' }
-  }
-
-  const allEntries = raw
-    .slice(0, MAX_RAW_LENGTH)
-    .split(/[\n,]/)
-    .map((value) => value.trim())
-    .filter((value) => value !== '')
-
-  const entries = allEntries.slice(0, MAX_ENTRIES)
-  let invalidCount = allEntries.length - entries.length // truncated by the cap
-
-  const emails: string[] = []
-  for (const entry of entries) {
-    if (EMAIL_PATTERN.test(entry)) emails.push(entry)
-    else invalidCount += 1
-  }
-
-  return { ok: true, emails, invalidCount }
-}
+// Pure decisions behind the site settings screen, testable without the Next runtime.
 
 // per-input cap so ten reviews aren't rejected because the ZIP box also had something
 export const MAX_OPS_FIELD_LENGTH = 8000

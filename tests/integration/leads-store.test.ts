@@ -20,8 +20,6 @@ import {
   markLeadEmail,
   setLeadNotes,
   setLeadStatus,
-  getSiteSettings,
-  upsertSiteSettings,
   leadsPerWeek,
 } from '@/server/leads/store'
 import type { LeadInput } from '@/server/leads/types'
@@ -135,13 +133,5 @@ describe.skipIf(!process.env.DATABASE_URL)('leads store', () => {
     expect(weeks).toHaveLength(8)
     expect(weeks[7]).toBe(2)
     expect(weeks.slice(0, 7).every((n) => n === 0)).toBe(true)
-  })
-
-  it('upserts site settings', async () => {
-    await upsertSiteSettings(CITY, ['miami@example.com'])
-    await upsertSiteSettings(CITY, ['miami@example.com', 'ops@example.com'])
-    const settings = await getSiteSettings(CITY)
-    expect(settings?.notifyEmails).toEqual(['miami@example.com', 'ops@example.com'])
-    expect(await getSiteSettings('ztest-nope')).toBeNull()
   })
 })

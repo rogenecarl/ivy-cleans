@@ -1,7 +1,7 @@
 // src/app/admin/(console)/dashboard/logic.ts
 // The dashboard's presentation decisions as pure functions, testable without the framework.
 import type { Role } from '@/server/auth/access'
-import { ADMIN_BASE, ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
+import { ADMIN_BASE, ADMIN_LEADS } from '@/server/auth/admin-routes'
 import type { SiteSummary } from '@/server/pipeline/admin-logic'
 
 // how long a lead has waited: "just now", "6 min", "4 hr", "3 d". Rounds DOWN — this figure must never overstate.
@@ -37,32 +37,20 @@ export function topCity(byCity: Record<string, number>): { key: string; count: n
   return { key: entries[0][0], count: entries[0][1] }
 }
 
-// live cities with no notification address — the worst silent failure. Drafts exempt.
-export function sitesWithNoInbox(
-  cities: { key: string; city: string; status: string }[],
-  notifyEmailsByCity: Record<string, { notifyEmails: string[] }>,
-): { key: string; city: string }[] {
-  return cities
-    .filter((c) => c.status === 'live')
-    .filter((c) => (notifyEmailsByCity[c.key]?.notifyEmails.length ?? 0) === 0)
-    .map((c) => ({ key: c.key, city: c.city }))
-}
-
 /** One thing that is actually wrong right now. */
 export type Alarm = {
-  key: 'waiting' | 'email' | 'inbox'
+  key: 'waiting' | 'email'
   label: string
   value: number
   hint: string
 }
 
-// only the FAILING checks, in fixed order: leads waiting, notifications failed, sites that can never notify
+// only the FAILING checks, in fixed order: leads waiting, then notifications failed
 export function activeAlarms(
   args: {
     waiting: number
     oldestWaitingAt: Date | null
     emailFailed: number
-    noInbox: { key: string; city: string }[]
   },
   now: Date,
 ): Alarm[] {
@@ -85,21 +73,7 @@ export function activeAlarms(
       hint: 'a lead arrived and nobody was emailed',
     })
   }
-  if (args.noInbox.length > 0) {
-    alarms.push({
-      key: 'inbox',
-      label: 'Live sites with no inbox',
-      value: args.noInbox.length,
-      hint: args.noInbox.map((s) => s.city).join(', '),
-    })
-  }
   return alarms
-}
-
-// drop the alarms a role can't act on (the inbox alarm links to Sites, which a manager can't reach)
-export function visibleAlarms(alarms: Alarm[], role: Role): Alarm[] {
-  if (role === 'admin') return alarms
-  return alarms.filter((a) => a.key !== 'inbox')
 }
 
 /** A tile in the dashboard's "Quick actions" row. */
@@ -154,16 +128,14 @@ export type AttentionItem = {
 
 // one row per thing that needs a person, each with the one action that fixes it
 export function attentionItems(alarms: Alarm[], sites: readonly SiteSummary[], role: Role): AttentionItem[] {
-  const items: AttentionItem[] = visibleAlarms(alarms, role).map((alarm) => ({
+  const items: AttentionItem[] = alarms.map((alarm) => ({
     id: alarm.key,
-    tag: alarm.key === 'inbox' ? 'Inbox' : 'Lead',
+    tag: 'Lead',
     text: [alarm.label, alarm.hint].filter(Boolean).join(' · '),
     action:
       alarm.key === 'waiting'
         ? { label: 'Open leads', href: `${ADMIN_LEADS}?status=new` }
-        : alarm.key === 'inbox'
-          ? { label: 'Add an inbox', href: ADMIN_SITES }
-          : { label: 'Open leads', href: ADMIN_LEADS },
+        : { label: 'Open leads', href: ADMIN_LEADS },
   }))
   if (role !== 'admin') return items
   for (const site of sites) {

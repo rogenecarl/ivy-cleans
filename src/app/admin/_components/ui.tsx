@@ -90,7 +90,6 @@ export function Pill({ children }: { children: ReactNode }) {
 
 const PROBLEM_LABEL: Record<ReadinessProblem, string> = {
   'no-domain': 'NO DOMAIN',
-  'no-inbox': 'NO INBOX',
   'email-failures': 'EMAIL FAILURES',
 }
 
@@ -114,7 +113,6 @@ export function ReadinessMarker({ readiness }: { readiness: Readiness | null }) 
 /** Sentence-case wording for the title attribute, where SHOUTING reads badly. */
 function PROBLEM_LABEL_TITLE(problem: ReadinessProblem): string {
   if (problem === 'no-domain') return 'No domain attached'
-  if (problem === 'no-inbox') return 'No notification inbox configured, so leads reach nobody'
   return 'Some notification emails failed to send'
 }
 

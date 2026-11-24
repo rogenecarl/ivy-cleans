@@ -11,7 +11,6 @@ import { sendLeadEmail } from '@/server/leads/mailer'
 import {
   countRecentByIpHash,
   createLead,
-  getSiteSettings,
   markLeadEmail,
 } from '@/server/leads/store'
 import { submitLead, type SubmitPorts, type SubmitResult } from '@/server/leads/submit'
@@ -35,8 +34,7 @@ export async function submitLeadAction(
     countRecentByIpHash,
     createLead,
     markLeadEmail,
-    getSiteSettings,
-    sendEmail: sendLeadEmail,
+      sendEmail: sendLeadEmail,
     async cityNameFor(cityKey) {
       try {
         return (await getCity(cityKey)).city
