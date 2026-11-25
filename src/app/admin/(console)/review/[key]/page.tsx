@@ -20,6 +20,7 @@ import { publishChecklist } from '@/server/pipeline/admin-logic/checklist'
 import { sitePaths } from '@/site/data/routes'
 import { cn } from '@/lib/utils'
 import { requireAdmin } from '@/server/auth/auth-server'
+import { provisioningStatus } from '@/server/pipeline/provision'
 
 // Review + publish. The preview at /<key> does the heavy lifting; this screen fixes the area list, re-rolls a stage,
 // and goes live. force-dynamic.
@@ -91,6 +92,8 @@ export default async function ReviewPage({
   )
 
   const isLive = doc.status === 'live'
+  // a live city with its own domain opens on that domain, not the /<key> preview
+  const liveUrl = isLive && doc.domain ? `https://${doc.domain}` : null
 
   // what publish would refuse, computed here so the operator sees it before clicking. Live cities only, as in publishCity.
   let duplication: Awaited<ReturnType<typeof checkCity>> = []
@@ -149,8 +152,8 @@ export default async function ReviewPage({
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Button asChild variant="outline" className="min-h-11 sm:min-h-9">
-          <a href={`/${key}`} target="_blank" rel="noreferrer">
-            Open preview
+          <a href={liveUrl ?? `/${key}`} target="_blank" rel="noreferrer">
+            {liveUrl ? 'Open live site' : 'Open preview'}
             <ExternalLink className="size-4" aria-hidden="true" />
           </a>
         </Button>
@@ -333,14 +336,14 @@ export default async function ReviewPage({
               <ProvisioningPoll cityKey={key} domain={doc.provisioning.domain} />
             )}
             <Button asChild variant="outline" className="mt-3 min-h-11 sm:min-h-9">
-              <a href={`/${key}`} target="_blank" rel="noreferrer">
-                Open preview
+              <a href={liveUrl ?? `/${key}`} target="_blank" rel="noreferrer">
+                {liveUrl ? 'Open live site' : 'Open preview'}
                 <ExternalLink className="size-4" aria-hidden="true" />
               </a>
             </Button>
           </div>
         ) : (
-          <PublishBox cityKey={key} city={doc.city} canPublish={checklist.canPublish} />
+          <PublishBox cityKey={key} city={doc.city} canPublish={checklist.canPublish} {...provisioningStatus()} />
         )}
       </Panel>
         </>

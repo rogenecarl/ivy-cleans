@@ -23,7 +23,20 @@ import { ErrorText } from '@/app/admin/_components/ui'
 // Publish, confirmed in an AlertDialog that says whether a domain will be attached. Mapping a host in _domains.json
 // is not the same as attaching it to the Vercel project; the success panel says so.
 
-export default function PublishBox({ cityKey, city, canPublish }: { cityKey: string; city: string; canPublish: boolean }) {
+export default function PublishBox({
+  cityKey,
+  city,
+  canPublish,
+  autoRouting,
+  canBuy,
+}: {
+  cityKey: string
+  city: string
+  canPublish: boolean
+  // from provisioningStatus(): what this deployment can really do without a developer
+  autoRouting: boolean
+  canBuy: boolean
+}) {
   const router = useRouter()
   const [domain, setDomain] = useState('')
   // OFF by default: buying a domain spends real money
@@ -59,8 +72,9 @@ export default function PublishBox({ cityKey, city, canPublish }: { cityKey: str
           </p>
         ) : published.domain ? (
           <p className="mt-1">
-            {published.domain} is routed. It still has to be attached to the Vercel project by hand,
-            and the app redeployed, unless Global Config is configured.
+            {autoRouting
+              ? `${published.domain} now shows ${city}.`
+              : `${published.domain} is saved. It shows ${city} once the domain is added to the site’s domain list and released.`}
           </p>
         ) : (
           <p className="mt-1">No domain was set &mdash; add one later.</p>
@@ -85,14 +99,20 @@ export default function PublishBox({ cityKey, city, canPublish }: { cityKey: str
         className="min-h-11 sm:min-h-9"
       />
       <p className="mt-1 text-[0.75rem] text-muted-foreground">
-        A domain you already own — paste it any way; the bare domain is kept. One another city already uses is refused.
+        A domain you already own, with or without www. A domain another city already uses is refused.
       </p>
       <ol className="mt-2 list-decimal space-y-0.5 pl-5 text-[0.75rem] text-muted-foreground">
-        <li>Point the domain&rsquo;s DNS at Vercel and add it to the Vercel project.</li>
-        <li>Publishing routes it to {city} straight away (with Global Config, no redeploy).</li>
+        <li>Add the domain to the Vercel project and point its DNS at Vercel.</li>
+        {autoRouting ? (
+          <li>Publishing routes it to {city} straight away.</li>
+        ) : (
+          <li>Publishing saves the domain; it shows {city} once it is added to the site&rsquo;s domain list and released.</li>
+        )}
         <li>Open the domain once DNS has spread — usually minutes, sometimes hours.</li>
       </ol>
 
+      {/* hidden until Porkbun, Vercel and Global Config are set up: ticking it would only fail */}
+      {canBuy && (
       <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-[0.85rem]">
         <input
           type="checkbox"
@@ -109,6 +129,7 @@ export default function PublishBox({ cityKey, city, canPublish }: { cityKey: str
           </span>
         </span>
       </label>
+      )}
 
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <AlertDialogTrigger asChild>
