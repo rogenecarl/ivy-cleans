@@ -1,6 +1,6 @@
 // tests/unit/leads/leads-readiness.test.ts
 import { describe, expect, it } from 'vitest'
-import { domainFor, siteReadiness, type DomainsIndex } from '@/server/leads/readiness'
+import { domainFor, siteLink, siteReadiness, type DomainsIndex } from '@/server/leads/readiness'
 
 const counts = { total: 0, unworked: 0, emailFailed: 0 }
 
@@ -83,5 +83,21 @@ describe('siteReadiness + domainFor (ruling 1 integration)', () => {
     })
     expect(result.problems).not.toContain('no-domain')
     expect(result.ready).toBe(true)
+  })
+})
+
+describe('siteLink', () => {
+  const domains: DomainsIndex = {
+    default: 'minneapolis',
+    hosts: { 'www.ivycleansorlando.com': 'orlando', 'ivycleansorlando.com': 'orlando' },
+  }
+
+  it('opens a live city on its own domain', () => {
+    expect(siteLink('orlando', true, domains)).toBe('https://www.ivycleansorlando.com')
+  })
+
+  it('keeps a draft, or a live city with no domain, on its /<key> preview', () => {
+    expect(siteLink('orlando', false, domains)).toBe('/orlando')
+    expect(siteLink('houston', true, domains)).toBe('/houston')
   })
 })
