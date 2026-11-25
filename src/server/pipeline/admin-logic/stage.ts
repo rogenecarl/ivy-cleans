@@ -31,9 +31,9 @@ export function siteStage(input: {
       ? { stage: 'stopped', reason: 'The last step failed — progress is kept', next: { label: 'Resume', href: generate } }
       : { stage: 'generating', reason: null, next: { label: 'Watch progress', href: generate } }
   }
-  if (!input.hasAddress) return { stage: 'needs-review', reason: 'No street address', next: { label: 'Add address', href: settings } }
+  if (!input.hasAddress) return { stage: 'needs-review', reason: 'Needs a street address', next: { label: 'Add address', href: settings } }
   if (input.blockingQuality > 0) {
-    return { stage: 'needs-review', reason: `${input.blockingQuality} quality problems`, next: { label: 'Review', href: review } }
+    return { stage: 'needs-review', reason: `${input.blockingQuality} quality problems to fix`, next: { label: 'Review', href: review } }
   }
   return { stage: 'ready', reason: null, next: { label: 'Publish', href: review } }
 }

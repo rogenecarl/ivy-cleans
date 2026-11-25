@@ -15,7 +15,8 @@ export function SignedInToast({ role }: { role: Role }) {
 
     // Names the role because this console has two, and "which account am I
     // in?" is the question a shared machine actually raises.
-    toast.success(`Signed in as ${role}.`)
+    // a fixed id: an effect that runs twice (React's dev double-run, a re-render) updates one toast, never stacks two
+    toast.success(`Signed in as ${role}.`, { id: 'signed-in' })
 
     const url = new URL(window.location.href)
     url.searchParams.delete('signedin')
