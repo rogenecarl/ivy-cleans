@@ -53,7 +53,7 @@ export default async function SiteSettingsPage({
         </Panel>
       )}
 
-      {/* About Us: every fact is typed by the operator; the page stays off the site until it has a year and a photo */}
+      {/* About Us: every fact is typed by the operator; the page stays off the site until it has a serving-since year */}
       <h2 id="about" className="mt-10 mb-1 scroll-mt-6 text-[1.15rem] font-semibold tracking-tight">About Us page</h2>
       {market.ok ? (
         <>
@@ -106,7 +106,7 @@ function AboutStatus({ missing, cityKey }: { missing: string[]; cityKey: string 
   return (
     <p className="mb-4 text-[0.85rem] text-muted-foreground">
       <span className="rounded-full border border-amber-600/30 bg-amber-50 px-2.5 py-0.5 text-amber-700">Off</span>
-      <span className="ml-2">It publishes once it has {missing.join(' and ')}. A crew lead, reviews and the rest make it better; they are not required.</span>
+      <span className="ml-2">It turns on once &ldquo;{missing.join('” and “')}&rdquo; is filled in. Photos, a crew lead and reviews make it better; they are not required.</span>
     </p>
   )
 }

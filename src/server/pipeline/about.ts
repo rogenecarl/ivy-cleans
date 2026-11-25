@@ -9,7 +9,6 @@ export const ABOUT_STORY_SLOT = 'about.story'
 export function aboutMissing(ops: MarketOps | undefined): string[] {
   const missing: string[] = []
   if (!ops?.servingSince) missing.push('serving since')
-  if (!ops?.photos?.length) missing.push('one photo')
   return missing
 }
 

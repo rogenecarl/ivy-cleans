@@ -31,9 +31,10 @@ const withAbout: CityContent = {
 }
 
 describe('about page data', () => {
-  it('is off until serving-since, crew lead and a photo exist', () => {
+  it('is off until serving-since exists; photos are optional', () => {
     expect(aboutReady(houston.ops)).toBe(false)
-    expect(aboutReady({ ...ops, photos: [] })).toBe(false)
+    expect(aboutReady({ ...ops, servingSince: undefined })).toBe(false)
+    expect(aboutReady({ ...ops, photos: [] })).toBe(true)
     expect(aboutReady(ops)).toBe(true)
   })
 
@@ -46,7 +47,7 @@ describe('about page data', () => {
       { label: 'Homes cleaned here', value: '340' },
     ])
     // the photo captioned "crew" is the crew photo and leaves the gallery
-    expect(about.crew).toEqual({ lead: 'Maria', photo: ops.photos![0], placeholder: false })
+    expect(about.crew).toEqual({ lead: 'Maria', photo: ops.photos![0] })
     expect(about.photos).toEqual([ops.photos![1]])
     expect(about.story).toHaveLength(2)
     expect(about.reviews).toHaveLength(1)
@@ -58,11 +59,11 @@ describe('about page data', () => {
     expect(aboutData({ ...houston, ops }).story).toBeUndefined()
   })
 
-  it('shows the placeholder until a photo is captioned as the crew', () => {
+  it('has no crew photo, and no stand-in, until a photo is captioned as the crew', () => {
     const about = aboutData({ ...houston, ops: { ...ops, photos: [ops.photos![1]] } })
-    expect(about.crew.placeholder).toBe(true)
-    expect(about.crew.photo.path).toBe('/images/crew-placeholder.svg')
+    expect(about.crew.photo).toBeUndefined()
     expect(about.photos).toEqual([ops.photos![1]])
+    expect(aboutData({ ...houston, ops: { ...ops, photos: [] } }).crew.photo).toBeUndefined()
   })
 })
 

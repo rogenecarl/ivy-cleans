@@ -4,15 +4,13 @@ import { ABOUT_STORY_SLOT, aboutReady, sinceLabel } from '@/server/pipeline/abou
 
 export { aboutReady }
 
-/** Stands in for the crew photo until one is uploaded; a caption containing "crew" marks the real one. */
-export const CREW_PLACEHOLDER: MarketPhoto = { path: '/images/crew-placeholder.svg', alt: 'Crew photo coming soon' }
-
 export type AboutData = {
   meta: { title: string; description: string }
   h1: string
   facts: { label: string; value: string }[]
   story: string[] | undefined
-  crew: { lead: string | undefined; photo: MarketPhoto; placeholder: boolean }
+  // a caption containing "crew" marks the crew photo; without one the crew block is text only
+  crew: { lead: string | undefined; photo: MarketPhoto | undefined }
   reviews: MarketReview[]
   photos: MarketPhoto[]
   contact: { phone: string; phoneHref: string; address: string | undefined; contactHref: string; bookHref: string }
@@ -46,7 +44,7 @@ export function aboutData(c: CityContent): AboutData {
     h1: `About Ivy Cleans in ${c.city}`,
     facts,
     story,
-    crew: { lead: ops.crewLead, photo: crewPhoto ?? CREW_PLACEHOLDER, placeholder: crewPhoto === undefined },
+    crew: { lead: ops.crewLead, photo: crewPhoto },
     reviews: ops.reviews ?? [],
     photos: photos.filter((p) => p !== crewPhoto),
     contact: {

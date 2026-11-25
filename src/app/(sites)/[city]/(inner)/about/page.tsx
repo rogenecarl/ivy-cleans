@@ -10,6 +10,7 @@ import { breadcrumbs } from "@/site/data/breadcrumbs";
 import { aboutData, aboutReady } from "@/site/data/about";
 import { localBusinessJsonLd } from "@/site/data/structured-data";
 import { cityFromParams, type CityParams } from "@/site/city-param";
+import type { CityContent } from "@/server/content/types";
 
 // Who Ivy Cleans is in this city. Rendered from the operator's facts; 404 until the gate facts exist (see aboutReady).
 export const dynamicParams = true;
@@ -72,31 +73,29 @@ export default async function AboutPage({ params }: { params: CityParams }) {
               </div>
             )}
 
-            <div className={`${SECTION} mx-auto flex max-w-[84rem] flex-col items-center gap-[2.4rem] md:flex-row md:justify-center`}>
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[4px] md:w-[36rem] md:shrink-0">
-                <Image
-                  src={about.crew.photo.path}
-                  alt={about.crew.photo.alt}
-                  fill
-                  unoptimized={about.crew.placeholder}
-                  sizes="(max-width: 768px) 100vw, 360px"
-                  className="object-cover"
-                />
+            {about.crew.photo ? (
+              <div className={`${SECTION} mx-auto flex max-w-[84rem] flex-col items-center gap-[2.4rem] md:flex-row md:justify-center`}>
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[4px] md:w-[36rem] md:shrink-0">
+                  <Image
+                    src={about.crew.photo.path}
+                    alt={about.crew.photo.alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 360px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="text-center md:text-left">
+                  <h2 className={`${H2} md:text-left`}>The {c.city} crew</h2>
+                  <CrewLine c={c} lead={about.crew.lead} />
+                </div>
               </div>
-              <div className="text-center md:text-left">
-                <h2 className={`${H2} md:text-left`}>The {c.city} crew</h2>
-                <p className="m-0 text-[1.8rem] leading-[1.6em] text-[#374151]">
-                  {about.crew.lead ? (
-                    <>
-                      <span className="font-semibold">{about.crew.lead}</span> leads the {c.city} crew
-                      {c.ops?.crewSize !== undefined ? ` of ${c.ops.crewSize}` : ''}.
-                    </>
-                  ) : (
-                    <>The people who clean your home are our own crew, not contractors.</>
-                  )}
-                </p>
+            ) : (
+              // no crew photo yet: a centred text block, never a stand-in picture
+              <div className={`${SECTION} mx-auto max-w-[76rem] rounded-[4px] bg-[#EEF7F4] px-[2rem] py-[3.2rem] text-center`}>
+                <h2 className={`${H2} mb-[1.2rem]`}>The {c.city} crew</h2>
+                <CrewLine c={c} lead={about.crew.lead} />
               </div>
-            </div>
+            )}
 
             {about.reviews.length > 0 && (
               <div className={SECTION}>
@@ -166,5 +165,20 @@ export default async function AboutPage({ params }: { params: CityParams }) {
       </section>
       <JsonLd data={localBusinessJsonLd(c)} />
     </>
+  );
+}
+
+function CrewLine({ c, lead }: { c: CityContent; lead: string | undefined }) {
+  return (
+    <p className="m-0 text-[1.8rem] leading-[1.6em] text-[#374151]">
+      {lead ? (
+        <>
+          <span className="font-semibold">{lead}</span> leads the {c.city} crew
+          {c.ops?.crewSize !== undefined ? ` of ${c.ops.crewSize}` : ""}.
+        </>
+      ) : (
+        <>The people who clean your home are our own crew, not contractors.</>
+      )}
+    </p>
   );
 }
