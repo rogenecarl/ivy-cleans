@@ -19,7 +19,8 @@ export function LoginForm({ next, signedOut }: { next: string; signedOut?: boole
   const loadingToast = useRef<string | number | null>(null)
 
   useEffect(() => {
-    if (isPending) loadingToast.current = toast.loading('Signing in…')
+    // fixed ids throughout: an effect that runs twice (React's dev double-run) updates one toast, never stacks two
+    if (isPending) loadingToast.current = toast.loading('Signing in…', { id: 'signing-in' })
   }, [isPending])
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export function LoginForm({ next, signedOut }: { next: string; signedOut?: boole
       toast.error(state.error, { id: loadingToast.current })
       loadingToast.current = null
     } else {
-      toast.error(state.error)
+      toast.error(state.error, { id: 'sign-in-error' })
     }
   }, [state])
 
@@ -42,7 +43,7 @@ export function LoginForm({ next, signedOut }: { next: string; signedOut?: boole
   // sign-out lands here with ?signedout=1; stripped with replaceState so a refresh doesn't re-announce it
   useEffect(() => {
     if (!signedOut) return
-    toast.success('Signed out.')
+    toast.success('Signed out.', { id: 'signed-out' })
     const url = new URL(window.location.href)
     url.searchParams.delete('signedout')
     window.history.replaceState(null, '', url.toString())
