@@ -408,3 +408,12 @@ export function buildProvisioners(): { registrar: Registrar; host: Host; router:
   if (!router) throw new Error('provisioning: GLOBAL_CONFIG_ID not set')
   return { registrar, host, router }
 }
+
+/** What the Publish box can promise: routing a host without a release, and buying one. Blank env counts as unset. */
+export function provisioningStatus(): { autoRouting: boolean; canBuy: boolean } {
+  if (process.env.STUB_MODEL === '1') return { autoRouting: true, canBuy: true }
+  const has = (...names: string[]) => names.every((n) => Boolean(process.env[n]?.trim()))
+  // written through the API (token + config id), read by the proxy through the EDGE_CONFIG connection string
+  const autoRouting = has('VERCEL_TOKEN', 'GLOBAL_CONFIG_ID', 'EDGE_CONFIG')
+  return { autoRouting, canBuy: autoRouting && has('PORKBUN_API_KEY', 'PORKBUN_SECRET_KEY', 'VERCEL_PROJECT_ID') }
+}

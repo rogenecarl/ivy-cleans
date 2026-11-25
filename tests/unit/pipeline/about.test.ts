@@ -12,9 +12,9 @@ const facts: AboutFacts = {
 }
 
 describe('about gate', () => {
-  it('needs serving-since and one photo; a crew lead is optional', () => {
-    expect(aboutMissing(undefined)).toEqual(['serving since', 'one photo'])
-    expect(aboutMissing({ servingSince: '2024-03' })).toEqual(['one photo'])
+  it('needs serving-since only; photos and a crew lead are optional', () => {
+    expect(aboutMissing(undefined)).toEqual(['serving since'])
+    expect(aboutMissing({ servingSince: '2024-03' })).toEqual([])
     expect(aboutReady({ servingSince: '2023', photos: [{ path: '/photos/x/1.jpg', alt: 'x' }] })).toBe(true)
     expect(aboutReady(facts.ops)).toBe(true)
   })
