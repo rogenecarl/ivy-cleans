@@ -1,25 +1,38 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Inbox, TriangleAlert } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ExternalLink, Inbox, TriangleAlert } from 'lucide-react'
 import { listCities, listSiteSummaries, type SiteSummary } from '@/server/pipeline/admin-logic'
 import { leadDashboardStats, leadsPerWeek, listLeads } from '@/server/leads/store'
 import type { LeadDashboardStats, LeadRecord } from '@/server/leads/types'
+import { loadRouting } from '@/server/content/resolve-rewrite'
+import { siteLink } from '@/server/leads/readiness'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { ADMIN_LEADS, ADMIN_SITES } from '@/server/auth/admin-routes'
-import { EmptyState, LeadStatusChip, initials } from '@/app/admin/_components/ui'
+import { EmptyState, LeadStatusChip, StagePill, initials } from '@/app/admin/_components/ui'
 import { buildCityLookup, cityDisplayName } from '@/app/admin/(console)/leads/logic'
-import { activeAlarms, attentionItems, describeTrend, pipelineBuckets } from './logic'
+import {
+  activeAlarms,
+  attentionItems,
+  dashboardHeadline,
+  describeAge,
+  describeTrend,
+  pipelineBuckets,
+  weekStartLabels,
+} from './logic'
 import { requireSession } from '@/server/auth/auth-server'
 import { cn } from '@/lib/utils'
 
-// Sites in progress (admin), what needs a person (each with its one action), the lead trend, the latest leads.
-// Nothing is edited here. force-dynamic: every figure changes with each submission.
+// What needs a person first, then the figures, the latest leads, the sites, and the weekly trend. Nothing is edited
+// here. force-dynamic: every figure changes with each submission.
 export const dynamic = 'force-dynamic'
 
 const RECENT_LIMIT = 6
 const WEEKS = 8
 
 const EMPTY_QUERY = { city: null, status: null, formType: null } as const
+
+const SECTION_TITLE = 'text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase'
+const CARD = 'rounded-lg border border-border bg-card'
 
 export default async function AdminDashboard() {
   // own guard: layouts don't re-render on soft navigation; React.cache makes it free
@@ -29,8 +42,9 @@ export default async function AdminDashboard() {
 
   const sites: SiteSummary[] = isAdmin ? await listSiteSummaries() : []
   const cityLookup = buildCityLookup(isAdmin ? sites : await listCities())
+  const { domains } = await loadRouting()
 
-  // lead data is an enhancement: the site cards must survive a Postgres outage. Scoped to these calls only.
+  // lead data is an enhancement: the page must survive a Postgres outage. Scoped to these calls only.
   let stats: LeadDashboardStats | null = null
   let recent: LeadRecord[] = []
   let weeks: number[] = []
@@ -48,153 +62,82 @@ export default async function AdminDashboard() {
   }
 
   const alarms = stats
-    ? activeAlarms(
-        {
-          waiting: stats.waiting,
-          oldestWaitingAt: stats.oldestWaitingAt,
-          emailFailed: stats.emailFailed,
-        },
-        now,
-      )
+    ? activeAlarms({ waiting: stats.waiting, oldestWaitingAt: stats.oldestWaitingAt, emailFailed: stats.emailFailed }, now)
     : []
   const items = attentionItems(alarms, sites, role)
-  const buckets = pipelineBuckets(sites)
-  const inProgress = buckets.generating.length + buckets.review.length + buckets.ready.length
+  const live = pipelineBuckets(sites).live.length
   const totalLeads = weeks.reduce((sum, n) => sum + n, 0)
-  const peak = Math.max(1, ...weeks)
 
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-[1.5rem] font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-muted-foreground">
-          {isAdmin
-            ? `${buckets.live.length} live ${buckets.live.length === 1 ? 'site' : 'sites'}, ${inProgress} in progress${
-                stats ? `, ${totalLeads} ${totalLeads === 1 ? 'lead' : 'leads'} in the last ${WEEKS} weeks` : ''
-              }. Anything that needs you comes first.`
-            : 'Every lead across all city sites. Anything needing a reply shows up first.'}
+        <p className="mt-1 text-[0.95rem] text-muted-foreground" data-role="headline">
+          {dashboardHeadline(stats ? stats.waiting : null)}
         </p>
       </div>
 
-      {isAdmin && (
-        <section className="mb-8" aria-labelledby="pipeline-title" data-role="pipeline">
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <h2 id="pipeline-title" className="text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
-              Sites in progress
-            </h2>
-            <Link href={ADMIN_SITES} className="text-[0.85rem] font-medium hover:underline">
-              All sites →
-            </Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <PipelineCard title="Generating" tone="blue" sites={buckets.generating} empty="Nothing is being generated." />
-            <PipelineCard title="Needs your review" tone="amber" sites={buckets.review} empty="Nothing waiting on you." />
-            <PipelineCard title="Ready to publish" tone="green" sites={buckets.ready} empty="Sites land here once every check passes." />
-            <PipelineCard title="Live" tone="green" sites={buckets.live} empty="No live sites yet." />
-          </div>
-        </section>
-      )}
-
       {leadsUnavailable && (
-        <Alert variant="destructive" className="mb-8">
+        <Alert variant="destructive" className="mb-6">
           <TriangleAlert className="size-4" aria-hidden="true" />
           <AlertTitle>Lead data is unavailable.</AlertTitle>
           <AlertDescription>
-            The leads store could not be reached, so no lead figures can be shown. Do not read this as “nothing needs attention”. Check the database connection and reload.
+            The leads store could not be reached, so no lead figures can be shown. Do not read this as &ldquo;nothing needs
+            attention&rdquo;. Check the database connection and reload.
           </AlertDescription>
         </Alert>
       )}
 
-      <section className="mb-8" aria-labelledby="attention-title" data-role="attention">
-        {items.length === 0 && !leadsUnavailable ? (
-          <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden="true" />
-            <p className="text-[0.85rem] text-emerald-900">
-              <strong className="font-semibold">All clear.</strong> No new leads to answer, nothing waiting on a decision, and
-              every live site notifies someone.
-            </p>
+      <section className="mb-6" aria-labelledby="attention-title" data-role="attention">
+        {items.length > 0 ? (
+          <div className="overflow-hidden rounded-lg border border-amber-300/70 bg-card">
+            <h2 id="attention-title" className={cn(SECTION_TITLE, 'bg-amber-50/70 px-5 py-3 text-amber-900')}>
+              Needs attention
+            </h2>
+            <ul className="divide-y divide-border/60">
+              {items.map((item) => (
+                <li key={item.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
+                  <span
+                    aria-hidden="true"
+                    className={cn('size-2 shrink-0 rounded-full', item.tag === 'Site' ? 'bg-amber-500' : 'bg-red-500')}
+                  />
+                  <span className="min-w-0 flex-[999_1_260px] text-[0.9rem]">{item.text}</span>
+                  <Button asChild size="sm" className="min-h-11 sm:min-h-8">
+                    <Link href={item.action.href}>{item.action.label}</Link>
+                  </Button>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : (
-          items.length > 0 && (
-            <div className="overflow-hidden rounded-lg border border-border bg-card">
-              <h2
-                id="attention-title"
-                className="px-5 pt-4 pb-2 text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase"
-              >
-                Needs attention
-              </h2>
-              <ul className="divide-y divide-border/60">
-                {items.map((item) => (
-                  <li key={item.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                    <span
-                      className={cn(
-                        'rounded-full px-2.5 py-0.5 text-[0.7rem] font-semibold',
-                        item.tag === 'Site' ? 'bg-amber-100 text-amber-900' : 'bg-red-100 text-red-800',
-                      )}
-                    >
-                      {item.tag}
-                    </span>
-                    <span className="min-w-0 flex-[999_1_280px] text-[0.9rem]">{item.text}</span>
-                    <Button asChild variant="outline" size="sm" className="min-h-11 sm:min-h-8">
-                      <Link href={item.action.href}>{item.action.label}</Link>
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+          !leadsUnavailable && (
+            <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-5 py-3">
+              <CheckCircle2 className="size-4 shrink-0 text-emerald-600" aria-hidden="true" />
+              <p className="text-[0.9rem] text-emerald-900">
+                <strong className="font-semibold">All clear.</strong> Nothing is waiting on you.
+              </p>
             </div>
           )
         )}
       </section>
 
-      {!leadsUnavailable && stats && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-lg border border-border bg-card p-5" aria-labelledby="trend-title">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 id="trend-title" className="text-[0.7rem] font-medium tracking-widest text-muted-foreground uppercase">
-                Leads, last {WEEKS} weeks
-              </h2>
-              <span className="text-[0.8rem] text-muted-foreground">
-                {stats.newThisWeek} this week · {describeTrend(stats.newThisWeek, stats.newLastWeek)}
-              </span>
-            </div>
-            {totalLeads === 0 && (
-              <p className="mt-3 text-[0.85rem] text-muted-foreground">No leads in the last {WEEKS} weeks.</p>
-            )}
-            <div
-              className="mt-4 flex h-28 items-end gap-2"
-              role="img"
-              aria-label={`Leads per week, oldest first: ${weeks.join(', ')}`}
-              data-role="lead-chart"
-            >
-              {weeks.map((n, i) => (
-                <span
-                  key={i}
-                  className={cn('flex-1 rounded-sm', n > 0 ? 'bg-primary' : 'bg-muted')}
-                  style={{ height: `${Math.max(4, Math.round((n / peak) * 112))}px` }}
-                  title={`${n} ${n === 1 ? 'lead' : 'leads'}`}
-                />
-              ))}
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-[0.8rem] text-muted-foreground">
-              <Figure value={stats.bookings} label={stats.bookings === 1 ? 'booking request' : 'booking requests'} />
-              <Figure value={stats.enquiries} label={stats.enquiries === 1 ? 'enquiry' : 'enquiries'} />
-              <Figure value={stats.booked} label="total booked" />
-            </div>
-          </section>
+      {stats && (
+        <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Key figures" data-role="figures">
+          <Stat value={stats.waiting} label="New leads to answer" href={`${ADMIN_LEADS}?status=new`} alert={stats.waiting > 0} />
+          <Stat value={stats.newThisWeek} label="Leads this week" note={describeTrend(stats.newThisWeek, stats.newLastWeek)} />
+          <Stat value={stats.bookedLast30} label="Booked, last 30 days" note={`${stats.booked} booked in total`} />
+          {isAdmin ? (
+            <Stat value={live} label={live === 1 ? 'Live site' : 'Live sites'} href={ADMIN_SITES} />
+          ) : (
+            <Stat value={totalLeads} label={`Leads, last ${WEEKS} weeks`} />
+          )}
+        </section>
+      )}
 
-          <section className="overflow-hidden rounded-lg border border-border bg-card" aria-labelledby="recent-title">
-            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
-              <h2 id="recent-title" className="text-[0.95rem] font-semibold">
-                Recent leads
-              </h2>
-              <Link
-                href={ADMIN_LEADS}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-sm text-[0.85rem] font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9"
-              >
-                View all
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </div>
+      <div className={cn('mb-6 grid gap-4', isAdmin && 'lg:grid-cols-3')}>
+        {stats && (
+          <section className={cn(CARD, 'overflow-hidden', isAdmin && 'lg:col-span-2')} aria-labelledby="recent-title">
+            <SectionHeader id="recent-title" title="Recent leads" href={ADMIN_LEADS} link="View all" />
             {recent.length === 0 ? (
               <div className="p-6">
                 <EmptyState
@@ -218,9 +161,12 @@ export default async function AdminDashboard() {
                         {initials(lead.name)}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[0.9rem] font-medium">{lead.name ?? 'No name given'}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="truncate text-[0.9rem] font-medium">{lead.name ?? 'No name given'}</span>
+                          <FormBadge formType={lead.formType} />
+                        </span>
                         <span className="block truncate text-[0.75rem] text-muted-foreground">
-                          {lead.email ?? lead.phone ?? 'No contact info'} · {cityDisplayName(cityLookup, lead.cityKey)}
+                          {cityDisplayName(cityLookup, lead.cityKey)} · {describeAge(lead.submittedAt, now)} ago
                         </span>
                       </span>
                       <LeadStatusChip status={lead.status} />
@@ -230,74 +176,156 @@ export default async function AdminDashboard() {
               </ul>
             )}
           </section>
-        </div>
-      )}
+        )}
+
+        {isAdmin && (
+          <section className={cn(CARD, 'overflow-hidden')} aria-labelledby="sites-title" data-role="sites">
+            <SectionHeader id="sites-title" title="Sites" href={ADMIN_SITES} link="All sites" />
+            {sites.length === 0 ? (
+              <p className="px-5 py-4 text-[0.85rem] text-muted-foreground">No sites yet.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {sites.map((site) => {
+                  const href = siteLink(site.key, site.stage === 'live', domains)
+                  const external = href.startsWith('https://')
+                  return (
+                    <li key={site.key} className="flex items-center gap-3 px-5 py-3">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[0.9rem] font-medium">{site.city}</span>
+                        {site.reason && (
+                          <span className="block truncate text-[0.75rem] text-muted-foreground">{site.reason}</span>
+                        )}
+                      </span>
+                      <StagePill stage={site.stage} />
+                      {external ? (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`View ${site.city} live site (opens in a new tab)`}
+                          className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:size-8"
+                        >
+                          <ExternalLink className="size-4" aria-hidden="true" />
+                        </a>
+                      ) : (
+                        <Link
+                          href={site.next.href}
+                          aria-label={`${site.next.label}: ${site.city}`}
+                          className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:size-8"
+                        >
+                          <ArrowRight className="size-4" aria-hidden="true" />
+                        </Link>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
+        )}
+      </div>
+
+      {stats && <WeeklyChart weeks={weeks} labels={weekStartLabels(now, WEEKS)} />}
     </>
   )
 }
 
-const TONE = {
-  blue: 'text-blue-800',
-  amber: 'text-amber-900',
-  green: 'text-emerald-800',
-} as const
-
-function PipelineCard({
-  title,
-  tone,
-  sites,
-  empty,
-}: {
-  title: string
-  tone: keyof typeof TONE
-  sites: SiteSummary[]
-  empty: string
-}) {
+function SectionHeader({ id, title, href, link }: { id: string; title: string; href: string; link: string }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-      <span className={cn('text-[0.7rem] font-semibold tracking-wider uppercase', TONE[tone])}>
-        {title} · {sites.length}
-      </span>
-      {sites.length === 0 ? (
-        <span className="text-[0.8rem] text-muted-foreground">{empty}</span>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {sites.map((site) => (
-            <li key={site.key}>
-              <Link
-                href={site.next.href}
-                className="block rounded-md outline-none hover:bg-muted/50 focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <span className="block text-[0.95rem] font-semibold">{site.city}</span>
-                {site.stage === 'generating' || site.stage === 'stopped' ? (
-                  <>
-                    <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-                      <span
-                        className={cn('block h-full rounded-full', site.stage === 'stopped' ? 'bg-destructive' : 'bg-primary')}
-                        style={{ width: `${Math.round(((site.doneCount ?? 0) / site.totalStages) * 100)}%` }}
-                      />
-                    </span>
-                    <span className="mt-1 block text-[0.75rem] text-muted-foreground">
-                      {site.stage === 'stopped' ? 'Stopped — resume it' : `${site.doneCount ?? 0} of ${site.totalStages} stages`}
-                    </span>
-                  </>
-                ) : (
-                  <span className="block text-[0.75rem] text-muted-foreground">{site.reason ?? site.next.label}</span>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+      <h2 id={id} className="text-[0.95rem] font-semibold">
+        {title}
+      </h2>
+      <Link
+        href={href}
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-sm text-[0.85rem] font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:min-h-9"
+      >
+        {link}
+        <ArrowRight className="size-4" aria-hidden="true" />
+      </Link>
     </div>
   )
 }
 
-function Figure({ value, label }: { value: number; label: string }) {
+function Stat({
+  value,
+  label,
+  note,
+  href,
+  alert = false,
+}: {
+  value: number
+  label: string
+  note?: string
+  href?: string
+  alert?: boolean
+}) {
+  const body = (
+    <>
+      <strong className={cn('block text-[1.9rem] leading-none font-semibold tabular-nums', alert && 'text-red-700')}>
+        {value}
+      </strong>
+      <span className="mt-2 block text-[0.8rem] font-medium">{label}</span>
+      {note && <span className="mt-0.5 block text-[0.75rem] text-muted-foreground">{note}</span>}
+    </>
+  )
+  const box = cn(CARD, 'block p-4')
+  return href ? (
+    <Link
+      href={href}
+      className={cn(box, 'outline-none hover:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-ring/50')}
+    >
+      {body}
+    </Link>
+  ) : (
+    <div className={box}>{body}</div>
+  )
+}
+
+function FormBadge({ formType }: { formType: LeadRecord['formType'] }) {
+  const booking = formType === 'booking'
   return (
-    <div>
-      <strong className="block text-[1.3rem] font-semibold text-foreground tabular-nums">{value}</strong>
-      {label}
-    </div>
+    <span
+      className={cn(
+        'shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold',
+        booking ? 'bg-orange-100 text-orange-900' : 'bg-emerald-100 text-emerald-900',
+      )}
+    >
+      {booking ? 'Booking' : 'Contact'}
+    </span>
+  )
+}
+
+function WeeklyChart({ weeks, labels }: { weeks: number[]; labels: string[] }) {
+  const peak = Math.max(1, ...weeks)
+  const total = weeks.reduce((sum, n) => sum + n, 0)
+  return (
+    <section className={cn(CARD, 'p-5')} aria-labelledby="trend-title">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="trend-title" className={SECTION_TITLE}>
+          Leads per week
+        </h2>
+        <span className="text-[0.8rem] text-muted-foreground">
+          {total} in the last {weeks.length} weeks
+        </span>
+      </div>
+      <ol
+        className="mt-4 flex h-40 items-end gap-2 sm:gap-3"
+        aria-label={`Leads per week, oldest first: ${weeks.map((n, i) => `week of ${labels[i]}: ${n}`).join(', ')}`}
+        data-role="lead-chart"
+      >
+        {weeks.map((n, i) => (
+          <li key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
+            <span className={cn('text-[0.75rem] tabular-nums', n > 0 ? 'font-semibold' : 'text-muted-foreground')}>{n}</span>
+            <span
+              aria-hidden="true"
+              className={cn('w-full max-w-12 rounded-t-sm', n > 0 ? 'bg-[#40907A]' : 'bg-muted')}
+              style={{ height: `${Math.max(3, Math.round((n / peak) * 100))}%` }}
+            />
+            <span className="mt-1 truncate text-[0.65rem] text-muted-foreground sm:text-[0.7rem]">{labels[i]}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
   )
 }

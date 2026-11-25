@@ -12,6 +12,8 @@ import { describe, expect, it } from 'vitest'
 import { canAccess } from '@/server/auth/access'
 import {
   activeAlarms,
+  dashboardHeadline,
+  weekStartLabels,
   describeAge,
   describeTrend,
   quickActionsFor,
@@ -203,5 +205,21 @@ describe('attentionItems', () => {
   it('asks for decisions on a run that paused for them', () => {
     const items = attentionItems([], [site({ key: 'orlando', city: 'Orlando', stage: 'needs-review', undecided: 2 })], 'admin')
     expect(items.map((i) => i.id)).toEqual(['facts:orlando'])
+  })
+})
+
+describe('weekStartLabels', () => {
+  it('labels each bar with the day its week began, oldest first, in Minneapolis time', () => {
+    const now = new Date('2026-11-25T18:00:00Z')
+    expect(weekStartLabels(now, 3)).toEqual(['Nov 4', 'Nov 11', 'Nov 18'])
+  })
+})
+
+describe('dashboardHeadline', () => {
+  it('leads with what is waiting, and says so plainly when nothing is', () => {
+    expect(dashboardHeadline(2)).toBe('2 new leads to answer.')
+    expect(dashboardHeadline(1)).toBe('1 new lead to answer.')
+    expect(dashboardHeadline(0)).toBe('All caught up. No new leads to answer.')
+    expect(dashboardHeadline(null)).toBe('Lead figures are unavailable right now.')
   })
 })
