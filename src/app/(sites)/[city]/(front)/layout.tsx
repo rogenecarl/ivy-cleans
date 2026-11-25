@@ -1,3 +1,5 @@
+// page views for the public city sites only (Vercel Web Analytics); the console has no tracker
+import { Analytics } from "@vercel/analytics/next";
 import TopBar from "@/site/components/TopBar";
 import Header from "@/site/components/Header";
 import Footer from "@/site/components/Footer";
@@ -27,6 +29,7 @@ export default async function FrontLayout({
       <Header site={site} />
       {children}
       <Footer site={site} innerSite={innerSite} quickLinks={quickLinks} />
+      <Analytics />
     </>
   );
 }
