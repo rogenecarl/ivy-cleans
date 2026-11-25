@@ -1,3 +1,5 @@
+// page views for the public city sites only (Vercel Web Analytics); the console has no tracker
+import { Analytics } from "@vercel/analytics/next";
 import InnerHeader from "@/site/components/inner/InnerHeader";
 import InnerFooter from "@/site/components/inner/InnerFooter";
 import { cityFromParams, type CityParams } from "@/site/city-param";
@@ -21,6 +23,7 @@ export default async function InnerLayout({
       <InnerHeader site={site} cityKey={cityKey} homeHref={cityHref(c, "/")} />
       {children}
       <InnerFooter site={site} innerSite={innerSite} />
+      <Analytics />
     </div>
   );
 }
