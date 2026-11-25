@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Building2, ChevronLeft, ChevronRight, ExternalLink, MoreHorizontal, TriangleAlert } from 'lucide-react'
 import { loadRouting } from '@/server/content/resolve-rewrite'
 import { listSiteSummaries, type SiteSummary } from '@/server/pipeline/admin-logic'
-import { domainFor, siteReadiness } from '@/server/leads/readiness'
+import { domainFor, siteLink, siteReadiness } from '@/server/leads/readiness'
 import { leadCountsByCity } from '@/server/leads/store'
 import type { LeadCounts } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -27,6 +27,7 @@ export const dynamic = 'force-dynamic'
 
 type View = SiteSummary & {
   domain: string | null
+  link: string
   problemCount: number
 }
 
@@ -63,7 +64,7 @@ export default async function SitesPage({
           counts: counts[site.key] ?? { total: 0, unworked: 0, emailFailed: 0 },
         })
     const stuck = site.stage === 'stopped' || site.stage === 'needs-review' ? 1 : 0
-    return { ...site, domain, problemCount: (readiness?.problems.length ?? 0) + stuck }
+    return { ...site, domain, link: siteLink(site.key, site.stage === 'live', domains), problemCount: (readiness?.problems.length ?? 0) + stuck }
   })
 
   const statusCounts = siteStatusCounts(views)
@@ -227,8 +228,8 @@ export default async function SitesPage({
       </div>
 
       <p className="mt-4 text-[0.8rem] text-muted-foreground">
-        Preview opens the city at its internal <code>/&lt;key&gt;</code> path, no login required. A live city also
-        answers on its own domain.
+        A live city with a domain opens on that domain. Any other city opens its preview at its internal{' '}
+        <code>/&lt;key&gt;</code> path.
       </p>
     </>
   )
@@ -275,8 +276,8 @@ function NextStep({ site }: { site: View }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <a href={`/${site.key}`} target="_blank" rel="noreferrer">
-              Preview
+            <a href={site.link} target="_blank" rel="noreferrer">
+              {site.link.startsWith('https://') ? 'Open live site' : 'Preview'}
               <ExternalLink className="ml-auto size-3.5" aria-hidden="true" />
             </a>
           </DropdownMenuItem>

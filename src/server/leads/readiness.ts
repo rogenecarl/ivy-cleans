@@ -31,3 +31,9 @@ export function domainFor(cityKey: string, domains: DomainsIndex): string | null
   if (mapped) return mapped
   return domains.default === cityKey ? '(default domain)' : null
 }
+
+// where the console opens a city: a live city on its own domain, otherwise its /<key> preview
+export function siteLink(cityKey: string, isLive: boolean, domains: DomainsIndex): string {
+  const host = isLive ? Object.entries(domains.hosts).find(([, key]) => key === cityKey)?.[0] : undefined
+  return host ? `https://${host}` : `/${cityKey}`
+}
