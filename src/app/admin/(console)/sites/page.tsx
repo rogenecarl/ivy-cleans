@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Building2, ChevronLeft, ChevronRight, ExternalLink, MoreHorizontal, TriangleAlert } from 'lucide-react'
+import { Building2, ChevronLeft, ChevronRight, ClipboardCheck, ExternalLink, Eye, Settings, TriangleAlert } from 'lucide-react'
 import { loadRouting } from '@/server/content/resolve-rewrite'
 import { listSiteSummaries, type SiteSummary } from '@/server/pipeline/admin-logic'
 import { domainFor, siteLink, siteReadiness } from '@/server/leads/readiness'
@@ -7,12 +7,7 @@ import { leadCountsByCity } from '@/server/leads/store'
 import type { LeadCounts } from '@/server/leads/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ADMIN_BASE, ADMIN_NEW, ADMIN_SITES } from '@/server/auth/admin-routes'
 import { EmptyState, StagePill } from '@/app/admin/_components/ui'
@@ -22,7 +17,7 @@ import { SiteSearch } from './site-search'
 import { requireAdmin } from '@/server/auth/auth-server'
 import { cn } from '@/lib/utils'
 
-// Every city, where it is in the process, and the one thing it needs next. force-dynamic: changes with every action.
+// Every city, its status, and what it needs next. force-dynamic: changes with every action.
 export const dynamic = 'force-dynamic'
 
 type View = SiteSummary & {
@@ -73,14 +68,14 @@ export default async function SitesPage({
   const paged = paginate(visible, query.page)
 
   return (
-    <>
+    <TooltipProvider>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[1.4rem] font-semibold tracking-tight">Sites</h1>
           <p className="mt-1 text-[0.85rem] text-muted-foreground">
             {filtersActive
               ? `${visible.length} of ${views.length} ${views.length === 1 ? 'site' : 'sites'} shown.`
-              : 'Every city, where it is in the process, and the one thing it needs next.'}
+              : 'Your city sites and what each one needs next.'}
           </p>
         </div>
         <Button asChild size="lg" className="min-h-11 sm:min-h-9">
@@ -137,18 +132,15 @@ export default async function SitesPage({
                 <TableHeader>
                   <TableRow>
                     <TableHead>City</TableHead>
-                    <TableHead>Where it is</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Domain</TableHead>
-                    <TableHead className="text-right">Next step</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paged.items.map((site) => (
                     <TableRow key={site.key} data-role="site-row">
-                      <TableCell>
-                        <span className="block font-medium">{site.city}</span>
-                        <span className="text-[0.75rem] text-muted-foreground">/{site.key}</span>
-                      </TableCell>
+                      <TableCell className="font-medium">{site.city}</TableCell>
                       <TableCell className="max-w-72">
                         <Where site={site} />
                       </TableCell>
@@ -156,7 +148,7 @@ export default async function SitesPage({
                         <Domain site={site} />
                       </TableCell>
                       <TableCell>
-                        <NextStep site={site} />
+                        <Actions site={site} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -167,15 +159,12 @@ export default async function SitesPage({
             <div className="flex flex-col gap-3 p-4 md:hidden">
               {paged.items.map((site) => (
                 <div key={site.key} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-                  <div>
-                    <p className="font-medium">{site.city}</p>
-                    <p className="text-[0.75rem] text-muted-foreground">/{site.key}</p>
-                  </div>
+                  <p className="font-medium">{site.city}</p>
                   <Where site={site} />
                   <p className="text-[0.8rem]">
                     <Domain site={site} />
                   </p>
-                  <NextStep site={site} />
+                  <Actions site={site} />
                 </div>
               ))}
             </div>
@@ -226,12 +215,7 @@ export default async function SitesPage({
           </>
         )}
       </div>
-
-      <p className="mt-4 text-[0.8rem] text-muted-foreground">
-        A live city with a domain opens on that domain. Any other city opens its preview at its internal{' '}
-        <code>/&lt;key&gt;</code> path.
-      </p>
-    </>
+    </TooltipProvider>
   )
 }
 
@@ -256,41 +240,86 @@ function Where({ site }: { site: View }) {
 }
 
 function Domain({ site }: { site: View }) {
-  return <span className={site.domain ? '' : 'text-muted-foreground'}>{site.domain ?? 'Not attached'}</span>
+  // a live city's domain opens the site; anything else is plain text
+  if (site.link.startsWith('https://')) {
+    return (
+      <a
+        href={site.link}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1 rounded-sm font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      >
+        {site.domain}
+        <ExternalLink className="size-3.5 text-muted-foreground" aria-hidden="true" />
+        <span className="sr-only">(opens in a new tab)</span>
+      </a>
+    )
+  }
+  return <span className="text-muted-foreground">{site.domain ?? 'No domain yet'}</span>
 }
 
-function NextStep({ site }: { site: View }) {
-  const primary = site.stage === 'ready' || site.stage === 'needs-review' || site.stage === 'stopped'
+// one labelled button when something blocks the city, then icon links that are always there
+function Actions({ site }: { site: View }) {
+  const live = site.stage === 'live'
+  const viewLabel = live && site.link.startsWith('https://') ? 'View live site' : 'Preview'
   return (
-    <div className="flex items-center justify-end gap-2">
-      <Button asChild size="sm" variant={primary ? 'default' : 'outline'} className="min-h-11 sm:min-h-8">
-        <Link href={site.next.href} data-role="next-step">
-          {site.next.label}
-        </Link>
-      </Button>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="min-h-11 sm:min-h-8" aria-label={`More for ${site.city}`}>
-            <MoreHorizontal className="size-4" aria-hidden="true" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <a href={site.link} target="_blank" rel="noreferrer">
-              {site.link.startsWith('https://') ? 'Open live site' : 'Preview'}
-              <ExternalLink className="ml-auto size-3.5" aria-hidden="true" />
-            </a>
-          </DropdownMenuItem>
-          {site.stage !== 'live' && (
-            <DropdownMenuItem asChild>
-              <Link href={`${ADMIN_BASE}/review/${site.key}`}>Review</Link>
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem asChild>
-            <Link href={`${ADMIN_BASE}/sites/${site.key}`}>Settings</Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className="flex items-center gap-1 md:justify-end">
+      {!live && (
+        <Button
+          asChild
+          size="sm"
+          variant={site.stage === 'generating' ? 'outline' : 'default'}
+          className="mr-1 min-h-11 sm:min-h-8"
+        >
+          <Link href={site.next.href} data-role="next-step">
+            {site.next.label}
+          </Link>
+        </Button>
+      )}
+      <IconLink href={site.link} label={`${viewLabel}: ${site.city}`} tip={viewLabel} external>
+        <Eye className="size-4" aria-hidden="true" />
+      </IconLink>
+      {!live && (
+        <IconLink href={`${ADMIN_BASE}/review/${site.key}`} label={`Review ${site.city}`} tip="Review">
+          <ClipboardCheck className="size-4" aria-hidden="true" />
+        </IconLink>
+      )}
+      <IconLink href={`${ADMIN_BASE}/sites/${site.key}`} label={`Settings for ${site.city}`} tip="Settings">
+        <Settings className="size-4" aria-hidden="true" />
+      </IconLink>
     </div>
+  )
+}
+
+function IconLink({
+  href,
+  label,
+  tip,
+  external = false,
+  children,
+}: {
+  href: string
+  label: string
+  tip: string
+  external?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button asChild variant="ghost" size="icon" className="size-11 sm:size-8">
+          {external ? (
+            <a href={href} target="_blank" rel="noreferrer" aria-label={`${label} (opens in a new tab)`}>
+              {children}
+            </a>
+          ) : (
+            <Link href={href} aria-label={label}>
+              {children}
+            </Link>
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{tip}</TooltipContent>
+    </Tooltip>
   )
 }

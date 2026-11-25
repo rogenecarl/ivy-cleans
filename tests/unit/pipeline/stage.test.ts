@@ -38,13 +38,13 @@ describe('siteStage', () => {
 
   it('a draft without a street address goes to Settings', () => {
     const s = siteStage({ ...base, hasAddress: false, row: row() })
-    expect(s).toMatchObject({ stage: 'needs-review', reason: 'No street address' })
+    expect(s).toMatchObject({ stage: 'needs-review', reason: 'Needs a street address' })
     expect(s.next.href).toBe('/admin/sites/orlando')
   })
 
   it('a draft with blocking quality findings goes to Review', () => {
     const s = siteStage({ ...base, blockingQuality: 2, row: row() })
-    expect(s).toMatchObject({ stage: 'needs-review', next: { label: 'Review', href: '/admin/review/orlando' } })
+    expect(s).toMatchObject({ stage: 'needs-review', reason: '2 quality problems to fix', next: { label: 'Review', href: '/admin/review/orlando' } })
   })
 
   it('a draft that passes the quick checks is ready to publish', () => {
