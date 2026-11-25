@@ -166,3 +166,23 @@ function order(id: string): number {
   if (id.startsWith('facts:')) return 2
   return 0
 }
+
+const WEEK_MS = 7 * 86_400_000
+
+/** The day each chart bar's week began, oldest first; matches bucketByWeek, whose newest week ends at `now`. */
+export function weekStartLabels(now: Date, weeks: number): string[] {
+  return Array.from({ length: weeks }, (_, i) =>
+    new Date(now.getTime() - (weeks - i) * WEEK_MS).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'America/Chicago',
+    }),
+  )
+}
+
+/** The line under the page title: what is waiting, or that nothing is. null = lead figures could not be read. */
+export function dashboardHeadline(waiting: number | null): string {
+  if (waiting === null) return 'Lead figures are unavailable right now.'
+  if (waiting === 0) return 'All caught up. No new leads to answer.'
+  return `${waiting} new ${waiting === 1 ? 'lead' : 'leads'} to answer.`
+}
