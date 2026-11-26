@@ -261,9 +261,17 @@ describe('suburbData', () => {
     test('suburbMeta.description is cut from the generated homes copy (item 9)', () => {
       const data = suburbData(cityWithSuburbCopy, katy)
       expect(data.suburbMeta.description).toBe(
-        'Homes in Katy tend to be newer builds with tile floors and HOAs.',
+        'House cleaning in Katy, FL from Ivy Cleans. Homes in Katy tend to be newer builds with tile floors and HOAs.',
       )
       expect(data.suburbMeta.description).not.toContain('Choose Ivy Cleans for superior house cleaning')
+    })
+
+    test('suburbMeta.description keeps the service lead and shortens a long homes sentence to fit', () => {
+      const long = `${'Katy homes '.repeat(12).trim()} are mostly newer builds.`
+      const data = suburbData({ ...cityWithSuburbCopy, sections: { ...cityWithSuburbCopy.sections, [homesSlot]: long } }, katy)
+      expect(data.suburbMeta.description.startsWith('House cleaning in Katy, FL from Ivy Cleans. Katy homes')).toBe(true)
+      expect(data.suburbMeta.description.endsWith('…')).toBe(true)
+      expect(data.suburbMeta.description.length).toBeLessThanOrEqual(155)
     })
 
     test('hero.paragraphs renders the generated intro, not the Savage template', () => {
