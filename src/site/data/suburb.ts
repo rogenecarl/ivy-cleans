@@ -6,7 +6,7 @@ import type { CityContent, MarketPhoto, SlotLink, Suburb } from '@/server/conten
 import { slotLinks } from '@/server/content/links'
 import { cityHref, t } from '@/server/content/interpolate'
 import { sOpt, suburbSlots } from '@/server/content/slots'
-import { metaDescription } from './meta'
+import { META_DESCRIPTION_MAX, metaDescription } from './meta'
 import { pickOtherServices } from './other-services'
 import { serviceBySlug } from './services/registry'
 
@@ -25,6 +25,12 @@ export type SuburbData = {
 
 const CTA_LABEL = 'Set an appointment 👈' // dump lines 21, 34, 42
 
+// the homes copy describes housing, not the service, so the snippet leads with what we sell and where
+function areaDescription(name: string, state: string, homes: string): string {
+  const lead = `House cleaning in ${name}, ${state} from Ivy Cleans.`
+  return `${lead} ${metaDescription(homes, META_DESCRIPTION_MAX - lead.length - 1)}`
+}
+
 export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
   const { name } = suburb
   const [introSlot, homesSlot, localSlot] = suburbSlots(suburb.slug)
@@ -39,8 +45,8 @@ export function suburbData(c: CityContent, suburb: SuburbRef): SuburbData {
       // generated homes copy when present; the template line is only the fallback
       description:
         homes !== undefined
-          ? metaDescription(homes)
-          : `Choose Ivy Cleans for superior house cleaning in ${name} ${c.state}. Best-in-class home cleaning service awaits. Book your cleaning now!`,
+          ? areaDescription(name, c.state, homes)
+          :`Choose Ivy Cleans for superior house cleaning in ${name} ${c.state}. Best-in-class home cleaning service awaits. Book your cleaning now!`,
     },
 
     // dump lines 17-21. `intro` (suburb.<slug>.intro) is Task 16's generated
